@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد — أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.1-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -37,6 +37,7 @@
 - [خيارات سطر الأوامر](#cli-options)
 - [المتطلبات](#requirements)
 - [هيكل المشروع](#project-structure)
+- [التوثيق](#documentation)
 - [المساهمة](#contributing)
 - [الرخصة](#license)
 
@@ -52,7 +53,7 @@
 | واجهة `dialog` تنكسر | ❌ لا تزال تستخدمها | ✅ TUI نقي بـ POSIX sh — بدون تبعيات |
 | VNC يموت عند قفل الشاشة | ❌ لا يوجد حل | ✅ `termux-wake-lock` مدمج |
 | لا صوت داخل proot | ❌ حل يدوي | ✅ جسر PulseAudio عبر TCP |
-| `systemctl` يفشل | ❌ أخطاء محيّرة | ✅ محاكي shell متكامل |
+| `systemctl` يفشل | ❌ أخطاء محيّرة | ✅ محاكي shell عام (أي خدمة) |
 | عشرون خطوة يدوية | ❌ معقد للغاية | ✅ أمر واحد: `bash install.sh` |
 
 ---
@@ -67,7 +68,7 @@
 | **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة |
 | **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة |
 
-**يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl · التحكم بالجلسات
+**يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl عام · التحكم بالجلسات
 
 ---
 
@@ -109,7 +110,9 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 |-------|-------|
 | `umo-startvnc` | تشغيل خادم VNC |
 | `umo-stopvnc` | إيقاف خادم VNC |
-| `systemctl start ssh` | تشغيل SSH (محاكى) |
+| `systemctl start <service>` | تشغيل خدمة (محاكى) |
+| `systemctl status <service>` | فحص حالة الخدمة |
+| `systemctl restart <service>` | إعادة تشغيل خدمة |
 
 ---
 
@@ -168,11 +171,20 @@ UMO/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
 ├── install.sh               # نقطة الدخول السريعة
-├── VERSION                  # رقم الإصدار
 ├── CHANGELOG.md             # سجل التغييرات
 ├── LICENSE                  # MIT License
 └── README.md                # الملف الرئيسي
 ```
+
+---
+
+<a id="documentation"></a>
+## 📚 التوثيق
+
+| المستند | الوصف |
+|---------|-------|
+| [INSTALL.md](docs/INSTALL.md) | دليل التثبيت التفصيلي |
+| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | المشاكل الشائعة وحلولها |
 
 ---
 

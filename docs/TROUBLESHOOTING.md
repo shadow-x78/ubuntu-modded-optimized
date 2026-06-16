@@ -2,7 +2,7 @@
 
 # Troubleshooting — UMO
 
-[![Version](https://img.shields.io/badge/version-3.1.1-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.2-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -68,15 +68,16 @@ pulseaudio --start
 
 **Cause:** Standard `systemd` does not run inside proot containers.
 
-**Fix:** UMO installs a shell-compatible `systemctl` emulator. Use it normally:
+**Fix:** UMO installs a **generic** shell-compatible `systemctl` emulator usable with **any service**. Use it normally:
 
 ```bash
-systemctl start ssh
-systemctl stop ssh
-systemctl restart ssh
-systemctl status ssh
-systemctl enable ssh
-systemctl disable ssh
+systemctl start <service>
+systemctl stop <service>
+systemctl restart <service>
+systemctl status <service>
+systemctl enable <service>
+systemctl disable <service>
+# example: systemctl start ssh
 ```
 
 > If the emulator is missing, re-run the installer or copy `modules/umo-systemctl.sh` manually.

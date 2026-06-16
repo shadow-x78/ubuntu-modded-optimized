@@ -13,7 +13,7 @@ umo_systemctl_install() {
     _bin="${UMO_INSTALL_DIR:?}/usr/local/bin/systemctl"
     cat > "$_bin" << 'EOF'
 #!/bin/sh
-# UMO Fake Systemctl — POSIX-compatible systemd emulator
+# UMO Generic Systemctl — POSIX-compatible systemd emulator
 
 ACTION="$1"
 UNIT="$2"
@@ -21,10 +21,12 @@ UNIT_FILE="/etc/init.d/$UNIT"
 
 usage() {
     echo "Usage: systemctl {start|stop|restart|status|enable|disable} <service>"
+    echo "       Works with any /etc/init.d/<service> script, service(8), or /usr/sbin/<service>"
     exit 1
 }
 
-[ -z "$ACTION" ] || [ -z "$UNIT" ] && usage
+[ -n "$ACTION" ] || usage
+[ -n "$UNIT" ] || usage
 
 case "$ACTION" in
     start)
@@ -48,10 +50,13 @@ case "$ACTION" in
         ;;
     status)
         if pgrep -x "$UNIT" >/dev/null 2>&1; then
-            echo "active $UNIT"
+            echo "* $UNIT - active (running)"
+            exit 0
+        elif [ -x "$UNIT_FILE" ] && "$UNIT_FILE" status >/dev/null 2>&1; then
+            echo "* $UNIT - active (running)"
             exit 0
         else
-            echo "inactive $UNIT"
+            echo "* $UNIT - inactive (dead)"
             exit 3
         fi
         ;;

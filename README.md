@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device — one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-3.1.1-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -37,6 +37,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 - [CLI Options](#cli-options)
 - [Requirements](#requirements)
 - [Project Structure](#project-structure)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -52,7 +53,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 | `dialog` breaks the UI | ❌ Still using it | ✅ Pure POSIX TUI — no deps |
 | VNC dies on screen lock | ❌ No fix | ✅ `termux-wake-lock` built-in |
 | No audio inside proot | ❌ Manual workaround | ✅ PulseAudio TCP bridge |
-| `systemctl` fails | ❌ Confusing errors | ✅ Full shell emulator |
+| `systemctl` fails | ❌ Confusing errors | ✅ Generic shell emulator (any service) |
 | 20+ manual steps | ❌ Too complex | ✅ One command: `bash install.sh` |
 
 ---
@@ -67,7 +68,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 | **Openbox** | Window Manager | Advanced users, minimal footprint |
 | **Minimal** | CLI only | Servers and headless usage |
 
-**Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Fake systemctl · Session Control
+**Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Generic systemctl emulator · Session Control
 
 ---
 
@@ -109,7 +110,9 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 |---------|-------------|
 | `umo-startvnc` | Start VNC server |
 | `umo-stopvnc` | Stop VNC server |
-| `systemctl start ssh` | Start SSH (emulated) |
+| `systemctl start <service>` | Start a service (emulated) |
+| `systemctl status <service>` | Check service status |
+| `systemctl restart <service>` | Restart a service |
 
 ---
 
@@ -157,7 +160,7 @@ UMO/
 │   ├── umo-proot.sh         # Proot container setup
 │   ├── umo-vnc.sh           # TigerVNC installation & session scripts
 │   ├── umo-audio.sh         # PulseAudio TCP bridge
-│   ├── umo-systemctl.sh     # Fake systemctl emulator
+│       ├── umo-systemctl.sh     # Generic systemctl emulator
 │   ├── umo-desktop.sh       # DE installer (XFCE4 / LXDE / Openbox)
 │   └── umo-apps.sh          # App group installer
 ├── config/
@@ -168,11 +171,20 @@ UMO/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes
 ├── install.sh               # Quick-start entry point
-├── VERSION                  # Semver version string
 ├── CHANGELOG.md             # Release history
 ├── LICENSE                  # MIT License
 └── README.md                # This file
 ```
+
+---
+
+<a id="documentation"></a>
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [INSTALL.md](docs/INSTALL.md) | Detailed installation guide |
+| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and fixes |
 
 ---
 

@@ -2,7 +2,7 @@
 
 # استكشاف الأخطاء وإصلاحها — UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.1-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.2-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -68,15 +68,16 @@ pulseaudio --start
 
 **السبب:** `systemd` القياسي لا يعمل داخل حاويات proot.
 
-**الحل:** UMO يثبِّت محاكي `systemctl` متوافق مع shell. استخدمه بشكل طبيعي:
+**الحل:** UMO يثبِّت محاكي `systemctl` **عام** متوافق مع shell يعمل مع **أي خدمة**. استخدمه بشكل طبيعي:
 
 ```bash
-systemctl start ssh
-systemctl stop ssh
-systemctl restart ssh
-systemctl status ssh
-systemctl enable ssh
-systemctl disable ssh
+systemctl start <service>
+systemctl stop <service>
+systemctl restart <service>
+systemctl status <service>
+systemctl enable <service>
+systemctl disable <service>
+# مثال: systemctl start ssh
 ```
 
 > إذا كان المحاكي مفقوداً، أعِد تشغيل المثبِّت أو انسخ `modules/umo-systemctl.sh` يدوياً.

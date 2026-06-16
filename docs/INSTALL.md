@@ -2,7 +2,7 @@
 
 # Installation Guide — UMO
 
-[![Version](https://img.shields.io/badge/version-3.1.1-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.2-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -143,9 +143,13 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 |---------|-------------|
 | `umo-startvnc` | Start VNC server |
 | `umo-stopvnc` | Stop VNC server |
-| `systemctl start ssh` | Start SSH (emulated) |
-| `systemctl stop ssh` | Stop SSH (emulated) |
-| `systemctl status ssh` | Check service status |
+| `systemctl start <service>` | Start a service (emulated) |
+| `systemctl status <service>` | Check service status |
+| `systemctl restart <service>` | Restart a service |
+| `systemctl stop <service>` | Stop a service (emulated) |
+| `systemctl enable <service>` | Enable a service |
+| `systemctl disable <service>` | Disable a service |
+| _(example: `systemctl start ssh`)_ | _Start SSH server_ |
 
 ---
 

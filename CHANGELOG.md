@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.2] - 2026-06-17
+
+### 🔄 Updated
+- **systemctl Emulator:** `umo-systemctl.sh` — now presented and documented as a
+  generic service manager (`start|stop|restart|status|enable|disable <service>`)
+  instead of SSH-centric; clearer usage and status output.
+- **Docs:** README, INSTALL, TROUBLESHOOTING (EN+AR) examples use a generic
+  `<service>` token; SSH shown only as an example. SSH start helper retained.
+- **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.2.
+
+---
+
 ## [v3.1.1] - 2026-06-17
 
 ### 🚀 Added
@@ -11,7 +23,7 @@ All notable changes to this project will be documented in this file.
 ### 🔄 Updated
 - **Architecture Warning:** `core-system.sh` — clearer message for x86_64 users; indicates primary target is ARM64.
 - **Summary Panel:** Compact key labels (`Platform`, `Arch`, `Path`) to prevent overflow.
-- **Version Bump:** All badges, inline defaults, `VERSION`, and `bin/umo-install` bumped to v3.1.1.
+- **Version Bump:** All badges, inline defaults, and `bin/umo-install` bumped to v3.1.1.
 
 ### 🐛 Fixed
 - **Table Width:** `umo_ui_panel()` minimum raised to 52 and clamped to terminal width; eliminates off-screen boxes.
@@ -30,7 +42,7 @@ All notable changes to this project will be documented in this file.
 - **Session Box:** `bin/umo-start` — fixed misaligned VNC line, dynamic box width, inline color fallback.
 - **Summary Colors:** `bin/umo-install` — Quick Commands and Inside Ubuntu now use brand palette.
 - **Changelog:** Formatted with emoji categories matching reference standard.
-- **Version Bump:** `VERSION`, `bin/umo-install`, and default strings updated to v3.1.0.
+- **Version Bump:** `bin/umo-install` and fallback defaults updated to v3.1.0.
 
 ### 🗑️ Removed
 - **Comments:** All inline code comments removed across `lib/core-ansi.sh`, `lib/core-ui.sh`, `bin/umo-start`, `bin/umo-install`.
@@ -46,7 +58,7 @@ All notable changes to this project will be documented in this file.
 - **Desktop Themes:** `--theme=umo-dark|umo-light|minimal|none` — Orchis-Dark, Papirus icons, fonts.
 - **Lean Mode:** `--lean` — strip docs/man/locales to save space.
 - **Version Flag:** `--ubuntu=22.04|24.04` for explicit selection.
-- **VERSION File:** Single source of truth for version string.
+- **VERSION Source:** `UMO_VERSION` variable in `bin/umo-install` is the single source of truth.
 
 ### 🔄 Updated
 - **Code Quality:** Removed duplicate block in `core-ansi.sh` (-40%), fixed `umo_box` format bug.
