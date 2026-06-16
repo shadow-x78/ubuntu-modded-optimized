@@ -1,70 +1,79 @@
-# UMO — Ubuntu Modded Optimized for Termux
+<div align="center">
 
-<p align="center">
-  <b>Production-ready Ubuntu environment for Android via Termux</b><br>
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#docs">Docs</a> •
-  <a href="#license">License</a>
-</p>
+# UMO — Ubuntu Modded Optimized
 
----
+Full Ubuntu on your Android device — one command, zero hassle
 
-## Overview
+[![Version](https://img.shields.io/badge/version-2.1.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
+![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
+![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
 
-**UMO (Ubuntu Modded Optimized)** is a free, open-source Ubuntu installer for Termux that solves every known issue in similar projects. Designed for developers, power users, and anyone who wants a stable Ubuntu environment on Android without manual configuration headaches.
-
-### Why UMO?
-
-| Problem | Other Projects | UMO Solution |
-|---------|---------------|--------------|
-| `dialog` breaks UI | ❌ Still uses it | ✅ Pure POSIX TUI |
-| VNC dies on lock | ❌ No fix | ✅ `termux-wake-lock` integrated |
-| No audio in proot | ❌ Manual fix | ✅ PulseAudio TCP bridge |
-| `systemctl` fails | ❌ Confusing errors | ✅ Shell emulator included |
-| Complex setup | ❌ 20+ manual steps | ✅ One-command install |
+</div>
 
 ---
 
-## Features
+## 🌐 Language
 
-### Core
-- **POSIX sh compatible** — Works with `bash`, `dash`, `ash`
-- **Zero UI dependencies** — No `dialog`, `whiptail`, or `ncurses` required
-- **Modular architecture** — 5 core libraries + 6 functional modules
-- **Structured logging** — Organized logs to `~/.umo/logs/`
-- **Health checks** — Pre-flight validation of all requirements
-
-### Desktop
-- **XFCE4** — Recommended (balanced)
-- **LXDE** — Ultra-lightweight for low-end devices
-- **Openbox** — Minimal for advanced users
-- **Minimal** — CLI-only mode
-
-### Connectivity
-- **VNC Server** — TigerVNC with session persistence
-- **Audio Bridge** — PulseAudio passthrough to Android
-- **Termux:X11** — Native display support (optional)
-
-### Management
-- **Fake systemctl** — Start/stop/restart/status/enable/disable
-- **Session control** — `umo-start` / `umo-stop` unified commands
-- **User isolation** — `ubuntu` user with sudo access
+<a href="README.md">🇬🇧 English</a> · <a href="README_AR.md">🇸🇦 العربية</a>
 
 ---
 
-## Quick Start
+## 📋 Table of Contents
+
+- [What is UMO?](#what-is-umo)
+- [Desktop Environments](#desktop-environments)
+- [Quick Start](#quick-start)
+- [Commands](#commands)
+- [CLI Options](#cli-options)
+- [Requirements](#requirements)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+<a id="what-is-umo"></a>
+## 🤔 What is UMO?
+
+**UMO (Ubuntu Modded Optimized)** is a free, open-source Ubuntu installer for Termux — rewritten from scratch to fix the root problems found in every similar project. No external UI dependencies, no manual configuration, no surprises.
+
+| Problem | Other Projects | UMO |
+|---------|---------------|-----|
+| `dialog` breaks the UI | ❌ Still using it | ✅ Pure POSIX TUI — no deps |
+| VNC dies on screen lock | ❌ No fix | ✅ `termux-wake-lock` built-in |
+| No audio inside proot | ❌ Manual workaround | ✅ PulseAudio TCP bridge |
+| `systemctl` fails | ❌ Confusing errors | ✅ Full shell emulator |
+| 20+ manual steps | ❌ Too complex | ✅ One command: `bash install.sh` |
+
+---
+
+<a id="desktop-environments"></a>
+## 🖥️ Desktop Environments
+
+| Environment | Type | Best For |
+|-------------|------|----------|
+| **XFCE4** | Full DE | Daily use — balanced performance |
+| **LXDE** | Lightweight DE | Low-end and older devices |
+| **Openbox** | Window Manager | Advanced users, minimal footprint |
+| **Minimal** | CLI only | Servers and headless usage |
+
+**Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Fake systemctl · Session Control
+
+---
+
+<a id="quick-start"></a>
+## 🚀 Quick Start
 
 ```bash
-# Download & extract
-cd ~
-git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git UMO
-cd UMO
+# Clone the repository
+git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git ~/UMO
+cd ~/UMO
 
 # Interactive install (recommended)
 bash install.sh
 
-# Or non-interactive with flags
+# Silent install with flags
 bash install.sh --no-gui --de=xfce4 --apps=full
 
 # Start Ubuntu
@@ -73,7 +82,8 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 
 ---
 
-## Commands
+<a id="commands"></a>
+## ⌨️ Commands
 
 ### In Termux
 
@@ -82,7 +92,7 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 | `~/umo-start.sh` | Start Ubuntu + VNC + Audio |
 | `~/umo-stop.sh` | Stop all services |
 | `~/umo-login.sh` | Login as root |
-| `~/umo-user.sh` | Login as ubuntu |
+| `~/umo-user.sh` | Login as ubuntu user |
 | `~/umo-vnc-start.sh` | Start VNC only |
 | `~/umo-fix-audio.sh` | Fix audio routing |
 
@@ -97,60 +107,64 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 
 ---
 
-## CLI Options
+<a id="cli-options"></a>
+## 🔧 CLI Options
 
 ```bash
 bash install.sh [OPTIONS]
 
-  --no-gui, --non-interactive   Skip menus (use defaults/env)
-  --de=xfce4|lxde|openbox      Desktop environment
-  --apps=basic|dev|media|full   Application group
-  --dir=PATH                   Custom install directory
-  --version=22.04|24.04        Ubuntu version
+  --no-gui, --non-interactive    Skip menus, use defaults/env vars
+  --de=xfce4|lxde|openbox        Choose desktop environment
+  --apps=basic|dev|media|full    Application group to install
+  --dir=PATH                     Custom installation directory
+  --version=22.04|24.04          Ubuntu version to install
 ```
 
 ---
 
-## Requirements
+<a id="requirements"></a>
+## 📋 Requirements
 
-- Android 8.0+ with ARM64 (aarch64)
-- Termux from F-Droid or GitHub (not Play Store)
-- 2GB+ free storage
+- Android 8.0+ — ARM64 processor (aarch64)
+- Termux from F-Droid or GitHub — **not** from Play Store
+- 2 GB+ free storage
 - Internet connection
 
 ---
 
-## Architecture
+<a id="project-structure"></a>
+## 🏗️ Project Structure
 
 ```
 UMO/
 ├── bin/
-│   ├── umo-install          # Main installer
-│   ├── umo-start            # Session starter
-│   └── umo-stop             # Session stopper
+│   ├── umo-install          # Main installer logic
+│   ├── umo-start            # Session starter (Termux-side)
+│   └── umo-stop             # Session stopper (Termux-side)
 ├── lib/
-│   ├── core-ansi.sh         # ANSI engine
-│   ├── core-ui.sh           # TUI engine
-│   ├── core-system.sh       # Platform utils
-│   ├── core-net.sh          # Download engine
-│   └── core-fs.sh           # File operations
+│   ├── core-ansi.sh         # ANSI colors, logging, banners, progress
+│   ├── core-ui.sh           # TUI: menus, prompts, panels
+│   ├── core-system.sh       # Platform detection, storage, internet
+│   ├── core-net.sh          # Downloads, mirrors, extraction
+│   └── core-fs.sh           # Safe file ops, backups, templates
 ├── modules/
-│   ├── umo-proot.sh         # Container manager
-│   ├── umo-vnc.sh           # VNC server
-│   ├── umo-audio.sh         # Audio bridge
-│   ├── umo-systemctl.sh     # Systemctl emulator
-│   ├── umo-desktop.sh       # DE installer
-│   └── umo-apps.sh          # App installer
+│   ├── umo-proot.sh         # Proot container setup
+│   ├── umo-vnc.sh           # TigerVNC installation & session scripts
+│   ├── umo-audio.sh         # PulseAudio TCP bridge
+│   ├── umo-systemctl.sh     # Fake systemctl emulator
+│   ├── umo-desktop.sh       # DE installer (XFCE4 / LXDE / Openbox)
+│   └── umo-apps.sh          # App group installer
 ├── config/
 │   ├── xstartup             # VNC session template
-│   ├── bashrc.patch         # Shell enhancements
-│   └── sources.list         # Ubuntu mirrors
+│   ├── bashrc.patch         # Shell enhancements for Ubuntu
+│   └── sources.list         # Ubuntu mirror list
 ├── docs/
-│   ├── INSTALL.md           # Installation guide
-│   └── TROUBLESHOOTING.md   # Common issues
+│   ├── INSTALL.md           # Detailed installation guide
+│   └── TROUBLESHOOTING.md   # Common issues and fixes
 ├── tests/
 │   └── run.sh               # Validation suite
-├── install.sh               # Quick-start wrapper
+├── install.sh               # Quick-start entry point
+├── VERSION                  # Semver version string
 ├── CHANGELOG.md             # Release history
 ├── LICENSE                  # MIT License
 └── README.md                # This file
@@ -158,19 +172,30 @@ UMO/
 
 ---
 
-## Docs
+<a id="contributing"></a>
+## 🤝 Contributing
 
-- [Installation Guide](docs/INSTALL.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
 ---
 
-## License
+<a id="license"></a>
+## 📜 License
 
 Distributed under the [MIT License](LICENSE).
 
 ---
 
-Built by [SHADOW_x78](https://github.com/Shadow-x78) · [Changelog](CHANGELOG.md)
+<div align="center">
 
-© 2026 Shadow-x78
+Built by <a href="https://github.com/Shadow-x78">SHADOW_x78</a> ·
+<a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
+[Changelog](CHANGELOG.md)
+
+<sub>&copy; 2026 Shadow-x78</sub>
+
+</div>
