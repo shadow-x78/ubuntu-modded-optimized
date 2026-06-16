@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.3] - 2026-06-17
+
+### 🎨 Changed
+- **Banner:** ASCII `UMO` logo now shown on all screen sizes; removed the `[UMO]` compact line.
+- **Tagline:** Reformatted to centered `Ubuntu Modded Optimized · v3.1.3` with `Shadow-x78` below.
+
+### 🔄 Updated
+- **Validation Panel:** `umo_ui_panel()` auto-fits any terminal width (minimum clamped to fit).
+- **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.3.
+
+---
+
 ## [v3.1.2] - 2026-06-17
 
 ### 🔄 Updated

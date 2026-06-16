@@ -39,7 +39,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-3.1.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-3.1.3}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi

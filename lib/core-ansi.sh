@@ -198,30 +198,24 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_NC"    "$_pad7" '' "$_l7" "$UMO_NC"
 
-    _tag="Ubuntu Modded Optimized v${UMO_VERSION:-3.1.2}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.3}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
 
-    _auth="by Shadow-x78"
+    _auth="Shadow-x78"
     _authlen=$(printf '%s' "$_auth" | wc -m)
     _authpad=$(( (_cols - _authlen) / 2 )); [ "$_authpad" -lt 0 ] && _authpad=0
     printf "%b%*s%s%b\n\n" "$UMO_COLOR_MUTED" "$_authpad" '' "$_auth" "$UMO_NC"
 }
 
 umo_banner_compact() {
-    _ver="${UMO_VERSION:-3.1.2}"
-    printf "%b[UMO]%b Ubuntu Modded Optimized %bv%s%b — Shadow-x78\n" \
-        "$UMO_COLOR_PRIMARY" "$UMO_NC" "$UMO_BOLD" "$_ver" "$UMO_NC"
+    umo_banner_full "$@"
 }
 
 umo_banner() {
     _w=$(tput cols 2>/dev/null || echo 60)
-    if [ "${_w:-0}" -ge 78 ]; then
-        umo_banner_full "$_w"
-    else
-        umo_banner_compact
-    fi
+    umo_banner_full "$_w"
 }
 
 umo_logo() {
@@ -231,7 +225,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.2}"
+    _ver="${UMO_VERSION:-3.1.3}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

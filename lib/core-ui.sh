@@ -225,7 +225,9 @@ umo_ui_panel() {
 
     _width=$(( _max_line + 6 ))
     [ "$_width" -gt "$((_cols - 2))" ] 2>/dev/null && _width=$((_cols - 2))
-    [ "$_width" -lt 50 ] 2>/dev/null && _width=50
+    if [ "$_width" -lt 50 ] 2>/dev/null && [ "$((_cols - 2))" -ge 50 ] 2>/dev/null; then
+        _width=50
+    fi
 
     _left=$(( (_cols - _width) / 2 )); [ "$_left" -lt 0 ] && _left=0
 
