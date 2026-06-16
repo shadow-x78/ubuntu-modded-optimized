@@ -1,0 +1,33 @@
+#!/bin/sh
+# UMO — Start VNC (template)
+VNC_DISPLAY="${VNC_DISPLAY:-{{DISPLAY}}}"
+VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
+VNC_DEPTH="${VNC_DEPTH:-{{VNC_DEPTH}}}"
+VNC_PORT="${VNC_PORT:-{{VNC_PORT}}}"
+
+for _pid in $(pgrep -f Xvnc); do kill "$_pid" 2>/dev/null || true; done
+sleep 1
+
+pulseaudio --start 2>/dev/null || true
+
+vncserver "$VNC_DISPLAY" \
+    -geometry "$VNC_GEOMETRY" \
+    -depth "$VNC_DEPTH" \
+    -localhost no \
+    -name "UMO Desktop" \
+    -deferUpdate 1 \
+    -alwaysshared \
+    -Log "*:stderr:100" &
+
+sleep 2
+
+_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+[ -z "$_IP" ] && _IP="127.0.0.1"
+
+echo ""
+echo "============================================"
+echo "  UMO VNC Server Started"
+echo "  Display: $VNC_DISPLAY"
+echo "  Address: $_IP:$VNC_PORT"
+echo "============================================"
+echo ""

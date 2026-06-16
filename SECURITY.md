@@ -2,7 +2,7 @@
 
 # Security Policy — UMO
 
-[![Version](https://img.shields.io/badge/version-2.1.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -149,7 +149,7 @@ We thank the following security researchers for responsible disclosure:
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">SHADOW_x78</a> ·
+Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 <a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [Back to README](../README.md)
 

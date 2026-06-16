@@ -2,7 +2,7 @@
 
 # استكشاف الأخطاء وإصلاحها — UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-2.1.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.0.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -59,9 +59,6 @@ termux-wake-lock
 
 # أو تشغيل PulseAudio يدوياً داخل Ubuntu
 pulseaudio --start
-
-# أو تشغيل سكريبت إصلاح الصوت من Termux
-~/umo-fix-audio.sh
 ```
 
 ---
@@ -164,7 +161,7 @@ cat ~/.umo/logs/install.log
 
 <div align="center">
 
-بُني بواسطة <a href="https://github.com/Shadow-x78">SHADOW_x78</a> ·
+بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 <a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [العودة إلى README](../README_AR.md)
 

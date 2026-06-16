@@ -1,50 +1,29 @@
 #!/bin/sh
-# VNC xstartup template
-# Supports LXDE, XFCE4, Openbox
-
-# Detect desktop environment
-DE="${UBUNTU_DE:-xfce4}"
-
-# Common fixes
+# UMO VNC Session — {{UMO_VERSION}}
 export PULSE_SERVER=127.0.0.1
-export PULSE_LATENCY_MSEC=60
-export DISPLAY=:1
+export PULSE_LATENCY_MSEC=30
+export DISPLAY={{DISPLAY}}
 export XAUTHORITY="$HOME/.Xauthority"
+export GALLIUM_DRIVER=virpipe
+export MESA_GL_VERSION_OVERRIDE=4.0
 
-# Disable screen blanking
 xset s off
 xset -dpms
 xset s noblank
 
-# Start the chosen desktop
+DE="{{UMO_DE}}"
 case "$DE" in
     lxde)
-        if command -v startlxde >/dev/null 2>&1; then
-            exec startlxde
-        fi
-        ;;
+        [ -x "$(command -v startlxde)" ] && \
+            exec dbus-launch --exit-with-session startlxde ;;
     xfce4|xfce)
-        if command -v startxfce4 >/dev/null 2>&1; then
-            exec startxfce4
-        fi
-        ;;
+        [ -x "$(command -v startxfce4)" ] && \
+            exec dbus-launch --exit-with-session startxfce4 ;;
     openbox)
-        if command -v openbox-session >/dev/null 2>&1; then
-            exec openbox-session
-        fi
-        ;;
+        [ -x "$(command -v openbox-session)" ] && \
+            exec dbus-launch --exit-with-session openbox-session ;;
     *)
-        # Fallback: try common ones
-        if command -v startxfce4 >/dev/null 2>&1; then
-            exec startxfce4
-        elif command -v startlxde >/dev/null 2>&1; then
-            exec startlxde
-        elif command -v openbox-session >/dev/null 2>&1; then
-            exec openbox-session
-        else
-            # Minimal fallback
-            xterm &
-            exec twm
-        fi
-        ;;
+        [ -x "$(command -v startxfce4)" ] && exec dbus-launch --exit-with-session startxfce4
+        [ -x "$(command -v startlxde)" ]  && exec dbus-launch --exit-with-session startlxde
+        xterm & exec twm ;;
 esac

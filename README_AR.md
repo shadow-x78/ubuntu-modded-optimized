@@ -1,10 +1,19 @@
 <div align="center">
 
-# UMO — Ubuntu Modded Optimized
+```
+  ██╗   ██╗███╗   ███╗ ██████╗
+  ██║   ██║████╗ ████║██╔═══██╗
+  ██║   ██║██╔████╔██║██║   ██║
+  ██║   ██║██║╚██╔╝██║██║   ██║
+  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝
+   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝
+```
+
+# Ubuntu Modded Optimized
 
 أوبنتو كامل على هاتفك الأندرويد — أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-2.1.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.0.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -94,15 +103,12 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 | `~/umo-login.sh` | الدخول كـ root |
 | `~/umo-user.sh` | الدخول كمستخدم ubuntu |
 | `~/umo-vnc-start.sh` | تشغيل VNC فقط |
-| `~/umo-fix-audio.sh` | إصلاح توجيه الصوت |
-
 ### داخل Ubuntu
 
 | الأمر | الوصف |
 |-------|-------|
 | `umo-startvnc` | تشغيل خادم VNC |
 | `umo-stopvnc` | إيقاف خادم VNC |
-| `umo-fix-audio` | إصلاح PulseAudio |
 | `systemctl start ssh` | تشغيل SSH (محاكى) |
 
 ---
@@ -192,7 +198,7 @@ UMO/
 
 <div align="center">
 
-بُني بواسطة <a href="https://github.com/Shadow-x78">SHADOW_x78</a> ·
+بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 <a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [سجل التغييرات](CHANGELOG.md)
 

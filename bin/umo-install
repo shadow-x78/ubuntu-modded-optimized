@@ -8,7 +8,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="2.1.1"
+export UMO_VERSION="3.0.0"
 
 # Load core libraries
 . "$UMO_LIB_DIR/core-ansi.sh"
@@ -27,9 +27,12 @@ export UMO_VERSION="2.1.1"
 
 # Defaults
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
-UMO_VERSION="${UMO_VERSION:-22.04}"
+UMO_UBUNTU_VERSION="${UMO_UBUNTU_VERSION:-22.04}"
 UMO_DE="${UMO_DE:-xfce4}"
 UMO_APP_SET="${UMO_APP_SET:-basic}"
+UMO_PERF_MODE="${UMO_PERF_MODE:-balanced}"
+UMO_THEME="${UMO_THEME:-}"
+UMO_LEAN="${UMO_LEAN:-0}"
 UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
 
 # --- Phase 1: Environment Validation -----------------------------------------
@@ -94,7 +97,7 @@ umo_phase_config() {
         "Desktop:    $UMO_DE" \
         "Apps:       $UMO_APP_SET" \
         "Install:    $UMO_INSTALL_DIR" \
-        "Version:    Ubuntu $UMO_VERSION"
+        "Version:    Ubuntu $UMO_UBUNTU_VERSION"
 
     umo_ui_confirm "Confirm installation?" "Y" || {
         umo_log_info "Installation cancelled."
@@ -107,12 +110,19 @@ umo_phase_download() {
     umo_ui_header "Downloading Ubuntu RootFS"
     export UMO_INSTALL_DIR
     export UMO_CACHE_DIR="$HOME/.umo/cache"
+    export UMO_UBUNTU_VERSION
     umo_fs_mkdir "$UMO_CACHE_DIR"
 
     _archive="$UMO_CACHE_DIR/umo-rootfs.tar.xz"
     umo_net_download_mirrors "$_archive"
     umo_net_extract "$_archive" "$UMO_INSTALL_DIR"
     rm -f "$_archive"
+
+    # U1: RootFS integrity check
+    if [ ! -f "$UMO_INSTALL_DIR/bin/bash" ] || [ ! -f "$UMO_INSTALL_DIR/bin/sh" ]; then
+        umo_die "RootFS extraction failed: /bin/bash or /bin/sh not found. Try a different mirror."
+    fi
+    umo_log_ok "RootFS integrity verified."
 }
 
 # --- Phase 5: Proot Setup ----------------------------------------------------
@@ -166,8 +176,15 @@ umo_phase_apps() {
 umo_phase_finalize() {
     umo_ui_header "Finalizing Installation"
 
-    # Update sources
-    cp "$SCRIPT_DIR/config/sources.list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
+    # Update sources (dynamic based on ubuntu version)
+    _codename="jammy"
+    [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _codename="noble"
+    _src_list="$SCRIPT_DIR/config/sources.list"
+    if [ -f "$_src_list" ] && grep -q 'jammy' "$_src_list" 2>/dev/null; then
+        sed '/^deb/ s/jammy/'"$_codename"'/g' "$_src_list" > "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
+    elif [ -f "$_src_list" ]; then
+        cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
+    fi
     "$HOME/umo-login.sh" -c "apt-get update -qq" 2>/dev/null || true
 
     # Create shortcuts
@@ -193,10 +210,11 @@ umo_phase_summary() {
     umo_rule
 
     umo_ui_panel "Installation Complete" \
-        "Version:    Ubuntu $UMO_VERSION" \
+        "Version:    Ubuntu $UMO_UBUNTU_VERSION" \
         "Desktop:    $UMO_DE" \
         "Path:       $UMO_INSTALL_DIR" \
         "VNC:        $_ip:5901" \
+        "Perf:       $UMO_PERF_MODE" \
         "User:       ubuntu (password: ubuntu)"
 
     printf "\n%bQuick Commands:%b\n" "$UMO_B_YELLOW" "$UMO_NC"
@@ -205,12 +223,32 @@ umo_phase_summary() {
     printf "  %b~/umo-vnc-start.sh%b    Start VNC only\n" "$UMO_B_GREEN" "$UMO_NC"
     printf "  %b~/umo-login.sh%b        Login as root\n" "$UMO_B_GREEN" "$UMO_NC"
     printf "  %b~/umo-user.sh%b         Login as ubuntu\n" "$UMO_B_GREEN" "$UMO_NC"
-    printf "  %b~/umo-fix-audio.sh%b    Fix audio\n" "$UMO_B_GREEN" "$UMO_NC"
 
     printf "\n%bInside Ubuntu:%b\n" "$UMO_B_YELLOW" "$UMO_NC"
     printf "  %bumo-startvnc%b        Start VNC\n" "$UMO_B_GREEN" "$UMO_NC"
     printf "  %bumo-stopvnc%b         Stop VNC\n" "$UMO_B_GREEN" "$UMO_NC"
-    printf "  %bumo-fix-audio%b        Fix PulseAudio\n" "$UMO_B_GREEN" "$UMO_NC"
+
+    # U8: Info file inside Ubuntu (best-effort)
+    _readme_dir="$UMO_INSTALL_DIR/root/.umo"
+    umo_fs_mkdir "$_readme_dir" 2>/dev/null || true
+    cat > "$_readme_dir/README.txt" 2>/dev/null || true << README_EOF
+========================================
+  UMO Ubuntu — Welcome!
+  Version: $UMO_UBUNTU_VERSION
+  Desktop: $UMO_DE
+========================================
+
+Quick commands:
+  umo-startvnc         Start VNC server
+  umo-stopvnc          Stop VNC server
+  apt-get update       Update package lists
+
+VNC: $_ip:5901
+User: ubuntu / Password: ubuntu
+Root: login via ~/umo-login.sh on host
+
+========================================
+README_EOF
 
     printf "\n"
     umo_ui_pause
@@ -224,7 +262,11 @@ umo_cli_parse() {
             --de=*)      UMO_DE="${_arg#*=}" ;;
             --apps=*)    UMO_APP_SET="${_arg#*=}" ;;
             --dir=*)     UMO_INSTALL_DIR="${_arg#*=}" ;;
-            --version=*) UMO_VERSION="${_arg#*=}" ;;
+            --ubuntu=*)  UMO_UBUNTU_VERSION="${_arg#*=}" ;;
+            --version=*) UMO_UBUNTU_VERSION="${_arg#*=}" ;;
+            --perf=*)    UMO_PERF_MODE="${_arg#*=}" ;;
+            --theme=*)   UMO_THEME="${_arg#*=}" ;;
+            --lean)      UMO_LEAN=1 ;;
             --help|-h)
                 cat << 'BANNER'
 Usage: umo-install [OPTIONS]
@@ -234,7 +276,11 @@ Options:
   --de=xfce4|lxde|openbox       Desktop environment
   --apps=basic|dev|media|full   Application set
   --dir=PATH                    Installation directory
-  --version=22.04|24.04         Ubuntu version
+  --ubuntu=22.04|24.04          Ubuntu version
+  --version=22.04|24.04         (alias for --ubuntu)
+  --perf=balanced|aggressive|off Performance level  [default: balanced]
+  --theme=umo-dark|umo-light|minimal|none  Desktop theme
+  --lean                        Remove docs/man/locales (save space)
   --help, -h                    Show this help
 BANNER
                 exit 0
@@ -243,19 +289,59 @@ BANNER
     done
 }
 
+# --- Phase Perf: Performance Optimizer (loaded dynamically) -------------------
+. "$UMO_MOD_DIR/umo-perf.sh" 2>/dev/null || true
+
+umo_phase_perf() {
+    [ "$UMO_PERF_MODE" = "off" ] && { umo_log_info "Performance tuning disabled."; return 0; }
+    umo_ui_header "Optimizing Performance"
+    export UMO_INSTALL_DIR
+    export UMO_PERF_MODE
+    export UMO_LEAN
+    if command -v umo_perf_setup >/dev/null 2>&1; then
+        umo_perf_setup
+        umo_log_ok "Performance optimizations applied (mode: $UMO_PERF_MODE)."
+    else
+        umo_log_warn "Performance module not available, skipping."
+    fi
+}
+
+# --- Phase Theme: Desktop Theme (loaded dynamically) --------------------------
+. "$UMO_MOD_DIR/umo-theme.sh" 2>/dev/null || true
+
+umo_phase_theme() {
+    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme disabled."; return 0; }
+    umo_ui_header "Applying Desktop Theme"
+    export UMO_INSTALL_DIR
+    export UMO_THEME
+    export SCRIPT_DIR
+    if command -v umo_theme_setup >/dev/null 2>&1; then
+        umo_theme_setup
+        umo_log_ok "Desktop theme applied ($UMO_THEME)."
+    else
+        umo_log_warn "Theme module not available, skipping."
+    fi
+}
+
 # --- Main -------------------------------------------------------------------
 umo_main() {
     umo_cli_parse "$@"
+
+    # Auto-enable theme for full app set
+    [ "$UMO_APP_SET" = "full" ] && [ -z "$UMO_THEME" ] && UMO_THEME="umo-dark"
+
     umo_phase_check
     umo_phase_deps
     umo_phase_config
     umo_phase_download
     umo_phase_proot
+    umo_phase_perf
     umo_phase_vnc
     umo_phase_audio
     umo_phase_systemctl
     umo_phase_desktop
     umo_phase_apps
+    umo_phase_theme
     umo_phase_finalize
     umo_phase_summary
 }

@@ -14,10 +14,15 @@ sleep 1
 # Detect display method
 if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
     echo "[UMO] Starting with Termux:X11..."
+    if ! command -v termux-x11 >/dev/null 2>&1; then
+        echo "[WARN] termux-x11-nightly not installed. Install it with:"
+        echo "  pkg install x11-repo && pkg install termux-x11-nightly"
+    fi
     export DISPLAY=:0
+    export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
     termux-x11 :0 2>/dev/null &
     sleep 2
-    exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; bash"
+    exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; export XDG_RUNTIME_DIR=${TMPDIR:-/tmp}; bash"
 else
     echo "[UMO] Starting Ubuntu + VNC + Audio..."
 

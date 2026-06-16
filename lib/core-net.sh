@@ -7,15 +7,26 @@ _UMO_NET_LOADED=1
 
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
-UMO_MIRROR_OFFICIAL="https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-arm64-root.tar.xz"
-UMO_MIRROR_CDMAGE="https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
-UMO_MIRROR_ANLINUX="https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
-
-UMO_MIRROR_LIST="
-$UMO_MIRROR_OFFICIAL
-$UMO_MIRROR_CDMAGE
-$UMO_MIRROR_ANLINUX
-"
+umo_net_mirror_list() {
+    _ver="${1:-22.04}"
+    case "$_ver" in
+        22.04|jammy)
+            echo "https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-arm64-root.tar.xz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
+            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
+            ;;
+        24.04|noble)
+            echo "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-arm64-root.tar.xz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-arm64.tar.gz"
+            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
+            ;;
+        *)
+            echo "https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-arm64-root.tar.xz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
+            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
+            ;;
+    esac
+}
 
 umo_net_download() {
     _url="$1"
@@ -48,7 +59,8 @@ umo_net_download() {
 
 umo_net_download_mirrors() {
     _output="$1"
-    _mirrors="${2:-$UMO_MIRROR_LIST}"
+    _ver="${UMO_UBUNTU_VERSION:-22.04}"
+    _mirrors=$(umo_net_mirror_list "$_ver")
     _tmp_dir="${UMO_CACHE_DIR:-$HOME/.umo/cache}"
     mkdir -p "$_tmp_dir"
 

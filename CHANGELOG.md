@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.0.0] - 2026-06-16
+
+### Code Quality
+- core-ansi.sh: removed complete duplicate block (-40%), fixed umo_box format bug (`$UMO_title` → `$_title`)
+- umo-install: separated UMO_VERSION from UMO_UBUNTU_VERSION
+- core-ui.sh: hardened umo_ui_checklist (fixed format injection + numeric fallback)
+- xstartup: single source template, removed duplicate heredoc from umo-vnc.sh
+- config/templates/: script templates replace inline heredocs across all modules
+- bashrc.patch: updated MESA_GL_VERSION_OVERRIDE to 4.0
+
+### Features
+- New ASCII banner: refined Block + compact variant for narrow terminals
+- Ubuntu 24.04 Noble Numbat support
+- `--perf=balanced|aggressive|off`: APT speed + swap + debloat + DNS hardening
+- `--theme=umo-dark|umo-light|minimal|none`: Orchis-Dark + Papirus icons + fonts
+- `--lean`: strip docs/man/locales to save space
+- `--ubuntu=22.04|24.04`: explicit Ubuntu version selection
+- `VERSION` file: single source of truth for version string
+
+### Performance
+- APT: 99umo-speed.conf (no recommends/suggests, retries, timeout) + eatmydata ready
+- Swap: automatic 512MB (balanced) / 1GB (aggressive) swapfile creation
+- DNS: Cloudflare + Google + Quad9 with immutable resolv.conf
+- Debloat: removes snapd, unattended-upgrades, apport, cups, avahi
+- GPU: MESA 4.0 override + virpipe + virglrenderer
+- VNC: deferUpdate + alwaysshared + error logging + dynamic geometry
+- XFCE: compositor/screensaver/animations disabled by default
+
+### Bug Fixes
+- U1: RootFS integrity check after extraction (verifies /bin/bash)
+- U2: Static resolv.conf + ca-certificates first + apt retry
+- U3: SSH helper creates /run/sshd + generates host keys
+- U5: dbus-launch --exit-with-session in xstartup (fixes black VNC)
+- C7: Mirrors by ubuntu version + SHA256 verification activated
+
+### New Files
+- `VERSION`
+- `modules/umo-perf.sh`
+- `modules/umo-theme.sh`
+- `config/templates/` (7 template files)
+- `config/theme/` (9 theme config files)
+
+---
+
 ## [v2.1.1] - 2026-06-16
 
 ### 📝 Documentation

@@ -33,42 +33,26 @@ INNER
 umo_vnc_configure() {
     umo_log_step "Configuring VNC session..."
 
-    _xstartup="${UMO_INSTALL_DIR}/root/.vnc/xstartup"
-    umo_fs_mkdir "$(dirname "$_xstartup")"
+    _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
+    umo_fs_mkdir "$_vnc_dir"
 
-    cat > "$_xstartup" << 'EOF'
-#!/bin/sh
-# UMO VNC Session
-export PULSE_SERVER=127.0.0.1
-export PULSE_LATENCY_MSEC=60
-export DISPLAY=:1
-export XAUTHORITY="$HOME/.Xauthority"
-
-xset s off
-xset -dpms
-xset s noblank
-
-DE="${UMO_DE:-xfce4}"
-case "$DE" in
-    lxde)
-        [ -x "$(command -v startlxde)" ] && exec startlxde ;;
-    xfce4|xfce)
-        [ -x "$(command -v startxfce4)" ] && exec startxfce4 ;;
-    openbox)
-        [ -x "$(command -v openbox-session)" ] && exec openbox-session ;;
-    *)
-        [ -x "$(command -v startxfce4)" ] && exec startxfce4
-        [ -x "$(command -v startlxde)" ] && exec startlxde
-        [ -x "$(command -v openbox-session)" ] && exec openbox-session
-        xterm & exec twm ;;
-esac
-EOF
-    chmod +x "$_xstartup"
+    # Render xstartup from template
+    _template="$SCRIPT_DIR/config/xstartup"
+    if [ -f "$_template" ]; then
+        umo_fs_render "$_template" "$_vnc_dir/xstartup" \
+            "UMO_VERSION" "${UMO_VERSION:-3.0.0}" \
+            "UMO_DE" "${UMO_DE:-xfce4}" \
+            "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
+    fi
+    chmod +x "$_vnc_dir/xstartup"
 
     # Copy to user
     if [ -d "${UMO_INSTALL_DIR}/home/ubuntu" ]; then
-        cp "$_xstartup" "${UMO_INSTALL_DIR}/home/ubuntu/.vnc/xstartup"
-        chown -R 1000:1000 "${UMO_INSTALL_DIR}/home/ubuntu/.vnc" 2>/dev/null || true
+        _user_vnc="${UMO_INSTALL_DIR}/home/ubuntu/.vnc"
+        umo_fs_mkdir "$_user_vnc"
+        cp "$_vnc_dir/xstartup" "$_user_vnc/xstartup"
+        chmod +x "$_user_vnc/xstartup"
+        chown -R 1000:1000 "$_user_vnc" 2>/dev/null || true
     fi
 
     # Default password
@@ -90,6 +74,7 @@ umo_vnc_create_scripts() {
 VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
+VNC_PORT="${VNC_PORT:-5901}"
 
 # Kill existing
 for _pid in $(pgrep -f Xvnc); do kill "$_pid" 2>/dev/null || true; done
@@ -101,7 +86,10 @@ vncserver "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
-    -name "UMO Desktop" &
+    -name "UMO Desktop" \
+    -deferUpdate 1 \
+    -alwaysshared \
+    -Log "*:stderr:100" &
 
 sleep 2
 
@@ -113,7 +101,7 @@ cat << BANNER
 ╔══════════════════════════════════════════╗
 ║  UMO VNC Server Started                  ║
 ║  Display: $VNC_DISPLAY                      ║
-║  Address: $_IP:${UMO_VNC_PORT:-5901}                  ║
+║  Address: $_IP:$VNC_PORT                  ║
 ╚══════════════════════════════════════════╝
 
 BANNER
@@ -135,6 +123,10 @@ EOF
     # Termux helpers
     cat > "$HOME/umo-vnc-start.sh" << 'EOF'
 #!/bin/sh
+# UMO — Start VNC + Audio (Termux-side)
+echo "[UMO] Starting PulseAudio bridge..."
+pulseaudio --start 2>/dev/null || true
+sleep 1
 exec "$HOME/umo-login.sh" -c "umo-startvnc"
 EOF
     chmod +x "$HOME/umo-vnc-start.sh"

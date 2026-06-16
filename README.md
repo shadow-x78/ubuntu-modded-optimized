@@ -1,10 +1,19 @@
 <div align="center">
 
-# UMO — Ubuntu Modded Optimized
+```
+  ██╗   ██╗███╗   ███╗ ██████╗
+  ██║   ██║████╗ ████║██╔═══██╗
+  ██║   ██║██╔████╔██║██║   ██║
+  ██║   ██║██║╚██╔╝██║██║   ██║
+  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝
+   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝
+```
+
+# Ubuntu Modded Optimized
 
 Full Ubuntu on your Android device — one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-2.1.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -94,15 +103,12 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 | `~/umo-login.sh` | Login as root |
 | `~/umo-user.sh` | Login as ubuntu user |
 | `~/umo-vnc-start.sh` | Start VNC only |
-| `~/umo-fix-audio.sh` | Fix audio routing |
-
 ### Inside Ubuntu
 
 | Command | Description |
 |---------|-------------|
 | `umo-startvnc` | Start VNC server |
 | `umo-stopvnc` | Stop VNC server |
-| `umo-fix-audio` | Repair PulseAudio |
 | `systemctl start ssh` | Start SSH (emulated) |
 
 ---
@@ -192,7 +198,7 @@ Distributed under the [MIT License](LICENSE).
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">SHADOW_x78</a> ·
+Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 <a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [Changelog](CHANGELOG.md)
 

@@ -153,14 +153,13 @@ export PULSE_LATENCY_MSEC=60
 export DISPLAY=:1
 export PROOT_NO_SECCOMP=1
 export GALLIUM_DRIVER=virpipe
-export MESA_GL_VERSION_OVERRIDE=3.3
+export MESA_GL_VERSION_OVERRIDE=4.0
 
 alias ll="ls -alF"
 alias la="ls -A"
 alias l="ls -CF"
 alias startvnc="bash /usr/local/bin/umo-startvnc"
 alias stopvnc="bash /usr/local/bin/umo-stopvnc"
-alias fix-audio="bash /usr/local/bin/umo-fix-audio"
 
 command -v neofetch >/dev/null 2>&1 && neofetch
 '

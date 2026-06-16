@@ -116,7 +116,6 @@ umo_ui_password() {
 
 umo_ui_checklist() {
     _title="$1"; shift
-    _count=0
 
     umo_screen_clear
     umo_banner
@@ -124,7 +123,6 @@ umo_ui_checklist() {
     printf "\n%b  ▶ %s%b\n\n" "$UMO_B_YELLOW" "$_title" "$UMO_NC"
     printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
-    # Build arrays (POSIX-compatible via eval)
     _idx=0
     for _item in "$@"; do
         _idx=$((_idx + 1))
@@ -135,7 +133,6 @@ umo_ui_checklist() {
 
     _cursor=1
     while true; do
-        # Redraw all items
         _i=0
         while [ "$_i" -lt "$_total" ]; do
             _i=$((_i + 1))
@@ -143,28 +140,45 @@ umo_ui_checklist() {
             eval "_label=\"\$_lbl_${_i}\""
 
             if [ "$_i" -eq "$_cursor" ]; then
-                _prefix="%b▶%b"
+                _ptr="▶"
+                _pfix="$UMO_B_CYAN"
             else
-                _prefix=" %b"
+                _ptr=" "
+                _pfix=""
             fi
 
             if [ "$_state" = "1" ]; then
-                _box="%b[✓]%b"
+                _mark="✓"
+                _mfix="$UMO_B_GREEN"
             else
-                _box="%b[ ]%b"
+                _mark=" "
+                _mfix=""
             fi
 
-            printf "  $_prefix $_box %s\n" "$UMO_B_CYAN" "$UMO_NC" "$UMO_B_GREEN" "$UMO_NC" "$_label"
+            printf "  %s%s [%s]%s %s\n" "$_pfix" "$_ptr" "$_mark" "$UMO_NC" "$_label"
         done
 
-        # Read key
         printf "\n%b  ↑/↓ Navigate | Space Toggle | Enter Confirm %b" "$UMO_DIM" "$UMO_NC"
-        _key=$(dd bs=1 count=1 2>/dev/null)
+        _key=$(dd bs=1 count=1 2>/dev/null) || true
+
+        # Fallback: dd failed, use numeric input
+        if [ -z "$_key" ]; then
+            printf "\n  %bNumeric mode: enter item numbers (space-separated, empty=confirm): %b" "$UMO_B_YELLOW" "$UMO_NC"
+            read -r _num_input
+            if [ -z "$_num_input" ]; then
+                break
+            fi
+            for _num in $_num_input; do
+                if [ "$_num" -ge 1 ] && [ "$_num" -le "$_total" ] 2>/dev/null; then
+                    eval "_chk_${_num}=\"1\""
+                fi
+            done
+            continue
+        fi
 
         case "$_key" in
             $(printf '\033'))
-                _esc=$(dd bs=1 count=1 2>/dev/null)
-                _seq=$(dd bs=1 count=1 2>/dev/null)
+                _seq=$(dd bs=1 count=2 2>/dev/null)
                 case "$_seq" in
                     A) [ "$_cursor" -gt 1 ] && _cursor=$((_cursor - 1)) ;;
                     B) [ "$_cursor" -lt "$_total" ] && _cursor=$((_cursor + 1)) ;;
@@ -178,7 +192,6 @@ umo_ui_checklist() {
             '') break ;;
         esac
 
-        # Clear for redraw
         _i=0
         while [ "$_i" -lt "$_total" ]; do
             umo_line_up
@@ -189,7 +202,6 @@ umo_ui_checklist() {
         umo_line_clear
     done
 
-    # Build result list
     UMO_CHECKLIST_RESULT=""
     _i=0
     while [ "$_i" -lt "$_total" ]; do

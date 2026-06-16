@@ -84,11 +84,21 @@ EOF
 }
 
 umo_systemctl_ssh_helper() {
-    cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-start-ssh" << 'EOF'
+    _template="$SCRIPT_DIR/config/templates/umo-start-ssh.sh"
+    _output="${UMO_INSTALL_DIR}/usr/local/bin/umo-start-ssh"
+    if [ -f "$_template" ]; then
+        umo_fs_render "$_template" "$_output"
+    else
+        # Fallback inline
+        cat > "$_output" << 'EOF'
 #!/bin/sh
-/usr/sbin/sshd -D &
+echo "[==>] Starting SSH server..."
+[ -d /run/sshd ] || mkdir -p /run/sshd
+[ -f /etc/ssh/ssh_host_rsa_key ] || ssh-keygen -A 2>/dev/null || true
+/usr/sbin/sshd -D "$@"
 EOF
-    chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-start-ssh"
+    fi
+    chmod +x "$_output"
 }
 
 umo_systemctl_setup() {
