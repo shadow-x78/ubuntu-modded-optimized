@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device — one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-3.0.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.1-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -167,8 +167,6 @@ UMO/
 ├── docs/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes
-├── tests/
-│   └── run.sh               # Validation suite
 ├── install.sh               # Quick-start entry point
 ├── VERSION                  # Semver version string
 ├── CHANGELOG.md             # Release history

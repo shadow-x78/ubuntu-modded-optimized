@@ -166,19 +166,21 @@ umo_banner_full() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
 
-    _l1=' __  __  ___ '
-    _l2='|  \/  |/ _ \'
-    _l3='| |\/| | | | |'
-    _l4='| |  | | |_| |'
-    _l5='|_|  |_|\___/ '
-    _l6='             '
+    _l1='  ██╗   ██╗███╗   ███╗ ██████╗ '
+    _l2='  ██║   ██║████╗ ████║██╔═══██╗'
+    _l3='  ██║   ██║██╔████╔██║██║   ██║'
+    _l4='  ██║   ██║██║╚██╔╝██║██║   ██║'
+    _l5='  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝'
+    _l6='   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ '
+    _l7='                               '
 
-    _len1=13
-    _len2=14
-    _len3=14
-    _len4=14
-    _len5=14
-    _len6=13
+    _len1=30
+    _len2=30
+    _len3=30
+    _len4=30
+    _len5=30
+    _len6=30
+    _len7=30
 
     _pad1=$(( (_cols - _len1) / 2 )); [ "$_pad1" -lt 0 ] && _pad1=0
     _pad2=$(( (_cols - _len2) / 2 )); [ "$_pad2" -lt 0 ] && _pad2=0
@@ -186,6 +188,7 @@ umo_banner_full() {
     _pad4=$(( (_cols - _len4) / 2 )); [ "$_pad4" -lt 0 ] && _pad4=0
     _pad5=$(( (_cols - _len5) / 2 )); [ "$_pad5" -lt 0 ] && _pad5=0
     _pad6=$(( (_cols - _len6) / 2 )); [ "$_pad6" -lt 0 ] && _pad6=0
+    _pad7=$(( (_cols - _len7) / 2 )); [ "$_pad7" -lt 0 ] && _pad7=0
 
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad1" '' "$_l1" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad2" '' "$_l2" "$UMO_NC"
@@ -193,8 +196,9 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad4" '' "$_l4" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad5" '' "$_l5" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_NC"    "$_pad7" '' "$_l7" "$UMO_NC"
 
-    _tag="Ubuntu Modded Optimized v${UMO_VERSION:-3.1.0}"
+    _tag="Ubuntu Modded Optimized v${UMO_VERSION:-3.1.1}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -206,7 +210,7 @@ umo_banner_full() {
 }
 
 umo_banner_compact() {
-    _ver="${UMO_VERSION:-3.1.0}"
+    _ver="${UMO_VERSION:-3.1.1}"
     printf "%b[UMO]%b Ubuntu Modded Optimized %bv%s%b — Shadow-x78\n" \
         "$UMO_COLOR_PRIMARY" "$UMO_NC" "$UMO_BOLD" "$_ver" "$UMO_NC"
 }
@@ -227,7 +231,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.0}"
+    _ver="${UMO_VERSION:-3.1.1}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

@@ -31,3 +31,6 @@ Thumbs.db
 # Patch rejects
 *.rej
 *.orig
+
+# Tests (local only — not tracked)
+/tests/

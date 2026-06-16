@@ -32,11 +32,11 @@ umo_sys_arch() {
 }
 
 umo_sys_require_arch() {
-    _supported="aarch64"
     _current=$(umo_sys_arch)
     case "$_current" in
         aarch64) umo_log_ok "Architecture: ARM64 (supported)" ;;
-        *) umo_log_warn "Architecture '$_current' may have limited support." ;;
+        x86_64)  umo_log_warn "Architecture '$_current' detected. Primary target is aarch64 (ARM64)." ;;
+        *)       umo_log_warn "Architecture '$_current' may have limited support." ;;
     esac
 }
 
@@ -128,10 +128,22 @@ umo_sys_setup_storage() {
 }
 
 umo_sys_summary() {
+    _platform="Termux"
+    if command -v termux-info >/dev/null 2>&1; then
+        _platform="Termux ($(termux-info 2>/dev/null | head -1 || echo 'Unknown'))"
+    fi
+    _arch=$(umo_sys_arch)
+    _store=$(umo_sys_disk_free_mb)
+    _ram=$(umo_sys_ram_mb)
+    _dir="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
+
+    _plen=$(printf '%s' "$_platform" | wc -m)
+    [ "$_plen" -gt 28 ] && _platform="Termux"
+
     umo_ui_panel "System Summary" \
-        "Platform:    Termux $(termux-info 2>/dev/null | head -1 || echo 'Unknown')" \
-        "Arch:        $(umo_sys_arch)" \
-        "Storage:     $(umo_sys_disk_free_mb)MB free" \
-        "RAM:         $(umo_sys_ram_mb)MB available" \
-        "Install Dir: ${UMO_INSTALL_DIR:-$HOME/ubuntu-modded}"
+        "Platform:  $_platform" \
+        "Arch:      $_arch" \
+        "Storage:   ${_store}MB free" \
+        "RAM:       ${_ram}MB available" \
+        "Path:      $_dir"
 }

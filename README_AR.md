@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد — أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-3.0.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.1-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -167,8 +167,6 @@ UMO/
 ├── docs/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
-├── tests/
-│   └── run.sh               # مجموعة الاختبارات
 ├── install.sh               # نقطة الدخول السريعة
 ├── VERSION                  # رقم الإصدار
 ├── CHANGELOG.md             # سجل التغييرات

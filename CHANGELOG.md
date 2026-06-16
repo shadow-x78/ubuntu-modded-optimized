@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.1] - 2026-06-17
+
+### 🚀 Added
+- **ASCII Banner:** Restored large block-letter UMO logo (7-line) with orange gradient centering.
+- **Panel Overflow Guard:** `umo_ui_panel()` now trims lines wider than the box and appends `…`.
+
+### 🔄 Updated
+- **Architecture Warning:** `core-system.sh` — clearer message for x86_64 users; indicates primary target is ARM64.
+- **Summary Panel:** Compact key labels (`Platform`, `Arch`, `Path`) to prevent overflow.
+- **Version Bump:** All badges, inline defaults, `VERSION`, and `bin/umo-install` bumped to v3.1.1.
+
+### 🐛 Fixed
+- **Table Width:** `umo_ui_panel()` minimum raised to 52 and clamped to terminal width; eliminates off-screen boxes.
+
+---
+
 ## [v3.1.0] - 2026-06-17
 
 ### 🚀 Added

@@ -223,9 +223,9 @@ umo_ui_panel() {
         [ "$_llen" -gt "$_max_line" ] && _max_line=$_llen
     done
 
-    _width=$(( _max_line + 8 ))
-    [ "$_width" -gt "$((_cols - 4))" ] 2>/dev/null && _width=$((_cols - 4))
-    [ "$_width" -lt 40 ] 2>/dev/null && _width=40
+    _width=$(( _max_line + 6 ))
+    [ "$_width" -gt "$((_cols - 2))" ] 2>/dev/null && _width=$((_cols - 2))
+    [ "$_width" -lt 50 ] 2>/dev/null && _width=50
 
     _left=$(( (_cols - _width) / 2 )); [ "$_left" -lt 0 ] && _left=0
 
@@ -234,9 +234,14 @@ umo_ui_panel() {
 
     for _line in "$@"; do
         _llen=$(printf '%s' "$_line" | wc -m)
-        _pad=$(( _width - 4 - _llen ))
-        [ "$_pad" -lt 0 ] && _pad=0
-        printf "%*s%b|%b  %s%*s%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_line" "$_pad" '' "$UMO_COLOR_PRIMARY"
+        if [ "$_llen" -gt "$((_width - 4))" ]; then
+            _trim="$(printf '%s' "$_line" | cut -c1-$((_width - 5)))"
+            printf "%*s%b|%b %s…%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_trim" "$UMO_COLOR_PRIMARY"
+        else
+            _pad=$(( _width - 4 - _llen ))
+            [ "$_pad" -lt 0 ] && _pad=0
+            printf "%*s%b|%b  %s%*s%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_line" "$_pad" '' "$UMO_COLOR_PRIMARY"
+        fi
     done
 
     printf "%b" "$UMO_COLOR_PRIMARY"
