@@ -30,7 +30,6 @@ umo_audio_configure() {
     if [ -f "$_pa_config" ] && ! grep -q "UMO Audio" "$_pa_config" 2>/dev/null; then
         cat >> "$_pa_config" << 'EOF'
 
-# ===== UMO Audio Bridge =====
 load-module module-native-protocol-tcp auth-anonymous=1
 EOF
     fi

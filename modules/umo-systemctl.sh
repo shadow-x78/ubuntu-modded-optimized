@@ -70,7 +70,6 @@ EOF
     chmod +x "$_bin"
     ln -sf /usr/local/bin/systemctl "${UMO_INSTALL_DIR}/usr/local/bin/systemctl3" 2>/dev/null || true
 
-    # Mask real systemctl
     if [ -f "${UMO_INSTALL_DIR}/usr/bin/systemctl" ] && [ ! -L "${UMO_INSTALL_DIR}/usr/bin/systemctl" ]; then
         mv "${UMO_INSTALL_DIR}/usr/bin/systemctl" "${UMO_INSTALL_DIR}/usr/bin/systemctl.real" 2>/dev/null || true
         ln -sf /usr/local/bin/systemctl "${UMO_INSTALL_DIR}/usr/bin/systemctl" 2>/dev/null || true
@@ -89,7 +88,6 @@ umo_systemctl_ssh_helper() {
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_output"
     else
-        # Fallback inline
         cat > "$_output" << 'EOF'
 #!/bin/sh
 echo "[==>] Starting SSH server..."

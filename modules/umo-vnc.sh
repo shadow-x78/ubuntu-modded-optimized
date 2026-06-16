@@ -36,7 +36,6 @@ umo_vnc_configure() {
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
     umo_fs_mkdir "$_vnc_dir"
 
-    # Render xstartup from template
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
@@ -46,7 +45,6 @@ umo_vnc_configure() {
     fi
     chmod +x "$_vnc_dir/xstartup"
 
-    # Copy to user
     if [ -d "${UMO_INSTALL_DIR}/home/ubuntu" ]; then
         _user_vnc="${UMO_INSTALL_DIR}/home/ubuntu/.vnc"
         umo_fs_mkdir "$_user_vnc"
@@ -55,7 +53,6 @@ umo_vnc_configure() {
         chown -R 1000:1000 "$_user_vnc" 2>/dev/null || true
     fi
 
-    # Default password
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
         printf 'ubuntu\nubuntu\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || true
@@ -67,16 +64,13 @@ umo_vnc_configure() {
 umo_vnc_create_scripts() {
     umo_log_step "Creating VNC control scripts..."
 
-    # Start script
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc" << 'EOF'
 #!/bin/sh
-# UMO — Start VNC
 VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 
-# Kill existing
 for _pid in $(pgrep -f Xvnc); do kill "$_pid" 2>/dev/null || true; done
 sleep 1
 
@@ -108,10 +102,8 @@ BANNER
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
 
-    # Stop script
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc" << 'EOF'
 #!/bin/sh
-# UMO — Stop VNC
 echo "[==>] Stopping VNC..."
 vncserver -kill :1 2>/dev/null || true
 vncserver -kill :2 2>/dev/null || true
@@ -120,10 +112,8 @@ echo "[OK] VNC stopped."
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc"
 
-    # Termux helpers
     cat > "$HOME/umo-vnc-start.sh" << 'EOF'
 #!/bin/sh
-# UMO — Start VNC + Audio (Termux-side)
 echo "[UMO] Starting PulseAudio bridge..."
 pulseaudio --start 2>/dev/null || true
 sleep 1

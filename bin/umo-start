@@ -64,7 +64,8 @@ else
     [ "$_l2_len" -gt "$_max_len" ] && _max_len=$_l2_len
     [ "$_l3_len" -gt "$_max_len" ] && _max_len=$_l3_len
 
-    _pad=$(( _max_len + 2 ))   _fill=$(( _pad - 2 ))
+    _pad=$(( _max_len + 2 ))
+    _fill=$(( _pad - 2 ))
 
     printf "\n"
     printf "%b╔" "$_UMO_PRI"

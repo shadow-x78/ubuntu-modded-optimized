@@ -20,12 +20,10 @@ umo_proot_prepare() {
         umo_fs_mkdir "$UMO_PROOT_DIR/$_d"
     done
 
-    # DNS resolution
     if [ -f "$UMO_TERMUX_PREFIX/etc/resolv.conf" ]; then
         cp "$UMO_TERMUX_PREFIX/etc/resolv.conf" "$UMO_PROOT_DIR/etc/resolv.conf" 2>/dev/null || true
     fi
 
-    # Hosts
     if [ -f "$UMO_TERMUX_PREFIX/etc/hosts" ]; then
         cp "$UMO_TERMUX_PREFIX/etc/hosts" "$UMO_PROOT_DIR/etc/hosts" 2>/dev/null || true
     fi
@@ -80,7 +78,6 @@ umo_proot_cmd() {
 umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
-    # Root login
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
 # UMO — Ubuntu Login Wrapper
@@ -107,7 +104,6 @@ exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-login.sh"
 
-    # User login
     cat > "$UMO_TERMUX_HOME/umo-user.sh" << EOF
 #!/bin/sh
 # UMO — Ubuntu User Login
@@ -128,7 +124,6 @@ exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
 
-    # Quick start helper
     cat > "$UMO_TERMUX_HOME/umo-start.sh" << 'EOF'
 #!/bin/sh
 # UMO — Quick Start
