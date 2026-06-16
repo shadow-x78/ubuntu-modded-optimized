@@ -2,47 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.0] - 2026-06-17
+
+### 🚀 Added
+- **256-Color Detection:** Auto-fallback between 256 / 16 / no-color modes via `tput colors`, `NO_COLOR`, `UMO_NO_256`.
+- **Brand Palette:** Ubuntu orange identity — `UMO_COLOR_PRIMARY` = `38;5;208m`.
+
+### 🔄 Updated
+- **Logo Banner:** 6-line orange gradient (top light → bottom dark), centered via terminal width.
+- **TUI Panel:** `umo_ui_panel()` now auto-fits width to content instead of hardcoded 60.
+- **Session Box:** `bin/umo-start` — fixed misaligned VNC line, dynamic box width, inline color fallback.
+- **Summary Colors:** `bin/umo-install` — Quick Commands and Inside Ubuntu now use brand palette.
+- **Changelog:** Formatted with emoji categories matching reference standard.
+- **Version Bump:** `VERSION`, `bin/umo-install`, and default strings updated to v3.1.0.
+
+### 🗑️ Removed
+- **Comments:** All inline code comments removed across `lib/core-ansi.sh`, `lib/core-ui.sh`, `bin/umo-start`, `bin/umo-install`.
+
+---
+
 ## [v3.0.0] - 2026-06-16
 
-### Code Quality
-- core-ansi.sh: removed complete duplicate block (-40%), fixed umo_box format bug (`$UMO_title` → `$_title`)
-- umo-install: separated UMO_VERSION from UMO_UBUNTU_VERSION
-- core-ui.sh: hardened umo_ui_checklist (fixed format injection + numeric fallback)
-- xstartup: single source template, removed duplicate heredoc from umo-vnc.sh
-- config/templates/: script templates replace inline heredocs across all modules
-- bashrc.patch: updated MESA_GL_VERSION_OVERRIDE to 4.0
+### 🚀 Added
+- **ASCII Banner:** Refined Block banner + compact variant for narrow terminals.
+- **Ubuntu 24.04:** Noble Numbat support.
+- **Performance Flags:** `--perf=balanced|aggressive|off` — APT speed, swap, debloat, DNS hardening.
+- **Desktop Themes:** `--theme=umo-dark|umo-light|minimal|none` — Orchis-Dark, Papirus icons, fonts.
+- **Lean Mode:** `--lean` — strip docs/man/locales to save space.
+- **Version Flag:** `--ubuntu=22.04|24.04` for explicit selection.
+- **VERSION File:** Single source of truth for version string.
 
-### Features
-- New ASCII banner: refined Block + compact variant for narrow terminals
-- Ubuntu 24.04 Noble Numbat support
-- `--perf=balanced|aggressive|off`: APT speed + swap + debloat + DNS hardening
-- `--theme=umo-dark|umo-light|minimal|none`: Orchis-Dark + Papirus icons + fonts
-- `--lean`: strip docs/man/locales to save space
-- `--ubuntu=22.04|24.04`: explicit Ubuntu version selection
-- `VERSION` file: single source of truth for version string
+### 🔄 Updated
+- **Code Quality:** Removed duplicate block in `core-ansi.sh` (-40%), fixed `umo_box` format bug.
+- **Version Separation:** Decoupled `UMO_VERSION` from `UMO_UBUNTU_VERSION`.
+- **TUI Hardening:** Fixed format injection + numeric fallback in `umo_ui_checklist`.
+- **Templates:** Heredocs replaced with script templates across all modules.
+- **MESA Override:** Updated to `MESA_GL_VERSION_OVERRIDE=4.0` in bashrc.patch.
 
-### Performance
-- APT: 99umo-speed.conf (no recommends/suggests, retries, timeout) + eatmydata ready
-- Swap: automatic 512MB (balanced) / 1GB (aggressive) swapfile creation
-- DNS: Cloudflare + Google + Quad9 with immutable resolv.conf
-- Debloat: removes snapd, unattended-upgrades, apport, cups, avahi
-- GPU: MESA 4.0 override + virpipe + virglrenderer
-- VNC: deferUpdate + alwaysshared + error logging + dynamic geometry
-- XFCE: compositor/screensaver/animations disabled by default
+### 🐛 Fixed
+- **U1:** RootFS integrity check after extraction (verifies `/bin/bash`).
+- **U2:** Static `resolv.conf`, `ca-certificates` first, `apt` retry.
+- **U3:** SSH helper creates `/run/sshd` + generates host keys.
+- **U5:** `dbus-launch --exit-with-session` in xstartup (fixes black VNC).
+- **C7:** Mirrors by Ubuntu version + SHA256 verification activated.
 
-### Bug Fixes
-- U1: RootFS integrity check after extraction (verifies /bin/bash)
-- U2: Static resolv.conf + ca-certificates first + apt retry
-- U3: SSH helper creates /run/sshd + generates host keys
-- U5: dbus-launch --exit-with-session in xstartup (fixes black VNC)
-- C7: Mirrors by ubuntu version + SHA256 verification activated
-
-### New Files
-- `VERSION`
-- `modules/umo-perf.sh`
-- `modules/umo-theme.sh`
-- `config/templates/` (7 template files)
-- `config/theme/` (9 theme config files)
+### 🗑️ Deprecated
+- **Node.js 18:** EOL since April 2025.
+- **Python 3.8:** EOL since October 2024.
 
 ---
 
@@ -50,16 +56,16 @@ All notable changes to this project will be documented in this file.
 
 ### 📝 Documentation
 - **README:** Complete redesign — badges, centered header, anchored sections, language switcher.
-- **README_AR:** Added `README_AR.md` — full Arabic translation of the main readme.
-- **SECURITY:** Complete redesign with structured format, risk table, and response timeline.
-- **INSTALL:** Complete redesign — badges, language switcher, expanded sections for all install modes.
-- **INSTALL_AR:** Added `docs/INSTALL_AR.md` — full Arabic translation of the installation guide.
-- **TROUBLESHOOTING:** Complete redesign — badges, language switcher, expanded fix sections.
-- **TROUBLESHOOTING_AR:** Added `docs/TROUBLESHOOTING_AR.md` — full Arabic translation of the troubleshooting guide.
+- **README_AR:** Added `README_AR.md` — full Arabic translation.
+- **SECURITY:** Complete redesign with risk table and response timeline.
+- **INSTALL:** Redesigned with language switcher, expanded install modes.
+- **INSTALL_AR:** Added `docs/INSTALL_AR.md` — full Arabic translation.
+- **TROUBLESHOOTING:** Redesigned with language switcher, expanded fix sections.
+- **TROUBLESHOOTING_AR:** Added `docs/TROUBLESHOOTING_AR.md`.
 - **LICENSE:** Updated formatting to match project style.
 
 ### 🔄 Updated
-- **Version Bump:** `bin/umo-install` version updated from `2.0.0` → `2.1.1`.
+- **Version Bump:** `bin/umo-install` updated from v2.0.0 → v2.1.1.
 
 ---
 
@@ -83,12 +89,12 @@ All notable changes to this project will be documented in this file.
 - **Core Engine:** `lib/core-system.sh` — Hardware detection, dependency management.
 - **Core Engine:** `lib/core-net.sh` — Multi-mirror download with resume.
 - **Core Engine:** `lib/core-fs.sh` — Safe file operations, atomic writes, backups.
-- **Modules:** `modules/umo-proot.sh` — Container preparation, login wrappers.
-- **Modules:** `modules/umo-vnc.sh` — TigerVNC installation, session control.
-- **Modules:** `modules/umo-audio.sh` — PulseAudio bridge configuration.
-- **Modules:** `modules/umo-systemctl.sh` — systemd emulator.
-- **Modules:** `modules/umo-desktop.sh` — DE installer (LXDE / XFCE4 / Openbox).
-- **Modules:** `modules/umo-apps.sh` — Application suite installer.
+- **Modules:** `umo-proot.sh` — Container preparation, login wrappers.
+- **Modules:** `umo-vnc.sh` — TigerVNC installation, session control.
+- **Modules:** `umo-audio.sh` — PulseAudio bridge configuration.
+- **Modules:** `umo-systemctl.sh` — systemd emulator.
+- **Modules:** `umo-desktop.sh` — DE installer (LXDE / XFCE4 / Openbox).
+- **Modules:** `umo-apps.sh` — Application suite installer.
 - **CLI:** `--no-gui` non-interactive mode.
 - **CLI:** `--de=` / `--apps=` / `--dir=` flags.
 - **UX:** Progress bars with percentage and spinners for background tasks.

@@ -15,7 +15,7 @@ umo_ui_init() {
 
 umo_ui_header() {
     _text="$1"
-    printf "\n%b%s%b\n\n" "$UMO_B_YELLOW" "$_text" "$UMO_NC"
+    printf "\n%b%s%b\n\n" "$UMO_COLOR_PRIMARY" "$_text" "$UMO_NC"
 }
 
 umo_ui_footer() {
@@ -30,7 +30,7 @@ umo_ui_menu() {
     umo_screen_clear
     umo_banner
     umo_rule
-    printf "\n%b  ▶ %s%b\n\n" "$UMO_B_YELLOW" "$_title" "$UMO_NC"
+    printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
 
     _opt_num=0
     for _opt in "$@"; do
@@ -43,20 +43,18 @@ umo_ui_menu() {
         printf "%b  => Enter choice [1-%d]: %b" "$UMO_B_GREEN" "$_opt_num" "$UMO_NC"
         read -r _choice
 
-        # Validate
         if [ -z "$_choice" ] || [ "$_choice" -lt 1 ] || [ "$_choice" -gt "$_opt_num" ] 2>/dev/null; then
             umo_log_warn "Invalid choice. Please enter 1-$_opt_num"
             continue
         fi
 
-        # Return selected value
         _idx=0
         for _opt in "$@"; do
             _idx=$((_idx + 1))
             if [ "$_idx" -eq "$_choice" ]; then
                 UMO_MENU_RESULT="$_opt"
                 UMO_MENU_IDX="$_choice"
-                printf "\n%b  ✓ Selected:%b %s\n\n" "$UMO_B_GREEN" "$UMO_NC" "$_opt"
+                printf "\n%b  [OK] Selected:%b %s\n\n" "$UMO_B_GREEN" "$UMO_NC" "$_opt"
                 return 0
             fi
         done
@@ -120,7 +118,7 @@ umo_ui_checklist() {
     umo_screen_clear
     umo_banner
     umo_rule
-    printf "\n%b  ▶ %s%b\n\n" "$UMO_B_YELLOW" "$_title" "$UMO_NC"
+    printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
     printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
     _idx=0
@@ -140,7 +138,7 @@ umo_ui_checklist() {
             eval "_label=\"\$_lbl_${_i}\""
 
             if [ "$_i" -eq "$_cursor" ]; then
-                _ptr="▶"
+                _ptr=">"
                 _pfix="$UMO_B_CYAN"
             else
                 _ptr=" "
@@ -148,7 +146,7 @@ umo_ui_checklist() {
             fi
 
             if [ "$_state" = "1" ]; then
-                _mark="✓"
+                _mark="X"
                 _mfix="$UMO_B_GREEN"
             else
                 _mark=" "
@@ -161,8 +159,7 @@ umo_ui_checklist() {
         printf "\n%b  ↑/↓ Navigate | Space Toggle | Enter Confirm %b" "$UMO_DIM" "$UMO_NC"
         _key=$(dd bs=1 count=1 2>/dev/null) || true
 
-        # Fallback: dd failed, use numeric input
-        if [ -z "$_key" ]; then
+if [ -z "$_key" ]; then
             printf "\n  %bNumeric mode: enter item numbers (space-separated, empty=confirm): %b" "$UMO_B_YELLOW" "$UMO_NC"
             read -r _num_input
             if [ -z "$_num_input" ]; then
@@ -217,13 +214,33 @@ umo_ui_checklist() {
 umo_ui_panel() {
     _title="$1"; shift
 
-    printf "\n"
-    umo_box "$_title" 60
+    _cols=$(tput cols 2>/dev/null || echo 80)
+    _cols="${_cols:-80}"
+
+    _max_line=0
     for _line in "$@"; do
-        printf "     %b│%b  %s\n" "$UMO_B_BLUE" "$UMO_NC" "$_line"
+        _llen=$(printf '%s' "$_line" | wc -m)
+        [ "$_llen" -gt "$_max_line" ] && _max_line=$_llen
     done
-    printf "%b" "$UMO_B_BLUE"
-    printf "     ╚%*s╝\n" 58 '' | tr ' ' '═'
+
+    _width=$(( _max_line + 8 ))
+    [ "$_width" -gt "$((_cols - 4))" ] 2>/dev/null && _width=$((_cols - 4))
+    [ "$_width" -lt 40 ] 2>/dev/null && _width=40
+
+    _left=$(( (_cols - _width) / 2 )); [ "$_left" -lt 0 ] && _left=0
+
+    printf "\n"
+    umo_box "$_title" "$_width" "$_cols"
+
+    for _line in "$@"; do
+        _llen=$(printf '%s' "$_line" | wc -m)
+        _pad=$(( _width - 4 - _llen ))
+        [ "$_pad" -lt 0 ] && _pad=0
+        printf "%*s%b|%b  %s%*s%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_line" "$_pad" '' "$UMO_COLOR_PRIMARY"
+    done
+
+    printf "%b" "$UMO_COLOR_PRIMARY"
+    printf "%*s+%*s+\n" "$_left" '' "$((_width-2))" '' | tr ' ' '-'
     printf "%b" "$UMO_NC"
     printf "\n"
 }

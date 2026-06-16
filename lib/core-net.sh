@@ -100,7 +100,6 @@ umo_net_extract() {
         *)        umo_die "Unknown archive format: $_archive" ;;
     esac
 
-    # Ensure essential mount points exist
     for _dir in dev proc sys tmp sdcard data termux; do
         mkdir -p "$_target/$_dir"
     done

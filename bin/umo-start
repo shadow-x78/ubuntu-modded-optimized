@@ -4,19 +4,38 @@
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 
-# Wake lock to prevent Android killing processes
+_UMO_NC=''
+_UMO_BOLD=''
+_UMO_PRI=''
+_UMO_GRN=''
+_UMO_CYN=''
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ -z "${UMO_NO_256:-}" ]; then
+    _umo_colors=$(tput colors 2>/dev/null || echo 0)
+    if [ "$_umo_colors" -ge 256 ] 2>/dev/null; then
+        _UMO_NC='\033[0m'
+        _UMO_BOLD='\033[1m'
+        _UMO_PRI='\033[38;5;208m'
+        _UMO_GRN='\033[38;5;34m'
+        _UMO_CYN='\033[38;5;39m'
+    elif [ "$_umo_colors" -ge 16 ] 2>/dev/null; then
+        _UMO_NC='\033[0m'
+        _UMO_BOLD='\033[1m'
+        _UMO_PRI='\033[1;33m'
+        _UMO_GRN='\033[1;32m'
+        _UMO_CYN='\033[1;36m'
+    fi
+fi
+
 termux-wake-lock 2>/dev/null || true
 
-# Start PulseAudio bridge
 pulseaudio --start 2>/dev/null || true
 sleep 1
 
-# Detect display method
 if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
-    echo "[UMO] Starting with Termux:X11..."
+    printf "%b[UMO]%b Starting with Termux:X11...\n" "$_UMO_PRI" "$_UMO_NC"
     if ! command -v termux-x11 >/dev/null 2>&1; then
-        echo "[WARN] termux-x11-nightly not installed. Install it with:"
-        echo "  pkg install x11-repo && pkg install termux-x11-nightly"
+        printf "%b[WARN]%b termux-x11-nightly not installed. Install it with:\n" "$_UMO_PRI" "$_UMO_NC"
+        printf "  %bpkg install x11-repo && pkg install termux-x11-nightly%b\n" "$_UMO_CYN" "$_UMO_NC"
     fi
     export DISPLAY=:0
     export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
@@ -24,24 +43,45 @@ if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
     sleep 2
     exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; export XDG_RUNTIME_DIR=${TMPDIR:-/tmp}; bash"
 else
-    echo "[UMO] Starting Ubuntu + VNC + Audio..."
+    printf "%b[UMO]%b Starting Ubuntu + VNC + Audio...\n" "$_UMO_PRI" "$_UMO_NC"
 
-    # Start VNC inside Ubuntu
     "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" &
     sleep 3
 
-    # Connection info
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
     [ -z "$IP" ] && IP="127.0.0.1"
 
+    _ip_str="${IP}:5901"
+    _l1="  UMO Session Active"
+    _l2="  VNC:    ${_ip_str}"
+    _l3="  Stop:   ~/umo-stop.sh"
+
+    _l1_len=$(printf '%s' "$_l1" | wc -m)
+    _l2_len=$(printf '%s' "$_l2" | wc -m)
+    _l3_len=$(printf '%s' "$_l3" | wc -m)
+
+    _max_len=$_l1_len
+    [ "$_l2_len" -gt "$_max_len" ] && _max_len=$_l2_len
+    [ "$_l3_len" -gt "$_max_len" ] && _max_len=$_l3_len
+
+    _pad=$(( _max_len + 2 ))   _fill=$(( _pad - 2 ))
+
     printf "\n"
-    printf "╔══════════════════════════════════════════╗\n"
-    printf "║  UMO Session Active                      ║\n"
-    printf "║  VNC:    %s:5901\n" "$IP"
-    printf "║  Stop:   ~/umo-stop.sh                   ║\n"
-    printf "╚══════════════════════════════════════════╝\n"
+    printf "%b╔" "$_UMO_PRI"
+    printf '%*s' "$_pad" '' | tr ' ' '═'
+    printf "╗%b\n" "$_UMO_NC"
+
+    printf "%b║%b%*s%s%*s%b║%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l1" $((_pad - _l1_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
+    printf "%b║%b%*s%s%*s%b║%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l2" $((_pad - _l2_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
+    printf "%b║%b%*s%s%*s%b║%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l3" $((_pad - _l3_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
+
+    printf "%b╚" "$_UMO_PRI"
+    printf '%*s' "$_pad" '' | tr ' ' '═'
+    printf "╝%b\n" "$_UMO_NC"
     printf "\n"
 
-    # Interactive login
     exec "$TERMUX_HOME/umo-login.sh"
 fi

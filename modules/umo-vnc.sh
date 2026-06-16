@@ -98,11 +98,11 @@ _IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
 
 cat << BANNER
 
-╔══════════════════════════════════════════╗
-║  UMO VNC Server Started                  ║
-║  Display: $VNC_DISPLAY                      ║
-║  Address: $_IP:$VNC_PORT                  ║
-╚══════════════════════════════════════════╝
++------------------------------------------+
+|  UMO VNC Server Started                  |
+|  Display: $VNC_DISPLAY                      |
+|  Address: $_IP:$VNC_PORT                  |
++------------------------------------------+
 
 BANNER
 EOF

@@ -5,8 +5,8 @@
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Check if running inside project or from extracted archive
 if [ -f "$SCRIPT_DIR/bin/umo-install" ]; then
+    chmod +x "$SCRIPT_DIR/bin/umo-install"
     exec "$SCRIPT_DIR/bin/umo-install" "$@"
 else
     echo "[ERR] UMO installer not found."

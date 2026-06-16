@@ -65,7 +65,6 @@ umo_fs_render() {
 
     _content=$(cat "$_template")
 
-    # Replace {{VAR}} placeholders
     while [ "$#" -ge 2 ]; do
         _key="$1"
         _val="$2"
