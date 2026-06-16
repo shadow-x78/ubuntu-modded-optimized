@@ -113,9 +113,9 @@ umo_theme_apply_panel() {
 umo_theme_apply_wallpaper() {
     umo_log_step "Setting wallpaper..."
 
-    _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-dark.png"
+    _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-wallpaper.jpg"
     _wp_dir="$UMO_INSTALL_DIR/usr/share/wallpapers"
-    _wp_dst="$_wp_dir/umo-dark.png"
+    _wp_dst="$_wp_dir/umo-wallpaper.jpg"
 
     if [ -f "$_wp_src" ]; then
         umo_fs_mkdir "$_wp_dir"
@@ -124,7 +124,7 @@ umo_theme_apply_wallpaper() {
         _xfce_props="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
         umo_fs_mkdir "$(dirname "$_xfce_props")"
         if [ -f "$_xfce_props" ]; then
-            sed -i 's|last-image.*|last-image" type="string" value="/usr/share/wallpapers/umo-dark.png"/>|' "$_xfce_props" 2>/dev/null || true
+            sed -i 's|last-image.*|last-image" type="string" value="/usr/share/wallpapers/umo-wallpaper.jpg"/>|' "$_xfce_props" 2>/dev/null || true
         fi
     else
         umo_log_info "No wallpaper file found, skipping."
