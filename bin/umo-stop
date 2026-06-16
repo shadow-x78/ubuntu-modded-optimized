@@ -1,0 +1,23 @@
+#!/bin/sh
+# UMO — Session Controller [stop] (MIT License)
+# https://github.com/Shadow-x78/termux-ubuntu-umo
+
+TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+
+echo "[UMO] Stopping session..."
+
+# Stop VNC
+"$TERMUX_HOME/umo-login.sh" -c "umo-stopvnc" 2>/dev/null || true
+
+# Kill remaining Xvnc
+for _pid in $(ps -ef 2>/dev/null | grep -i xvnc | grep -v grep | awk '{print $2}'); do
+    kill -9 "$_pid" 2>/dev/null || true
+done
+
+# Stop audio
+pulseaudio --kill 2>/dev/null || true
+
+# Release wake lock
+termux-wake-unlock 2>/dev/null || true
+
+echo "[UMO] Session stopped."

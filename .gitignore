@@ -1,0 +1,33 @@
+# UMO Runtime & Cache
+*.bak
+*.tmp
+*.swp
+*.umo-bak-*
+.umo/
+*.log
+
+# Agent / project metadata
+.kilo/
+AGENTS.md
+
+# Editor artifacts
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary download artifacts during install
+*.tar.xz.partial
+*.tar.gz.partial
+*.zip.partial
+
+# Runtime directories (created by installer)
+/cache/
+/logs/
+
+# Patch rejects
+*.rej
+*.orig

@@ -1,0 +1,27 @@
+# Bash additions for Ubuntu Modded environment
+# Source this in ~/.bashrc
+
+# Environment
+export PULSE_SERVER=127.0.0.1
+export PULSE_LATENCY_MSEC=60
+export DISPLAY=:1
+export PROOT_NO_SECCOMP=1
+
+# GPU/Graphics hints for proot
+export GALLIUM_DRIVER=virpipe
+export MESA_GL_VERSION_OVERRIDE=3.3
+
+# Aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# VNC shortcuts
+alias startvnc='bash /usr/local/bin/umo-startvnc'
+alias stopvnc='bash /usr/local/bin/umo-stopvnc'
+
+# Audio fix
+alias fix-audio='bash /usr/local/bin/umo-fix-audio'
+
+# Neofetch on login
+command -v neofetch >/dev/null 2>&1 && neofetch

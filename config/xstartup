@@ -1,0 +1,50 @@
+#!/bin/sh
+# VNC xstartup template
+# Supports LXDE, XFCE4, Openbox
+
+# Detect desktop environment
+DE="${UBUNTU_DE:-xfce4}"
+
+# Common fixes
+export PULSE_SERVER=127.0.0.1
+export PULSE_LATENCY_MSEC=60
+export DISPLAY=:1
+export XAUTHORITY="$HOME/.Xauthority"
+
+# Disable screen blanking
+xset s off
+xset -dpms
+xset s noblank
+
+# Start the chosen desktop
+case "$DE" in
+    lxde)
+        if command -v startlxde >/dev/null 2>&1; then
+            exec startlxde
+        fi
+        ;;
+    xfce4|xfce)
+        if command -v startxfce4 >/dev/null 2>&1; then
+            exec startxfce4
+        fi
+        ;;
+    openbox)
+        if command -v openbox-session >/dev/null 2>&1; then
+            exec openbox-session
+        fi
+        ;;
+    *)
+        # Fallback: try common ones
+        if command -v startxfce4 >/dev/null 2>&1; then
+            exec startxfce4
+        elif command -v startlxde >/dev/null 2>&1; then
+            exec startlxde
+        elif command -v openbox-session >/dev/null 2>&1; then
+            exec openbox-session
+        else
+            # Minimal fallback
+            xterm &
+            exec twm
+        fi
+        ;;
+esac

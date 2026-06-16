@@ -1,0 +1,263 @@
+#!/bin/sh
+# UMO — Main Installer (MIT License)
+# https://github.com/Shadow-x78/termux-ubuntu-umo
+
+set -e
+
+# Bootstrap
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+export UMO_LIB_DIR="$SCRIPT_DIR/lib"
+export UMO_MOD_DIR="$SCRIPT_DIR/modules"
+export UMO_VERSION="2.0.0"
+
+# Load core libraries
+. "$UMO_LIB_DIR/core-ansi.sh"
+. "$UMO_LIB_DIR/core-ui.sh"
+. "$UMO_LIB_DIR/core-system.sh"
+. "$UMO_LIB_DIR/core-net.sh"
+. "$UMO_LIB_DIR/core-fs.sh"
+
+# Load modules
+. "$UMO_MOD_DIR/umo-proot.sh"
+. "$UMO_MOD_DIR/umo-vnc.sh"
+. "$UMO_MOD_DIR/umo-audio.sh"
+. "$UMO_MOD_DIR/umo-systemctl.sh"
+. "$UMO_MOD_DIR/umo-desktop.sh"
+. "$UMO_MOD_DIR/umo-apps.sh"
+
+# Defaults
+UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
+UMO_VERSION="${UMO_VERSION:-22.04}"
+UMO_DE="${UMO_DE:-xfce4}"
+UMO_APP_SET="${UMO_APP_SET:-basic}"
+UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
+
+# --- Phase 1: Environment Validation -----------------------------------------
+umo_phase_check() {
+    umo_ui_init
+    umo_ui_panel "Environment Validation" \
+        "Checking Termux compatibility..." \
+        "Verifying architecture support..." \
+        "Testing network connectivity..." \
+        "Calculating available storage..."
+
+    umo_sys_require_termux
+    umo_sys_setup_storage
+    umo_sys_require_arch
+    umo_sys_require_internet
+    umo_sys_require_space 2048
+    umo_sys_summary
+}
+
+# --- Phase 2: Dependencies ---------------------------------------------------
+umo_phase_deps() {
+    umo_ui_header "Installing Dependencies"
+    umo_sys_pkg_install proot-distro wget tar pulseaudio x11-repo tur-repo
+    umo_sys_pkg_install virglrenderer-android termux-x11-nightly 2>/dev/null || true
+    umo_sys_pkg_install git curl unzip
+}
+
+# --- Phase 3: Configuration --------------------------------------------------
+umo_phase_config() {
+    if [ -n "$UMO_NON_INTERACTIVE" ]; then
+        umo_log_info "Non-interactive mode: DE=$UMO_DE, Apps=$UMO_APP_SET"
+        return 0
+    fi
+
+    umo_ui_menu "Choose Desktop Environment" \
+        "XFCE4 (Recommended — Balanced)" \
+        "LXDE (Ultra-Lightweight)" \
+        "Openbox (Minimal — Advanced)" \
+        "Minimal (CLI only — No GUI)"
+
+    case "$UMO_MENU_IDX" in
+        1) UMO_DE="xfce4" ;;
+        2) UMO_DE="lxde" ;;
+        3) UMO_DE="openbox" ;;
+        4) UMO_DE="minimal" ;;
+    esac
+
+    umo_ui_menu "Choose Application Set" \
+        "Basic (Utilities only)" \
+        "Developer (Basic + Python/Node/GCC)" \
+        "Media (Basic + VLC/FFmpeg)" \
+        "Full Suite (Everything)"
+
+    case "$UMO_MENU_IDX" in
+        1) UMO_APP_SET="basic" ;;
+        2) UMO_APP_SET="dev" ;;
+        3) UMO_APP_SET="media" ;;
+        4) UMO_APP_SET="full" ;;
+    esac
+
+    umo_ui_panel "Configuration Summary" \
+        "Desktop:    $UMO_DE" \
+        "Apps:       $UMO_APP_SET" \
+        "Install:    $UMO_INSTALL_DIR" \
+        "Version:    Ubuntu $UMO_VERSION"
+
+    umo_ui_confirm "Confirm installation?" "Y" || {
+        umo_log_info "Installation cancelled."
+        exit 0
+    }
+}
+
+# --- Phase 4: Download Ubuntu RootFS -----------------------------------------
+umo_phase_download() {
+    umo_ui_header "Downloading Ubuntu RootFS"
+    export UMO_INSTALL_DIR
+    export UMO_CACHE_DIR="$HOME/.umo/cache"
+    umo_fs_mkdir "$UMO_CACHE_DIR"
+
+    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.xz"
+    umo_net_download_mirrors "$_archive"
+    umo_net_extract "$_archive" "$UMO_INSTALL_DIR"
+    rm -f "$_archive"
+}
+
+# --- Phase 5: Proot Setup ----------------------------------------------------
+umo_phase_proot() {
+    umo_ui_header "Configuring Proot Container"
+    export UMO_INSTALL_DIR
+    umo_proot_setup
+    umo_proot_create_user
+}
+
+# --- Phase 6: VNC Setup ------------------------------------------------------
+umo_phase_vnc() {
+    [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping VNC (minimal mode)."; return 0; }
+    umo_ui_header "Installing VNC Server"
+    export UMO_INSTALL_DIR
+    umo_vnc_setup
+}
+
+# --- Phase 7: Audio Bridge ---------------------------------------------------
+umo_phase_audio() {
+    umo_ui_header "Configuring Audio Bridge"
+    export UMO_INSTALL_DIR
+    umo_audio_setup
+}
+
+# --- Phase 8: Systemctl ------------------------------------------------------
+umo_phase_systemctl() {
+    umo_ui_header "Installing Systemctl Emulator"
+    export UMO_INSTALL_DIR
+    umo_systemctl_setup
+}
+
+# --- Phase 9: Desktop Environment ------------------------------------------
+umo_phase_desktop() {
+    [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping desktop (minimal mode)."; return 0; }
+    umo_ui_header "Installing Desktop Environment"
+    export UMO_INSTALL_DIR
+    export UMO_DE
+    umo_de_install
+}
+
+# --- Phase 10: Applications -------------------------------------------------
+umo_phase_apps() {
+    umo_ui_header "Installing Applications"
+    export UMO_INSTALL_DIR
+    export UMO_APP_SET
+    umo_apps_install
+}
+
+# --- Phase 11: Finalization --------------------------------------------------
+umo_phase_finalize() {
+    umo_ui_header "Finalizing Installation"
+
+    # Update sources
+    cp "$SCRIPT_DIR/config/sources.list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get update -qq" 2>/dev/null || true
+
+    # Create shortcuts
+    for _script in start stop; do
+        _src="$SCRIPT_DIR/bin/umo-$_script"
+        _dst="$HOME/umo-$_script.sh"
+        if [ -f "$_src" ]; then
+            cp -f "$_src" "$_dst"
+            chmod +x "$_dst"
+        fi
+    done
+
+    umo_log_ok "Installation complete."
+}
+
+# --- Phase 12: Summary -----------------------------------------------------
+umo_phase_summary() {
+    _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+    [ -z "$_ip" ] && _ip="127.0.0.1"
+
+    umo_screen_clear
+    umo_banner
+    umo_rule
+
+    umo_ui_panel "Installation Complete" \
+        "Version:    Ubuntu $UMO_VERSION" \
+        "Desktop:    $UMO_DE" \
+        "Path:       $UMO_INSTALL_DIR" \
+        "VNC:        $_ip:5901" \
+        "User:       ubuntu (password: ubuntu)"
+
+    printf "\n%bQuick Commands:%b\n" "$UMO_B_YELLOW" "$UMO_NC"
+    printf "  %b~/umo-start.sh%b       Start Ubuntu + VNC + Audio\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %b~/umo-stop.sh%b        Stop everything\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %b~/umo-vnc-start.sh%b    Start VNC only\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %b~/umo-login.sh%b        Login as root\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %b~/umo-user.sh%b         Login as ubuntu\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %b~/umo-fix-audio.sh%b    Fix audio\n" "$UMO_B_GREEN" "$UMO_NC"
+
+    printf "\n%bInside Ubuntu:%b\n" "$UMO_B_YELLOW" "$UMO_NC"
+    printf "  %bumo-startvnc%b        Start VNC\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %bumo-stopvnc%b         Stop VNC\n" "$UMO_B_GREEN" "$UMO_NC"
+    printf "  %bumo-fix-audio%b        Fix PulseAudio\n" "$UMO_B_GREEN" "$UMO_NC"
+
+    printf "\n"
+    umo_ui_pause
+}
+
+# --- CLI Parser -------------------------------------------------------------
+umo_cli_parse() {
+    for _arg in "$@"; do
+        case "$_arg" in
+            --no-gui|--non-interactive) UMO_NON_INTERACTIVE=1 ;;
+            --de=*)      UMO_DE="${_arg#*=}" ;;
+            --apps=*)    UMO_APP_SET="${_arg#*=}" ;;
+            --dir=*)     UMO_INSTALL_DIR="${_arg#*=}" ;;
+            --version=*) UMO_VERSION="${_arg#*=}" ;;
+            --help|-h)
+                cat << 'BANNER'
+Usage: umo-install [OPTIONS]
+
+Options:
+  --no-gui, --non-interactive   Non-interactive mode
+  --de=xfce4|lxde|openbox       Desktop environment
+  --apps=basic|dev|media|full   Application set
+  --dir=PATH                    Installation directory
+  --version=22.04|24.04         Ubuntu version
+  --help, -h                    Show this help
+BANNER
+                exit 0
+                ;;
+        esac
+    done
+}
+
+# --- Main -------------------------------------------------------------------
+umo_main() {
+    umo_cli_parse "$@"
+    umo_phase_check
+    umo_phase_deps
+    umo_phase_config
+    umo_phase_download
+    umo_phase_proot
+    umo_phase_vnc
+    umo_phase_audio
+    umo_phase_systemctl
+    umo_phase_desktop
+    umo_phase_apps
+    umo_phase_finalize
+    umo_phase_summary
+}
+
+umo_main "$@"

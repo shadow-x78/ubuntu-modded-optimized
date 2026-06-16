@@ -1,0 +1,42 @@
+#!/bin/sh
+# UMO — Session Controller [start] (MIT License)
+# https://github.com/Shadow-x78/termux-ubuntu-umo
+
+TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+
+# Wake lock to prevent Android killing processes
+termux-wake-lock 2>/dev/null || true
+
+# Start PulseAudio bridge
+pulseaudio --start 2>/dev/null || true
+sleep 1
+
+# Detect display method
+if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
+    echo "[UMO] Starting with Termux:X11..."
+    export DISPLAY=:0
+    termux-x11 :0 2>/dev/null &
+    sleep 2
+    exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; bash"
+else
+    echo "[UMO] Starting Ubuntu + VNC + Audio..."
+
+    # Start VNC inside Ubuntu
+    "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" &
+    sleep 3
+
+    # Connection info
+    IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+    [ -z "$IP" ] && IP="127.0.0.1"
+
+    printf "\n"
+    printf "╔══════════════════════════════════════════╗\n"
+    printf "║  UMO Session Active                      ║\n"
+    printf "║  VNC:    %s:5901\n" "$IP"
+    printf "║  Stop:   ~/umo-stop.sh                   ║\n"
+    printf "╚══════════════════════════════════════════╝\n"
+    printf "\n"
+
+    # Interactive login
+    exec "$TERMUX_HOME/umo-login.sh"
+fi
