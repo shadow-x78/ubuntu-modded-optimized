@@ -13,6 +13,12 @@ All notable changes to this project will be documented in this file.
 - **Configuration Summary:** Migrated to `umo_kv "Desktop"`, `Apps`, `Install`, `Version`.
 - **System Summary:** Migrated to `umo_kv "Platform"`, `Arch`, `Storage`, `RAM`, `Path`.
 - **Installation Complete:** Migrated to `umo_kv` lines for Version, Desktop, Path, VNC, Perf, User.
+- **Banner Author:** Label changed from `Shadow-x78` to `By Shadow-x78`.
+- **Separators:** Replaced dash rules (`umo_rule`) with blank lines in `umo_ui_init`, `umo_ui_menu`, and `umo_ui_checklist`.
+- **Step Spacing:** `umo_log_step` now prepends a blank line before every `[==>]` message across all 41 call sites.
+
+### 🐛 Fixed
+- **Termux Info Display:** `umo_sys_summary()` now reads `TERMUX_APK_RELEASE` or `TERMUX_VERSION` from `termux-info` instead of capturing the header line `Termux Variables:`.
 
 ### 🔄 Updated
 - **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.4.

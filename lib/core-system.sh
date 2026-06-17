@@ -130,7 +130,9 @@ umo_sys_setup_storage() {
 umo_sys_summary() {
     _platform="Termux"
     if command -v termux-info >/dev/null 2>&1; then
-        _platform="Termux ($(termux-info 2>/dev/null | head -1 || echo 'Unknown'))"
+        _ver=$(termux-info 2>/dev/null | grep '^TERMUX_APK_RELEASE=' | head -1)
+        [ -z "$_ver" ] && _ver=$(termux-info 2>/dev/null | grep '^TERMUX_VERSION=' | head -1)
+        _platform="Termux (${_ver:-Unknown})"
     fi
     _arch=$(umo_sys_arch)
     _store=$(umo_sys_disk_free_mb)

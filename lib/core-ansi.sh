@@ -102,7 +102,7 @@ umo_log_ok()    { printf "%b[OK]%b  %s\n" "$UMO_B_GREEN" "$UMO_NC" "$*"; }
 umo_log_err()   { printf "%b[ERR]%b %s\n" "$UMO_B_RED"   "$UMO_NC" "$*" >&2; }
 umo_log_warn()  { printf "%b[WARN]%b %s\n" "$UMO_B_YELLOW" "$UMO_NC" "$*" >&2; }
 umo_log_info()  { printf "%b[INFO]%b %s\n" "$UMO_B_BLUE"  "$UMO_NC" "$*"; }
-umo_log_step()  { printf "%b[==>]%b %s\n" "$UMO_B_CYAN"  "$UMO_NC" "$*"; }
+umo_log_step()  { printf "\n%b[==>]%b %s\n" "$UMO_B_CYAN"  "$UMO_NC" "$*"; }
 umo_log_debug() { [ "${UMO_DEBUG:-0}" = "1" ] && printf "%b[DBG]%b  %s\n" "$UMO_GRAY" "$UMO_NC" "$*"; }
 umo_die()       { umo_log_err "$*"; exit 1; }
 
@@ -203,7 +203,7 @@ umo_banner_full() {
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
 
-    _auth="Shadow-x78"
+    _auth="By Shadow-x78"
     _authlen=$(printf '%s' "$_auth" | wc -m)
     _authpad=$(( (_cols - _authlen) / 2 )); [ "$_authpad" -lt 0 ] && _authpad=0
     printf "%b%*s%s%b\n\n" "$UMO_COLOR_MUTED" "$_authpad" '' "$_auth" "$UMO_NC"

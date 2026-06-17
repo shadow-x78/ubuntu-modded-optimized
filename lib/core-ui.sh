@@ -10,7 +10,7 @@ _UMO_UI_LOADED=1
 umo_ui_init() {
     umo_screen_clear
     umo_banner
-    umo_rule
+    printf "\n"
 }
 
 umo_ui_header() {
@@ -29,7 +29,7 @@ umo_ui_menu() {
 
     umo_screen_clear
     umo_banner
-    umo_rule
+    printf "\n"
     printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
 
     _opt_num=0
@@ -117,7 +117,7 @@ umo_ui_checklist() {
 
     umo_screen_clear
     umo_banner
-    umo_rule
+    printf "\n"
     printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
     printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
