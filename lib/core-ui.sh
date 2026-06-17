@@ -24,7 +24,7 @@ umo_ui_header() {
     printf "  %b" "$UMO_COLOR_PRIMARY"
     _rule_len=$(( _cols - 4 ))
     [ "$_rule_len" -lt 1 ] && _rule_len=1
-    printf '%*s\n' "$_rule_len" '' | tr ' ' '─'
+    printf '%*s\n' "$_rule_len" '' | tr ' ' "$UMO_LINE_H"
     printf "%b\n" "$UMO_NC"
 }
 

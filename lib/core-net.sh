@@ -52,30 +52,13 @@ umo_net_download() {
     umo_log_step "Downloading: $(basename "$_url")"
 
     if umo_sys_has_cmd wget; then
-        _rc_file="${_output}.rc.$$"
-        # Run wget, echo exit code to sentinel inside a grouped command that
-        # still pipes stderr through the progress while loop.
-        { wget --show-progress --progress=bar:force:noscroll \
-               --timeout=60 --tries=3 \
-               -O "$_output" "$_url" 2>&1; echo $? > "$_rc_file"; } | \
-        while IFS= read -r _line; do
-            case "$_line" in
-                *%*)
-                    _pct=$(printf '%s' "$_line" | sed 's/.*\([0-9]+%\).*/\1/')
-                    printf "\r  %bDownload:%b %s" "$UMO_B_CYAN" "$UMO_NC" "$_pct"
-                    ;;
-            esac
-        done
-        _rc=$(cat "$_rc_file" 2>/dev/null || echo 1)
-        rm -f "$_rc_file"
-        printf "\n"
-
+        wget --quiet --timeout=60 --tries=3 -O "$_output" "$_url" 2>/dev/null
+        _rc=$?
         [ "$_rc" -eq 0 ] || return 1
         umo_net__validate_file "$_output" || return 1
         return 0
     elif umo_sys_has_cmd curl; then
-        curl -L --progress-bar --max-time 300 \
-             -o "$_output" "$_url"
+        curl -L -s --max-time 300 -o "$_output" "$_url" 2>/dev/null
         _rc=$?
         [ "$_rc" -eq 0 ] || return 1
         umo_net__validate_file "$_output" || return 1
@@ -99,7 +82,13 @@ umo_net_download_mirrors() {
         if [ -f "$_filename" ] && [ -s "$_filename" ]; then
             if umo_net__validate_file "$_filename"; then
                 umo_log_info "Using cached archive."
-                [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
+                if [ "$_filename" != "$_output" ]; then
+                    cp -f "$_filename" "$_output" 2>/dev/null || {
+                        umo_log_warn "Copy to $_output failed, re-downloading..."
+                        rm -f "$_filename"
+                        continue
+                    }
+                fi
                 return 0
             else
                 umo_log_warn "Cached archive too small or invalid, re-downloading..."
@@ -109,7 +98,13 @@ umo_net_download_mirrors() {
 
         if umo_net_download "$_url" "$_filename"; then
             if umo_net__validate_file "$_filename"; then
-                [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
+                if [ "$_filename" != "$_output" ]; then
+                    cp -f "$_filename" "$_output" 2>/dev/null || {
+                        umo_log_warn "Copy to $_output failed, trying next mirror..."
+                        rm -f "$_filename"
+                        continue
+                    }
+                fi
                 return 0
             else
                 umo_log_warn "Downloaded file too small or invalid, trying next mirror..."

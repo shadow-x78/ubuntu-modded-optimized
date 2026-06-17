@@ -90,9 +90,17 @@ else
 fi
 
 UMO_GLYPH_SUPPORT=0
-case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
-    *UTF-8*|*utf8*) [ -t 1 ] && [ -z "${UMO_ASCII:-}" ] && UMO_GLYPH_SUPPORT=1 ;;
-esac
+if [ -z "${UMO_ASCII:-}" ]; then
+    case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+        *UTF-8*|*utf8*) [ -t 1 ] && UMO_GLYPH_SUPPORT=1 ;;
+    esac
+    if [ "$UMO_GLYPH_SUPPORT" -eq 0 ] 2>/dev/null && command -v locale >/dev/null 2>&1; then
+        _umo_charmap=$(locale charmap 2>/dev/null || true)
+        case "$_umo_charmap" in
+            UTF-8*|utf-8*) [ -t 1 ] && UMO_GLYPH_SUPPORT=1 ;;
+        esac
+    fi
+fi
 
 if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
     UMO_G_STEP='❯';      UMO_G_STEP_BLOCK='▌'
@@ -101,6 +109,7 @@ if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
     UMO_G_DBG='⋯';       UMO_G_RUN='⠋'
     UMO_G_BRANCH='├─';   UMO_G_LEAF='└─'
     UMO_BAR_FILL='█';    UMO_BAR_EMPTY='░'
+    UMO_LINE_H='─'
 else
     UMO_G_STEP='==>';    UMO_G_STEP_BLOCK='|'
     UMO_G_OK='OK';       UMO_G_ERR='ERR'
@@ -108,6 +117,7 @@ else
     UMO_G_DBG='~';       UMO_G_RUN='*'
     UMO_G_BRANCH='-';    UMO_G_LEAF='-'
     UMO_BAR_FILL='#';    UMO_BAR_EMPTY='-'
+    UMO_LINE_H='-'
 fi
 
 umo_cursor_hide() { printf '\033[?25l'; }
@@ -238,7 +248,7 @@ umo_run_quiet() {
 }
 
 umo_rule() {
-    _char="${1:--}"
+    _char="${1:-$UMO_LINE_H}"
     _cols="${2:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
     printf "%b" "$UMO_COLOR_PRIMARY"
@@ -280,7 +290,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad4" '' "$_l4" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad5" '' "$_l5" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_NC"    "$_pad7" '' "$_l7" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad7" '' "$_l7" "$UMO_NC"
 
     _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.6}"
     _taglen=$(printf '%s' "$_tag" | wc -m)

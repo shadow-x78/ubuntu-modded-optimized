@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Added
 - **Quiet Runner (`umo_run_quiet`):** `lib/core-ansi.sh` — wraps long-running commands with a Braille/ASCII spinner, captures output to a temp log, and on failure prints the last 30 lines. Replaces silent `2>/dev/null || true` swallowing across all modules.
 - **Download Validation:** `lib/core-net.sh` — minimum file-size guard (`_UMO_NET_MIN_SIZE=1 MB`) and `umo_net__validate_file()` prevent corrupted or truncated rootfs archives from being accepted.
-- **Sentinel-File Exit-Code Pattern:** `lib/core-net.sh` — `wget` exit code is preserved via `{ wget ...; echo $? > sentinel; } | while ...` so download failures are no longer masked by the progress pipeline.
 - **Timestamp Logging:** `lib/core-ansi.sh` — optional `UMO_LOG_TIME=1` prefix for every log line.
 - **Warn Color:** `lib/core-ansi.sh` — dedicated `UMO_COLOR_WARN` (ANSI 220 / bold yellow) replaces the previous reuse of `UMO_B_YELLOW`.
 
@@ -19,6 +18,13 @@ All notable changes to this project will be documented in this file.
 - **App/Desktop Installers:** `_run_installer` and `_run_de_installer` now pass human-readable labels into `umo_run_quiet` so every install phase is visible and traceable.
 
 ### 🐛 Fixed
+- **Pkg Install Quiet:** `lib/core-system.sh` — `umo_sys_pkg_install` now wraps all package installs under a single `umo_run_quiet` spinner instead of printing raw `pkg`/`apt` stdout per package. Eliminates the #1 visual source of layout corruption.
+- **Download Output Leak:** `lib/core-net.sh` — `umo_net_download` switched from `--show-progress` to `--quiet` (wget) and `-s` (curl). The old `--show-progress` + `--progress=bar:force:noscroll` printed raw terminal control sequences that destroyed the TUI layout. On failure, the last 30 lines are available via `umo_run_quiet`.
+- **Archive Copy Robustness:** `lib/core-net.sh` — both cached-copy and post-download copy paths now guard `cp` failures with `{ ... } || { warn; rm; continue; }` instead of silently failing and leaving a missing file.
+- **Box-Drawing Fallback:** `lib/core-ansi.sh` + `lib/core-ui.sh` — new `UMO_LINE_H` variable guarded by `UMO_GLYPH_SUPPORT`. Draws `─` in UTF-8 environments and `-` in ASCII/non-UTF-8 locales, replacing the hardcoded Unicode rule that rendered as ``.
+- **Banner Line Bug:** `lib/core-ansi.sh` — corrected `_l7` line 7 of the UMO banner: format string `%b %*s %s %b` was consuming the color code as the width argument due to `%*s` eating two args. Now passes a valid color (`UMO_GRAD_1`) as the first `%b`.
+- **System Check Spacing:** `bin/umo-install` + `lib/core-system.sh` — `umo_phase_check` now opens with `umo_ui_header "System Check"`, and `umo_sys_require_internet` uses `umo_log_info` instead of `umo_log_step`. Prevents the overlapping `▌ Checking... ✔` visual clash.
+- **UTF-8 Detection:** `lib/core-ansi.sh` — glyph detection now falls back to `locale charmap` when `LANG`/`LC_ALL` variables do not contain "UTF-8". Respects `UMO_ASCII=1` for forced ASCII mode.
 - **Readme Whitespace:** `README.md` & `README_AR.md` — fixed stray extra space in ASCII logo bottom line.
 
 ### 🔄 Updated

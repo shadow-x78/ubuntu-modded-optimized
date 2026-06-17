@@ -33,6 +33,7 @@ UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
 
 umo_phase_check() {
     umo_ui_init
+    umo_ui_header "System Check"
     umo_sys_require_termux
     umo_sys_setup_storage
     umo_sys_require_arch

@@ -74,7 +74,7 @@ umo_sys_has_internet() {
 }
 
 umo_sys_require_internet() {
-    umo_log_step "Checking internet connectivity..."
+    umo_log_info "Checking internet connectivity..."
     if umo_sys_has_internet; then
         umo_log_ok "Internet connection verified."
     else
@@ -98,14 +98,12 @@ umo_sys_require_cmd() {
 }
 
 umo_sys_pkg_install() {
-    for _pkg in "$@"; do
-        umo_log_step "Installing $_pkg..."
-        if command -v pkg >/dev/null 2>&1; then
-            pkg install -y "$_pkg" 2>/dev/null || true
-        else
-            apt-get install -y "$_pkg" 2>/dev/null || true
-        fi
-    done
+    [ $# -eq 0 ] && return 0
+    if command -v pkg >/dev/null 2>&1; then
+        umo_run_quiet "Installing dependencies" pkg install -y "$@" || true
+    else
+        umo_run_quiet "Installing dependencies" apt-get install -y "$@" || true
+    fi
 }
 
 umo_sys_kill_by_name() {
