@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد — أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.4-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-3.1.5-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -209,7 +209,6 @@ UMO/
 <div align="center">
 
 بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
-<a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [سجل التغييرات](CHANGELOG.md)
 
 <sub>&copy; 2026 Shadow-x78</sub>

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.5] - 2026-06-17
+
+### 🚀 Added
+- **Ubuntu Version Menu:** Interactive selection between Ubuntu 22.04 LTS (Jammy) and 24.04 LTS (Noble) in `umo_phase_config`.
+- **UMO Glyph Log:** Professional Unicode glyph-based logging system with tree-style sub-steps.
+  - Glyphs: `▶` (step), `✔` (ok), `✖` (err), `⚠` (warn), `ℹ` (info), `⋯` (debug), `├─/└─` (sub-steps).
+  - Automatic ASCII fallback when Unicode is unavailable (`UMO_ASCII=1` or non-UTF-8 locale).
+  - Progress bar now uses `▣/▱` blocks with glyph fallback to `#/-`.
+
+### 🐛 Fixed
+- **Same-File Copy Guard:** `lib/core-net.sh` — `cp` no longer fails with `are the same file` when cache path equals output path.
+
+### 🔄 Updated
+- **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.5.
+
+---
+
 ## [v3.1.4] - 2026-06-17
 
 ### 🗑️ Removed

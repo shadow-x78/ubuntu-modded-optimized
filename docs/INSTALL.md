@@ -2,7 +2,7 @@
 
 # Installation Guide — UMO
 
-[![Version](https://img.shields.io/badge/version-3.1.4-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.5-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -166,7 +166,6 @@ rm -rf ~/umo-ubuntu ~/.umo ~/umo-*.sh
 <div align="center">
 
 Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
-<a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
 [Back to README](../README.md)
 
 <sub>&copy; 2026 Shadow-x78</sub>

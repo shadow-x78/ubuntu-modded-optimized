@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.1.4"
+export UMO_VERSION="3.1.5"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -53,6 +53,15 @@ umo_phase_config() {
         umo_log_info "Non-interactive mode: DE=$UMO_DE, Apps=$UMO_APP_SET"
         return 0
     fi
+
+    umo_ui_menu "Choose Ubuntu Version" \
+        "Ubuntu 22.04 LTS (Jammy — Stable, Recommended)" \
+        "Ubuntu 24.04 LTS (Noble — Latest)"
+
+    case "$UMO_MENU_IDX" in
+        1) UMO_UBUNTU_VERSION="22.04" ;;
+        2) UMO_UBUNTU_VERSION="24.04" ;;
+    esac
 
     umo_ui_menu "Choose Desktop Environment" \
         "XFCE4 (Recommended — Balanced)" \

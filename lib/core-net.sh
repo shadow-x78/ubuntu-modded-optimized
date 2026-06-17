@@ -70,12 +70,12 @@ umo_net_download_mirrors() {
 
         if [ -f "$_filename" ] && [ -s "$_filename" ]; then
             umo_log_info "Using cached archive."
-            cp -f "$_filename" "$_output"
+            [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
             return 0
         fi
 
         if umo_net_download "$_url" "$_filename"; then
-            cp -f "$_filename" "$_output"
+            [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
             return 0
         else
             umo_log_warn "Mirror failed, trying next..."
