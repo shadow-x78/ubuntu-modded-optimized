@@ -140,10 +140,10 @@ umo_sys_summary() {
     _plen=$(printf '%s' "$_platform" | wc -m)
     [ "$_plen" -gt 28 ] && _platform="Termux"
 
-    umo_ui_panel "System Summary" \
-        "Platform:  $_platform" \
-        "Arch:      $_arch" \
-        "Storage:   ${_store}MB free" \
-        "RAM:       ${_ram}MB available" \
-        "Path:      $_dir"
+    umo_ui_header "System Summary"
+    umo_kv "Platform" "$_platform"
+    umo_kv "Arch"     "$_arch"
+    umo_kv "Storage"  "${_store}MB free"
+    umo_kv "RAM"      "${_ram}MB available"
+    umo_kv "Path"     "$_dir"
 }

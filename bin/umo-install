@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.1.3"
+export UMO_VERSION="3.1.4"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -33,12 +33,6 @@ UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
 
 umo_phase_check() {
     umo_ui_init
-    umo_ui_panel "Environment Validation" \
-        "Checking Termux compatibility..." \
-        "Verifying architecture support..." \
-        "Testing network connectivity..." \
-        "Calculating available storage..."
-
     umo_sys_require_termux
     umo_sys_setup_storage
     umo_sys_require_arch
@@ -86,11 +80,11 @@ umo_phase_config() {
         4) UMO_APP_SET="full" ;;
     esac
 
-    umo_ui_panel "Configuration Summary" \
-        "Desktop:    $UMO_DE" \
-        "Apps:       $UMO_APP_SET" \
-        "Install:    $UMO_INSTALL_DIR" \
-        "Version:    Ubuntu $UMO_UBUNTU_VERSION"
+    umo_ui_header "Configuration Summary"
+    umo_kv "Desktop" "$UMO_DE"
+    umo_kv "Apps"    "$UMO_APP_SET"
+    umo_kv "Install" "$UMO_INSTALL_DIR"
+    umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
 
     umo_ui_confirm "Confirm installation?" "Y" || {
         umo_log_info "Installation cancelled."
@@ -190,13 +184,13 @@ umo_phase_summary() {
     umo_banner
     umo_rule
 
-    umo_ui_panel "Installation Complete" \
-        "Version:    Ubuntu $UMO_UBUNTU_VERSION" \
-        "Desktop:    $UMO_DE" \
-        "Path:       $UMO_INSTALL_DIR" \
-        "VNC:        $_ip:5901" \
-        "Perf:       $UMO_PERF_MODE" \
-        "User:       ubuntu (password: ubuntu)"
+    umo_ui_header "Installation Complete"
+    umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
+    umo_kv "Desktop" "$UMO_DE"
+    umo_kv "Path"    "$UMO_INSTALL_DIR"
+    umo_kv "VNC"     "$_ip:5901"
+    umo_kv "Perf"    "$UMO_PERF_MODE"
+    umo_kv "User"    "ubuntu (password: ubuntu)"
 
     printf "\n%bQuick Commands:%b\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-start.sh%b       Start Ubuntu + VNC + Audio\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"

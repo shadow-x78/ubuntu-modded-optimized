@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.4] - 2026-06-17
+
+### 🗑️ Removed
+- **Framed Panels:** `umo_ui_panel()` and `umo_box()` removed entirely.
+- **Environment Validation Panel:** Deleted the duplicate static "Checking..." box in `umo_phase_check()`.
+
+### 🎨 Changed
+- **Line-Based Design:** All summary panels now use `umo_ui_header` + `umo_kv` for clean key:value output.
+- **Configuration Summary:** Migrated to `umo_kv "Desktop"`, `Apps`, `Install`, `Version`.
+- **System Summary:** Migrated to `umo_kv "Platform"`, `Arch`, `Storage`, `RAM`, `Path`.
+- **Installation Complete:** Migrated to `umo_kv` lines for Version, Desktop, Path, VNC, Perf, User.
+
+### 🔄 Updated
+- **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.4.
+
+---
+
 ## [v3.1.3] - 2026-06-17
 
 ### 🎨 Changed

@@ -198,7 +198,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_NC"    "$_pad7" '' "$_l7" "$UMO_NC"
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.3}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.4}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -225,34 +225,12 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.3}"
+    _ver="${UMO_VERSION:-3.1.4}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)
     _pad=$(( (_cols - _txtlen) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
     printf "%b%*s%s%b\n" "$UMO_DIM" "$_pad" '' "$_txt" "$UMO_NC"
-}
-
-umo_box() {
-    _title="$1"
-    _width="${2:-60}"
-    _cols="${3:-$(tput cols 2>/dev/null || echo 80)}"
-    _cols="${_cols:-80}"
-
-    [ "$_width" -gt "$((_cols - 4))" ] 2>/dev/null && _width=$((_cols - 4))
-    [ "$_width" -lt 40 ] 2>/dev/null && _width=40
-
-    _left=$(( (_cols - _width) / 2 )); [ "$_left" -lt 0 ] && _left=0
-
-    printf "%b" "$UMO_COLOR_PRIMARY"
-    printf "%*s+%*s+\n" "$_left" '' "$((_width-2))" '' | tr ' ' '-'
-    if [ -n "$_title" ]; then
-        _tlen=$(printf '%s' "$_title" | wc -m)
-        _pad=$(( (_width - 2 - _tlen) / 2 )); [ "$_pad" -lt 1 ] && _pad=1
-        printf "%*s|%*s%s%*s|\n" "$_left" '' "$_pad" '' "$_title" "$((_width-2-_tlen-_pad))" ''
-        printf "%*s+%*s+\n" "$_left" '' "$((_width-2))" '' | tr ' ' '-'
-    fi
-    printf "%b" "$UMO_NC"
 }
 
 umo_kv() {

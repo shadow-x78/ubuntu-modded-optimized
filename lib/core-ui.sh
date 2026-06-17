@@ -211,47 +211,6 @@ if [ -z "$_key" ]; then
     done
 }
 
-umo_ui_panel() {
-    _title="$1"; shift
-
-    _cols=$(tput cols 2>/dev/null || echo 80)
-    _cols="${_cols:-80}"
-
-    _max_line=0
-    for _line in "$@"; do
-        _llen=$(printf '%s' "$_line" | wc -m)
-        [ "$_llen" -gt "$_max_line" ] && _max_line=$_llen
-    done
-
-    _width=$(( _max_line + 6 ))
-    [ "$_width" -gt "$((_cols - 2))" ] 2>/dev/null && _width=$((_cols - 2))
-    if [ "$_width" -lt 50 ] 2>/dev/null && [ "$((_cols - 2))" -ge 50 ] 2>/dev/null; then
-        _width=50
-    fi
-
-    _left=$(( (_cols - _width) / 2 )); [ "$_left" -lt 0 ] && _left=0
-
-    printf "\n"
-    umo_box "$_title" "$_width" "$_cols"
-
-    for _line in "$@"; do
-        _llen=$(printf '%s' "$_line" | wc -m)
-        if [ "$_llen" -gt "$((_width - 4))" ]; then
-            _trim="$(printf '%s' "$_line" | cut -c1-$((_width - 5)))"
-            printf "%*s%b|%b %s…%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_trim" "$UMO_COLOR_PRIMARY"
-        else
-            _pad=$(( _width - 4 - _llen ))
-            [ "$_pad" -lt 0 ] && _pad=0
-            printf "%*s%b|%b  %s%*s%b|\n" "$_left" '' "$UMO_COLOR_PRIMARY" "$UMO_NC" "$_line" "$_pad" '' "$UMO_COLOR_PRIMARY"
-        fi
-    done
-
-    printf "%b" "$UMO_COLOR_PRIMARY"
-    printf "%*s+%*s+\n" "$_left" '' "$((_width-2))" '' | tr ' ' '-'
-    printf "%b" "$UMO_NC"
-    printf "\n"
-}
-
 umo_ui_pause() {
     _msg="${1:-Press [Enter] to continue...}"
     printf "\n%b  %s%b" "$UMO_DIM" "$_msg" "$UMO_NC"
