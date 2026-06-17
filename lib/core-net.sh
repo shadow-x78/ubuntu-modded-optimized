@@ -7,6 +7,9 @@ _UMO_NET_LOADED=1
 
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
+# Minimum sane tarball size in bytes (1 MB). A valid rootfs is tens of MB.
+_UMO_NET_MIN_SIZE=1048576
+
 umo_net_mirror_list() {
     _ver="${1:-22.04}"
     case "$_ver" in
@@ -28,6 +31,20 @@ umo_net_mirror_list() {
     esac
 }
 
+umo_net__file_size() {
+    _f="$1"
+    stat -c%s "$1" 2>/dev/null || stat -f%z "$1" 2>/dev/null || echo 0
+}
+
+umo_net__validate_file() {
+    _f="$1"
+    [ -f "$_f" ] || return 1
+    [ -s "$_f" ] || return 1
+    _sz=$(umo_net__file_size "$_f")
+    [ "$_sz" -ge "$_UMO_NET_MIN_SIZE" ] || return 1
+    return 0
+}
+
 umo_net_download() {
     _url="$1"
     _output="$2"
@@ -35,22 +52,33 @@ umo_net_download() {
     umo_log_step "Downloading: $(basename "$_url")"
 
     if umo_sys_has_cmd wget; then
-        wget --show-progress --progress=bar:force:noscroll \
-             --timeout=60 --tries=3 \
-             -O "$_output" "$_url" 2>&1 | \
+        _rc_file="${_output}.rc.$$"
+        # Run wget, echo exit code to sentinel inside a grouped command that
+        # still pipes stderr through the progress while loop.
+        { wget --show-progress --progress=bar:force:noscroll \
+               --timeout=60 --tries=3 \
+               -O "$_output" "$_url" 2>&1; echo $? > "$_rc_file"; } | \
         while IFS= read -r _line; do
             case "$_line" in
                 *%*)
-                    _pct=$(printf '%s' "$_line" | sed 's/.*\([0-9]\+%\).*/\1/')
+                    _pct=$(printf '%s' "$_line" | sed 's/.*\([0-9]+%\).*/\1/')
                     printf "\r  %bDownload:%b %s" "$UMO_B_CYAN" "$UMO_NC" "$_pct"
                     ;;
             esac
         done
+        _rc=$(cat "$_rc_file" 2>/dev/null || echo 1)
+        rm -f "$_rc_file"
         printf "\n"
+
+        [ "$_rc" -eq 0 ] || return 1
+        umo_net__validate_file "$_output" || return 1
         return 0
     elif umo_sys_has_cmd curl; then
         curl -L --progress-bar --max-time 300 \
              -o "$_output" "$_url"
+        _rc=$?
+        [ "$_rc" -eq 0 ] || return 1
+        umo_net__validate_file "$_output" || return 1
         return 0
     else
         umo_die "No download tool available. Install wget or curl."
@@ -69,14 +97,24 @@ umo_net_download_mirrors() {
         _filename="$_tmp_dir/$(basename "$_url")"
 
         if [ -f "$_filename" ] && [ -s "$_filename" ]; then
-            umo_log_info "Using cached archive."
-            [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
-            return 0
+            if umo_net__validate_file "$_filename"; then
+                umo_log_info "Using cached archive."
+                [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
+                return 0
+            else
+                umo_log_warn "Cached archive too small or invalid, re-downloading..."
+                rm -f "$_filename"
+            fi
         fi
 
         if umo_net_download "$_url" "$_filename"; then
-            [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
-            return 0
+            if umo_net__validate_file "$_filename"; then
+                [ "$_filename" != "$_output" ] && cp -f "$_filename" "$_output"
+                return 0
+            else
+                umo_log_warn "Downloaded file too small or invalid, trying next mirror..."
+                rm -f "$_filename"
+            fi
         else
             umo_log_warn "Mirror failed, trying next..."
             rm -f "$_filename"
@@ -91,14 +129,24 @@ umo_net_extract() {
     _target="$2"
 
     umo_log_step "Extracting archive..."
+
+    if [ ! -f "$_archive" ]; then
+        umo_die "Archive not found: $_archive"
+    fi
+
     mkdir -p "$_target"
 
+    _rc=0
     case "$_archive" in
-        *.tar.xz) tar -xJf "$_archive" -C "$_target" --exclude='dev' || true ;;
-        *.tar.gz) tar -xzf "$_archive" -C "$_target" --exclude='dev' || true ;;
-        *.zip)    unzip -q "$_archive" -d "$_target" || true ;;
+        *.tar.xz) tar -xJf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
+        *.tar.gz) tar -xzf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
+        *.zip)    unzip -q "$_archive" -d "$_target"; _rc=$? ;;
         *)        umo_die "Unknown archive format: $_archive" ;;
     esac
+
+    if [ "$_rc" -ne 0 ]; then
+        umo_die "Extraction failed (exit code $_rc): $_archive"
+    fi
 
     for _dir in dev proc sys tmp sdcard data termux; do
         mkdir -p "$_target/$_dir"

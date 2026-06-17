@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf
 INNER
-    _run_de_installer
+    _run_de_installer "LXDE"
 }
 
 umo_de_xfce4() {
@@ -29,7 +29,7 @@ apt-get update -qq
 apt-get install -y -qq xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11
 apt-get install -y -qq xubuntu-icon-theme xfce4-whiskermenu-plugin
 INNER
-    _run_de_installer
+    _run_de_installer "XFCE4"
 }
 
 umo_de_openbox() {
@@ -40,7 +40,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq openbox obconf lxterminal pcmanfm tint2 feh
 INNER
-    _run_de_installer
+    _run_de_installer "Openbox"
 }
 
 umo_de_minimal() {
@@ -51,12 +51,13 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq xterm xfonts-base
 INNER
-    _run_de_installer
+    _run_de_installer "minimal X11"
 }
 
 _run_de_installer() {
+    _label="$1"
     chmod +x "${UMO_INSTALL_DIR}/tmp/install-de.sh"
-    "$HOME/umo-login.sh" -c "bash /tmp/install-de.sh"
+    umo_run_quiet "Installing $_label" "$HOME/umo-login.sh" -c "bash /tmp/install-de.sh"
     rm -f "${UMO_INSTALL_DIR}/tmp/install-de.sh"
     umo_log_ok "Desktop environment installed."
 }

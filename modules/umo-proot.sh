@@ -185,7 +185,7 @@ if [ -d /etc/sudoers.d ]; then
 fi
 INNER
     chmod +x "$UMO_PROOT_DIR/tmp/setup-user.sh"
-    umo_proot_exec "bash /tmp/setup-user.sh"
+    umo_run_quiet "Creating user 'ubuntu'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /tmp/setup-user.sh"
     rm -f "$UMO_PROOT_DIR/tmp/setup-user.sh"
 
     umo_log_ok "User 'ubuntu' created (password: ubuntu)."

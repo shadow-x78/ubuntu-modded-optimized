@@ -23,17 +23,17 @@ apt-get update -qq
 apt-get install -y -qq $_theme_pkgs 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/tmp/install-theme.sh"
-    "$HOME/umo-login.sh" -c "bash /tmp/install-theme.sh" 2>/dev/null || true
+    umo_run_quiet "Installing theme packages" "$HOME/umo-login.sh" -c "bash /tmp/install-theme.sh"
 
     if ! "$HOME/umo-login.sh" -c "dpkg -l | grep -q orchis" 2>/dev/null; then
         umo_log_step "Downloading Orchis theme..."
-        "$HOME/umo-login.sh" -c "
-            wget -q 'https://github.com/vinceliuice/Orchis-theme/archive/refs/tags/2024-09-20.tar.gz' -O /tmp/orchis.tar.gz 2>/dev/null && \
-            tar xzf /tmp/orchis.tar.gz -C /tmp/ && \
-            cd /tmp/Orchis-theme-* && \
-            ./install.sh -t default -c dark --tweaks solid 2>/dev/null; \
+        umo_run_quiet "Downloading Orchis theme" "$HOME/umo-login.sh" -c "
+            wget -q 'https://github.com/vinceliuice/Orchis-theme/archive/refs/tags/2024-09-20.tar.gz' -O /tmp/orchis.tar.gz 2>/dev/null && \\
+            tar xzf /tmp/orchis.tar.gz -C /tmp/ && \\
+            cd /tmp/Orchis-theme-* && \\
+            ./install.sh -t default -c dark --tweaks solid 2>/dev/null; \\
             rm -rf /tmp/orchis* /tmp/Orchis*
-        " 2>/dev/null || umo_log_warn "Orchis theme download failed (non-critical)."
+        " || umo_log_warn "Orchis theme download failed (non-critical)."
     fi
 
     rm -f "$UMO_INSTALL_DIR/tmp/install-theme.sh"

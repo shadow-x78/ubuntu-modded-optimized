@@ -93,7 +93,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update -qq
 INNER
     chmod +x "$UMO_INSTALL_DIR/tmp/debloat.sh"
-    "$HOME/umo-login.sh" -c "bash /tmp/debloat.sh" 2>/dev/null || true
+    umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /tmp/debloat.sh"
     rm -f "$UMO_INSTALL_DIR/tmp/debloat.sh"
 
     umo_log_ok "Debloating completed."
@@ -126,7 +126,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update -qq
 INNER
     chmod +x "$UMO_INSTALL_DIR/tmp/cleanup.sh"
-    "$HOME/umo-login.sh" -c "bash /tmp/cleanup.sh" 2>/dev/null || true
+    umo_run_quiet "Cleaning up" "$HOME/umo-login.sh" -c "bash /tmp/cleanup.sh"
     rm -f "$UMO_INSTALL_DIR/tmp/cleanup.sh"
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
@@ -188,7 +188,7 @@ xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/tmp/perf-desktop.sh"
-    "$HOME/umo-login.sh" -c "bash /tmp/perf-desktop.sh" 2>/dev/null || true
+    umo_run_quiet "Optimizing desktop environment" "$HOME/umo-login.sh" -c "bash /tmp/perf-desktop.sh"
     rm -f "$UMO_INSTALL_DIR/tmp/perf-desktop.sh"
 
     umo_log_ok "Desktop optimizations applied."

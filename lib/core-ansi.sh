@@ -61,6 +61,7 @@ if [ "$UMO_COLOR_SUPPORT" -eq 256 ] 2>/dev/null; then
     UMO_COLOR_MUTED='\033[38;5;245m'
     UMO_COLOR_DANGER='\033[38;5;160m'
     UMO_COLOR_SUCCESS='\033[38;5;34m'
+    UMO_COLOR_WARN='\033[38;5;220m'
     UMO_GRAD_1='\033[38;5;208m'
     UMO_GRAD_2='\033[38;5;214m'
     UMO_GRAD_3='\033[38;5;220m'
@@ -71,6 +72,7 @@ elif [ "$UMO_COLOR_SUPPORT" -eq 16 ] 2>/dev/null; then
     UMO_COLOR_MUTED='\033[0;37m'
     UMO_COLOR_DANGER='\033[1;31m'
     UMO_COLOR_SUCCESS='\033[1;32m'
+    UMO_COLOR_WARN='\033[1;33m'
     UMO_GRAD_1='\033[0;33m'
     UMO_GRAD_2='\033[1;33m'
     UMO_GRAD_3='\033[1;37m'
@@ -81,6 +83,7 @@ else
     UMO_COLOR_MUTED=''
     UMO_COLOR_DANGER=''
     UMO_COLOR_SUCCESS=''
+    UMO_COLOR_WARN=''
     UMO_GRAD_1=''
     UMO_GRAD_2=''
     UMO_GRAD_3=''
@@ -92,15 +95,19 @@ case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
 esac
 
 if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
-    UMO_G_STEP='▶'; UMO_G_OK='✔'; UMO_G_ERR='✖'
-    UMO_G_WARN='⚠'; UMO_G_INFO='ℹ'; UMO_G_DBG='⋯'
-    UMO_G_BRANCH='├─'; UMO_G_LEAF='└─'
-    UMO_BAR_FILL='▣'; UMO_BAR_EMPTY='▱'
+    UMO_G_STEP='❯';      UMO_G_STEP_BLOCK='▌'
+    UMO_G_OK='✔';        UMO_G_ERR='✖'
+    UMO_G_WARN='⚠';      UMO_G_INFO='ℹ'
+    UMO_G_DBG='⋯';       UMO_G_RUN='⠋'
+    UMO_G_BRANCH='├─';   UMO_G_LEAF='└─'
+    UMO_BAR_FILL='█';    UMO_BAR_EMPTY='░'
 else
-    UMO_G_STEP='==>'; UMO_G_OK='OK'; UMO_G_ERR='ERR'
-    UMO_G_WARN='!'; UMO_G_INFO='i'; UMO_G_DBG='~'
-    UMO_G_BRANCH='-'; UMO_G_LEAF='-'
-    UMO_BAR_FILL='#'; UMO_BAR_EMPTY='-'
+    UMO_G_STEP='==>';    UMO_G_STEP_BLOCK='|'
+    UMO_G_OK='OK';       UMO_G_ERR='ERR'
+    UMO_G_WARN='!';      UMO_G_INFO='i'
+    UMO_G_DBG='~';       UMO_G_RUN='*'
+    UMO_G_BRANCH='-';    UMO_G_LEAF='-'
+    UMO_BAR_FILL='#';    UMO_BAR_EMPTY='-'
 fi
 
 umo_cursor_hide() { printf '\033[?25l'; }
@@ -115,16 +122,29 @@ umo_color() {
     printf "%b%s%b" "$_c" "$*" "$UMO_NC"
 }
 
-umo_log_ok()    { printf "%b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK"   "$UMO_NC" "$*"; }
-umo_log_err()   { printf "%b%s%b  %s\n" "$UMO_COLOR_DANGER"  "$UMO_G_ERR"  "$UMO_NC" "$*" >&2; }
-umo_log_warn()  { printf "%b%s%b  %s\n" "$UMO_B_YELLOW"      "$UMO_G_WARN" "$UMO_NC" "$*" >&2; }
-umo_log_info()  { printf "%b%s%b  %s\n" "$UMO_COLOR_INFO"    "$UMO_G_INFO" "$UMO_NC" "$*"; }
-umo_log_step()  { printf "\n%b%s%b %b%s%b\n" "$UMO_B_CYAN" "$UMO_G_STEP" "$UMO_NC" "$UMO_BOLD" "$*" "$UMO_NC"; }
-umo_log_debug() { [ "${UMO_DEBUG:-0}" = "1" ] && printf "%b%s%b  %s\n" "$UMO_GRAY" "$UMO_G_DBG" "$UMO_NC" "$*"; }
+umo_log__time() {
+    if [ "${UMO_LOG_TIME:-0}" = "1" ]; then
+        printf '%s ' "$(date '+%H:%M:%S')"
+    fi
+}
+
+umo_log_ok()    { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK"   "$UMO_NC" "$(umo_log__time)" "$*"; }
+umo_log_err()   { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_DANGER"  "$UMO_G_ERR"  "$UMO_NC" "$(umo_log__time)" "$*" >&2; }
+umo_log_warn()  { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_WARN"    "$UMO_G_WARN" "$UMO_NC" "$(umo_log__time)" "$*" >&2; }
+umo_log_info()  { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_INFO"    "$UMO_G_INFO" "$UMO_NC" "$(umo_log__time)" "$*"; }
+umo_log_debug() { [ "${UMO_DEBUG:-0}" = "1" ] && printf "  %b%s%b  %s%s\n" "$UMO_GRAY" "$UMO_G_DBG" "$UMO_NC" "$(umo_log__time)" "$*"; }
 umo_die()       { umo_log_err "$*"; exit 1; }
 
-umo_log_sub()      { printf "   %b%s%b %s\n" "$UMO_COLOR_MUTED" "$UMO_G_BRANCH" "$UMO_NC" "$*"; }
-umo_log_sub_last() { printf "   %b%s%b %s\n" "$UMO_COLOR_MUTED" "$UMO_G_LEAF"   "$UMO_NC" "$*"; }
+umo_log_step()  {
+    if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
+        printf "\n%b%s%b  %b%s%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$*" "$UMO_NC"
+    else
+        printf "\n%b%s%b  %b%s%b\n" "$UMO_B_CYAN" "$UMO_G_STEP" "$UMO_NC" "$UMO_BOLD" "$*" "$UMO_NC"
+    fi
+}
+
+umo_log_sub()      { printf "     %b%s%b %s\n" "$UMO_COLOR_MUTED" "$UMO_G_BRANCH" "$UMO_NC" "$*"; }
+umo_log_sub_last() { printf "     %b%s%b %s\n" "$UMO_COLOR_MUTED" "$UMO_G_LEAF"   "$UMO_NC" "$*"; }
 
 umo_log_file() {
     _msg="$1"
@@ -148,11 +168,11 @@ umo_progress() {
     _bar_filled=$(printf '%*s' "$_filled" '' | tr ' ' "$UMO_BAR_FILL")
     _bar_empty=$(printf '%*s' "$_empty" '' | tr ' ' "$UMO_BAR_EMPTY")
 
-    printf "\r%b[%b%s%b%s%b] %3d%% %b%s%b" \
-        "$UMO_B_BLUE" \
+    printf "\r  %b[%b%s%b%s%b] %3d%% %b%s%b" \
+        "$UMO_COLOR_PRIMARY" \
         "$UMO_COLOR_SUCCESS" "$_bar_filled" \
         "$UMO_COLOR_MUTED" "$_bar_empty" \
-        "$UMO_B_BLUE" \
+        "$UMO_COLOR_PRIMARY" \
         "$_pct" \
         "$UMO_DIM" "$_label" "$UMO_NC"
 
@@ -162,18 +182,59 @@ umo_progress() {
 umo_spinner() {
     _msg="$1"
     _pid="$2"
-    _spin='|/-\\'
     _i=0
+
+    if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
+        _spin_set='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+        _spin_len=10
+    else
+        _spin_set='|/-\\'
+        _spin_len=4
+    fi
 
     umo_cursor_hide
     while kill -0 "$_pid" 2>/dev/null; do
-        _char=$(printf '%s' "$_spin" | cut -c$((_i+1))-$((_i+1)))
-        printf "\r%b%s%b %s%b" "$UMO_B_CYAN" "$_char" "$UMO_NC" "$_msg" "$UMO_NC"
-        _i=$(( (_i + 1) % 10 ))
+        _char=$(printf '%s' "$_spin_set" | cut -c$((_i + 1))-$((_i + 1)))
+        printf "\r  %b%s%b  %s%b" "$UMO_B_CYAN" "$_char" "$UMO_NC" "$_msg" "$UMO_NC"
+        _i=$(( (_i + 1) % _spin_len ))
         sleep 0.08
     done
     umo_line_clear
     umo_cursor_show
+}
+
+umo_run_quiet() {
+    _label="$1"
+    shift
+    _logdir="${UMO_LOG_DIR:-$HOME/.umo/logs}"
+    mkdir -p "$_logdir"
+    _logfile="$_logdir/umo-quiet-$$.log"
+
+    "$@" > "$_logfile" 2>&1 &
+    _pid=$!
+
+    umo_spinner "$_label" "$_pid"
+    wait "$_pid"
+    _rc=$?
+
+    if [ "$_rc" -eq 0 ]; then
+        umo_line_clear
+        printf "  %b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
+        umo_log_file "$_label"
+        rm -f "$_logfile"
+        return 0
+    else
+        umo_line_clear
+        printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
+        if [ -s "$_logfile" ]; then
+            printf "  %bLast 30 lines of log:%b\n" "$UMO_DIM" "$UMO_NC"
+            tail -n 30 "$_logfile" 2>/dev/null | while IFS= read -r _line; do
+                printf "    %s\n" "$_line"
+            done
+        fi
+        rm -f "$_logfile"
+        return 1
+    fi
 }
 
 umo_rule() {
@@ -221,7 +282,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
     printf "%b%*s%s%b\n" "$UMO_NC"    "$_pad7" '' "$_l7" "$UMO_NC"
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.5}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.6}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -248,7 +309,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.5}"
+    _ver="${UMO_VERSION:-3.1.6}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

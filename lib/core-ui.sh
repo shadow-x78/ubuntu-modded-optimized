@@ -15,7 +15,17 @@ umo_ui_init() {
 
 umo_ui_header() {
     _text="$1"
-    printf "\n%b%s%b\n\n" "$UMO_COLOR_PRIMARY" "$_text" "$UMO_NC"
+    _cols="${2:-$(tput cols 2>/dev/null || echo 80)}"
+    _cols="${_cols:-80}"
+    _txtlen=$(printf '%s' "$_text" | wc -m)
+
+    printf "\n"
+    printf "  %b%s%b\n" "$UMO_BOLD" "$_text" "$UMO_NC"
+    printf "  %b" "$UMO_COLOR_PRIMARY"
+    _rule_len=$(( _cols - 4 ))
+    [ "$_rule_len" -lt 1 ] && _rule_len=1
+    printf '%*s\n' "$_rule_len" '' | tr ' ' '─'
+    printf "%b\n" "$UMO_NC"
 }
 
 umo_ui_footer() {
@@ -30,7 +40,8 @@ umo_ui_menu() {
     umo_screen_clear
     umo_banner
     printf "\n"
-    printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
+    umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
+    printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
     _opt_num=0
     for _opt in "$@"; do
@@ -54,7 +65,7 @@ umo_ui_menu() {
             if [ "$_idx" -eq "$_choice" ]; then
                 UMO_MENU_RESULT="$_opt"
                 UMO_MENU_IDX="$_choice"
-                printf "\n%b  [OK] Selected:%b %s\n\n" "$UMO_B_GREEN" "$UMO_NC" "$_opt"
+                printf "\n%b  %s Selected:%b %s\n\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_opt"
                 return 0
             fi
         done

@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.6] - 2026-06-17
+
+### 🚀 Added
+- **Quiet Runner (`umo_run_quiet`):** `lib/core-ansi.sh` — wraps long-running commands with a Braille/ASCII spinner, captures output to a temp log, and on failure prints the last 30 lines. Replaces silent `2>/dev/null || true` swallowing across all modules.
+- **Download Validation:** `lib/core-net.sh` — minimum file-size guard (`_UMO_NET_MIN_SIZE=1 MB`) and `umo_net__validate_file()` prevent corrupted or truncated rootfs archives from being accepted.
+- **Sentinel-File Exit-Code Pattern:** `lib/core-net.sh` — `wget` exit code is preserved via `{ wget ...; echo $? > sentinel; } | while ...` so download failures are no longer masked by the progress pipeline.
+- **Timestamp Logging:** `lib/core-ansi.sh` — optional `UMO_LOG_TIME=1` prefix for every log line.
+- **Warn Color:** `lib/core-ansi.sh` — dedicated `UMO_COLOR_WARN` (ANSI 220 / bold yellow) replaces the previous reuse of `UMO_B_YELLOW`.
+
+### 🎨 Changed
+- **Glyph Refresh:** `lib/core-ansi.sh` — step indicator changed to `▌`/`❯`, progress bar to `█/░`, spinner to Braille cycle `⠋⠙⠹...`, and added `UMO_G_RUN` glyph.
+- **Menu Polish:** `lib/core-ui.sh` — `umo_ui_header` now draws an under-rule with `─`; menus show `[Space]=Toggle [Enter]=Confirm` hint.
+- **Log Indentation:** All log helpers (`umo_log_ok`, `umo_log_err`, `umo_log_warn`, etc.) now use 2-space indentation for consistent hierarchy.
+- **Extraction Hardening:** `lib/core-net.sh` — archive extraction no longer silently ignores `tar`/`unzip` errors; non-zero exit codes now `umo_die` with the actual status.
+- **App/Desktop Installers:** `_run_installer` and `_run_de_installer` now pass human-readable labels into `umo_run_quiet` so every install phase is visible and traceable.
+
+### 🐛 Fixed
+- **Readme Whitespace:** `README.md` & `README_AR.md` — fixed stray extra space in ASCII logo bottom line.
+
+### 🔄 Updated
+- **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.6.
+
+---
+
 ## [v3.1.5] - 2026-06-17
 
 ### 🚀 Added
