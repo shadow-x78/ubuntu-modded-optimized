@@ -62,8 +62,8 @@ umo_perf_swap() {
         return 0
     }
 
-    chmod 600 "$_swapfile"
-    mkswap "$_swapfile" >/dev/null 2>&1
+    chmod 600 "$_swapfile" 2>/dev/null || true
+    mkswap "$_swapfile" >/dev/null 2>&1 || true
 
     if swapon "$_swapfile" 2>/dev/null; then
         umo_log_ok "Swap enabled: $_size"
@@ -72,7 +72,7 @@ umo_perf_swap() {
     fi
 
     grep -q "$_swapfile" "$UMO_INSTALL_DIR/etc/fstab" 2>/dev/null || \
-        echo "$_swapfile none swap sw 0 0" >> "$UMO_INSTALL_DIR/etc/fstab"
+        echo "$_swapfile none swap sw 0 0" >> "$UMO_INSTALL_DIR/etc/fstab" 2>/dev/null || true
 
     _conf="$UMO_INSTALL_DIR/etc/sysctl.conf"
     grep -q "vm.swappiness" "$_conf" 2>/dev/null || \

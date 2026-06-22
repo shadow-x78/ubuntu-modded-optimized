@@ -114,8 +114,8 @@ umo_net_extract() {
 
     _rc=0
     case "$_archive" in
-        *.tar.xz) tar -xJf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
-        *.tar.gz) tar -xzf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
+        *.tar.xz) proot --link2symlink -0 tar -xJf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
+        *.tar.gz) proot --link2symlink -0 tar -xzf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
         *.zip)    unzip -q "$_archive" -d "$_target"; _rc=$? ;;
         *)        umo_die "Unknown archive format: $_archive" ;;
     esac

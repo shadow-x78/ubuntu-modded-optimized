@@ -43,15 +43,23 @@ umo_ui_menu() {
     printf "\n"
     umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
 
+    if [ "${UMO_GLYPH_SUPPORT:-0}" -eq 1 ]; then
+        _bullet="❯"
+        _prompt="╰─➤"
+    else
+        _bullet="*"
+        _prompt="=>"
+    fi
+
     _opt_num=0
     for _opt in "$@"; do
         _opt_num=$((_opt_num + 1))
-        printf "     %b[%2d]%b  %s\n" "$UMO_B_CYAN" "$_opt_num" "$UMO_NC" "$_opt"
+        printf "  %b %s %b %b%-2s%b  %s\n" "$UMO_COLOR_PRIMARY" "$_bullet" "$UMO_NC" "$UMO_B_CYAN" "$_opt_num" "$UMO_NC" "$_opt"
     done
     printf "\n"
 
     while true; do
-        printf "%b  => Enter choice [1-%d]: %b" "$UMO_B_GREEN" "$_opt_num" "$UMO_NC"
+        printf "  %b%s%b Select an option %b[1-%d]%b: " "$UMO_COLOR_SUCCESS" "$_prompt" "$UMO_NC" "$UMO_DIM" "$_opt_num" "$UMO_NC"
         read -r _choice
 
         if [ -z "$_choice" ] || [ "$_choice" -lt 1 ] || [ "$_choice" -gt "$_opt_num" ] 2>/dev/null; then
@@ -129,7 +137,7 @@ umo_ui_checklist() {
     umo_screen_clear
     umo_banner
     printf "\n"
-    printf "\n%b  => %s%b\n\n" "$UMO_COLOR_PRIMARY" "$_title" "$UMO_NC"
+    umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
     printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
     _idx=0
@@ -148,26 +156,38 @@ umo_ui_checklist() {
             eval "_state=\"\$_chk_${_i}\""
             eval "_label=\"\$_lbl_${_i}\""
 
+            if [ "${UMO_GLYPH_SUPPORT:-0}" -eq 1 ]; then
+                _ptr_glyph="❯"
+                _mark_glyph="◉"
+                _unmark_glyph="○"
+            else
+                _ptr_glyph=">"
+                _mark_glyph="X"
+                _unmark_glyph=" "
+            fi
+
             if [ "$_i" -eq "$_cursor" ]; then
-                _ptr=">"
+                _ptr="$_ptr_glyph"
                 _pfix="$UMO_B_CYAN"
+                _lfix="$UMO_BOLD"
             else
                 _ptr=" "
                 _pfix=""
+                _lfix=""
             fi
 
             if [ "$_state" = "1" ]; then
-                _mark="X"
+                _mark="$_mark_glyph"
                 _mfix="$UMO_B_GREEN"
             else
-                _mark=" "
-                _mfix=""
+                _mark="$_unmark_glyph"
+                _mfix="$UMO_DIM"
             fi
 
-            printf "  %s%s [%s]%s %s\n" "$_pfix" "$_ptr" "$_mark" "$UMO_NC" "$_label"
+            printf "  %b%s%b %b[%s]%b %b%s%b\n" "$_pfix" "$_ptr" "$UMO_NC" "$_mfix" "$_mark" "$UMO_NC" "$_lfix" "$_label" "$UMO_NC"
         done
 
-        printf "\n%b  ↑/↓ Navigate | Space Toggle | Enter Confirm %b" "$UMO_DIM" "$UMO_NC"
+        printf "\n  %b↑/↓ Navigate | Space Toggle | Enter Confirm%b " "$UMO_DIM" "$UMO_NC"
         _key=$(dd bs=1 count=1 2>/dev/null) || true
 
 if [ -z "$_key" ]; then
