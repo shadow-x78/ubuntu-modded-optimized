@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.3] - 2026-06-23
+
+### 🐛 Fixed
+- **APT Unauthenticated Packages:** Forced `apt-get` to bypass unauthenticated package restrictions during initial setup to prevent `dpkg` error `100` failures when `GPG` keys are absent.
+- **Git Sync Issue:** Released as a standard commit to resolve local branch tracking mismatches caused by the previous force-push.
+
 ## [v3.2.2] - 2026-06-23
 
 ### 🐛 Fixed

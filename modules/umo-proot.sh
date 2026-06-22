@@ -30,8 +30,9 @@ umo_proot_prepare() {
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Acquire::AllowInsecureRepositories "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
 
-    # Bypass GPG signature errors on initial rootfs
     if [ -f "$UMO_PROOT_DIR/etc/apt/sources.list" ]; then
         sed -i 's/^deb /deb [trusted=yes] /g' "$UMO_PROOT_DIR/etc/apt/sources.list" 2>/dev/null || true
     fi
