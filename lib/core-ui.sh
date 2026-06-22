@@ -42,7 +42,6 @@ umo_ui_menu() {
     umo_banner
     printf "\n"
     umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
-    printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
     _opt_num=0
     for _opt in "$@"; do

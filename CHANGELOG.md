@@ -2,9 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v3.1.8] - 2026-06-22
+## [v3.1.9] - 2026-06-23
 
 ### 🐛 Fixed
+- **Extraction:** Reverted `proot` tar extraction back to native `tar` to fix `execve` permission denied errors for devices that block `ptrace` aggressively. 
+- **Architecture:** Dropped support for `x86_64` (WSA/Emulators) completely due to kernel-level `ptrace` blocking. The installer will now instantly exit if the device is not ARM64.
+- **UI:** Removed stray multiselect prompt text from standard menus.
 - **Proot Permissions:** Added `unset LD_PRELOAD` to container wrapper scripts (`umo-login.sh`, `umo-user.sh`) to prevent `ptrace(TRACEME): Permission denied` and `execve Permission denied` errors caused by Termux `termux-exec` interference.
 - **Proot Permissions:** Restructured `umo_run_quiet` to execute commands in the foreground and the spinner in the background. This fixes Android 11+ `ptrace` permission denials when running `proot` in background processes.
 - **Proot Container:** Resolved shadow mount conflicts with `/tmp` during the user creation phase by running `setup-user.sh` directly from `/root`.

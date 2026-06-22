@@ -3,11 +3,12 @@
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
 set -e
+unset LD_PRELOAD
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.1.8"
+export UMO_VERSION="3.1.9"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -117,8 +118,6 @@ umo_phase_download() {
     case "$_arch" in
         aarch64|arm64) _uarch="arm64" ;;
         armv7l|armv8l|arm) _uarch="armhf" ;;
-        x86_64|amd64) _uarch="amd64" ;;
-        i686|i386|x86) _uarch="i386" ;;
         *) _uarch="arm64" ;;
     esac
 

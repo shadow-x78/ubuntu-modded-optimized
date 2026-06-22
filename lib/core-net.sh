@@ -16,8 +16,6 @@ umo_net_mirror_list() {
     case "$_arch" in
         aarch64|arm64) _uarch="arm64" ;;
         armv7l|armv8l|arm) _uarch="armhf" ;;
-        x86_64|amd64) _uarch="amd64" ;;
-        i686|i386|x86) _uarch="i386" ;;
         *) _uarch="arm64" ;;
     esac
 

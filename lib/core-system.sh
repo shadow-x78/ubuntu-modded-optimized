@@ -25,8 +25,6 @@ umo_sys_arch() {
     case "$_arch" in
         aarch64|arm64) echo "aarch64" ;;
         armv7*|armhf)  echo "armhf" ;;
-        x86_64|amd64)  echo "x86_64" ;;
-        i*86)          echo "i386" ;;
         *)             echo "$_arch" ;;
     esac
 }
@@ -34,9 +32,8 @@ umo_sys_arch() {
 umo_sys_require_arch() {
     _current=$(umo_sys_arch)
     case "$_current" in
-        aarch64) umo_log_ok "Architecture: ARM64 (supported)" ;;
-        x86_64)  umo_log_warn "Architecture '$_current' detected. Primary target is aarch64 (ARM64)." ;;
-        *)       umo_log_warn "Architecture '$_current' may have limited support." ;;
+        aarch64) umo_log_ok "Architecture: $_current (supported)" ;;
+        *)       umo_die "Unsupported architecture: $_current. UMO requires an ARM64 (aarch64) device." ;;
     esac
 }
 
