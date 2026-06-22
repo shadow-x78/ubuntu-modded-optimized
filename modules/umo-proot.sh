@@ -167,7 +167,7 @@ umo_proot_exec() {
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
 
-    cat > "$UMO_PROOT_DIR/tmp/setup-user.sh" << 'INNER'
+    cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -184,9 +184,9 @@ if [ -d /etc/sudoers.d ]; then
     chmod 440 /etc/sudoers.d/ubuntu
 fi
 INNER
-    chmod +x "$UMO_PROOT_DIR/tmp/setup-user.sh"
-    umo_run_quiet "Creating user 'ubuntu'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /tmp/setup-user.sh"
-    rm -f "$UMO_PROOT_DIR/tmp/setup-user.sh"
+    chmod +x "$UMO_PROOT_DIR/root/setup-user.sh"
+    umo_run_quiet "Creating user 'ubuntu'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/setup-user.sh"
+    rm -f "$UMO_PROOT_DIR/root/setup-user.sh"
 
     umo_log_ok "User 'ubuntu' created (password: ubuntu)."
 }

@@ -236,8 +236,8 @@ umo_run_quiet() {
     _pid=$!
 
     umo_spinner "$_label" "$_pid"
-    wait "$_pid"
-    _rc=$?
+    _rc=0
+    wait "$_pid" || _rc=$?
 
     if [ "$_rc" -eq 0 ]; then
         umo_line_clear
