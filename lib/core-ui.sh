@@ -25,7 +25,7 @@ umo_ui_header() {
     printf "  %b" "$UMO_COLOR_PRIMARY"
     _rule_len="$_txtlen"
     [ "$_rule_len" -lt 1 ] && _rule_len=1
-    umo_repeat "$UMO_LINE_H" "$_rule_len"; printf '\n'
+    umo_repeat "$UMO_LINE_H" "$_rule_len"
     printf "%b\n" "$UMO_NC"
 }
 
