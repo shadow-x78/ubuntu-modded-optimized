@@ -12,10 +12,10 @@ UMO_APP_SET="${UMO_APP_SET:-basic}"
 umo_apps_basic() {
     umo_log_step "Installing base utilities..."
     _run_installer "base utilities" "
-apt-get update -qq
-apt-get install -y -q nano wget curl git htop neofetch man-db ca-certificates
-apt-get install -y -q zip unzip tar xz-utils
-apt-get install -y -q locales tzdata
+apt-get update
+apt-get install -y nano wget curl git htop neofetch man-db ca-certificates
+apt-get install -y zip unzip tar xz-utils
+apt-get install -y locales tzdata
 locale-gen en_US.UTF-8
 "
 }
@@ -23,43 +23,43 @@ locale-gen en_US.UTF-8
 umo_apps_browsers() {
     umo_log_step "Installing browsers..."
     _run_installer "browsers" "
-apt-get update -qq
-apt-get install -y -q firefox || apt-get install -y -q firefox-esr || true
-apt-get install -y -q chromium-browser || apt-get install -y -q chromium || true
+apt-get update
+apt-get install -y firefox || apt-get install -y firefox-esr || true
+apt-get install -y chromium-browser || apt-get install -y chromium || true
 "
 }
 
 umo_apps_office() {
     umo_log_step "Installing LibreOffice..."
     _run_installer "LibreOffice" "
-apt-get update -qq
-apt-get install -y -q libreoffice-writer libreoffice-calc libreoffice-impress
+apt-get update
+apt-get install -y libreoffice-writer libreoffice-calc libreoffice-impress
 "
 }
 
 umo_apps_media() {
     umo_log_step "Installing media tools..."
     _run_installer "media tools" "
-apt-get update -qq
-apt-get install -y -q vlc ffmpeg
+apt-get update
+apt-get install -y vlc ffmpeg
 "
 }
 
 umo_apps_dev() {
     umo_log_step "Installing development tools..."
     _run_installer "development tools" "
-apt-get update -qq
-apt-get install -y -q python3 python3-pip python3-venv nodejs npm
-apt-get install -y -q build-essential gcc g++ make cmake
+apt-get update
+apt-get install -y python3 python3-pip python3-venv nodejs npm
+apt-get install -y build-essential gcc g++ make cmake
 "
 }
 
 umo_apps_termux() {
     umo_log_step "Installing Termux integration..."
     _run_installer "Termux integration" "
-apt-get update -qq
-apt-get install -y -q termux-api 2>/dev/null || true
-apt-get install -y -q xclip xsel
+apt-get update
+apt-get install -y termux-api 2>/dev/null || true
+apt-get install -y xclip xsel
 "
 }
 

@@ -86,12 +86,13 @@ umo_perf_debloat() {
 
     cat > "$UMO_INSTALL_DIR/root/debloat.sh" << INNER
 #!/bin/sh
+set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
 apt-get clean
 rm -rf /var/lib/apt/lists/*
-apt-get update -qq
-apt-get install -y -q ubuntu-keyring 2>/dev/null || true
+apt-get update
+apt-get install -y ubuntu-keyring 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
@@ -121,6 +122,7 @@ umo_perf_cleanup() {
 
     cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
+set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get clean
 rm -rf /var/lib/apt/lists/*

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.6] - 2026-06-23
+
+### 🐛 Fixed
+- **Silent Failures:** Added `set -e` to all dynamically generated `proot` scripts (`setup-user.sh`, `debloat.sh`, `install-vnc.sh`, etc.) to ensure `umo_run_quiet` correctly catches and reports intermediate failures instead of falsely reporting success if only the last command succeeds.
+- **APT Logging Visibility:** Fully removed `-q` and `-qq` from all `apt-get` commands inside the installer scripts to ensure standard `dpkg` and `apt` error logs are visible to the user on failure, without being obscured.
+
 ## [v3.2.5] - 2026-06-23
 
 ### 🐛 Fixed
