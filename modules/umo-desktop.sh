@@ -15,7 +15,7 @@ umo_de_lxde() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf
+apt-get install -y -q lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf
 INNER
     _run_de_installer "LXDE"
 }
@@ -26,8 +26,8 @@ umo_de_xfce4() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11
-apt-get install -y -qq xubuntu-icon-theme xfce4-whiskermenu-plugin
+apt-get install -y -q xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11
+apt-get install -y -q xubuntu-icon-theme xfce4-whiskermenu-plugin
 INNER
     _run_de_installer "XFCE4"
 }
@@ -38,7 +38,7 @@ umo_de_openbox() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq openbox obconf lxterminal pcmanfm tint2 feh
+apt-get install -y -q openbox obconf lxterminal pcmanfm tint2 feh
 INNER
     _run_de_installer "Openbox"
 }
@@ -49,7 +49,7 @@ umo_de_minimal() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq xterm xfonts-base
+apt-get install -y -q xterm xfonts-base
 INNER
     _run_de_installer "minimal X11"
 }

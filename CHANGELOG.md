@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.4] - 2026-06-23
+
+### 🐛 Fixed
+- **VNC Dependencies:** Added explicit installation of `apt-utils` and `tzdata` during VNC setup to prevent `debconf` from hanging or throwing `dpkg` error `100` when installing TigerVNC dependencies.
+- **APT Logging:** Replaced `-qq` with `-q` in `apt-get` commands to ensure `dpkg` error details are logged correctly without cluttering output with progress bars.
+
 ## [v3.2.3] - 2026-06-23
 
 ### 🐛 Fixed

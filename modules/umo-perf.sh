@@ -91,7 +91,7 @@ apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 apt-get update -qq
-apt-get install -y -qq ubuntu-keyring 2>/dev/null || true
+apt-get install -y -q ubuntu-keyring 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /root/debloat.sh"

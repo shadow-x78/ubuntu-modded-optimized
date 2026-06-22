@@ -186,7 +186,7 @@ umo_proot_create_user() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq sudo adduser
+apt-get install -y -q sudo adduser
 
 if ! id -u ubuntu >/dev/null 2>&1; then
     adduser --disabled-password --gecos '' ubuntu

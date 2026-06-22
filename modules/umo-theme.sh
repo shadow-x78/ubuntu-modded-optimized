@@ -20,7 +20,7 @@ umo_theme_install_packages() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq $_theme_pkgs 2>/dev/null || true
+apt-get install -y -q $_theme_pkgs 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
     umo_run_quiet "Installing theme packages" "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
