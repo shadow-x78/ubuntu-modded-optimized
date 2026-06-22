@@ -7,26 +7,19 @@ _UMO_NET_LOADED=1
 
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
-# Minimum sane tarball size in bytes (1 MB). A valid rootfs is tens of MB.
 _UMO_NET_MIN_SIZE=1048576
 
 umo_net_mirror_list() {
     _ver="${1:-22.04}"
     case "$_ver" in
         22.04|jammy)
-            echo "https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-arm64-root.tar.xz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
-            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
             ;;
         24.04|noble)
-            echo "https://cloud-images.ubuntu.com/minimal/releases/noble/release/ubuntu-24.04-minimal-cloudimg-arm64-root.tar.xz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-arm64.tar.gz"
-            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
             ;;
         *)
-            echo "https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-arm64-root.tar.xz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
-            echo "https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Rootfs/Ubuntu/arm64/ubuntu-rootfs-arm64.tar.xz"
             ;;
     esac
 }

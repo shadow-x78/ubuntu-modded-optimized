@@ -17,12 +17,13 @@ umo_ui_header() {
     _text="$1"
     _cols="${2:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _txtlen=$(printf '%s' "$_text" | wc -m)
+    _raw_text=$(printf '%b' "$_text" | sed "s/$(printf '\033')\[[0-9;]*m//g")
+    _txtlen=$(printf '%s' "$_raw_text" | wc -m)
 
     printf "\n"
     printf "  %b%s%b\n" "$UMO_BOLD" "$_text" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
-    _rule_len=$(( _cols - 4 ))
+    _rule_len="$_txtlen"
     [ "$_rule_len" -lt 1 ] && _rule_len=1
     umo_repeat "$UMO_LINE_H" "$_rule_len"; printf '\n'
     printf "%b\n" "$UMO_NC"

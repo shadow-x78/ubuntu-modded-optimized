@@ -109,7 +109,7 @@ umo_phase_download() {
     export UMO_UBUNTU_VERSION
     umo_fs_mkdir "$UMO_CACHE_DIR"
 
-    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.xz"
+    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.gz"
     umo_net_download_mirrors "$_archive"
     [ -f "$_archive" ] || umo_die "Download reported success but archive is missing: $_archive"
     umo_net_extract "$_archive" "$UMO_INSTALL_DIR"
