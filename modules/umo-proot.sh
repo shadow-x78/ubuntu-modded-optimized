@@ -87,7 +87,8 @@ PREFIX="$UMO_TERMUX_PREFIX"
 [ -d "\$INSTALL_DIR" ] || { echo "[ERR] UMO not installed."; exit 1; }
 
 export PROOT_NO_SECCOMP=1
-export PROOT_LOAD_EXT_LIBS=0
+unset LD_PRELOAD
+unset LD_LIBRARY_PATH
 
 AUDIO_SOCK=""
 [ -S "\$PREFIX/tmp/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/tmp/pulse-\$(id -u)/native:/tmp/pulse-native"
@@ -95,7 +96,7 @@ AUDIO_SOCK=""
 
 exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
-    -b "\$HOME:/sdcard" -b "\$HOME:/termux" -b /data \
+    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \$AUDIO_SOCK \
     -w /root \
     /usr/bin/env -i HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
@@ -111,11 +112,12 @@ INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
 export PROOT_NO_SECCOMP=1
-export PROOT_LOAD_EXT_LIBS=0
+unset LD_PRELOAD
+unset LD_LIBRARY_PATH
 
 exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
-    -b "\$HOME:/sdcard" -b "\$HOME:/termux" -b /data \
+    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \
     -w /home/ubuntu \
     /usr/bin/env -i HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \

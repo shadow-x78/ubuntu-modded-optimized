@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.1.7"
+export UMO_VERSION="3.1.8"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -113,7 +113,16 @@ umo_phase_download() {
     export UMO_UBUNTU_VERSION
     umo_fs_mkdir "$UMO_CACHE_DIR"
 
-    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.gz"
+    _arch=$(uname -m)
+    case "$_arch" in
+        aarch64|arm64) _uarch="arm64" ;;
+        armv7l|armv8l|arm) _uarch="armhf" ;;
+        x86_64|amd64) _uarch="amd64" ;;
+        i686|i386|x86) _uarch="i386" ;;
+        *) _uarch="arm64" ;;
+    esac
+
+    _archive="$UMO_CACHE_DIR/umo-rootfs-${_uarch}.tar.gz"
     umo_net_download_mirrors "$_archive"
     [ -f "$_archive" ] || umo_die "Download reported success but archive is missing: $_archive"
     umo_net_extract "$_archive" "$UMO_INSTALL_DIR"

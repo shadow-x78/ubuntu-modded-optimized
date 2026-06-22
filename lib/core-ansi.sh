@@ -203,7 +203,6 @@ umo_progress() {
 
 umo_spinner() {
     _msg="$1"
-    _pid="$2"
     _i=0
 
     if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
@@ -215,14 +214,12 @@ umo_spinner() {
     fi
 
     umo_cursor_hide
-    while kill -0 "$_pid" 2>/dev/null; do
+    while true; do
         _char=$(printf '%s' "$_spin_set" | cut -c$((_i + 1))-$((_i + 1)))
         printf "\r  %b%s%b  %s%b" "$UMO_B_CYAN" "$_char" "$UMO_NC" "$_msg" "$UMO_NC"
         _i=$(( (_i + 1) % _spin_len ))
         sleep 0.08
     done
-    umo_line_clear
-    umo_cursor_show
 }
 
 umo_run_quiet() {
@@ -232,21 +229,23 @@ umo_run_quiet() {
     mkdir -p "$_logdir"
     _logfile="$_logdir/umo-quiet-$$.log"
 
-    "$@" > "$_logfile" 2>&1 &
-    _pid=$!
+    umo_spinner "$_label" &
+    _spin_pid=$!
 
-    umo_spinner "$_label" "$_pid"
     _rc=0
-    wait "$_pid" || _rc=$?
+    "$@" > "$_logfile" 2>&1 || _rc=$?
+
+    kill "$_spin_pid" 2>/dev/null
+    wait "$_spin_pid" 2>/dev/null || true
+    umo_line_clear
+    umo_cursor_show
 
     if [ "$_rc" -eq 0 ]; then
-        umo_line_clear
         printf "  %b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
         umo_log_file "$_label"
         rm -f "$_logfile"
         return 0
     else
-        umo_line_clear
         printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
         if [ -s "$_logfile" ]; then
             printf "  %bLast 30 lines of log:%b\n" "$UMO_DIM" "$UMO_NC"
@@ -254,7 +253,6 @@ umo_run_quiet() {
                 printf "    %s\n" "$_line"
             done
         fi
-        rm -f "$_logfile"
         return 1
     fi
 }
@@ -290,7 +288,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.7}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.8}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -317,7 +315,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.7}"
+    _ver="${UMO_VERSION:-3.1.8}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

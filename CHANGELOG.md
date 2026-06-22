@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.8] - 2026-06-22
+
+### 🐛 Fixed
+- **Proot Permissions:** Added `unset LD_PRELOAD` to container wrapper scripts (`umo-login.sh`, `umo-user.sh`) to prevent `ptrace(TRACEME): Permission denied` and `execve Permission denied` errors caused by Termux `termux-exec` interference.
+- **Proot Permissions:** Restructured `umo_run_quiet` to execute commands in the foreground and the spinner in the background. This fixes Android 11+ `ptrace` permission denials when running `proot` in background processes.
+- **Proot Container:** Resolved shadow mount conflicts with `/tmp` during the user creation phase by running `setup-user.sh` directly from `/root`.
+
 ## [v3.1.7] - 2026-06-22
 
 ### 🐛 Fixed

@@ -11,15 +11,25 @@ _UMO_NET_MIN_SIZE=1048576
 
 umo_net_mirror_list() {
     _ver="${1:-22.04}"
+    
+    _arch=$(uname -m)
+    case "$_arch" in
+        aarch64|arm64) _uarch="arm64" ;;
+        armv7l|armv8l|arm) _uarch="armhf" ;;
+        x86_64|amd64) _uarch="amd64" ;;
+        i686|i386|x86) _uarch="i386" ;;
+        *) _uarch="arm64" ;;
+    esac
+
     case "$_ver" in
         22.04|jammy)
-            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-${_uarch}.tar.gz"
             ;;
         24.04|noble)
-            echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-arm64.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-${_uarch}.tar.gz"
             ;;
         *)
-            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-arm64.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-${_uarch}.tar.gz"
             ;;
     esac
 }
