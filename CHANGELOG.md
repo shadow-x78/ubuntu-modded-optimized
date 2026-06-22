@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.5] - 2026-06-23
+
+### 🐛 Fixed
+- **DPKG Fsync Error (100):** Fixed a critical failure where `dpkg` would crash with exit code 100 without printing any logs. This was caused by Android's filesystem returning `EINVAL` when `dpkg` attempts `fsync()`. Forced `dpkg` to use `force-unsafe-io` during the container setup to prevent sync-related crashes on Termux.
+
 ## [v3.2.4] - 2026-06-23
 
 ### 🐛 Fixed

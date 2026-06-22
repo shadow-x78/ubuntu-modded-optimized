@@ -28,6 +28,9 @@ umo_proot_prepare() {
         cp "$UMO_TERMUX_PREFIX/etc/hosts" "$UMO_PROOT_DIR/etc/hosts" 2>/dev/null || true
     fi
 
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d"
+    echo "force-unsafe-io" > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/force-unsafe-io" 2>/dev/null || true
+
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
