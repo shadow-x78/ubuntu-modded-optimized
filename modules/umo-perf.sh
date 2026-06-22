@@ -84,7 +84,7 @@ umo_perf_debloat() {
 
     _bloat="snapd unattended-upgrades apport ModemManager modemmanager cups cups-browsed avahi-daemon"
 
-    cat > "$UMO_INSTALL_DIR/tmp/debloat.sh" << INNER
+    cat > "$UMO_INSTALL_DIR/root/debloat.sh" << INNER
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
@@ -92,9 +92,9 @@ apt-get clean
 rm -rf /var/lib/apt/lists/*
 apt-get update -qq
 INNER
-    chmod +x "$UMO_INSTALL_DIR/tmp/debloat.sh"
-    umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /tmp/debloat.sh"
-    rm -f "$UMO_INSTALL_DIR/tmp/debloat.sh"
+    chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
+    umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
+    rm -f "$UMO_INSTALL_DIR/root/debloat.sh"
 
     umo_log_ok "Debloating completed."
 }
@@ -118,16 +118,16 @@ EOR
 umo_perf_cleanup() {
     umo_log_step "Cleaning up..."
 
-    cat > "$UMO_INSTALL_DIR/tmp/cleanup.sh" << INNER
+    cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 apt-get update -qq
 INNER
-    chmod +x "$UMO_INSTALL_DIR/tmp/cleanup.sh"
-    umo_run_quiet "Cleaning up" "$HOME/umo-login.sh" -c "bash /tmp/cleanup.sh"
-    rm -f "$UMO_INSTALL_DIR/tmp/cleanup.sh"
+    chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
+    umo_run_quiet "Cleaning up" "$HOME/umo-login.sh" -c "bash /root/cleanup.sh"
+    rm -f "$UMO_INSTALL_DIR/root/cleanup.sh"
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
         umo_log_step "Removing documentation and locale data (--lean)..."
@@ -179,7 +179,7 @@ umo_perf_vnc() {
 umo_perf_desktop() {
     umo_log_step "Optimizing desktop environment..."
 
-    cat > "$UMO_INSTALL_DIR/tmp/perf-desktop.sh" << 'INNER'
+    cat > "$UMO_INSTALL_DIR/root/perf-desktop.sh" << 'INNER'
 #!/bin/sh
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 xfconf-query -c xfce4-screensaver -p /saver/enabled -s false 2>/dev/null || true
@@ -187,9 +187,9 @@ xfconf-query -c thunar-volman -p /automount-drives/enabled -s false 2>/dev/null 
 xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
-    chmod +x "$UMO_INSTALL_DIR/tmp/perf-desktop.sh"
-    umo_run_quiet "Optimizing desktop environment" "$HOME/umo-login.sh" -c "bash /tmp/perf-desktop.sh"
-    rm -f "$UMO_INSTALL_DIR/tmp/perf-desktop.sh"
+    chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
+    umo_run_quiet "Optimizing desktop environment" "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh"
+    rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh"
 
     umo_log_ok "Desktop optimizations applied."
 }

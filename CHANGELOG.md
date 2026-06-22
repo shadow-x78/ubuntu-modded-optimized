@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.1] - 2026-06-23
+
+### 🐛 Fixed
+- **Proot Paths:** Fixed an issue where `debloat`, `cleanup`, and other temporary scripts were created in `$UMO_INSTALL_DIR/tmp` but failed to execute because `proot-distro` binds Termux's `/tmp` to `/tmp` in the container. Changed the temporary script path to `/root`.
+- **UI:** The installer wrapper (`install.sh`) now clears the screen immediately upon execution to ensure a clean prompt view.
+
 ## [v3.2.0] - 2026-06-23
 
 ### 🐛 Fixed

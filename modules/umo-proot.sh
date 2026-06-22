@@ -36,10 +36,10 @@ umo_proot_cmd() {
     _workdir="${2:-/root}"
 
     _audio_bind=""
-    if [ -S "$UMO_TERMUX_PREFIX/tmp/pulse-$(id -u)/native" ]; then
-        _audio_bind="-b $UMO_TERMUX_PREFIX/tmp/pulse-$(id -u)/native:/tmp/pulse-native"
-    elif [ -S "$UMO_TERMUX_PREFIX/tmp/pulse-native" ]; then
-        _audio_bind="-b $UMO_TERMUX_PREFIX/tmp/pulse-native:/tmp/pulse-native"
+    if [ -S "$UMO_TERMUX_PREFIX/root/pulse-$(id -u)/native" ]; then
+        _audio_bind="-b $UMO_TERMUX_PREFIX/root/pulse-$(id -u)/native:/root/pulse-native"
+    elif [ -S "$UMO_TERMUX_PREFIX/root/pulse-native" ]; then
+        _audio_bind="-b $UMO_TERMUX_PREFIX/root/pulse-native:/root/pulse-native"
     fi
 
     printf 'proot \
@@ -91,8 +91,8 @@ unset LD_PRELOAD
 unset LD_LIBRARY_PATH
 
 AUDIO_SOCK=""
-[ -S "\$PREFIX/tmp/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/tmp/pulse-\$(id -u)/native:/tmp/pulse-native"
-[ -S "\$PREFIX/tmp/pulse-native" ] && AUDIO_SOCK="-b \$PREFIX/tmp/pulse-native:/tmp/pulse-native"
+[ -S "\$PREFIX/root/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-\$(id -u)/native:/root/pulse-native"
+[ -S "\$PREFIX/root/pulse-native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-native:/root/pulse-native"
 
 exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \

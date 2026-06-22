@@ -34,7 +34,7 @@ load-module module-native-protocol-tcp auth-anonymous=1
 EOF
     fi
 
-    mkdir -p "$UMO_TERMUX_PREFIX/tmp/pulse-runtime"
+    mkdir -p "$UMO_TERMUX_PREFIX/root/pulse-runtime"
 
     umo_log_ok "PulseAudio bridge configured."
 }

@@ -16,16 +16,16 @@ UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 umo_vnc_install() {
     umo_log_step "Installing TigerVNC server..."
 
-    cat > "${UMO_INSTALL_DIR:?}/tmp/install-vnc.sh" << 'INNER'
+    cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq tigervnc-standalone-server tigervnc-viewer tigervnc-common
 apt-get install -y -qq dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi
 INNER
-    chmod +x "${UMO_INSTALL_DIR}/tmp/install-vnc.sh"
-    umo_run_quiet "Installing TigerVNC server" "$HOME/umo-login.sh" -c "bash /tmp/install-vnc.sh"
-    rm -f "${UMO_INSTALL_DIR}/tmp/install-vnc.sh"
+    chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
+    umo_run_quiet "Installing TigerVNC server" "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
 
     umo_log_ok "TigerVNC installed."
 }
@@ -39,7 +39,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-3.2.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-3.2.1}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi

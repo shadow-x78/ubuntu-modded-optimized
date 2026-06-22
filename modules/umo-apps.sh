@@ -66,10 +66,10 @@ apt-get install -y -qq xclip xsel
 _run_installer() {
     _label="$1"
     _script_body="$2"
-    _script="${UMO_INSTALL_DIR:?}/tmp/install-apps.sh"
+    _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
     printf '#!/bin/sh\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
-    umo_run_quiet "Installing $_label" "$HOME/umo-login.sh" -c "bash /tmp/install-apps.sh"
+    umo_run_quiet "Installing $_label" "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
     rm -f "$_script"
 }
 
