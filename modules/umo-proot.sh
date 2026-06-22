@@ -28,6 +28,14 @@ umo_proot_prepare() {
         cp "$UMO_TERMUX_PREFIX/etc/hosts" "$UMO_PROOT_DIR/etc/hosts" 2>/dev/null || true
     fi
 
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
+    echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+
+    # Bypass GPG signature errors on initial rootfs
+    if [ -f "$UMO_PROOT_DIR/etc/apt/sources.list" ]; then
+        sed -i 's/^deb /deb [trusted=yes] /g' "$UMO_PROOT_DIR/etc/apt/sources.list" 2>/dev/null || true
+    fi
+
     umo_log_ok "Proot directories ready."
 }
 
@@ -94,12 +102,14 @@ AUDIO_SOCK=""
 [ -S "\$PREFIX/root/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-\$(id -u)/native:/root/pulse-native"
 [ -S "\$PREFIX/root/pulse-native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-native:/root/pulse-native"
 
+cd "\$INSTALL_DIR" || exit 1
+
 exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \$AUDIO_SOCK \
-    -w /root \
-    /usr/bin/env -i HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    -w / \
+    /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
     /bin/bash --login "\$@"
 EOF
@@ -115,12 +125,14 @@ export PROOT_NO_SECCOMP=1
 unset LD_PRELOAD
 unset LD_LIBRARY_PATH
 
+cd "\$INSTALL_DIR" || exit 1
+
 exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \
-    -w /home/ubuntu \
-    /usr/bin/env -i HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    -w / \
+    /usr/bin/env -i PWD=/ HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
     /bin/su - ubuntu "\$@"
 EOF

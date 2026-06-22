@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.2] - 2026-06-23
+
+### 🐛 Fixed
+- **Container Execution:** Fixed `job-working-directory: error retrieving current directory: getcwd` warnings when running internal scripts by enforcing the initial container working directory to `/` instead of `/root` (or `/home/ubuntu`).
+- **APT Sandbox:** Fixed `setresuid (1: Operation not permitted)` error when running `apt-get` by automatically bypassing APT's `_apt` privilege drop sandbox inside `proot`.
+- **APT Repositories:** Bypassed `NO_PUBKEY 871920D1991BC93C` GPG signature errors on the initial rootfs by automatically marking repositories as `[trusted=yes]` during setup, and forcing `ubuntu-keyring` to update.
+
 ## [v3.2.1] - 2026-06-23
 
 ### 🐛 Fixed
