@@ -120,6 +120,18 @@ else
     UMO_LINE_H='-'
 fi
 
+umo_repeat() {
+    _rc_char="$1"; _rc_count="$2"
+    _rc_out=''
+    _rc_i=0
+    [ "$_rc_count" -lt 0 ] 2>/dev/null && _rc_count=0
+    while [ "$_rc_i" -lt "$_rc_count" ]; do
+        _rc_out="$_rc_out$_rc_char"
+        _rc_i=$(( _rc_i + 1 ))
+    done
+    printf '%s' "$_rc_out"
+}
+
 umo_cursor_hide() { printf '\033[?25l'; }
 umo_cursor_show() { printf '\033[?25h'; }
 umo_cursor_home() { printf '\033[H'; }
@@ -175,8 +187,8 @@ umo_progress() {
     _filled=$(( _current * _width / _total ))
     _empty=$(( _width - _filled ))
 
-    _bar_filled=$(printf '%*s' "$_filled" '' | tr ' ' "$UMO_BAR_FILL")
-    _bar_empty=$(printf '%*s' "$_empty" '' | tr ' ' "$UMO_BAR_EMPTY")
+    _bar_filled=$(umo_repeat "$UMO_BAR_FILL" "$_filled")
+    _bar_empty=$(umo_repeat "$UMO_BAR_EMPTY" "$_empty")
 
     printf "\r  %b[%b%s%b%s%b] %3d%% %b%s%b" \
         "$UMO_COLOR_PRIMARY" \
@@ -252,7 +264,7 @@ umo_rule() {
     _cols="${2:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
     printf "%b" "$UMO_COLOR_PRIMARY"
-    printf '%*s\n' "$_cols" '' | tr ' ' "$_char"
+    umo_repeat "$_char" "$_cols"; printf '\n'
     printf "%b" "$UMO_NC"
 }
 
@@ -260,39 +272,25 @@ umo_banner_full() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
 
-    _l1='  ██╗   ██╗███╗   ███╗ ██████╗ '
-    _l2='  ██║   ██║████╗ ████║██╔═══██╗'
-    _l3='  ██║   ██║██╔████╔██║██║   ██║'
-    _l4='  ██║   ██║██║╚██╔╝██║██║   ██║'
-    _l5='  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝'
-    _l6='   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ '
-    _l7='                               '
+    _l1='██╗   ██╗███╗   ███╗ ██████╗  '
+    _l2='██║   ██║████╗ ████║██╔═══██╗ '
+    _l3='██║   ██║██╔████╔██║██║   ██║ '
+    _l4='██║   ██║██║╚██╔╝██║██║   ██║ '
+    _l5='╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ '
+    _l6=' ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  '
 
-    _len1=30
-    _len2=30
-    _len3=30
-    _len4=30
-    _len5=30
-    _len6=30
-    _len7=30
+    _logo_w=30
+    _pad=$(( (_cols - _logo_w) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
 
-    _pad1=$(( (_cols - _len1) / 2 )); [ "$_pad1" -lt 0 ] && _pad1=0
-    _pad2=$(( (_cols - _len2) / 2 )); [ "$_pad2" -lt 0 ] && _pad2=0
-    _pad3=$(( (_cols - _len3) / 2 )); [ "$_pad3" -lt 0 ] && _pad3=0
-    _pad4=$(( (_cols - _len4) / 2 )); [ "$_pad4" -lt 0 ] && _pad4=0
-    _pad5=$(( (_cols - _len5) / 2 )); [ "$_pad5" -lt 0 ] && _pad5=0
-    _pad6=$(( (_cols - _len6) / 2 )); [ "$_pad6" -lt 0 ] && _pad6=0
-    _pad7=$(( (_cols - _len7) / 2 )); [ "$_pad7" -lt 0 ] && _pad7=0
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l1" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l2" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l3" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l4" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l5" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
+    printf '\n'
 
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad1" '' "$_l1" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad2" '' "$_l2" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad3" '' "$_l3" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad4" '' "$_l4" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad5" '' "$_l5" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad6" '' "$_l6" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad7" '' "$_l7" "$UMO_NC"
-
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.6}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-3.1.7}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -319,7 +317,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-3.1.6}"
+    _ver="${UMO_VERSION:-3.1.7}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

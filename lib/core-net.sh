@@ -75,44 +75,24 @@ umo_net_download_mirrors() {
     _tmp_dir="${UMO_CACHE_DIR:-$HOME/.umo/cache}"
     mkdir -p "$_tmp_dir"
 
+    if umo_net__validate_file "$_output"; then
+        umo_log_info "Using cached archive."
+        return 0
+    fi
+
     for _url in $_mirrors; do
         [ -z "$_url" ] && continue
-        _filename="$_tmp_dir/$(basename "$_url")"
 
-        if [ -f "$_filename" ] && [ -s "$_filename" ]; then
-            if umo_net__validate_file "$_filename"; then
-                umo_log_info "Using cached archive."
-                if [ "$_filename" != "$_output" ]; then
-                    cp -f "$_filename" "$_output" 2>/dev/null || {
-                        umo_log_warn "Copy to $_output failed, re-downloading..."
-                        rm -f "$_filename"
-                        continue
-                    }
-                fi
-                return 0
-            else
-                umo_log_warn "Cached archive too small or invalid, re-downloading..."
-                rm -f "$_filename"
-            fi
-        fi
-
-        if umo_net_download "$_url" "$_filename"; then
-            if umo_net__validate_file "$_filename"; then
-                if [ "$_filename" != "$_output" ]; then
-                    cp -f "$_filename" "$_output" 2>/dev/null || {
-                        umo_log_warn "Copy to $_output failed, trying next mirror..."
-                        rm -f "$_filename"
-                        continue
-                    }
-                fi
+        if umo_net_download "$_url" "$_output"; then
+            if umo_net__validate_file "$_output"; then
                 return 0
             else
                 umo_log_warn "Downloaded file too small or invalid, trying next mirror..."
-                rm -f "$_filename"
+                rm -f "$_output"
             fi
         else
             umo_log_warn "Mirror failed, trying next..."
-            rm -f "$_filename"
+            rm -f "$_output"
         fi
     done
 

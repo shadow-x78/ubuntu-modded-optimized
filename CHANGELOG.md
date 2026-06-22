@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1.7] - 2026-06-22
+
+### 🐛 Fixed
+- **Rendering:** Added `umo_repeat` in `lib/core-ansi.sh` to safely repeat UTF-8 glyphs, fixing line corruption (``) in headers and progress bars.
+- **UI:** Centered the UMO banner correctly across different terminal widths without drift.
+- **Download/Extract:** Refactored `umo_net_download_mirrors` and `umo_phase_download` to safely validate files before proceeding, eliminating fake success messages and preventing `Archive not found` errors.
+
 ## [v3.1.6] - 2026-06-17
 
 ### 🚀 Added
