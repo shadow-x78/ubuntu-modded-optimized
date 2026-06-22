@@ -43,10 +43,14 @@ umo_phase_check() {
 }
 
 umo_phase_deps() {
-    umo_ui_header "Installing Dependencies"
-    umo_sys_pkg_install proot-distro wget tar pulseaudio x11-repo tur-repo
-    umo_sys_pkg_install virglrenderer-android termux-x11-nightly 2>/dev/null || true
-    umo_sys_pkg_install git curl unzip
+    umo_ui_header "Dependencies"
+    _install_deps() {
+        _pkg_cmd="apt-get install -y"
+        command -v pkg >/dev/null 2>&1 && _pkg_cmd="pkg install -y"
+        $_pkg_cmd proot-distro wget tar pulseaudio x11-repo tur-repo git curl unzip >/dev/null 2>&1 || true
+        $_pkg_cmd virglrenderer-android termux-x11-nightly >/dev/null 2>&1 || true
+    }
+    umo_run_quiet "Installing dependencies" _install_deps
 }
 
 umo_phase_config() {
@@ -103,13 +107,13 @@ umo_phase_config() {
 }
 
 umo_phase_download() {
-    umo_ui_header "Downloading Ubuntu RootFS"
+    umo_ui_header "Ubuntu RootFS"
     export UMO_INSTALL_DIR
     export UMO_CACHE_DIR="$HOME/.umo/cache"
     export UMO_UBUNTU_VERSION
     umo_fs_mkdir "$UMO_CACHE_DIR"
 
-    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.xz"
+    _archive="$UMO_CACHE_DIR/umo-rootfs.tar.gz"
     umo_net_download_mirrors "$_archive"
     [ -f "$_archive" ] || umo_die "Download reported success but archive is missing: $_archive"
     umo_net_extract "$_archive" "$UMO_INSTALL_DIR"
@@ -122,7 +126,7 @@ umo_phase_download() {
 }
 
 umo_phase_proot() {
-    umo_ui_header "Configuring Proot Container"
+    umo_ui_header "Proot Container"
     export UMO_INSTALL_DIR
     umo_proot_setup
     umo_proot_create_user
