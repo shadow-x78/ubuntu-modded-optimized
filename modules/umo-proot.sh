@@ -56,6 +56,7 @@ umo_proot_cmd() {
 
     printf 'proot \
         --link2symlink \
+        --sysvipc \
         -0 \
         -r %s \
         -b /dev \
@@ -64,7 +65,7 @@ umo_proot_cmd() {
         -b %s:/sdcard \
         -b %s:/termux \
         -b /data \
-        -b %s/tmp:/tmp \
+        -b %s/tmp:/tmp -b %s/tmp:/dev/shm \
         %s \
         -w %s \
         /usr/bin/env -i \
@@ -108,7 +109,7 @@ AUDIO_SOCK=""
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \$AUDIO_SOCK \
@@ -131,7 +132,7 @@ unset LD_LIBRARY_PATH
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink -0 -r "\$INSTALL_DIR" \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \
@@ -189,8 +190,8 @@ umo_proot_create_user() {
 #!/bin/sh
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y -q sudo adduser
+apt-get update
+apt-get install -y sudo adduser
 
 if ! id -u ubuntu >/dev/null 2>&1; then
     adduser --disabled-password --gecos '' ubuntu

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.7] - 2026-06-23
+
+### 🐛 Fixed
+- **DPKG / APT Proot Constraints:** Added `--sysvipc` to the `proot` invocation to ensure System V IPC emulation is fully enabled. This is strictly required by `dpkg` on Termux for stable operation and memory sharing.
+- **Shared Memory Mount:** Added explicit bind mount `-b $PREFIX/tmp:/dev/shm` to the `proot` container. `dpkg` on Ubuntu requires POSIX shared memory (`/dev/shm`), which is not natively present in Android's `/dev`, causing `apt-get` to fail executing `dpkg` with error code 100.
+- **Removed Silence Flags:** Explicitly removed `-q` and `-qq` from all module files including `umo-proot.sh`.
+
 ## [v3.2.6] - 2026-06-23
 
 ### 🐛 Fixed
