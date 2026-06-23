@@ -33,6 +33,7 @@ umo_proot_prepare() {
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Acquire::AllowInsecureRepositories "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
 
@@ -55,8 +56,7 @@ umo_proot_cmd() {
     fi
 
     printf 'proot \
-        --link2symlink \
-        --sysvipc \
+                --sysvipc \
         -0 \
         -r %s \
         -b /dev \
@@ -81,6 +81,7 @@ umo_proot_cmd() {
         "$UMO_PROOT_DIR" \
         "$UMO_TERMUX_HOME" \
         "$UMO_TERMUX_HOME" \
+        "$UMO_TERMUX_PREFIX" \
         "$UMO_TERMUX_PREFIX" \
         "${_audio_bind}" \
         "$_workdir" \
@@ -109,7 +110,7 @@ AUDIO_SOCK=""
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \$AUDIO_SOCK \
@@ -132,7 +133,7 @@ unset LD_LIBRARY_PATH
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" \

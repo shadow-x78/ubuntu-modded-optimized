@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.2.8] - 2026-06-23
+
+### 🐛 Fixed
+- **Proot Mount Syntax:** Fixed a critical formatting bug in the `proot` launch arguments where the `/dev/shm` bind mount was silently ignored due to a missing string format argument. This ensures `/dev/shm` is correctly mapped to `$PREFIX/tmp`, which definitively resolves the `dpkg 100` exit code.
+- **PTY Disablement for APT:** Disabled PTY usage for `dpkg` (`Dpkg::Use-Pty "0"`) inside the sandbox config to prevent standard output swallowing and terminal capability issues during installation.
+- **Link2Symlink Performance:** Completely removed the experimental `--link2symlink` flag from extraction and runtime. The native Android EXT4 filesystem handles symlinks fine; removing this avoids potential `dpkg` and `execve` failures with deep directory symlinks.
+
 ## [v3.2.7] - 2026-06-23
 
 ### 🐛 Fixed
