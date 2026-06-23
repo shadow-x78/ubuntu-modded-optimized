@@ -14,8 +14,6 @@ UMO_VNC_DEPTH="${UMO_VNC_DEPTH:-24}"
 UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 
 umo_vnc_install() {
-    umo_log_step "Installing TigerVNC server..."
-
     cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -32,14 +30,14 @@ apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
 dpkg --configure -a || true
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
-    umo_run_quiet "Installing TigerVNC server" "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    umo_run_quiet "Installing TigerVNC" "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
     rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
 
     umo_log_ok "TigerVNC installed."
 }
 
 umo_vnc_configure() {
-    umo_log_step "Configuring VNC session..."
+    umo_log_step "Configuring VNC..."
 
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
     umo_fs_mkdir "$_vnc_dir"
@@ -47,7 +45,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-3.3.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-3.3.3}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
@@ -63,14 +61,15 @@ umo_vnc_configure() {
 
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || true
+        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || \
+        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "tigervncpasswd >/dev/null 2>&1" || true
     fi
 
     umo_log_ok "VNC configured."
 }
 
 umo_vnc_create_scripts() {
-    umo_log_step "Creating VNC control scripts..."
+    umo_log_step "Creating VNC scripts..."
 
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc" << 'EOF'
 #!/bin/sh
@@ -79,13 +78,20 @@ VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 
-for _pid in $(pgrep -f Xvnc); do kill "$_pid" 2>/dev/null || true; done
+for _pid in $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
 sleep 1
 
 pulseaudio --start 2>/dev/null || true
 
-_vnc_cmd="vncserver"
-command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"
+_vnc_cmd=""
+if command -v tigervncserver >/dev/null 2>&1; then
+    _vnc_cmd="tigervncserver"
+elif command -v vncserver >/dev/null 2>&1; then
+    _vnc_cmd="vncserver"
+else
+    echo "  [!] VNC server not found. Install with: apt install tigervnc-standalone-server"
+    exit 1
+fi
 
 $_vnc_cmd "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
@@ -101,34 +107,47 @@ sleep 2
 _IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
 [ -z "$_IP" ] && _IP="127.0.0.1"
 
-cat << BANNER
+_NC='\033[0m'
+_PRI='\033[38;5;208m'
+_GRN='\033[38;5;34m'
+_CYN='\033[38;5;39m'
+_BOLD='\033[1m'
+_DIM='\033[2m'
 
-+------------------------------------------+
-|  UMO VNC Server Started                  |
-|  Display: $VNC_DISPLAY                      |
-|  Address: $_IP:$VNC_PORT                  |
-+------------------------------------------+
-
-BANNER
+printf "\n"
+printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
+printf "  ${_BOLD}${_GRN}▸ UMO VNC Server${_NC}\n"
+printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
+printf "\n"
+printf "  ${_BOLD}Display:${_NC}    ${_CYN}%s${_NC}\n" "$VNC_DISPLAY"
+printf "  ${_BOLD}Address:${_NC}    ${_CYN}%s:%s${_NC}\n" "$_IP" "$VNC_PORT"
+printf "  ${_BOLD}Resolution:${_NC} ${_DIM}%s${_NC}\n" "$VNC_GEOMETRY"
+printf "\n"
+printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
+printf "\n"
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
 
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc" << 'EOF'
 #!/bin/sh
-echo "[==>] Stopping VNC..."
-_vnc_cmd="vncserver"
-command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"
+_vnc_cmd=""
+if command -v tigervncserver >/dev/null 2>&1; then
+    _vnc_cmd="tigervncserver"
+elif command -v vncserver >/dev/null 2>&1; then
+    _vnc_cmd="vncserver"
+fi
 
-$_vnc_cmd -kill :1 2>/dev/null || true
-$_vnc_cmd -kill :2 2>/dev/null || true
-for _pid in $(pgrep -f Xvnc); do kill -9 "$_pid" 2>/dev/null || true; done
-echo "[OK] VNC stopped."
+if [ -n "$_vnc_cmd" ]; then
+    $_vnc_cmd -kill :1 2>/dev/null || true
+    $_vnc_cmd -kill :2 2>/dev/null || true
+fi
+for _pid in $(pgrep -f Xvnc 2>/dev/null); do kill -9 "$_pid" 2>/dev/null || true; done
+printf "  \033[38;5;34m✔\033[0m  VNC stopped.\n"
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc"
 
     cat > "$HOME/umo-vnc-start.sh" << 'EOF'
 #!/bin/sh
-echo "[UMO] Starting PulseAudio bridge..."
 pulseaudio --start 2>/dev/null || true
 sleep 1
 exec "$HOME/umo-login.sh" -c "umo-startvnc"

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.3] - 2026-06-23
+
+### ✨ Added
+- **Unified ANSI Design:** All runtime outputs (VNC banner, session box, stop messages) now use the same ANSI style as the installer — no more ASCII `+---+` boxes.
+- **`umo --help` Improvements:** Examples now use generic `<name>` instead of hardcoded usernames; section headers are color-coded.
+- **Post-Install Summary:** Replaced old "Quick Commands" and "Inside Ubuntu" sections with a clean `umo` CLI reference table.
+
+### 🐛 Fixed
+- **`vncserver: not found`:** VNC scripts now check `tigervncserver` first, then fallback to `vncserver`, with a clear error if neither is found.
+- **`pgrep: uptime`:** Removed `pgrep uptime` call from session start; uptime data now comes from fake `/proc/uptime`.
+- **`swapon failed` Warning:** Swap is not available inside proot — removed the swap setup entirely to avoid the confusing warning.
+- **Duplicate Log Messages:** Removed `umo_log_step` calls before `umo_run_quiet` in app/VNC installers — `umo_run_quiet` already shows the spinner label.
+- **`stty` Terminal Corruption:** Removed all `stty -echo` / `stty -icanon` / `dd` raw mode from TUI engine; all input now uses simple `read`.
+- **CRLF Line Endings:** Added `.gitattributes` to force LF; all `.sh` files verified clean.
+- **`setsid` Breaking stdin:** Removed `setsid` from `install.sh` which was creating a session without a controlling terminal.
+- **Auto-Exit After Install:** Added `stty sane` + `trap` at script entry to guarantee terminal restoration and clean exit.
+
+### 🔄 Changed
+- **Phase Headers:** Shortened from "Installing VNC Server" → "VNC Server", "Configuring Audio Bridge" → "Audio Bridge", etc.
+- **VNC Banner:** Now uses colored ANSI lines and labels instead of plain ASCII box art.
+- **Session Active Box:** Replaced with styled ANSI output matching the installer look; includes `umo stop` and `umo status` hints.
+
 ## [v3.3.2] - 2026-06-23
 
 ### ✨ Added

@@ -43,40 +43,7 @@ EOC
 }
 
 umo_perf_swap() {
-    _size="${1:-512M}"
-    [ "$UMO_PERF_MODE" = "aggressive" ] && _size="1G"
-    _swapfile="${UMO_INSTALL_DIR:?}/swapfile"
-
-    umo_log_step "Setting up swap ($_size)..."
-
-    if [ -f "$_swapfile" ]; then
-        umo_log_info "Swap file already exists, skipping."
-        return 0
-    fi
-
-    _swap_count="${_size%[MG]}"
-    case "$_size" in *[Gg]) _swap_count=$((_swap_count * 1024)) ;; esac
-    fallocate -l "$_size" "$_swapfile" 2>/dev/null || \
-        dd if=/dev/zero of="$_swapfile" bs=1M count="$_swap_count" 2>/dev/null || {
-        umo_log_warn "Cannot create swapfile (proot limitation — skipping)."
-        return 0
-    }
-
-    chmod 600 "$_swapfile" 2>/dev/null || true
-    mkswap "$_swapfile" >/dev/null 2>&1 || true
-
-    if swapon "$_swapfile" 2>/dev/null; then
-        umo_log_ok "Swap enabled: $_size"
-    else
-        umo_log_warn "swapon failed (best-effort inside proot)."
-    fi
-
-    grep -q "$_swapfile" "$UMO_INSTALL_DIR/etc/fstab" 2>/dev/null || \
-        echo "$_swapfile none swap sw 0 0" >> "$UMO_INSTALL_DIR/etc/fstab" 2>/dev/null || true
-
-    _conf="$UMO_INSTALL_DIR/etc/sysctl.conf"
-    grep -q "vm.swappiness" "$_conf" 2>/dev/null || \
-        printf 'vm.swappiness=10\nvm.vfs_cache_pressure=50\n' >> "$_conf" 2>/dev/null || true
+    umo_log_info "Swap is not available inside proot, skipping."
 }
 
 umo_perf_debloat() {

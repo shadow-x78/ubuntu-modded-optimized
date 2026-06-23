@@ -10,7 +10,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.3.2"
+export UMO_VERSION="3.3.3"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -144,40 +144,40 @@ umo_phase_proot() {
 
 umo_phase_vnc() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping VNC (minimal mode)."; return 0; }
-    umo_ui_header "Installing VNC Server"
+    umo_ui_header "VNC Server"
     export UMO_INSTALL_DIR
     umo_vnc_setup
 }
 
 umo_phase_audio() {
-    umo_ui_header "Configuring Audio Bridge"
+    umo_ui_header "Audio Bridge"
     export UMO_INSTALL_DIR
     umo_audio_setup
 }
 
 umo_phase_systemctl() {
-    umo_ui_header "Installing Systemctl Emulator"
+    umo_ui_header "Systemctl Emulator"
     export UMO_INSTALL_DIR
     umo_systemctl_setup
 }
 
 umo_phase_desktop() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping desktop (minimal mode)."; return 0; }
-    umo_ui_header "Installing Desktop Environment"
+    umo_ui_header "Desktop Environment"
     export UMO_INSTALL_DIR
     export UMO_DE
     umo_de_install
 }
 
 umo_phase_apps() {
-    umo_ui_header "Installing Applications"
+    umo_ui_header "Applications"
     export UMO_INSTALL_DIR
     export UMO_APP_SET
     umo_apps_install
 }
 
 umo_phase_finalize() {
-    umo_ui_header "Finalizing Installation"
+    umo_ui_header "Finalizing"
 
     _codename="jammy"
     [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _codename="noble"
@@ -191,7 +191,7 @@ umo_phase_finalize() {
     "$HOME/umo-login.sh" -c "apt-get install -y sudo" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "dpkg --configure -a" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "usermod -aG sudo umo" 2>/dev/null || true
-    # Ensure no proot process is left blocking the installer
+
     for _pid in $(pgrep -f "proot" 2>/dev/null); do
         kill "$_pid" 2>/dev/null || true
     done
@@ -208,10 +208,7 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << 'UMOCMD'
 #!/bin/sh
-# UMO — Ubuntu Modded Optimized Launcher (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
-
-_UMO_VERSION="3.3.2"
+_UMO_VERSION="3.3.3"
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
 _UMO_DIM='\033[2m'
@@ -223,8 +220,8 @@ _UMO_YEL='\033[38;5;220m'
 _UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 
 _umo_header() {
-    printf "\n  ${_UMO_BOLD}${_UMO_PRI}▸ UMO${_UMO_NC}${_UMO_DIM} Ubuntu Modded Optimized${_UMO_NC}  ${_UMO_DIM}v${_UMO_VERSION}${_UMO_NC}\n"
-    printf "  ${_UMO_DIM}────────────────────────────────────────${_UMO_NC}\n\n"
+    printf "\n  ${_UMO_BOLD}${_UMO_PRI}▸ UMO${_UMO_NC}  ${_UMO_DIM}Ubuntu Modded Optimized${_UMO_NC}  ${_UMO_DIM}v${_UMO_VERSION}${_UMO_NC}\n"
+    printf "  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n\n"
 }
 
 _umo_ok()   { printf "  ${_UMO_GRN}✔${_UMO_NC}  %s\n" "$1"; }
@@ -318,37 +315,36 @@ _umo_help() {
     _umo_header
     printf "  ${_UMO_BOLD}Usage:${_UMO_NC}  ${_UMO_CYN}umo${_UMO_NC} ${_UMO_DIM}[COMMAND] [OPTIONS]${_UMO_NC}\n\n"
 
-    printf "  ${_UMO_BOLD}Session Commands:${_UMO_NC}\n"
+    printf "  ${_UMO_BOLD}${_UMO_PRI}Session${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio (default)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Stop all UMO processes"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Show running status of UMO services"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}Login Commands:${_UMO_NC}\n"
+    printf "  ${_UMO_BOLD}${_UMO_PRI}Login${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "login"              "Login as root"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Login as default user (umo)"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"       "Switch default user & login"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Login as default user"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"      "Switch default user & login"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}System Commands:${_UMO_NC}\n"
+    printf "  ${_UMO_BOLD}${_UMO_PRI}System${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start VNC server only"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Update all Ubuntu packages"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Run a command inside Ubuntu"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Backup Ubuntu container"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}Info Commands:${_UMO_NC}\n"
+    printf "  ${_UMO_BOLD}${_UMO_PRI}Info${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--help, -h"         "Show this help message"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--version, -v"      "Show UMO version"
     printf "\n"
 
     printf "  ${_UMO_BOLD}Examples:${_UMO_NC}\n"
-    printf "    ${_UMO_DIM}umo${_UMO_NC}                        # Start Ubuntu\n"
-    printf "    ${_UMO_DIM}umo status${_UMO_NC}                 # Check what's running\n"
-    printf "    ${_UMO_DIM}umo --user shadow-x7${_UMO_NC}       # Switch to user shadow-x7\n"
-    printf "    ${_UMO_DIM}umo update${_UMO_NC}                 # Update Ubuntu packages\n"
-    printf "    ${_UMO_DIM}umo run \"apt list --installed\"${_UMO_NC} # Run a command\n"
-    printf "    ${_UMO_DIM}umo backup ~/backups${_UMO_NC}       # Backup to a folder\n"
+    printf "    ${_UMO_DIM}\$ umo${_UMO_NC}                          Start Ubuntu\n"
+    printf "    ${_UMO_DIM}\$ umo status${_UMO_NC}                    Check services\n"
+    printf "    ${_UMO_DIM}\$ umo --user myuser${_UMO_NC}             Switch to user\n"
+    printf "    ${_UMO_DIM}\$ umo run \"apt list --installed\"${_UMO_NC} Run command\n"
+    printf "    ${_UMO_DIM}\$ umo backup ~/backups${_UMO_NC}          Backup rootfs\n"
     printf "\n"
 }
 
@@ -374,7 +370,7 @@ esac
 UMOCMD
     chmod +x "$HOME/../usr/bin/umo"
 
-    umo_log_ok "Installation complete."
+    umo_log_ok "Finalized."
 }
 
 umo_phase_summary() {
@@ -388,53 +384,55 @@ umo_phase_summary() {
     printf "\n  %b%bInstallation Complete%b\n" "$UMO_BOLD" "$UMO_COLOR_SUCCESS" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
     umo_repeat "$UMO_LINE_H" 21
-    printf "%b\n" "$UMO_NC"
+    printf "%b\n\n" "$UMO_NC"
 
     umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Path"    "$UMO_INSTALL_DIR"
     umo_kv "VNC"     "$_ip:5901"
-    umo_kv "Perf"    "$UMO_PERF_MODE"
     umo_kv "User"    "umo (password: umo)"
 
-    printf "\n%bQuick Commands:%b\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %bumo%b                  Start Ubuntu (alias)\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-start.sh%b       Start Ubuntu + VNC + Audio\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-stop.sh%b        Stop everything\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-vnc-start.sh%b    Start VNC only\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-login.sh%b        Login as root\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-user.sh%b         Login as umo\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "\n  %b%bGet Started%b\n" "$UMO_BOLD" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "  %b" "$UMO_COLOR_PRIMARY"
+    umo_repeat "$UMO_LINE_H" 11
+    printf "%b\n\n" "$UMO_NC"
 
-    printf "\n%bInside Ubuntu:%b\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %bumo-startvnc%b        Start VNC\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %bumo-stopvnc%b         Stop VNC\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo" "$UMO_NC" "Start Ubuntu + VNC + Audio"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo stop" "$UMO_NC" "Stop all services"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo login" "$UMO_NC" "Login as root"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo user" "$UMO_NC" "Login as default user"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --user <name>" "$UMO_NC" "Switch default user"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo status" "$UMO_NC" "Show service status"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update Ubuntu packages"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --help" "$UMO_NC" "Full command reference"
 
     _readme_dir="$UMO_INSTALL_DIR/root/.umo"
     umo_fs_mkdir "$_readme_dir" 2>/dev/null || true
     cat > "$_readme_dir/README.txt" 2>/dev/null || true << README_EOF
 ========================================
-  UMO Ubuntu — Welcome!
+  UMO Ubuntu — v$UMO_VERSION
   Version: $UMO_UBUNTU_VERSION
   Desktop: $UMO_DE
 ========================================
 
-Quick commands:
-  umo                  Start Ubuntu (alias)
-  umo-startvnc         Start VNC server
-  umo-stopvnc          Stop VNC server
-  apt-get update       Update package lists
+Commands (run from Termux):
+  umo                  Start Ubuntu + VNC + Audio
+  umo stop             Stop all services
+  umo login            Login as root
+  umo user             Login as default user
+  umo --user <name>    Switch user
+  umo status           Show service status
+  umo update           Update packages
+  umo --help           Full help
 
 VNC: $_ip:5901
 User: umo / Password: umo
-Root: login via ~/umo-login.sh on host
 
 ========================================
 README_EOF
 
-    printf "\n"
+    printf "\n  %bRun %bumo --help%b%b for the full command reference.%b\n\n" "$UMO_DIM" "$UMO_B_CYAN" "$UMO_NC" "$UMO_DIM" "$UMO_NC"
 
-    # Kill any lingering background proot child processes from finalize phase
-    # so the installer can return to the shell immediately
     for _pid in $(pgrep -f "umo-login.sh" 2>/dev/null); do
         kill "$_pid" 2>/dev/null || true
     done
@@ -482,7 +480,7 @@ BANNER
 
 umo_phase_perf() {
     [ "$UMO_PERF_MODE" = "off" ] && { umo_log_info "Performance tuning disabled."; return 0; }
-    umo_ui_header "Optimizing Performance"
+    umo_ui_header "Performance Tuning"
     export UMO_INSTALL_DIR
     export UMO_PERF_MODE
     export UMO_LEAN
@@ -498,7 +496,7 @@ umo_phase_perf() {
 
 umo_phase_theme() {
     [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme disabled."; return 0; }
-    umo_ui_header "Applying Desktop Theme"
+    umo_ui_header "Desktop Theme"
     export UMO_INSTALL_DIR
     export UMO_THEME
     export SCRIPT_DIR
