@@ -199,6 +199,33 @@ umo_phase_finalize() {
         fi
     done
 
+    cat > "$HOME/../usr/bin/umo" << 'UMOCMD'
+#!/bin/sh
+# UMO — Quick launcher (MIT License)
+# https://github.com/Shadow-x78/termux-ubuntu-umo
+case "${1:-start}" in
+    start)  exec "$HOME/umo-start.sh" ;;
+    stop)   exec "$HOME/umo-stop.sh" ;;
+    login)  exec "$HOME/umo-login.sh" ;;
+    user)   exec "$HOME/umo-user.sh" ;;
+    vnc)    exec "$HOME/umo-vnc-start.sh" ;;
+    help|--help|-h)
+        echo "Usage: umo [start|stop|login|user|vnc]"
+        echo "  start  — Start Ubuntu + VNC + Audio (default)"
+        echo "  stop   — Stop everything"
+        echo "  login  — Login as root"
+        echo "  user   — Login as umo"
+        echo "  vnc    — Start VNC only"
+        ;;
+    *)
+        echo "Unknown command: $1"
+        echo "Run 'umo help' for usage."
+        exit 1
+        ;;
+esac
+UMOCMD
+    chmod +x "$HOME/../usr/bin/umo"
+
     umo_log_ok "Installation complete."
 }
 
@@ -210,7 +237,11 @@ umo_phase_summary() {
     umo_banner
     umo_rule
 
-    umo_ui_header "Installation Complete"
+    printf "\n  %b%bInstallation Complete%b\n" "$UMO_BOLD" "$UMO_COLOR_SUCCESS" "$UMO_NC"
+    printf "  %b" "$UMO_COLOR_PRIMARY"
+    umo_repeat "$UMO_LINE_H" 21
+    printf "%b\n" "$UMO_NC"
+
     umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Path"    "$UMO_INSTALL_DIR"
@@ -219,6 +250,7 @@ umo_phase_summary() {
     umo_kv "User"    "umo (password: umo)"
 
     printf "\n%bQuick Commands:%b\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "  %bumo%b                  Start Ubuntu (alias)\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-start.sh%b       Start Ubuntu + VNC + Audio\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-stop.sh%b        Stop everything\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-vnc-start.sh%b    Start VNC only\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
@@ -239,6 +271,7 @@ umo_phase_summary() {
 ========================================
 
 Quick commands:
+  umo                  Start Ubuntu (alias)
   umo-startvnc         Start VNC server
   umo-stopvnc          Stop VNC server
   apt-get update       Update package lists
@@ -251,7 +284,6 @@ Root: login via ~/umo-login.sh on host
 README_EOF
 
     printf "\n"
-    umo_ui_pause
 }
 
 umo_cli_parse() {
