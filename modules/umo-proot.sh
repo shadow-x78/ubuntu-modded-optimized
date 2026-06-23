@@ -117,7 +117,7 @@ cd "\$INSTALL_DIR" || exit 1
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
-    -b "\$PREFIX/tmp:/tmp" \$AUDIO_SOCK \
+    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
@@ -140,7 +140,7 @@ cd "\$INSTALL_DIR" || exit 1
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
-    -b "\$PREFIX/tmp:/tmp" \
+    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
