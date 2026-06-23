@@ -43,6 +43,10 @@ umo_net__validate_file() {
     [ -s "$_f" ] || return 1
     _sz=$(umo_net__file_size "$_f")
     [ "$_sz" -ge "$_UMO_NET_MIN_SIZE" ] || return 1
+    case "$_f" in
+        *.gz|*.tgz) gzip -t "$_f" 2>/dev/null || return 1 ;;
+        *.xz)       xz -t "$_f" 2>/dev/null || return 1 ;;
+    esac
     return 0
 }
 
@@ -76,9 +80,14 @@ umo_net_download_mirrors() {
     _tmp_dir="${UMO_CACHE_DIR:-$HOME/.umo/cache}"
     mkdir -p "$_tmp_dir"
 
-    if umo_net__validate_file "$_output"; then
-        umo_log_info "Using cached archive."
-        return 0
+    if [ -f "$_output" ]; then
+        if umo_net__validate_file "$_output"; then
+            umo_log_info "Using cached archive."
+            return 0
+        else
+            umo_log_warn "Cached archive is corrupt, re-downloading..."
+            rm -f "$_output"
+        fi
     fi
 
     for _url in $_mirrors; do
@@ -88,7 +97,7 @@ umo_net_download_mirrors() {
             if umo_net__validate_file "$_output"; then
                 return 0
             else
-                umo_log_warn "Downloaded file too small or invalid, trying next mirror..."
+                umo_log_warn "Downloaded file invalid or corrupt, trying next mirror..."
                 rm -f "$_output"
             fi
         else
@@ -106,26 +115,30 @@ umo_net_extract() {
 
     [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
 
+    umo_log_step "Extracting archive..."
+
     case "$_archive" in
-        *.gz|*.tgz)
-            if ! gzip -t "$_archive" 2>/dev/null; then
-                umo_log_err "Archive is corrupt (gzip integrity check failed)."
-                rm -f "$_archive"
-                umo_die "Deleted corrupt archive. Please re-run the installer to download again."
-            fi
+        *.tar.gz|*.tgz)
+            umo_run_quiet "Decompressing $(basename "$_archive")..." \
+                proot --link2symlink -0 tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
+                umo_die "Extraction failed (gzip). Archive may be corrupt — re-run to re-download."
             ;;
-        *.xz)
-            if ! xz -t "$_archive" 2>/dev/null; then
-                umo_log_err "Archive is corrupt (xz integrity check failed)."
-                rm -f "$_archive"
-                umo_die "Deleted corrupt archive. Please re-run the installer to download again."
-            fi
+        *.tar.xz)
+            umo_run_quiet "Decompressing $(basename "$_archive")..." \
+                proot --link2symlink -0 tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
+                umo_die "Extraction failed (xz). Archive may be corrupt — re-run to re-download."
+            ;;
+        *.zip)
+            umo_run_quiet "Decompressing $(basename "$_archive")..." \
+                unzip -q "$_archive" -d "$_dest" || \
+                umo_die "Extraction failed (zip)."
+            ;;
+        *)
+            umo_die "Unknown archive format: $_archive"
             ;;
     esac
 
-    umo_run_quiet "Extracting archive..." \
-        proot --link2symlink -0 tar -xpf "$_archive" -C "$_dest" 2>&1 || \
-        umo_die "Extraction failed."
+    umo_log_ok "Extraction complete."
 }
 
 umo_net_verify_sha256() {
