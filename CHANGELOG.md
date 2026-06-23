@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.2] - 2026-06-23
+
+### ✨ Added
+- **`umo status`:** Displays real-time status of the proot session, VNC server, and PulseAudio bridge.
+- **`umo update`:** Runs `apt-get update && apt-get upgrade && apt-get autoremove` inside Ubuntu.
+- **`umo run <cmd>`:** Executes an arbitrary command inside the Ubuntu container from Termux (e.g. `umo run "apt list --installed"`).
+- **`umo backup [dir]`:** Archives the entire Ubuntu rootfs to a timestamped `.tar.gz` file.
+- **`umo --user <name>` / `umo -u <name>`:** Creates the user if not existing, patches `umo-user.sh` to set them as the default login user, then logs in.
+- **`umo --version` / `umo -v`:** Prints the UMO launcher version.
+- **`umo --help` / `umo -h`:** Redesigned help page with grouped sections (Session, Login, System, Info) and usage examples.
+
+### 🐛 Fixed
+- **Auto-Exit After Install:** Added explicit `pgrep`+`kill` cleanup in `umo_phase_finalize` and `umo_phase_summary` to terminate any lingering proot children before the installer returns control to Termux.
+- **`install.sh` Blocking:** Wrapped `umo-install` in `setsid` (when available) so child proot processes belong to a new session and cannot hold the parent Termux shell hostage after installation completes.
+
 ## [v3.3.1] - 2026-06-23
 
 ### ✨ Added

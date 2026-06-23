@@ -206,34 +206,166 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << 'UMOCMD'
 #!/bin/sh
-# UMO — Quick launcher (MIT License)
+# UMO — Ubuntu Modded Optimized Launcher (MIT License)
+# https://github.com/Shadow-x78/termux-ubuntu-umo
 
-_nc='\033[0m'
-_bold='\033[1m'
-_pri='\033[38;5;208m'
-_cyn='\033[38;5;39m'
-_dim='\033[2m'
+_UMO_VERSION="3.3.2"
+_UMO_NC='\033[0m'
+_UMO_BOLD='\033[1m'
+_UMO_DIM='\033[2m'
+_UMO_PRI='\033[38;5;208m'
+_UMO_CYN='\033[38;5;39m'
+_UMO_GRN='\033[38;5;34m'
+_UMO_RED='\033[38;5;196m'
+_UMO_YEL='\033[38;5;220m'
+_UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+
+_umo_header() {
+    printf "\n  ${_UMO_BOLD}${_UMO_PRI}▸ UMO${_UMO_NC}${_UMO_DIM} Ubuntu Modded Optimized${_UMO_NC}  ${_UMO_DIM}v${_UMO_VERSION}${_UMO_NC}\n"
+    printf "  ${_UMO_DIM}────────────────────────────────────────${_UMO_NC}\n\n"
+}
+
+_umo_ok()   { printf "  ${_UMO_GRN}✔${_UMO_NC}  %s\n" "$1"; }
+_umo_err()  { printf "  ${_UMO_RED}✖${_UMO_NC}  %s\n" "$1" >&2; }
+_umo_info() { printf "  ${_UMO_CYN}➜${_UMO_NC}  %s\n" "$1"; }
+_umo_warn() { printf "  ${_UMO_YEL}!${_UMO_NC}  %s\n" "$1"; }
+
+_umo_status() {
+    _umo_header
+    _login="$_UMO_TERMUX_HOME/umo-login.sh"
+    [ -f "$_login" ] && _installed="${_UMO_GRN}Installed${_UMO_NC}" || _installed="${_UMO_RED}Not installed${_UMO_NC}"
+    printf "  ${_UMO_BOLD}Container:${_UMO_NC}  "
+    printf "${_installed}\n"
+
+    _proot_pids=$(pgrep -f "proot.*umo" 2>/dev/null | tr '\n' ' ')
+    if [ -n "$_proot_pids" ]; then
+        printf "  ${_UMO_BOLD}Session:${_UMO_NC}    ${_UMO_GRN}Running${_UMO_NC} (PID: $_proot_pids)\n"
+    else
+        printf "  ${_UMO_BOLD}Session:${_UMO_NC}    ${_UMO_DIM}Stopped${_UMO_NC}\n"
+    fi
+
+    _vnc_pid=$(pgrep -f "Xvnc" 2>/dev/null | head -1)
+    if [ -n "$_vnc_pid" ]; then
+        _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+        [ -z "$_ip" ] && _ip="127.0.0.1"
+        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_GRN}Active${_UMO_NC} → ${_UMO_CYN}${_ip}:5901${_UMO_NC}\n"
+    else
+        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_DIM}Stopped${_UMO_NC}\n"
+    fi
+
+    _pulse=$(pgrep -f "pulseaudio" 2>/dev/null | head -1)
+    if [ -n "$_pulse" ]; then
+        printf "  ${_UMO_BOLD}Audio:${_UMO_NC}      ${_UMO_GRN}Running${_UMO_NC}\n"
+    else
+        printf "  ${_UMO_BOLD}Audio:${_UMO_NC}      ${_UMO_DIM}Stopped${_UMO_NC}\n"
+    fi
+    printf "\n"
+}
+
+_umo_run_update() {
+    _umo_info "Updating Ubuntu packages..."
+    "$_UMO_TERMUX_HOME/umo-login.sh" -c "apt-get update -y && apt-get upgrade -y && apt-get autoremove -y"
+    _umo_ok "Update complete."
+}
+
+_umo_run_cmd() {
+    if [ -z "$1" ]; then
+        _umo_err "No command provided. Usage: umo run \"<command>\""
+        exit 1
+    fi
+    "$_UMO_TERMUX_HOME/umo-login.sh" -c "$*"
+}
+
+_umo_set_user() {
+    _new_user="$1"
+    if [ -z "$_new_user" ]; then
+        _umo_err "Usage: umo --user <username>"
+        exit 1
+    fi
+    _login="$_UMO_TERMUX_HOME/umo-login.sh"
+    _user_sh="$_UMO_TERMUX_HOME/umo-user.sh"
+    if [ ! -f "$_login" ]; then
+        _umo_err "UMO not installed."
+        exit 1
+    fi
+    _umo_info "Switching default user to: $_new_user"
+    "$_UMO_TERMUX_HOME/umo-login.sh" -c "id $_new_user >/dev/null 2>&1 || { useradd -m -s /bin/bash $_new_user && echo '${_new_user}:${_new_user}' | chpasswd; }"
+    sed -i "s|/bin/su - [^ ]*|/bin/su - $_new_user|g" "$_user_sh" 2>/dev/null || true
+    sed -i "s|HOME=/home/[^ ]*|HOME=/home/$_new_user|g" "$_user_sh" 2>/dev/null || true
+    _umo_ok "Default user is now: $_new_user"
+    _umo_info "Run 'umo user' to login as $_new_user"
+}
+
+_umo_backup() {
+    _bak_dir="${1:-$_UMO_TERMUX_HOME/umo-backup}"
+    _bak_file="$_bak_dir/umo-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+    _install_dir=$(grep 'INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
+    if [ -z "$_install_dir" ] || [ ! -d "$_install_dir" ]; then
+        _umo_err "Cannot find UMO install directory."
+        exit 1
+    fi
+    mkdir -p "$_bak_dir"
+    _umo_info "Backing up to: $_bak_file"
+    tar -czf "$_bak_file" -C "$(dirname "$_install_dir")" "$(basename "$_install_dir")" 2>/dev/null
+    _sz=$(du -sh "$_bak_file" 2>/dev/null | cut -f1)
+    _umo_ok "Backup complete! Size: $_sz"
+    _umo_info "File: $_bak_file"
+}
+
+_umo_help() {
+    _umo_header
+    printf "  ${_UMO_BOLD}Usage:${_UMO_NC}  ${_UMO_CYN}umo${_UMO_NC} ${_UMO_DIM}[COMMAND] [OPTIONS]${_UMO_NC}\n\n"
+
+    printf "  ${_UMO_BOLD}Session Commands:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio (default)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Stop all UMO processes"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Show running status of UMO services"
+    printf "\n"
+
+    printf "  ${_UMO_BOLD}Login Commands:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "login"              "Login as root"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Login as default user (umo)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"       "Switch default user & login"
+    printf "\n"
+
+    printf "  ${_UMO_BOLD}System Commands:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start VNC server only"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Update all Ubuntu packages"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Run a command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Backup Ubuntu container"
+    printf "\n"
+
+    printf "  ${_UMO_BOLD}Info Commands:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--help, -h"         "Show this help message"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--version, -v"      "Show UMO version"
+    printf "\n"
+
+    printf "  ${_UMO_BOLD}Examples:${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}umo${_UMO_NC}                        # Start Ubuntu\n"
+    printf "    ${_UMO_DIM}umo status${_UMO_NC}                 # Check what's running\n"
+    printf "    ${_UMO_DIM}umo --user shadow-x7${_UMO_NC}       # Switch to user shadow-x7\n"
+    printf "    ${_UMO_DIM}umo update${_UMO_NC}                 # Update Ubuntu packages\n"
+    printf "    ${_UMO_DIM}umo run \"apt list --installed\"${_UMO_NC} # Run a command\n"
+    printf "    ${_UMO_DIM}umo backup ~/backups${_UMO_NC}       # Backup to a folder\n"
+    printf "\n"
+}
 
 case "${1:-start}" in
-    start)  exec "$HOME/umo-start.sh" ;;
-    stop)   exec "$HOME/umo-stop.sh" ;;
-    login)  exec "$HOME/umo-login.sh" ;;
-    user)   exec "$HOME/umo-user.sh" ;;
-    vnc)    exec "$HOME/umo-vnc-start.sh" ;;
-    help|--help|-h)
-        printf "\n  ${_bold}${_pri}UMO Ubuntu Launcher${_nc}\n\n"
-        printf "  ${_dim}Usage:${_nc} ${_cyn}umo [COMMAND]${_nc}\n\n"
-        printf "  ${_bold}Commands:${_nc}\n"
-        printf "    ${_cyn}%-10s${_nc} Start Ubuntu + VNC + Audio (default)\n" "start"
-        printf "    ${_cyn}%-10s${_nc} Stop all UMO processes\n" "stop"
-        printf "    ${_cyn}%-10s${_nc} Login as root user\n" "login"
-        printf "    ${_cyn}%-10s${_nc} Login as default user (umo)\n" "user"
-        printf "    ${_cyn}%-10s${_nc} Start VNC server only\n" "vnc"
-        printf "\n"
-        ;;
+    start)                  exec "$_UMO_TERMUX_HOME/umo-start.sh" ;;
+    stop)                   exec "$_UMO_TERMUX_HOME/umo-stop.sh" ;;
+    login)                  exec "$_UMO_TERMUX_HOME/umo-login.sh" ;;
+    user)                   exec "$_UMO_TERMUX_HOME/umo-user.sh" ;;
+    vnc)                    exec "$_UMO_TERMUX_HOME/umo-vnc-start.sh" ;;
+    status)                 _umo_status ;;
+    update)                 _umo_run_update ;;
+    run)                    shift; _umo_run_cmd "$@" ;;
+    backup)                 shift; _umo_backup "$@" ;;
+    --user|-u)              shift; _umo_set_user "$1" ;;
+    --version|-v|version)   printf "\n  ${_UMO_PRI}UMO${_UMO_NC} v${_UMO_VERSION}\n\n" ;;
+    help|--help|-h)         _umo_help ;;
     *)
-        printf "\n  ${_pri}[ERR]${_nc} Unknown command: $1\n"
-        printf "  Run '${_cyn}umo help${_nc}' for usage.\n\n"
+        _umo_err "Unknown command: $1"
+        printf "  Run '${_UMO_CYN}umo --help${_UMO_NC}' for usage.\n\n"
         exit 1
         ;;
 esac
