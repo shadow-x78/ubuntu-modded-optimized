@@ -186,6 +186,8 @@ umo_phase_finalize() {
         cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
     fi
     "$HOME/umo-login.sh" -c "apt-get update -qq" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get install -y -o Dpkg::Options::='--no-lock' -o Dpkg::Options::='--force-unsafe-io' sudo" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "usermod -aG sudo ubuntu" 2>/dev/null || true
 
     for _script in start stop; do
         _src="$SCRIPT_DIR/bin/umo-$_script"

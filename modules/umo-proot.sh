@@ -205,23 +205,14 @@ SRCLIST
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update
-apt-get install -y \
-    -o Dpkg::Options::="--no-lock" \
-    -o Dpkg::Options::="--force-all" \
-    -o Dpkg::Options::="--force-unsafe-io" \
-    ubuntu-keyring sudo adduser
-
 if ! id -u ubuntu >/dev/null 2>&1; then
     adduser --disabled-password --gecos '' ubuntu
     echo 'ubuntu:ubuntu' | chpasswd
-    usermod -aG sudo ubuntu
 fi
 
-if [ -d /etc/sudoers.d ]; then
-    echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu
-    chmod 440 /etc/sudoers.d/ubuntu
-fi
+mkdir -p /etc/sudoers.d
+echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu
+chmod 440 /etc/sudoers.d/ubuntu
 INNER
     chmod +x "$UMO_PROOT_DIR/root/setup-user.sh"
     umo_run_quiet "Creating user 'ubuntu'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/setup-user.sh"
