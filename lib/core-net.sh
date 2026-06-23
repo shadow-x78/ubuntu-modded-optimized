@@ -121,12 +121,12 @@ umo_net_extract() {
     case "$_archive" in
         *.tar.gz|*.tgz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
-                tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
+                proot --link2symlink tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
                 umo_die "Extraction failed (gzip). Archive may be corrupt — re-run to re-download."
             ;;
         *.tar.xz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
-                tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
+                proot --link2symlink tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
                 umo_die "Extraction failed (xz). Archive may be corrupt — re-run to re-download."
             ;;
         *.zip)
