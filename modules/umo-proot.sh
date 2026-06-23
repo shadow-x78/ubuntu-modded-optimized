@@ -192,6 +192,14 @@ umo_proot_exec() {
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
 
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt"
+    cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+SRCLIST
+
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
 set -e
