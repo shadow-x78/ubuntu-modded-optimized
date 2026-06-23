@@ -110,6 +110,14 @@ umo_proot_cmd() {
 umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
+    # Create fake /proc files for pgrep/ps to work without Android SELinux blocking them
+    _fake_proc="$UMO_PROOT_DIR/.fake_proc"
+    umo_fs_mkdir "$_fake_proc"
+    echo "cpu  0 0 0 0 0 0 0 0 0 0" > "$_fake_proc/stat"
+    echo "Linux version 5.4.0-proot (termux)" > "$_fake_proc/version"
+    echo "0.00 0.00" > "$_fake_proc/uptime"
+    echo "0.00 0.00 0.00 1/1 1" > "$_fake_proc/loadavg"
+
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
 # UMO — Ubuntu Login Wrapper
@@ -129,7 +137,11 @@ AUDIO_SOCK=""
 cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    --bind=/dev --bind=/proc --bind=/sys \
+    -b /dev -b /proc -b /sys \
+    -b "\$INSTALL_DIR/.fake_proc/stat:/proc/stat" \
+    -b "\$INSTALL_DIR/.fake_proc/version:/proc/version" \
+    -b "\$INSTALL_DIR/.fake_proc/uptime:/proc/uptime" \
+    -b "\$INSTALL_DIR/.fake_proc/loadavg:/proc/loadavg" \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
@@ -152,7 +164,11 @@ unset LD_LIBRARY_PATH
 cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    --bind=/dev --bind=/proc --bind=/sys \
+    -b /dev -b /proc -b /sys \
+    -b "\$INSTALL_DIR/.fake_proc/stat:/proc/stat" \
+    -b "\$INSTALL_DIR/.fake_proc/version:/proc/version" \
+    -b "\$INSTALL_DIR/.fake_proc/uptime:/proc/uptime" \
+    -b "\$INSTALL_DIR/.fake_proc/loadavg:/proc/loadavg" \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
