@@ -74,7 +74,6 @@ umo_proot_cmd() {
     fi
 
     printf 'proot \
-        --link2symlink \
         --sysvipc \
         -0 \
         -r %s \
@@ -111,6 +110,7 @@ umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
+    rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
@@ -130,7 +130,7 @@ AUDIO_SOCK=""
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
@@ -153,7 +153,7 @@ unset LD_LIBRARY_PATH
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
