@@ -223,10 +223,9 @@ SRCLIST
     chmod 755 "$UMO_PROOT_DIR/home/umo"
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/sudoers.d"
-    chmod 755 "$UMO_PROOT_DIR/etc/sudoers.d" 2>/dev/null || true
-    printf "umo ALL=(ALL) NOPASSWD:ALL\n" > "$UMO_PROOT_DIR/etc/sudoers.d/umo"
-    chmod 440 "$UMO_PROOT_DIR/etc/sudoers.d/umo"
-    chmod 750 "$UMO_PROOT_DIR/etc/sudoers.d" 2>/dev/null || true
+    "$UMO_TERMUX_HOME/umo-login.sh" -c \
+        "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
+        2>/dev/null || true
 
     umo_log_ok "User 'umo' created (password: umo)."
 }
