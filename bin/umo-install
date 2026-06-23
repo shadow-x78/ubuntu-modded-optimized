@@ -202,7 +202,13 @@ umo_phase_finalize() {
     cat > "$HOME/../usr/bin/umo" << 'UMOCMD'
 #!/bin/sh
 # UMO — Quick launcher (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+
+_nc='\033[0m'
+_bold='\033[1m'
+_pri='\033[38;5;208m'
+_cyn='\033[38;5;39m'
+_dim='\033[2m'
+
 case "${1:-start}" in
     start)  exec "$HOME/umo-start.sh" ;;
     stop)   exec "$HOME/umo-stop.sh" ;;
@@ -210,16 +216,19 @@ case "${1:-start}" in
     user)   exec "$HOME/umo-user.sh" ;;
     vnc)    exec "$HOME/umo-vnc-start.sh" ;;
     help|--help|-h)
-        echo "Usage: umo [start|stop|login|user|vnc]"
-        echo "  start  — Start Ubuntu + VNC + Audio (default)"
-        echo "  stop   — Stop everything"
-        echo "  login  — Login as root"
-        echo "  user   — Login as umo"
-        echo "  vnc    — Start VNC only"
+        printf "\n  ${_bold}${_pri}UMO Ubuntu Launcher${_nc}\n\n"
+        printf "  ${_dim}Usage:${_nc} ${_cyn}umo [COMMAND]${_nc}\n\n"
+        printf "  ${_bold}Commands:${_nc}\n"
+        printf "    ${_cyn}%-10s${_nc} Start Ubuntu + VNC + Audio (default)\n" "start"
+        printf "    ${_cyn}%-10s${_nc} Stop all UMO processes\n" "stop"
+        printf "    ${_cyn}%-10s${_nc} Login as root user\n" "login"
+        printf "    ${_cyn}%-10s${_nc} Login as default user (umo)\n" "user"
+        printf "    ${_cyn}%-10s${_nc} Start VNC server only\n" "vnc"
+        printf "\n"
         ;;
     *)
-        echo "Unknown command: $1"
-        echo "Run 'umo help' for usage."
+        printf "\n  ${_pri}[ERR]${_nc} Unknown command: $1\n"
+        printf "  Run '${_cyn}umo help${_nc}' for usage.\n\n"
         exit 1
         ;;
 esac

@@ -84,7 +84,10 @@ sleep 1
 
 pulseaudio --start 2>/dev/null || true
 
-vncserver "$VNC_DISPLAY" \
+_vnc_cmd="vncserver"
+command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"
+
+$_vnc_cmd "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
@@ -113,8 +116,11 @@ EOF
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc" << 'EOF'
 #!/bin/sh
 echo "[==>] Stopping VNC..."
-vncserver -kill :1 2>/dev/null || true
-vncserver -kill :2 2>/dev/null || true
+_vnc_cmd="vncserver"
+command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"
+
+$_vnc_cmd -kill :1 2>/dev/null || true
+$_vnc_cmd -kill :2 2>/dev/null || true
 for _pid in $(pgrep -f Xvnc); do kill -9 "$_pid" 2>/dev/null || true; done
 echo "[OK] VNC stopped."
 EOF

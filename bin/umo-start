@@ -67,21 +67,24 @@ else
     _pad=$(( _max_len + 2 ))
     _fill=$(( _pad - 2 ))
 
+    _fill=""
+    _i=0
+    while [ "$_i" -lt "$_pad" ]; do
+        _fill="${_fill}-"
+        _i=$((_i + 1))
+    done
+
     printf "\n"
-    printf "%b╔" "$_UMO_PRI"
-    printf '%*s' "$_pad" '' | tr ' ' '═'
-    printf "╗%b\n" "$_UMO_NC"
+    printf "%b+-%s-+%b\n" "$_UMO_PRI" "$_fill" "$_UMO_NC"
 
-    printf "%b║%b%*s%s%*s%b║%b\n" \
-        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l1" $((_pad - _l1_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
-    printf "%b║%b%*s%s%*s%b║%b\n" \
-        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l2" $((_pad - _l2_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
-    printf "%b║%b%*s%s%*s%b║%b\n" \
-        "$_UMO_PRI" "$_UMO_NC" 1 '' "$_l3" $((_pad - _l3_len - 1)) '' "$_UMO_PRI" "$_UMO_NC"
+    printf "%b| %b%*s%s%*s%b |%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 0 '' "$_l1" $((_pad - _l1_len)) '' "$_UMO_PRI" "$_UMO_NC"
+    printf "%b| %b%*s%s%*s%b |%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 0 '' "$_l2" $((_pad - _l2_len)) '' "$_UMO_PRI" "$_UMO_NC"
+    printf "%b| %b%*s%s%*s%b |%b\n" \
+        "$_UMO_PRI" "$_UMO_NC" 0 '' "$_l3" $((_pad - _l3_len)) '' "$_UMO_PRI" "$_UMO_NC"
 
-    printf "%b╚" "$_UMO_PRI"
-    printf '%*s' "$_pad" '' | tr ' ' '═'
-    printf "╝%b\n" "$_UMO_NC"
+    printf "%b+-%s-+%b\n" "$_UMO_PRI" "$_fill" "$_UMO_NC"
     printf "\n"
 
     exec "$TERMUX_HOME/umo-login.sh"

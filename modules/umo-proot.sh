@@ -129,7 +129,7 @@ AUDIO_SOCK=""
 cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    -b /dev -b /proc -b /sys \
+    --bind=/dev --bind=/proc --bind=/sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
@@ -152,7 +152,7 @@ unset LD_LIBRARY_PATH
 cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    -b /dev -b /proc -b /sys \
+    --bind=/dev --bind=/proc --bind=/sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
@@ -233,7 +233,17 @@ SRCLIST
     cp -rp "$UMO_PROOT_DIR/etc/skel/." "$UMO_PROOT_DIR/home/umo/" 2>/dev/null || true
     chmod 755 "$UMO_PROOT_DIR/home/umo"
 
-    umo_fs_mkdir "$UMO_PROOT_DIR/etc/sudoers.d"
+    _etc="$UMO_PROOT_DIR/etc"
+    chmod 644 "$_etc/passwd" "$_etc/group"
+    chmod 640 "$_etc/shadow" "$_etc/gshadow"
+
+    for _gid in 3003 9997 20488 50488 1000 1015 1023 1024 1028 1065 3001 3002 3006 3009 3011 3012; do
+        if ! grep -q ":x:$_gid:" "$_etc/group" 2>/dev/null; then
+            echo "android_$_gid:x:$_gid:" >> "$_etc/group"
+        fi
+    done
+
+    umo_fs_mkdir "$_etc/sudoers.d"
     "$UMO_TERMUX_HOME/umo-login.sh" -c \
         "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
         2>/dev/null || true
