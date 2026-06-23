@@ -44,7 +44,15 @@ umo_ui_menu() {
     umo_screen_clear
     umo_banner
     printf "\n"
-    umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
+
+    # Print title inline without clearing screen again
+    printf "  %b%b%b\n" "$UMO_BOLD" "$_title" "$UMO_NC"
+    printf "  %b" "$UMO_COLOR_PRIMARY"
+    _title_plain=$(printf '%s' "$_title" | sed "s/$(printf '\033')\[[0-9;]*m//g")
+    _title_len=$(printf '%s' "$_title_plain" | wc -m)
+    [ "$_title_len" -lt 1 ] && _title_len=1
+    umo_repeat "$UMO_LINE_H" "$_title_len"
+    printf "%b\n\n" "$UMO_NC"
 
     if [ "${UMO_GLYPH_SUPPORT:-0}" -eq 1 ]; then
         _bullet="❯"
@@ -65,8 +73,15 @@ umo_ui_menu() {
         printf "  %b%s%b Select an option %b[1-%d]%b: " "$UMO_COLOR_SUCCESS" "$_prompt" "$UMO_NC" "$UMO_DIM" "$_opt_num" "$UMO_NC"
         read -r _choice
 
-        if [ -z "$_choice" ] || [ "$_choice" -lt 1 ] || [ "$_choice" -gt "$_opt_num" ] 2>/dev/null; then
-            umo_log_warn "Invalid choice. Please enter 1-$_opt_num"
+        # Strip any trailing CR from input (safety for CRLF terminals)
+        _choice=$(printf '%s' "$_choice" | tr -d '\r')
+
+        if [ -z "$_choice" ] || ! printf '%s' "$_choice" | grep -qE '^[0-9]+$'; then
+            umo_log_warn "Invalid choice. Please enter a number 1-$_opt_num"
+            continue
+        fi
+        if [ "$_choice" -lt 1 ] || [ "$_choice" -gt "$_opt_num" ]; then
+            umo_log_warn "Choice out of range. Please enter 1-$_opt_num"
             continue
         fi
 
