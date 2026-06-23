@@ -32,22 +32,16 @@ umo_proot_prepare() {
     printf 'force-unsafe-io\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
     _dpkg_dir="$UMO_PROOT_DIR/var/lib/dpkg"
-    if [ -d "$_dpkg_dir" ]; then
-        touch "$_dpkg_dir/status" 2>/dev/null || true
-        cp -f "$_dpkg_dir/status" "$_dpkg_dir/status-old" 2>/dev/null || true
-        chmod -R u+rw "$_dpkg_dir" 2>/dev/null || true
-    fi
+    umo_fs_mkdir "$_dpkg_dir"
     umo_fs_mkdir "$_dpkg_dir/updates"
     umo_fs_mkdir "$_dpkg_dir/info"
     umo_fs_mkdir "$_dpkg_dir/parts"
     umo_fs_mkdir "$_dpkg_dir/triggers"
+    touch "$_dpkg_dir/status" 2>/dev/null || true
+    touch "$_dpkg_dir/available" 2>/dev/null || true
+    chmod -R u+rw "$_dpkg_dir" 2>/dev/null || true
 
-    umo_fs_mkdir "$UMO_PROOT_DIR/usr/local/sbin"
-    cat > "$UMO_PROOT_DIR/usr/local/sbin/dpkg" << 'DPKGWRAP'
-#!/bin/sh
-/usr/bin/dpkg --force-all "$@" || true
-DPKGWRAP
-    chmod +x "$UMO_PROOT_DIR/usr/local/sbin/dpkg"
+    rm -f "$UMO_PROOT_DIR/usr/local/sbin/dpkg" 2>/dev/null || true
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/sources.list.d"
@@ -56,7 +50,8 @@ DPKGWRAP
 
     cat > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null << 'APTCONF'
 APT::Sandbox::User "root";
-Dpkg::Options:: "--force-all";
+Dpkg::Options:: "--force-confdef";
+Dpkg::Options:: "--force-confold";
 Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";
 DPkg::FlushSTDIN "false";
@@ -65,7 +60,6 @@ DPkg::DropPrivileges "false";
 Debug::NoLocking "1";
 APT::Get::AllowUnauthenticated "true";
 APT::Acquire::AllowInsecureRepositories "true";
-Dir::Bin::dpkg "/usr/local/sbin/dpkg";
 APTCONF
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true

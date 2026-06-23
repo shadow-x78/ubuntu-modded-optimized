@@ -20,25 +20,23 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
-_apt_update() {
-    apt-get update \
-        -o Acquire::AllowInsecureRepositories=true \
-        -o APT::Get::AllowUnauthenticated=true 2>&1 | \
-        grep -v "^Ign\|^W:\|^Err\|^Get:" || true
-}
-
-_apt_update
+apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
 
 apt-get install -y ubuntu-keyring 2>/dev/null || true
-_apt_update
+apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
 
-apt-get install -y apt-utils 2>/dev/null || true
-apt-get install -y dialog 2>/dev/null || true
-apt-get install -y tzdata 2>/dev/null || true
+apt-get install -y apt-utils dialog tzdata 2>/dev/null || true
 dpkg --configure -a 2>/dev/null || true
 
-apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
-apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi 2>/dev/null || true
+apt-get install -y \
+    tigervnc-standalone-server \
+    tigervnc-viewer \
+    tigervnc-common \
+    dbus-x11 \
+    xfonts-base \
+    xfonts-75dpi \
+    xfonts-100dpi
+
 dpkg --configure -a 2>/dev/null || true
 
 if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
