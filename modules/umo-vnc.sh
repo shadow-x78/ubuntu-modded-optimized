@@ -20,14 +20,20 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
+# Phase 0: Repair any broken/half-configured dpkg state from rootfs extraction
+dpkg --configure -a 2>&1 || true
+apt-get -f install -y 2>&1 || true
+
+# Phase 1: Update package lists
 apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
 
-apt-get install -y ubuntu-keyring 2>/dev/null || true
+# Phase 2: Install foundation (apt-utils REQUIRED for proper debconf configuration)
+apt-get install -y ubuntu-keyring 2>&1 | tail -3 || true
 apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
+apt-get install -y apt-utils dialog tzdata 2>&1 | tail -5 || true
+dpkg --configure -a 2>&1 || true
 
-apt-get install -y apt-utils dialog tzdata 2>/dev/null || true
-dpkg --configure -a 2>/dev/null || true
-
+# Phase 3: Install TigerVNC + dependencies (first attempt)
 apt-get install -y \
     tigervnc-standalone-server \
     tigervnc-viewer \
@@ -35,12 +41,30 @@ apt-get install -y \
     dbus-x11 \
     xfonts-base \
     xfonts-75dpi \
-    xfonts-100dpi
+    xfonts-100dpi 2>&1 | tail -15
 
-dpkg --configure -a 2>/dev/null || true
+# Phase 4: Recovery — dpkg error 100 leaves packages unpacked but unconfigured
+if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
+    dpkg --configure -a 2>&1 || true
+    apt-get -f install -y 2>&1 | tail -5 || true
 
+    # Retry: second pass finishes configuration of already-unpacked packages
+    apt-get install -y \
+        tigervnc-standalone-server \
+        tigervnc-viewer \
+        tigervnc-common \
+        dbus-x11 \
+        xfonts-base \
+        xfonts-75dpi \
+        xfonts-100dpi 2>&1 | tail -10
+    dpkg --configure -a 2>&1 || true
+fi
+
+# Final verification
 if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
     echo "ERROR: TigerVNC installation failed"
+    echo "--- dpkg audit (broken/half-configured packages) ---"
+    dpkg --audit 2>&1 | head -20
     exit 1
 fi
 INNER
