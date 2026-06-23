@@ -16,7 +16,7 @@ UMO_TERMUX_PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 umo_proot_prepare() {
     umo_log_step "Preparing proot container..."
 
-    for _d in dev proc sys tmp sdcard data termux root home/ubuntu; do
+    for _d in dev proc sys tmp sdcard data termux root home/umo; do
         umo_fs_mkdir "$UMO_PROOT_DIR/$_d"
     done
 
@@ -216,7 +216,6 @@ if ! id -u umo >/dev/null 2>&1; then
     grep -q "^umo:" /etc/gshadow 2>/dev/null || echo "umo:!::"  >> /etc/gshadow 2>/dev/null || true
     grep -q "^umo:" /etc/passwd  || echo "umo:x:1000:1000::/home/umo:/bin/bash" >> /etc/passwd
     grep -q "^umo:" /etc/shadow  2>/dev/null || echo "umo:!:19000:0:99999:7:::" >> /etc/shadow 2>/dev/null || true
-    mkdir -p /home/umo
     cp -r /etc/skel/. /home/umo/ 2>/dev/null || true
     chown -R 1000:1000 /home/umo
     chmod 755 /home/umo
