@@ -12,54 +12,62 @@ UMO_APP_SET="${UMO_APP_SET:-basic}"
 umo_apps_basic() {
     umo_log_step "Installing base utilities..."
     _run_installer "base utilities" "
-apt-get update
-apt-get install -y nano wget curl git htop neofetch man-db ca-certificates
-apt-get install -y zip unzip tar xz-utils
-apt-get install -y locales tzdata
-locale-gen en_US.UTF-8
+apt-get update -y
+apt-get install -y nano wget curl git htop neofetch man-db ca-certificates || true
+dpkg --configure -a || true
+apt-get install -y zip unzip tar xz-utils || true
+dpkg --configure -a || true
+apt-get install -y locales tzdata || true
+dpkg --configure -a || true
+locale-gen en_US.UTF-8 || true
 "
 }
 
 umo_apps_browsers() {
     umo_log_step "Installing browsers..."
     _run_installer "browsers" "
-apt-get update
+apt-get update -y
 apt-get install -y firefox || apt-get install -y firefox-esr || true
 apt-get install -y chromium-browser || apt-get install -y chromium || true
+dpkg --configure -a || true
 "
 }
 
 umo_apps_office() {
     umo_log_step "Installing LibreOffice..."
     _run_installer "LibreOffice" "
-apt-get update
-apt-get install -y libreoffice-writer libreoffice-calc libreoffice-impress
+apt-get update -y
+apt-get install -y libreoffice-writer libreoffice-calc libreoffice-impress || true
+dpkg --configure -a || true
 "
 }
 
 umo_apps_media() {
     umo_log_step "Installing media tools..."
     _run_installer "media tools" "
-apt-get update
-apt-get install -y vlc ffmpeg
+apt-get update -y
+apt-get install -y vlc ffmpeg || true
+dpkg --configure -a || true
 "
 }
 
 umo_apps_dev() {
     umo_log_step "Installing development tools..."
     _run_installer "development tools" "
-apt-get update
-apt-get install -y python3 python3-pip python3-venv nodejs npm
-apt-get install -y build-essential gcc g++ make cmake
+apt-get update -y
+apt-get install -y python3 python3-pip python3-venv nodejs npm || true
+apt-get install -y build-essential gcc g++ make cmake || true
+dpkg --configure -a || true
 "
 }
 
 umo_apps_termux() {
     umo_log_step "Installing Termux integration..."
     _run_installer "Termux integration" "
-apt-get update
+apt-get update -y
 apt-get install -y termux-api 2>/dev/null || true
-apt-get install -y xclip xsel
+apt-get install -y xclip xsel || true
+dpkg --configure -a || true
 "
 }
 
@@ -67,7 +75,7 @@ _run_installer() {
     _label="$1"
     _script_body="$2"
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
-    printf '#!/bin/sh\n%s\n' "$_script_body" > "$_script"
+    printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
     umo_run_quiet "Installing $_label" "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
     rm -f "$_script"

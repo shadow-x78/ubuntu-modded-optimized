@@ -186,7 +186,8 @@ umo_phase_finalize() {
         cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
     fi
     "$HOME/umo-login.sh" -c "apt-get update -qq" 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "apt-get install -y -o Dpkg::Options::='--no-lock' -o Dpkg::Options::='--force-unsafe-io' sudo" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get install -y sudo" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "dpkg --configure -a" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "usermod -aG sudo umo" 2>/dev/null || true
 
     for _script in start stop; do
@@ -222,7 +223,7 @@ umo_phase_summary() {
     printf "  %b~/umo-stop.sh%b        Stop everything\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-vnc-start.sh%b    Start VNC only\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b~/umo-login.sh%b        Login as root\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
-    printf "  %b~/umo-user.sh%b         Login as ubuntu\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "  %b~/umo-user.sh%b         Login as umo\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
 
     printf "\n%bInside Ubuntu:%b\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %bumo-startvnc%b        Start VNC\n" "$UMO_COLOR_PRIMARY" "$UMO_NC"

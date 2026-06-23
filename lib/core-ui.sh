@@ -20,6 +20,9 @@ umo_ui_header() {
     _raw_text=$(printf '%b' "$_text" | sed "s/$(printf '\033')\[[0-9;]*m//g")
     _txtlen=$(printf '%s' "$_raw_text" | wc -m)
 
+    umo_screen_clear
+    umo_banner
+
     printf "\n"
     printf "  %b%b%b\n" "$UMO_BOLD" "$_text" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
