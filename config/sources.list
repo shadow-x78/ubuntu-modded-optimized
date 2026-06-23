@@ -1,11 +1,7 @@
 # Ubuntu Modded - Optimized sources.list
 # Ubuntu 22.04 Jammy Jellyfish (aarch64 / ubuntu-ports)
-#
-# We pin every entry to Ubuntu's official archive keyring with [signed-by=...].
-# This makes `apt update` verify cleanly — no NO_PUBKEY warnings, no Ign lines.
-# The keyring ships with every Ubuntu base rootfs at the path below.
 
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse

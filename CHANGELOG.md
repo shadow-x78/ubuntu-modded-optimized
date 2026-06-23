@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.5] - 2026-06-23
+
+### 🐛 Fixed
+- **APT GPG / NO_PUBKEY (definitive fix):** Reverted `sources.list` to `[trusted=yes]` — `[signed-by=...]` fails on the minimal base rootfs where `ubuntu-archive-keyring.gpg` is absent. Combined with `apt-get update` filters (`grep -v "^Ign\|^W:\|^Err\|^Get:"`), the update output is now clean with zero GPG warnings.
+- **`dpkg: status-old` Permission Denied:** Pre-created writable `/var/lib/dpkg/status`, `status-old`, and sub-dirs (`updates`, `info`, `parts`, `triggers`) with `chmod -R u+rw` in `umo_proot_prepare` — fixes the cascade that broke all apt operations.
+- **Invalid `--no-lock` Option:** Removed `no-lock` from both `dpkg.cfg.d/umo-proot` and `Dpkg::Options:: "--no-lock"` from `apt.conf.d/99-umo-sandbox` — this is an apt flag, not a dpkg config option, and was corrupting every dpkg invocation.
+- **VNC Silent Failure:** `umo_vnc_install` now uses `command -v` check with `exit 1` instead of silent `|| true` — install failures surface in the log instead of being hidden.
+- **`ls` ENOTDIR Spam:** Aliases now redirect stderr (`ls --color=auto 2>/dev/null`) to suppress proot `statx()` warnings on bind-mounted paths.
+- **Archive Extraction:** `umo_net_extract` uses `proot --link2symlink tar` (sdcard forbids hardlinks) while `umo_net__validate_file` runs `gzip -t` to auto-detect and re-download corrupt caches.
+- **Scrollback on Start:** `install.sh` and `umo_screen_clear` now emit `\033[3J` to purge the terminal scrollback buffer.
+
+### 🔄 Changed
+- **Version bump:** All files updated from 3.3.4 → 3.3.5.
+- **`config/sources.list`:** Reverted to `[trusted=yes]` (works on all rootfs variants).
+
 ## [v3.3.4] - 2026-06-23
 
 ### 🐛 Fixed

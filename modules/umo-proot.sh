@@ -224,11 +224,11 @@ umo_proot_create_user() {
         echo "umo:x:1000:1000:UMO User:/home/umo:/bin/bash" >> "$_etc/passwd"
     fi
 
-    cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST
-deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
-deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
-deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
-deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+    cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << 'SRCLIST'
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
 SRCLIST
 
     rm -f "$UMO_PROOT_DIR/etc/group.lock" \

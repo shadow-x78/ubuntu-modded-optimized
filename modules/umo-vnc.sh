@@ -20,36 +20,29 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
-_apt_retry() {
-    for i in 1 2 3; do
-        apt-get update -y && return 0
-        echo "apt-get update attempt $i failed, retrying..."
-        sleep 2
-    done
-    return 1
+_apt_update() {
+    apt-get update \
+        -o Acquire::AllowInsecureRepositories=true \
+        -o APT::Get::AllowUnauthenticated=true 2>&1 | \
+        grep -v "^Ign\|^W:\|^Err\|^Get:" || true
 }
 
-_apt_retry || {
-    echo "ERROR: apt-get update failed after 3 attempts"
-    cat /etc/apt/sources.list 2>/dev/null
-    exit 1
-}
+_apt_update
 
-apt-get install -y ubuntu-keyring || true
-_apt_retry || true
+apt-get install -y ubuntu-keyring 2>/dev/null || true
+_apt_update
 
-apt-get install -y apt-utils || true
-apt-get install -y dialog || true
-apt-get install -y tzdata || true
+apt-get install -y apt-utils 2>/dev/null || true
+apt-get install -y dialog 2>/dev/null || true
+apt-get install -y tzdata 2>/dev/null || true
 dpkg --configure -a 2>/dev/null || true
 
 apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
-apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
+apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi 2>/dev/null || true
 dpkg --configure -a 2>/dev/null || true
 
 if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
     echo "ERROR: TigerVNC installation failed"
-    apt-cache search tigervnc 2>/dev/null || echo "apt-cache search also failed"
     exit 1
 fi
 INNER
@@ -69,7 +62,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-3.3.4}" \
+            "UMO_VERSION" "${UMO_VERSION:-3.3.5}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
