@@ -102,33 +102,30 @@ umo_net_download_mirrors() {
 
 umo_net_extract() {
     _archive="$1"
-    _target="$2"
+    _dest="${2:-.}"
 
-    umo_log_step "Extracting archive..."
+    [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
 
-    if [ ! -f "$_archive" ]; then
-        umo_die "Archive not found: $_archive"
-    fi
-
-    mkdir -p "$_target"
-
-    _rc=0
     case "$_archive" in
-        *.tar.xz) proot --link2symlink -0 tar -xJf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
-        *.tar.gz) proot --link2symlink -0 tar -xzf "$_archive" -C "$_target" --exclude='dev'; _rc=$? ;;
-        *.zip)    unzip -q "$_archive" -d "$_target"; _rc=$? ;;
-        *)        umo_die "Unknown archive format: $_archive" ;;
+        *.gz|*.tgz)
+            if ! gzip -t "$_archive" 2>/dev/null; then
+                umo_log_err "Archive is corrupt (gzip integrity check failed)."
+                rm -f "$_archive"
+                umo_die "Deleted corrupt archive. Please re-run the installer to download again."
+            fi
+            ;;
+        *.xz)
+            if ! xz -t "$_archive" 2>/dev/null; then
+                umo_log_err "Archive is corrupt (xz integrity check failed)."
+                rm -f "$_archive"
+                umo_die "Deleted corrupt archive. Please re-run the installer to download again."
+            fi
+            ;;
     esac
 
-    if [ "$_rc" -ne 0 ]; then
-        umo_die "Extraction failed (exit code $_rc): $_archive"
-    fi
-
-    for _dir in dev proc sys tmp sdcard data termux; do
-        mkdir -p "$_target/$_dir"
-    done
-
-    umo_log_ok "Extraction complete."
+    umo_run_quiet "Extracting archive..." \
+        proot --link2symlink -0 tar -xpf "$_archive" -C "$_dest" 2>&1 || \
+        umo_die "Extraction failed."
 }
 
 umo_net_verify_sha256() {

@@ -110,7 +110,6 @@ umo_proot_cmd() {
 umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
-    # Remove stale fake_proc dir left by older versions.
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
