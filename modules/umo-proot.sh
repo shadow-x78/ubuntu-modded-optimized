@@ -35,9 +35,8 @@ umo_proot_prepare() {
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Options {"--force-all";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d"
-    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x871920D1991BC93C" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" 2>/dev/null || true
-    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x3B4FE6ACC0B21F32" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
+    # Clean up any bad keys
+    rm -f "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
 
     echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
@@ -193,10 +192,22 @@ umo_proot_exec() {
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
 
+    # Fetch official ubuntu-keyring from ports to install binary GPG keys directly
+    _keyring_url=$(curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/" | grep -o 'href="ubuntu-keyring_[0-9\.]*_all.deb"' | tail -n 1 | cut -d '"' -f 2 || true)
+    if [ -n "$_keyring_url" ]; then
+        curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/$_keyring_url" -o "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" 2>/dev/null || true
+    fi
+
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
 set -e
 export DEBIAN_FRONTEND=noninteractive
+
+if [ -f /root/ubuntu-keyring.deb ]; then
+    dpkg -i /root/ubuntu-keyring.deb || true
+    rm -f /root/ubuntu-keyring.deb
+fi
+
 apt-get update
 apt-get install -y ubuntu-keyring sudo adduser
 
