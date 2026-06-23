@@ -33,7 +33,7 @@ umo_proot_prepare() {
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Options {"--force-all";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Dpkg::Options {"--force-all"; "--force-unsafe-io";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     rm -f "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
 
@@ -120,7 +120,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 PROOT_LOAD_EXT_LIBS=0 \
     /bin/bash --login "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-login.sh"
@@ -143,7 +143,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 PROOT_LOAD_EXT_LIBS=0 \
     /bin/su - ubuntu "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
@@ -202,7 +202,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -f /root/ubuntu-keyring.deb ]; then
-    dpkg -i /root/ubuntu-keyring.deb || true
+    dpkg --force-all --force-unsafe-io -i /root/ubuntu-keyring.deb || true
     rm -f /root/ubuntu-keyring.deb
 fi
 
