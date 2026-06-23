@@ -8,6 +8,9 @@ _UMO_UI_LOADED=1
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
 umo_ui_init() {
+    # Reset terminal state immediately in case a previous run crashed and left stty -echo active
+    stty sane 2>/dev/null || true
+    stty echo icanon 2>/dev/null || true
     umo_screen_clear
     umo_banner
     printf "\n"
