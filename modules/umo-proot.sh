@@ -29,23 +29,32 @@ umo_proot_prepare() {
     fi
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d"
-    echo "force-unsafe-io" > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/force-unsafe-io" 2>/dev/null || true
+    printf 'force-unsafe-io\nno-lock\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
+
+    umo_fs_mkdir "$UMO_PROOT_DIR/usr/local/sbin"
+    printf '#!/bin/sh\nexec /usr/bin/dpkg --no-lock --force-unsafe-io "$@"\n' \
+        > "$UMO_PROOT_DIR/usr/local/sbin/dpkg"
+    chmod +x "$UMO_PROOT_DIR/usr/local/sbin/dpkg"
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
-    echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Options:: "--no-lock";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Options:: "--force-all";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Options:: "--force-unsafe-io";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/sources.list.d"
+    rm -f "$UMO_PROOT_DIR/etc/apt/sources.list.d"/*.list \
+          "$UMO_PROOT_DIR/etc/apt/sources.list.d"/*.sources 2>/dev/null || true
 
-
-    echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'DPkg::DropPrivileges "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Debug::NoLocking "1";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'APT::Acquire::AllowInsecureRepositories "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-
+    cat > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null << 'APTCONF'
+APT::Sandbox::User "root";
+Dpkg::Options:: "--no-lock";
+Dpkg::Options:: "--force-all";
+Dpkg::Options:: "--force-unsafe-io";
+Dpkg::Use-Pty "0";
+DPkg::FlushSTDIN "false";
+DPkg::Run-Directory "/";
+DPkg::DropPrivileges "false";
+Debug::NoLocking "1";
+APT::Get::AllowUnauthenticated "true";
+APT::Acquire::AllowInsecureRepositories "true";
+Dir::Bin::dpkg "/usr/local/sbin/dpkg";
+APTCONF
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
     umo_log_ok "Proot directories ready."

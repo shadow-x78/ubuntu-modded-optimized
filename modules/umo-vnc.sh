@@ -22,7 +22,10 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 apt-get update
-apt-get install -y apt-utils dialog tzdata
+apt-get install -y ubuntu-keyring
+apt-get update
+apt-get install -y apt-utils
+apt-get install -y dialog tzdata
 apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
 apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi
 INNER
