@@ -8,6 +8,7 @@ _UMO_UI_LOADED=1
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
 umo_ui_init() {
+    printf '\033[3J'
     umo_screen_clear
     umo_banner
     printf "\n"

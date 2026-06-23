@@ -135,7 +135,7 @@ umo_repeat() {
 umo_cursor_hide() { printf '\033[?25l'; }
 umo_cursor_show() { printf '\033[?25h'; }
 umo_cursor_home() { printf '\033[H'; }
-umo_screen_clear() { printf '\033[2J\033[H'; }
+umo_screen_clear() { printf '\033[2J\033[3J\033[H'; }
 umo_line_clear()   { printf '\033[2K\r'; }
 umo_line_up()      { printf '\033[1A'; }
 

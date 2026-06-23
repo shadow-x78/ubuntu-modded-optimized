@@ -21,16 +21,18 @@ export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
 apt-get update -y
-apt-get install -y ubuntu-keyring
+
+apt-get install -y ubuntu-keyring || true
 apt-get update -y
-apt-get install -y apt-utils
-dpkg --configure -a
-apt-get install -y dialog tzdata
-dpkg --configure -a
+
+apt-get install -y apt-utils || true
+apt-get install -y dialog || true
+apt-get install -y tzdata || true
+dpkg --configure -a || true
 
 apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
-apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi
-dpkg --configure -a
+apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
+dpkg --configure -a || true
 
 if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
     echo "ERROR: TigerVNC installation failed"

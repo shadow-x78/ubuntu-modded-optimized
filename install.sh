@@ -3,7 +3,7 @@
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
 set -e
-printf '\033[2J\033[H'
+printf '\033[2J\033[3J\033[H\033c'
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/bin/umo-install" ]; then
