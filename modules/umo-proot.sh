@@ -31,6 +31,17 @@ umo_proot_prepare() {
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d"
     printf 'force-unsafe-io\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
+    _dpkg_dir="$UMO_PROOT_DIR/var/lib/dpkg"
+    if [ -d "$_dpkg_dir" ]; then
+        touch "$_dpkg_dir/status" 2>/dev/null || true
+        cp -f "$_dpkg_dir/status" "$_dpkg_dir/status-old" 2>/dev/null || true
+        chmod -R u+rw "$_dpkg_dir" 2>/dev/null || true
+    fi
+    umo_fs_mkdir "$_dpkg_dir/updates"
+    umo_fs_mkdir "$_dpkg_dir/info"
+    umo_fs_mkdir "$_dpkg_dir/parts"
+    umo_fs_mkdir "$_dpkg_dir/triggers"
+
     umo_fs_mkdir "$UMO_PROOT_DIR/usr/local/sbin"
     cat > "$UMO_PROOT_DIR/usr/local/sbin/dpkg" << 'DPKGWRAP'
 #!/bin/sh
@@ -45,7 +56,6 @@ DPKGWRAP
 
     cat > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null << 'APTCONF'
 APT::Sandbox::User "root";
-Dpkg::Options:: "--no-lock";
 Dpkg::Options:: "--force-all";
 Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";

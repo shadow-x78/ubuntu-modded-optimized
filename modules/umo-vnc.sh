@@ -20,22 +20,36 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
-apt-get update -y
+_apt_retry() {
+    for i in 1 2 3; do
+        apt-get update -y && return 0
+        echo "apt-get update attempt $i failed, retrying..."
+        sleep 2
+    done
+    return 1
+}
+
+_apt_retry || {
+    echo "ERROR: apt-get update failed after 3 attempts"
+    cat /etc/apt/sources.list 2>/dev/null
+    exit 1
+}
 
 apt-get install -y ubuntu-keyring || true
-apt-get update -y
+_apt_retry || true
 
 apt-get install -y apt-utils || true
 apt-get install -y dialog || true
 apt-get install -y tzdata || true
-dpkg --configure -a || true
+dpkg --configure -a 2>/dev/null || true
 
 apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
 apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
-dpkg --configure -a || true
+dpkg --configure -a 2>/dev/null || true
 
 if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
     echo "ERROR: TigerVNC installation failed"
+    apt-cache search tigervnc 2>/dev/null || echo "apt-cache search also failed"
     exit 1
 fi
 INNER
