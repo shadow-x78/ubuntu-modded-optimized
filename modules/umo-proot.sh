@@ -193,17 +193,17 @@ umo_proot_create_user() {
     _keyring_url=$(curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/" | grep -o 'href="ubuntu-keyring_[0-9\.]*_all.deb"' | tail -n 1 | cut -d '"' -f 2 || true)
     if [ -n "$_keyring_url" ]; then
         curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/$_keyring_url" -o "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" 2>/dev/null || true
+        # Extract directly on the host to bypass PRoot syscall bugs!
+        if [ -f "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" ]; then
+            dpkg-deb -x "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" "$UMO_PROOT_DIR" 2>/dev/null || true
+            rm -f "$UMO_PROOT_DIR/root/ubuntu-keyring.deb"
+        fi
     fi
 
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
 set -e
 export DEBIAN_FRONTEND=noninteractive
-
-if [ -f /root/ubuntu-keyring.deb ]; then
-    dpkg-deb -x /root/ubuntu-keyring.deb / || true
-    rm -f /root/ubuntu-keyring.deb
-fi
 
 apt-get update
 apt-get install -y ubuntu-keyring sudo adduser
