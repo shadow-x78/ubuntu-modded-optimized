@@ -374,3 +374,4 @@ umo_main() {
 }
 
 umo_main "$@"
+exit 0
