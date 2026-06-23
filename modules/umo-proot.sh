@@ -206,7 +206,11 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt-get install -y ubuntu-keyring sudo adduser
+apt-get install -y \
+    -o Dpkg::Options::="--no-lock" \
+    -o Dpkg::Options::="--force-all" \
+    -o Dpkg::Options::="--force-unsafe-io" \
+    ubuntu-keyring sudo adduser
 
 if ! id -u ubuntu >/dev/null 2>&1; then
     adduser --disabled-password --gecos '' ubuntu
