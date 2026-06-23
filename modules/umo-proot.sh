@@ -32,8 +32,10 @@ umo_proot_prepare() {
     printf 'force-unsafe-io\nno-lock\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
     umo_fs_mkdir "$UMO_PROOT_DIR/usr/local/sbin"
-    printf '#!/bin/sh\nexec /usr/bin/dpkg --no-lock --force-unsafe-io "$@"\n' \
-        > "$UMO_PROOT_DIR/usr/local/sbin/dpkg"
+    cat > "$UMO_PROOT_DIR/usr/local/sbin/dpkg" << 'DPKGWRAP'
+#!/bin/sh
+/usr/bin/dpkg --force-all "$@" || true
+DPKGWRAP
     chmod +x "$UMO_PROOT_DIR/usr/local/sbin/dpkg"
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"

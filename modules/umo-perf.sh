@@ -86,13 +86,13 @@ umo_perf_debloat() {
 
     cat > "$UMO_INSTALL_DIR/root/debloat.sh" << INNER
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
 apt-get clean
 rm -rf /var/lib/apt/lists/*
-apt-get update
+apt-get update -y
 apt-get install -y ubuntu-keyring 2>/dev/null || true
+dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
@@ -122,11 +122,10 @@ umo_perf_cleanup() {
 
     cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get clean
 rm -rf /var/lib/apt/lists/*
-apt-get update -qq
+apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
     umo_run_quiet "Cleaning up" "$HOME/umo-login.sh" -c "bash /root/cleanup.sh"
@@ -152,8 +151,8 @@ export MESA_GLES_VERSION_OVERRIDE=3.2
 export LIBGL_ALWAYS_SOFTWARE=0
 '
 
-    if [ -f "$UMO_INSTALL_DIR/home/ubuntu/.bashrc" ]; then
-        umo_fs_patch "$UMO_INSTALL_DIR/home/ubuntu/.bashrc" "# ===== UMO GPU =====" '
+    if [ -f "$UMO_INSTALL_DIR/home/umo/.bashrc" ]; then
+        umo_fs_patch "$UMO_INSTALL_DIR/home/umo/.bashrc" "# ===== UMO GPU =====" '
 export GALLIUM_DRIVER=virpipe
 export MESA_GL_VERSION_OVERRIDE=4.0
 export MESA_GLES_VERSION_OVERRIDE=3.2

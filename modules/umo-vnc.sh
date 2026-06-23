@@ -18,16 +18,18 @@ umo_vnc_install() {
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
-apt-get update
-apt-get install -y ubuntu-keyring
-apt-get update
-apt-get install -y apt-utils
-apt-get install -y dialog tzdata
-apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common
-apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi
+apt-get update -y
+apt-get install -y ubuntu-keyring || true
+apt-get update -y
+apt-get install -y apt-utils || true
+dpkg --configure -a || true
+apt-get install -y dialog tzdata || true
+dpkg --configure -a || true
+apt-get install -y tigervnc-standalone-server tigervnc-viewer tigervnc-common || true
+apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
+dpkg --configure -a || true
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
     umo_run_quiet "Installing TigerVNC server" "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"

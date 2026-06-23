@@ -18,10 +18,10 @@ umo_theme_install_packages() {
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -q $_theme_pkgs 2>/dev/null || true
+dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
     umo_run_quiet "Installing theme packages" "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
@@ -46,7 +46,7 @@ umo_theme_apply_gtk() {
 
     _theme_dir="$SCRIPT_DIR/config/theme"
 
-    for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/ubuntu"; do
+    for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
         umo_fs_mkdir "$_home/.config/gtk-3.0"
         if [ -f "$_theme_dir/gtk-3.0/settings.ini" ]; then
@@ -66,8 +66,8 @@ umo_theme_apply_gtk() {
         cp -f "$_theme_dir/xfwm4/xfwm4.xml" "$_xfce_conf/"
     fi
 
-    chown -R 1000:1000 "$UMO_INSTALL_DIR/home/ubuntu/.config" 2>/dev/null || true
-    chown -R 1000:1000 "$UMO_INSTALL_DIR/home/ubuntu/.gtkrc-2.0" 2>/dev/null || true
+    chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.config" 2>/dev/null || true
+    chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.gtkrc-2.0" 2>/dev/null || true
 
     umo_log_ok "GTK configuration applied."
 }

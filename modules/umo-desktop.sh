@@ -13,10 +13,10 @@ umo_de_lxde() {
     umo_log_step "Installing LXDE (ultra-lightweight)..."
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf
+apt-get update -y
+apt-get install -y lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true
+dpkg --configure -a || true
 INNER
     _run_de_installer "LXDE"
 }
@@ -25,11 +25,11 @@ umo_de_xfce4() {
     umo_log_step "Installing XFCE4 (recommended)..."
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11
-apt-get install -y xubuntu-icon-theme xfce4-whiskermenu-plugin
+apt-get update -y
+apt-get install -y xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11 || true
+apt-get install -y xubuntu-icon-theme xfce4-whiskermenu-plugin || true
+dpkg --configure -a || true
 INNER
     _run_de_installer "XFCE4"
 }
@@ -38,10 +38,10 @@ umo_de_openbox() {
     umo_log_step "Installing Openbox (minimal)..."
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y openbox obconf lxterminal pcmanfm tint2 feh
+apt-get update -y
+apt-get install -y openbox obconf lxterminal pcmanfm tint2 feh || true
+dpkg --configure -a || true
 INNER
     _run_de_installer "Openbox"
 }
@@ -50,10 +50,10 @@ umo_de_minimal() {
     umo_log_step "Installing minimal X11..."
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
-set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y xterm xfonts-base
+apt-get update -y
+apt-get install -y xterm xfonts-base || true
+dpkg --configure -a || true
 INNER
     _run_de_installer "minimal X11"
 }
