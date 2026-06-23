@@ -190,9 +190,10 @@ export PROOT_NO_SECCOMP=1
 export GALLIUM_DRIVER=virpipe
 export MESA_GL_VERSION_OVERRIDE=4.0
 
-alias ll="ls -alF"
-alias la="ls -A"
-alias l="ls -CF"
+alias ls="ls --color=auto 2>/dev/null"
+alias ll="ls -alF 2>/dev/null"
+alias la="ls -A 2>/dev/null"
+alias l="ls -CF 2>/dev/null"
 alias startvnc="bash /usr/local/bin/umo-startvnc"
 alias stopvnc="bash /usr/local/bin/umo-stopvnc"
 
