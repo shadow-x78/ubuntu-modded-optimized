@@ -155,7 +155,12 @@ umo_ui_checklist() {
     umo_screen_clear
     umo_banner
     printf "\n"
-    umo_ui_header "$UMO_COLOR_PRIMARY$_title$UMO_NC"
+    printf "  %b%b%b\n" "$UMO_BOLD" "$_title" "$UMO_NC"
+    printf "  %b" "$UMO_COLOR_PRIMARY"
+    _cl_plain=$(printf '%s' "$_title" | sed "s/$(printf '\033')\[[0-9;]*m//g")
+    _cl_len=$(printf '%s' "$_cl_plain" | wc -m); [ "$_cl_len" -lt 1 ] && _cl_len=1
+    umo_repeat "$UMO_LINE_H" "$_cl_len"
+    printf "%b\n\n" "$UMO_NC"
     printf "  %b[Space]=Toggle  [Enter]=Confirm%b\n\n" "$UMO_DIM" "$UMO_NC"
 
     _idx=0
@@ -167,6 +172,15 @@ umo_ui_checklist() {
     _total="$_idx"
 
     _cursor=1
+
+    # Save terminal state before entering raw mode
+    _stty_save=$(stty -g 2>/dev/null) || _stty_save=""
+
+    # Restore terminal on any exit
+    trap '[ -n "$_stty_save" ] && stty "$_stty_save" 2>/dev/null; umo_cursor_show' EXIT INT TERM
+
+    stty -echo -icanon min 1 time 0 2>/dev/null || true
+
     while true; do
         _i=0
         while [ "$_i" -lt "$_total" ]; do
@@ -175,59 +189,44 @@ umo_ui_checklist() {
             eval "_label=\"\$_lbl_${_i}\""
 
             if [ "${UMO_GLYPH_SUPPORT:-0}" -eq 1 ]; then
-                _ptr_glyph="❯"
-                _mark_glyph="◉"
-                _unmark_glyph="○"
+                _ptr_glyph="❯"; _mark_glyph="◉"; _unmark_glyph="○"
             else
-                _ptr_glyph=">"
-                _mark_glyph="X"
-                _unmark_glyph=" "
+                _ptr_glyph=">"; _mark_glyph="X"; _unmark_glyph=" "
             fi
 
             if [ "$_i" -eq "$_cursor" ]; then
-                _ptr="$_ptr_glyph"
-                _pfix="$UMO_B_CYAN"
-                _lfix="$UMO_BOLD"
+                _ptr="$_ptr_glyph"; _pfix="$UMO_B_CYAN"; _lfix="$UMO_BOLD"
             else
-                _ptr=" "
-                _pfix=""
-                _lfix=""
+                _ptr=" "; _pfix=""; _lfix=""
             fi
 
             if [ "$_state" = "1" ]; then
-                _mark="$_mark_glyph"
-                _mfix="$UMO_B_GREEN"
+                _mark="$_mark_glyph"; _mfix="$UMO_B_GREEN"
             else
-                _mark="$_unmark_glyph"
-                _mfix="$UMO_DIM"
+                _mark="$_unmark_glyph"; _mfix="$UMO_DIM"
             fi
 
             printf "  %b%s%b %b[%s]%b %b%s%b\n" "$_pfix" "$_ptr" "$UMO_NC" "$_mfix" "$_mark" "$UMO_NC" "$_lfix" "$_label" "$UMO_NC"
         done
 
         printf "\n  %b↑/↓ Navigate | Space Toggle | Enter Confirm%b " "$UMO_DIM" "$UMO_NC"
+
         _key=$(dd bs=1 count=1 2>/dev/null) || true
 
-if [ -z "$_key" ]; then
-            printf "\n  %bNumeric mode: enter item numbers (space-separated, empty=confirm): %b" "$UMO_B_YELLOW" "$UMO_NC"
-            read -r _num_input
-            if [ -z "$_num_input" ]; then
-                break
-            fi
-            for _num in $_num_input; do
-                if [ "$_num" -ge 1 ] && [ "$_num" -le "$_total" ] 2>/dev/null; then
-                    eval "_chk_${_num}=\"1\""
-                fi
-            done
-            continue
-        fi
+        # Move cursor up to redraw
+        _i=0
+        while [ "$_i" -lt "$((_total + 2))" ]; do
+            umo_line_up
+            umo_line_clear
+            _i=$((_i + 1))
+        done
 
         case "$_key" in
             $(printf '\033'))
                 _seq=$(dd bs=1 count=2 2>/dev/null)
                 case "$_seq" in
-                    A) [ "$_cursor" -gt 1 ] && _cursor=$((_cursor - 1)) ;;
-                    B) [ "$_cursor" -lt "$_total" ] && _cursor=$((_cursor + 1)) ;;
+                    "[A") [ "$_cursor" -gt 1 ] && _cursor=$((_cursor - 1)) ;;
+                    "[B") [ "$_cursor" -lt "$_total" ] && _cursor=$((_cursor + 1)) ;;
                 esac
                 ;;
             ' ')
@@ -237,16 +236,12 @@ if [ -z "$_key" ]; then
                 ;;
             '') break ;;
         esac
-
-        _i=0
-        while [ "$_i" -lt "$_total" ]; do
-            umo_line_up
-            umo_line_clear
-            _i=$((_i + 1))
-        done
-        umo_line_up
-        umo_line_clear
     done
+
+    # Restore terminal to normal cooked mode
+    [ -n "$_stty_save" ] && stty "$_stty_save" 2>/dev/null || stty sane 2>/dev/null || true
+    umo_cursor_show
+    trap - EXIT INT TERM
 
     UMO_CHECKLIST_RESULT=""
     _i=0
@@ -259,6 +254,7 @@ if [ -z "$_key" ]; then
         fi
     done
 }
+
 
 umo_ui_pause() {
     _msg="${1:-Press [Enter] to continue...}"
