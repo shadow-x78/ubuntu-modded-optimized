@@ -8,7 +8,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/bin/umo-install" ]; then
     chmod +x "$SCRIPT_DIR/bin/umo-install"
-    exec "$SCRIPT_DIR/bin/umo-install" "$@"
+    if command -v setsid >/dev/null 2>&1; then
+        exec setsid "$SCRIPT_DIR/bin/umo-install" "$@"
+    else
+        exec "$SCRIPT_DIR/bin/umo-install" "$@"
+    fi
 else
     echo "[ERR] UMO installer not found."
     echo "      Expected: $SCRIPT_DIR/bin/umo-install"

@@ -189,6 +189,11 @@ umo_phase_finalize() {
     "$HOME/umo-login.sh" -c "apt-get install -y sudo" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "dpkg --configure -a" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "usermod -aG sudo umo" 2>/dev/null || true
+    # Ensure no proot process is left blocking the installer
+    for _pid in $(pgrep -f "proot" 2>/dev/null); do
+        kill "$_pid" 2>/dev/null || true
+    done
+    wait 2>/dev/null || true
 
     for _script in start stop; do
         _src="$SCRIPT_DIR/bin/umo-$_script"
@@ -293,6 +298,16 @@ Root: login via ~/umo-login.sh on host
 README_EOF
 
     printf "\n"
+
+    # Kill any lingering background proot child processes from finalize phase
+    # so the installer can return to the shell immediately
+    for _pid in $(pgrep -f "umo-login.sh" 2>/dev/null); do
+        kill "$_pid" 2>/dev/null || true
+    done
+    for _pid in $(pgrep -f "proot.*umo" 2>/dev/null); do
+        kill "$_pid" 2>/dev/null || true
+    done
+    wait 2>/dev/null || true
 }
 
 umo_cli_parse() {
