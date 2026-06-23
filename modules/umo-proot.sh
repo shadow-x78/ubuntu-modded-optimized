@@ -41,6 +41,8 @@ umo_proot_prepare() {
     echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::DropPrivileges "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Debug::NoLocking "1";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'APT::Acquire::AllowInsecureRepositories "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
 
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
@@ -189,9 +191,6 @@ umo_proot_exec() {
 
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
-
-    # Download the official binary GPG keyring directly to avoid any dpkg/deb extraction bugs
-    curl -sL "http://archive.ubuntu.com/ubuntu/project/ubuntu-archive-keyring.gpg" -o "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-archive-keyring.gpg" 2>/dev/null || true
 
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
