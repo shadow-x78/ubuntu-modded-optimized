@@ -10,6 +10,7 @@ _UMO_MOD_APPS_LOADED=1
 UMO_APP_SET="${UMO_APP_SET:-basic}"
 
 umo_apps_basic() {
+    umo_log_step "Installing base utilities..."
     _run_installer "Base utilities" "
 apt-get update -y
 apt-get install -y nano wget curl git htop neofetch man-db ca-certificates || true
@@ -23,6 +24,7 @@ locale-gen en_US.UTF-8 || true
 }
 
 umo_apps_browsers() {
+    umo_log_step "Installing browsers..."
     _run_installer "Browsers" "
 apt-get update -y
 apt-get install -y firefox || apt-get install -y firefox-esr || true
@@ -32,6 +34,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_office() {
+    umo_log_step "Installing LibreOffice..."
     _run_installer "LibreOffice" "
 apt-get update -y
 apt-get install -y libreoffice-writer libreoffice-calc libreoffice-impress || true
@@ -40,6 +43,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_media() {
+    umo_log_step "Installing media tools..."
     _run_installer "Media tools" "
 apt-get update -y
 apt-get install -y vlc ffmpeg || true
@@ -48,6 +52,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_dev() {
+    umo_log_step "Installing development tools..."
     _run_installer "Development tools" "
 apt-get update -y
 apt-get install -y python3 python3-pip python3-venv nodejs npm || true
@@ -57,6 +62,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_termux() {
+    umo_log_step "Installing Termux integration..."
     _run_installer "Termux integration" "
 apt-get update -y
 apt-get install -y termux-api 2>/dev/null || true
@@ -71,7 +77,7 @@ _run_installer() {
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
     printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
-    umo_run_quiet "$_label" "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
+    umo_run_quiet "Installing $_label..." "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
     rm -f "$_script"
 }
 

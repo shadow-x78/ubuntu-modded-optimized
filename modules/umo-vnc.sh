@@ -14,6 +14,7 @@ UMO_VNC_DEPTH="${UMO_VNC_DEPTH:-24}"
 UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 
 umo_vnc_install() {
+    umo_log_step "Installing VNC server..."
     cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -30,7 +31,7 @@ apt-get install -y dbus-x11 xfonts-base xfonts-75dpi xfonts-100dpi || true
 dpkg --configure -a || true
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
-    umo_run_quiet "Installing TigerVNC" "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    umo_run_quiet "Installing TigerVNC..." "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
     rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
 
     umo_log_ok "TigerVNC installed."

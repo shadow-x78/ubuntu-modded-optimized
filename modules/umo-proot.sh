@@ -110,15 +110,7 @@ umo_proot_cmd() {
 umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
-    # NOTE: We intentionally do NOT bind fake files onto /proc/* anymore.
-    # Binding a regular file onto /proc/stat (etc.) while /proc itself is also
-    # bound triggers a proot path-resolution bug where statx() on sibling root
-    # entries returns ENOTDIR — producing the "ls: cannot access 'bin': Not a
-    # directory" spam at the rootfs root. Real Android /proc is readable enough
-    # for ls and pgrep, so we rely on it directly.
-    #
-    # Clean up any fake_proc directory left at the rootfs root by older versions
-    # (it also used to leak a visible "/.fake_proc" entry in `ls -a /`).
+    # Remove stale fake_proc dir left by older versions.
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
@@ -214,18 +206,12 @@ umo_proot_exec() {
 }
 
 umo_proot_create_user() {
-    umo_log_step "Creating user 'umo'..."
+    umo_log_step "Creating default user 'umo'..."
 
-    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt"
+    _etc="$UMO_PROOT_DIR/etc"
 
-    # Use the official Ubuntu archive keyring (ships with the base rootfs) so
-    # `apt update` verifies cleanly: no NO_PUBKEY warnings and no Ign lines.
-    # If the keyring is missing (stripped rootfs), fall back to [trusted=yes].
-    _keyring="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
-    if [ -f "$UMO_PROOT_DIR$_keyring" ]; then
-        _apt_opt="[signed-by=$_keyring]"
-    else
-        _apt_opt="[trusted=yes]"
+    if ! grep -q '^umo:' "$_etc/passwd" 2>/dev/null; then
+        echo "umo:x:1000:1000:UMO User:/home/umo:/bin/bash" >> "$_etc/passwd"
     fi
 
     cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST

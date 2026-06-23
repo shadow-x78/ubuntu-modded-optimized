@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 - **Swap Fully Removed:** Deleted `umo_perf_swap()` function and its call in `umo_perf_setup()` — swap is entirely non-functional inside proot and was producing confusing `swapon failed` output even after the previous "skip" stub.
 - **Remaining `stty` Calls Removed:** Stripped the last `stty sane` + `trap` lines from `install.sh` and `bin/umo-install` — these were a leftover from the `stty -icanon` era and are no longer needed since the TUI uses plain `read`.
 
+### 📝 Improved
+- **Module Documentation:** Added summary headers to `umo-apps.sh`, `umo-desktop.sh`, `umo-vnc.sh`, and `umo-perf.sh` describing their purpose and public API functions.
+- **Code Clarity:** Removed verbose inline comments from `umo-proot.sh` and other modules — each function now has a short explanatory header comment instead of multi-line rationales embedded in the logic.
+
 ### 🔄 Changed
 - **`config/sources.list`:** Updated template to use `[signed-by=...]` with the official Ubuntu keyring path, matching what the installer writes into the container.
 

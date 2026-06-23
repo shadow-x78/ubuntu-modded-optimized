@@ -58,7 +58,7 @@ apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
-    umo_run_quiet "Removing unnecessary services" "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
+    umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh"
 
     umo_log_ok "Debloating completed."
@@ -91,7 +91,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
-    umo_run_quiet "Cleaning up" "$HOME/umo-login.sh" -c "bash /root/cleanup.sh"
+    umo_run_quiet "Running APT cleanup..." "$HOME/umo-login.sh" -c "bash /root/cleanup.sh"
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh"
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
@@ -153,7 +153,7 @@ xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
-    umo_run_quiet "Optimizing desktop environment" "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh"
+    umo_run_quiet "Applying desktop tweaks..." "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh"
     rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh"
 
     umo_log_ok "Desktop optimizations applied."
