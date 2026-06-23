@@ -48,8 +48,8 @@ umo_vnc_configure() {
     fi
     chmod +x "$_vnc_dir/xstartup"
 
-    if [ -d "${UMO_INSTALL_DIR}/home/ubuntu" ]; then
-        _user_vnc="${UMO_INSTALL_DIR}/home/ubuntu/.vnc"
+    if [ -d "${UMO_INSTALL_DIR}/home/umo" ]; then
+        _user_vnc="${UMO_INSTALL_DIR}/home/umo/.vnc"
         umo_fs_mkdir "$_user_vnc"
         cp "$_vnc_dir/xstartup" "$_user_vnc/xstartup"
         chmod +x "$_user_vnc/xstartup"
@@ -58,7 +58,7 @@ umo_vnc_configure() {
 
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        printf 'ubuntu\nubuntu\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || true
+        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || true
     fi
 
     umo_log_ok "VNC configured."

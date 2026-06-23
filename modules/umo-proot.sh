@@ -33,7 +33,9 @@ umo_proot_prepare() {
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Dpkg::Options {"--no-lock"; "--force-all"; "--force-unsafe-io";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Dpkg::Options:: "--no-lock";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Dpkg::Options:: "--force-all";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Dpkg::Options:: "--force-unsafe-io";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
 
 
