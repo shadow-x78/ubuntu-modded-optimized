@@ -41,6 +41,13 @@ umo_proot_prepare() {
     touch "$_dpkg_dir/available" 2>/dev/null || true
     chmod -R u+rw "$_dpkg_dir" 2>/dev/null || true
 
+    umo_fs_mkdir "$UMO_PROOT_DIR/usr/sbin"
+    cat > "$UMO_PROOT_DIR/usr/sbin/policy-rc.d" << 'POLICY'
+#!/bin/sh
+exit 101
+POLICY
+    chmod +x "$UMO_PROOT_DIR/usr/sbin/policy-rc.d"
+
     rm -f "$UMO_PROOT_DIR/usr/local/sbin/dpkg" 2>/dev/null || true
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/apt.conf.d"
@@ -50,9 +57,10 @@ umo_proot_prepare() {
 
     cat > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null << 'APTCONF'
 APT::Sandbox::User "root";
+Dpkg::Options:: "--force-all";
+Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Options:: "--force-confdef";
 Dpkg::Options:: "--force-confold";
-Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";
 DPkg::FlushSTDIN "false";
 DPkg::Run-Directory "/";
