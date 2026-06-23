@@ -35,16 +35,15 @@ umo_proot_prepare() {
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Options {"--force-all";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'APT::Get::AllowUnauthenticated "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    echo 'Acquire::AllowInsecureRepositories "true";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-
-    if [ -f "$UMO_PROOT_DIR/etc/apt/sources.list" ]; then
-        sed -i 's/^deb /deb [trusted=yes] /g' "$UMO_PROOT_DIR/etc/apt/sources.list" 2>/dev/null || true
-    fi
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d"
+    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" 2>/dev/null || true
+    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3B4FE6ACC0B21F32" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
 
     echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::DropPrivileges "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+    echo 'Debug::NoLocking "1";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
+
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
     umo_log_ok "Proot directories ready."
@@ -199,7 +198,7 @@ umo_proot_create_user() {
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y sudo adduser
+apt-get install -y ubuntu-keyring sudo adduser
 
 if ! id -u ubuntu >/dev/null 2>&1; then
     adduser --disabled-password --gecos '' ubuntu
