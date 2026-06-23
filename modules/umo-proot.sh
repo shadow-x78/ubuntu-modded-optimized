@@ -200,36 +200,29 @@ deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main rest
 deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
 SRCLIST
 
-    rm -f "$UMO_PROOT_DIR/etc/group.lock" "$UMO_PROOT_DIR/etc/passwd.lock" \
-          "$UMO_PROOT_DIR/etc/shadow.lock" "$UMO_PROOT_DIR/etc/gshadow.lock" 2>/dev/null || true
+    rm -f "$UMO_PROOT_DIR/etc/group.lock" \
+          "$UMO_PROOT_DIR/etc/passwd.lock" \
+          "$UMO_PROOT_DIR/etc/shadow.lock" \
+          "$UMO_PROOT_DIR/etc/gshadow.lock" \
+          "$UMO_PROOT_DIR/etc/.pwd.lock" 2>/dev/null || true
 
-    cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
-#!/bin/sh
-set -e
-export DEBIAN_FRONTEND=noninteractive
+    grep -q "^umo:" "$UMO_PROOT_DIR/etc/group"  || \
+        printf "umo:x:1000:\n" >> "$UMO_PROOT_DIR/etc/group"
+    grep -q "^umo:" "$UMO_PROOT_DIR/etc/gshadow" 2>/dev/null || \
+        printf "umo:!::\n" >> "$UMO_PROOT_DIR/etc/gshadow" 2>/dev/null || true
+    grep -q "^umo:" "$UMO_PROOT_DIR/etc/passwd"  || \
+        printf "umo:x:1000:1000::/home/umo:/bin/bash\n" >> "$UMO_PROOT_DIR/etc/passwd"
 
-rm -f /etc/group.lock /etc/passwd.lock /etc/shadow.lock /etc/gshadow.lock \
-      /etc/.pwd.lock 2>/dev/null || true
+    _pw_hash=$(openssl passwd -6 -salt "umosalt" "umo" 2>/dev/null || echo "!")
+    grep -q "^umo:" "$UMO_PROOT_DIR/etc/shadow" 2>/dev/null || \
+        printf "umo:%s:19000:0:99999:7:::\n" "$_pw_hash" >> "$UMO_PROOT_DIR/etc/shadow" 2>/dev/null || true
 
-if ! id -u umo >/dev/null 2>&1; then
-    grep -q "^umo:" /etc/group   || echo "umo:x:1000:"          >> /etc/group
-    grep -q "^umo:" /etc/gshadow 2>/dev/null || echo "umo:!::"  >> /etc/gshadow 2>/dev/null || true
-    grep -q "^umo:" /etc/passwd  || echo "umo:x:1000:1000::/home/umo:/bin/bash" >> /etc/passwd
-    grep -q "^umo:" /etc/shadow  2>/dev/null || echo "umo:!:19000:0:99999:7:::" >> /etc/shadow 2>/dev/null || true
-    cp -r /etc/skel/. /home/umo/ 2>/dev/null || true
-    chown -R 1000:1000 /home/umo
-    chmod 755 /home/umo
-fi
+    cp -rp "$UMO_PROOT_DIR/etc/skel/." "$UMO_PROOT_DIR/home/umo/" 2>/dev/null || true
+    chmod 755 "$UMO_PROOT_DIR/home/umo"
 
-echo 'umo:umo' | chpasswd
-
-mkdir -p /etc/sudoers.d
-echo 'umo ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/umo
-chmod 440 /etc/sudoers.d/umo
-INNER
-    chmod +x "$UMO_PROOT_DIR/root/setup-user.sh"
-    umo_run_quiet "Creating user 'umo'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/setup-user.sh"
-    rm -f "$UMO_PROOT_DIR/root/setup-user.sh"
+    umo_fs_mkdir "$UMO_PROOT_DIR/etc/sudoers.d"
+    printf "umo ALL=(ALL) NOPASSWD:ALL\n" > "$UMO_PROOT_DIR/etc/sudoers.d/umo"
+    chmod 440 "$UMO_PROOT_DIR/etc/sudoers.d/umo"
 
     umo_log_ok "User 'umo' created (password: umo)."
 }
