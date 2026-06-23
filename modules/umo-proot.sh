@@ -143,9 +143,9 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
-    /usr/bin/env -i PWD=/ HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    /usr/bin/env -i PWD=/ HOME=/home/umo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 \
-    /bin/su - ubuntu "\$@"
+    /bin/su - umo "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
 
@@ -190,7 +190,7 @@ umo_proot_exec() {
 }
 
 umo_proot_create_user() {
-    umo_log_step "Creating user 'ubuntu'..."
+    umo_log_step "Creating user 'umo'..."
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt"
     cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST
@@ -200,25 +200,30 @@ deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main rest
 deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
 SRCLIST
 
+    rm -f "$UMO_PROOT_DIR/etc/group.lock" "$UMO_PROOT_DIR/etc/passwd.lock" \
+          "$UMO_PROOT_DIR/etc/shadow.lock" "$UMO_PROOT_DIR/etc/gshadow.lock" 2>/dev/null || true
+
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
-if ! id -u ubuntu >/dev/null 2>&1; then
-    adduser --disabled-password --gecos '' ubuntu
-    echo 'ubuntu:ubuntu' | chpasswd
+rm -f /etc/group.lock /etc/passwd.lock /etc/shadow.lock /etc/gshadow.lock 2>/dev/null || true
+
+if ! id -u umo >/dev/null 2>&1; then
+    adduser --disabled-password --gecos '' umo
+    echo 'umo:umo' | chpasswd
 fi
 
 mkdir -p /etc/sudoers.d
-echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu
-chmod 440 /etc/sudoers.d/ubuntu
+echo 'umo ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/umo
+chmod 440 /etc/sudoers.d/umo
 INNER
     chmod +x "$UMO_PROOT_DIR/root/setup-user.sh"
-    umo_run_quiet "Creating user 'ubuntu'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/setup-user.sh"
+    umo_run_quiet "Creating user 'umo'" "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/setup-user.sh"
     rm -f "$UMO_PROOT_DIR/root/setup-user.sh"
 
-    umo_log_ok "User 'ubuntu' created (password: ubuntu)."
+    umo_log_ok "User 'umo' created (password: umo)."
 }
 
 umo_proot_setup() {
