@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.1] - 2026-06-23
+
+### ✨ Added
+- **Global `umo` Launcher:** Created a global Termux command `umo` that acts as an alias to manage the container (start, stop, login, user, vnc). Added usage instructions to the installation summary.
+
+### 🐛 Fixed
+- **Summary Phase Auto-Exit:** Fixed the installer not exiting automatically after displaying the final summary.
+- **Double Screen Clear:** Prevented the installation summary from being erased by a duplicate screen clear.
+
 ## [v3.3.0] - 2026-06-23
 
 ### ✨ Changed
