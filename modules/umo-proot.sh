@@ -208,12 +208,21 @@ SRCLIST
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
-rm -f /etc/group.lock /etc/passwd.lock /etc/shadow.lock /etc/gshadow.lock 2>/dev/null || true
+rm -f /etc/group.lock /etc/passwd.lock /etc/shadow.lock /etc/gshadow.lock \
+      /etc/.pwd.lock 2>/dev/null || true
 
 if ! id -u umo >/dev/null 2>&1; then
-    adduser --disabled-password --gecos '' umo
-    echo 'umo:umo' | chpasswd
+    grep -q "^umo:" /etc/group   || echo "umo:x:1000:"          >> /etc/group
+    grep -q "^umo:" /etc/gshadow 2>/dev/null || echo "umo:!::"  >> /etc/gshadow 2>/dev/null || true
+    grep -q "^umo:" /etc/passwd  || echo "umo:x:1000:1000::/home/umo:/bin/bash" >> /etc/passwd
+    grep -q "^umo:" /etc/shadow  2>/dev/null || echo "umo:!:19000:0:99999:7:::" >> /etc/shadow 2>/dev/null || true
+    mkdir -p /home/umo
+    cp -r /etc/skel/. /home/umo/ 2>/dev/null || true
+    chown -R 1000:1000 /home/umo
+    chmod 755 /home/umo
 fi
+
+echo 'umo:umo' | chpasswd
 
 mkdir -p /etc/sudoers.d
 echo 'umo ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/umo
