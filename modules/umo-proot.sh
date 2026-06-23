@@ -190,14 +190,8 @@ umo_proot_exec() {
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
 
-    _keyring_url=$(curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/" | grep -o 'href="ubuntu-keyring_[0-9\.]*_all.deb"' | tail -n 1 | cut -d '"' -f 2 || true)
-    if [ -n "$_keyring_url" ]; then
-        curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/$_keyring_url" -o "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" 2>/dev/null || true
-        if [ -f "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" ]; then
-            dpkg-deb -x "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" "$UMO_PROOT_DIR" 2>/dev/null || true
-            rm -f "$UMO_PROOT_DIR/root/ubuntu-keyring.deb"
-        fi
-    fi
+    # Download the official binary GPG keyring directly to avoid any dpkg/deb extraction bugs
+    curl -sL "http://archive.ubuntu.com/ubuntu/project/ubuntu-archive-keyring.gpg" -o "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-archive-keyring.gpg" 2>/dev/null || true
 
     cat > "$UMO_PROOT_DIR/root/setup-user.sh" << 'INNER'
 #!/bin/sh
