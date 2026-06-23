@@ -36,8 +36,8 @@ umo_proot_prepare() {
     echo 'Dpkg::Options {"--force-all";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d"
-    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" 2>/dev/null || true
-    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3B4FE6ACC0B21F32" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
+    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x871920D1991BC93C" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" 2>/dev/null || true
+    curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x3B4FE6ACC0B21F32" > "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
 
     echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
