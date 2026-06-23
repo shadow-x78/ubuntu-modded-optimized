@@ -177,7 +177,7 @@ umo_ui_checklist() {
     _stty_save=$(stty -g 2>/dev/null) || _stty_save=""
 
     # Restore terminal on any exit
-    trap '[ -n "$_stty_save" ] && stty "$_stty_save" 2>/dev/null; umo_cursor_show' EXIT INT TERM
+    trap '[ -n "$_stty_save" ] && stty "$_stty_save" 2>/dev/null; stty echo icanon 2>/dev/null || true; umo_cursor_show' EXIT INT TERM
 
     stty -echo -icanon min 1 time 0 2>/dev/null || true
 
@@ -240,6 +240,8 @@ umo_ui_checklist() {
 
     # Restore terminal to normal cooked mode
     [ -n "$_stty_save" ] && stty "$_stty_save" 2>/dev/null || stty sane 2>/dev/null || true
+    # FORCE echo and icanon just to be absolutely sure (Termux busybox stty quirks)
+    stty echo icanon 2>/dev/null || true
     umo_cursor_show
     trap - EXIT INT TERM
 
