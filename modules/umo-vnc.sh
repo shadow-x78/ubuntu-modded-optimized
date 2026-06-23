@@ -20,48 +20,36 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
-# Suppress noisy download/progress lines but keep errors
-_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
-
 echo "=== UMO VNC INSTALL LOG ==="
 
-# Phase 0: Repair dpkg state from rootfs extraction
-echo "--- [0] Repairing dpkg state ---"
-dpkg --configure -a 2>&1 || true
-apt-get -f install -y 2>&1 || true
+# Critical: fix dpkg permissions from inside proot BEFORE any apt operation
+bash /root/.umo/fix-dpkg.sh 2>&1 || true
 
-# Phase 1: Update package lists
-echo "--- [1] Updating package lists ---"
+_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+
+echo "--- [1] apt update ---"
 apt-get update -y 2>&1 | _apt_filter || true
 
-# Phase 2: Foundation packages (apt-utils needed for debconf, dialog for TUI)
-echo "--- [2] Installing foundation (apt-utils) ---"
-apt-get install -y ubuntu-keyring 2>&1 | _apt_filter || true
-apt-get update -y 2>&1 | _apt_filter || true
-apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 || true
-dpkg --configure -a 2>&1 || true
+echo "--- [2] Installing apt-utils (required for debconf) ---"
+apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 | _apt_filter || true
+bash /root/.umo/fix-dpkg.sh 2>&1 || true
 
-# Phase 3: Install fonts first (their postinst runs font cache updates)
-echo "--- [3] Installing xfonts ---"
-apt-get install -y --no-install-recommends xfonts-base xfonts-encodings xfonts-utils 2>&1 || true
-dpkg --configure -a 2>&1 || true
-apt-get install -y --no-install-recommends xfonts-75dpi xfonts-100dpi 2>&1 || true
-dpkg --configure -a 2>&1 || true
+echo "--- [3] Installing fonts ---"
+apt-get install -y --no-install-recommends xfonts-base xfonts-encodings xfonts-utils 2>&1 | _apt_filter || true
+apt-get install -y --no-install-recommends xfonts-75dpi xfonts-100dpi 2>&1 | _apt_filter || true
+bash /root/.umo/fix-dpkg.sh 2>&1 || true
 
-# Phase 4: Install dbus-x11 (postinst creates /var/lib/dbus/machine-id)
 echo "--- [4] Installing dbus-x11 ---"
-apt-get install -y --no-install-recommends dbus-x11 2>&1 || true
-dpkg --configure -a 2>&1 || true
+apt-get install -y --no-install-recommends dbus-x11 2>&1 | _apt_filter || true
+bash /root/.umo/fix-dpkg.sh 2>&1 || true
 
-# Phase 5: Install TigerVNC
 echo "--- [5] Installing TigerVNC ---"
 apt-get install -y --no-install-recommends \
-    tigervnc-standalone-server tigervnc-viewer tigervnc-common 2>&1 || true
-dpkg --configure -a 2>&1 || true
+    tigervnc-standalone-server tigervnc-viewer tigervnc-common 2>&1 | _apt_filter || true
+bash /root/.umo/fix-dpkg.sh 2>&1 || true
 
-# Phase 6: Recovery pass — fix broken deps and retry config
-echo "--- [6] Recovery pass ---"
-apt-get -f install -y 2>&1 || true
+echo "--- [6] Recovery: fix broken deps ---"
+apt-get -f install -y 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 || true
 
 # Final verification
@@ -71,10 +59,12 @@ if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 
 fi
 
 echo "=== ERROR: TigerVNC installation failed ==="
-echo "--- dpkg audit (broken packages) ---"
-dpkg --audit 2>&1 | head -30
-echo "--- dpkg status (tigervnc) ---"
+echo "--- dpkg audit ---"
+dpkg --audit 2>&1 | head -20
+echo "--- dpkg status ---"
 dpkg -l 'tigervnc*' 2>&1 | tail -10
+echo "--- status file perms ---"
+ls -la /var/lib/dpkg/status* 2>&1
 exit 1
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"

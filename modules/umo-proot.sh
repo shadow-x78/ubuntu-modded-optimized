@@ -275,7 +275,48 @@ SRCLIST
         "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
         2>/dev/null || true
 
+    umo_proot_fix_dpkg
+
     umo_log_ok "User 'umo' created (password: umo)."
+}
+
+# Fix dpkg database permissions from INSIDE proot
+# (host-side chmod/touch is ineffective — proot's filesystem layer has different UID mapping)
+umo_proot_fix_dpkg() {
+    umo_fs_mkdir "$UMO_PROOT_DIR/root/.umo"
+
+    # Create a reusable fix script in the rootfs
+    cat > "$UMO_PROOT_DIR/root/.umo/fix-dpkg.sh" << 'FIXDPKG'
+#!/bin/sh
+# UMO — dpkg permission fix (MUST run inside proot)
+_d="/var/lib/dpkg"
+
+# Make entire dpkg database readable/writable/executable by owner
+chmod -R u+rwX "$_d" 2>/dev/null || true
+chmod 755 "$_d" "$_d/updates" "$_d/info" "$_d/parts" "$_d/triggers" 2>/dev/null || true
+
+# Pre-populate status-old from status (dpkg renames status→status-old on every write)
+if [ -f "$_d/status" ]; then
+    cp -f "$_d/status" "$_d/status-old" 2>/dev/null || true
+elif [ ! -f "$_d/status-old" ]; then
+    touch "$_d/status" "$_d/status-old" 2>/dev/null || true
+fi
+
+# Ensure lock files exist and are writable
+touch "$_d/lock" "$_d/lock-frontend" "$_d/available" 2>/dev/null || true
+chmod 644 "$_d/status" "$_d/status-old" "$_d/available" 2>/dev/null || true
+chmod 666 "$_d/lock" "$_d/lock-frontend" 2>/dev/null || true
+
+# Fix ownership (proot -0 reports root, but real UID may differ)
+chown -R 0:0 "$_d" 2>/dev/null || true
+
+# Configure any half-installed packages
+dpkg --configure -a 2>/dev/null || true
+FIXDPKG
+    chmod +x "$UMO_PROOT_DIR/root/.umo/fix-dpkg.sh" 2>/dev/null || true
+
+    # Run the fix from inside proot
+    "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/.umo/fix-dpkg.sh" 2>/dev/null || true
 }
 
 umo_proot_setup() {
