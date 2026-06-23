@@ -80,7 +80,6 @@ umo_proot_cmd() {
         PULSE_SERVER=127.0.0.1 \
         PULSE_LATENCY_MSEC=60 \
         PROOT_NO_SECCOMP=1 \
-        PROOT_LOAD_EXT_LIBS=0 \
         /bin/bash --login' \
         "$UMO_PROOT_DIR" \
         "$UMO_TERMUX_HOME" \
@@ -120,7 +119,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 PROOT_LOAD_EXT_LIBS=0 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 \
     /bin/bash --login "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-login.sh"
@@ -143,7 +142,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/home/ubuntu PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 PROOT_LOAD_EXT_LIBS=0 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 \
     /bin/su - ubuntu "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
@@ -202,7 +201,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -f /root/ubuntu-keyring.deb ]; then
-    dpkg --force-all --force-unsafe-io -i /root/ubuntu-keyring.deb || true
+    dpkg-deb -x /root/ubuntu-keyring.deb / || true
     rm -f /root/ubuntu-keyring.deb
 fi
 
