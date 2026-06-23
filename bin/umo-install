@@ -2,8 +2,6 @@
 # UMO — Main Installer (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
-stty sane 2>/dev/null || true
-trap 'stty sane 2>/dev/null || true' EXIT INT TERM HUP
 set -e
 unset LD_PRELOAD
 

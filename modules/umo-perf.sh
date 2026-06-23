@@ -42,10 +42,6 @@ EOC
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)."
 }
 
-umo_perf_swap() {
-    umo_log_info "Swap is not available inside proot, skipping."
-}
-
 umo_perf_debloat() {
     umo_log_step "Removing unnecessary services..."
 
@@ -168,7 +164,6 @@ umo_perf_setup() {
 
     umo_perf_apt
     umo_perf_dns
-    umo_perf_swap
     umo_perf_debloat
     umo_perf_cleanup
 

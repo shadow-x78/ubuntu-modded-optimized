@@ -110,13 +110,16 @@ umo_proot_cmd() {
 umo_proot_create_scripts() {
     umo_log_step "Creating login wrappers..."
 
-    # Create fake /proc files for pgrep/ps to work without Android SELinux blocking them
-    _fake_proc="$UMO_PROOT_DIR/.fake_proc"
-    umo_fs_mkdir "$_fake_proc"
-    echo "cpu  0 0 0 0 0 0 0 0 0 0" > "$_fake_proc/stat"
-    echo "Linux version 5.4.0-proot (termux)" > "$_fake_proc/version"
-    echo "0.00 0.00" > "$_fake_proc/uptime"
-    echo "0.00 0.00 0.00 1/1 1" > "$_fake_proc/loadavg"
+    # NOTE: We intentionally do NOT bind fake files onto /proc/* anymore.
+    # Binding a regular file onto /proc/stat (etc.) while /proc itself is also
+    # bound triggers a proot path-resolution bug where statx() on sibling root
+    # entries returns ENOTDIR — producing the "ls: cannot access 'bin': Not a
+    # directory" spam at the rootfs root. Real Android /proc is readable enough
+    # for ls and pgrep, so we rely on it directly.
+    #
+    # Clean up any fake_proc directory left at the rootfs root by older versions
+    # (it also used to leak a visible "/.fake_proc" entry in `ls -a /`).
+    rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
@@ -138,10 +141,6 @@ cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
-    -b "\$INSTALL_DIR/.fake_proc/stat:/proc/stat" \
-    -b "\$INSTALL_DIR/.fake_proc/version:/proc/version" \
-    -b "\$INSTALL_DIR/.fake_proc/uptime:/proc/uptime" \
-    -b "\$INSTALL_DIR/.fake_proc/loadavg:/proc/loadavg" \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \$AUDIO_SOCK \
     -w / \
@@ -165,10 +164,6 @@ cd "\$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
-    -b "\$INSTALL_DIR/.fake_proc/stat:/proc/stat" \
-    -b "\$INSTALL_DIR/.fake_proc/version:/proc/version" \
-    -b "\$INSTALL_DIR/.fake_proc/uptime:/proc/uptime" \
-    -b "\$INSTALL_DIR/.fake_proc/loadavg:/proc/loadavg" \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
     -w / \
@@ -222,11 +217,22 @@ umo_proot_create_user() {
     umo_log_step "Creating user 'umo'..."
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/apt"
+
+    # Use the official Ubuntu archive keyring (ships with the base rootfs) so
+    # `apt update` verifies cleanly: no NO_PUBKEY warnings and no Ign lines.
+    # If the keyring is missing (stripped rootfs), fall back to [trusted=yes].
+    _keyring="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
+    if [ -f "$UMO_PROOT_DIR$_keyring" ]; then
+        _apt_opt="[signed-by=$_keyring]"
+    else
+        _apt_opt="[trusted=yes]"
+    fi
+
     cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
+deb $_apt_opt http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
 SRCLIST
 
     rm -f "$UMO_PROOT_DIR/etc/group.lock" \

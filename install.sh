@@ -2,7 +2,6 @@
 # UMO — Quick-start Wrapper (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
-stty sane 2>/dev/null || true
 set -e
 printf '\033[2J\033[H'
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
