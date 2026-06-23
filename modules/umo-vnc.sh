@@ -22,31 +22,31 @@ export TZ=Etc/UTC
 
 echo "=== UMO VNC INSTALL LOG ==="
 
-# Critical: fix dpkg permissions from inside proot BEFORE any apt operation
-bash /root/.umo/fix-dpkg.sh 2>&1 || true
-
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+
+# Repair any half-configured packages from rootfs extraction
+dpkg --configure -a 2>&1 || true
 
 echo "--- [1] apt update ---"
 apt-get update -y 2>&1 | _apt_filter || true
 
 echo "--- [2] Installing apt-utils (required for debconf) ---"
 apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 | _apt_filter || true
-bash /root/.umo/fix-dpkg.sh 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 echo "--- [3] Installing fonts ---"
 apt-get install -y --no-install-recommends xfonts-base xfonts-encodings xfonts-utils 2>&1 | _apt_filter || true
 apt-get install -y --no-install-recommends xfonts-75dpi xfonts-100dpi 2>&1 | _apt_filter || true
-bash /root/.umo/fix-dpkg.sh 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 echo "--- [4] Installing dbus-x11 ---"
 apt-get install -y --no-install-recommends dbus-x11 2>&1 | _apt_filter || true
-bash /root/.umo/fix-dpkg.sh 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 echo "--- [5] Installing TigerVNC ---"
 apt-get install -y --no-install-recommends \
     tigervnc-standalone-server tigervnc-viewer tigervnc-common 2>&1 | _apt_filter || true
-bash /root/.umo/fix-dpkg.sh 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 echo "--- [6] Recovery: fix broken deps ---"
 apt-get -f install -y 2>&1 | _apt_filter || true
