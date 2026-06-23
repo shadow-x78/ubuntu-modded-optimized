@@ -32,14 +32,21 @@ umo_proot_prepare() {
     printf 'force-unsafe-io\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
     _dpkg_dir="$UMO_PROOT_DIR/var/lib/dpkg"
-    umo_fs_mkdir "$_dpkg_dir"
-    umo_fs_mkdir "$_dpkg_dir/updates"
-    umo_fs_mkdir "$_dpkg_dir/info"
-    umo_fs_mkdir "$_dpkg_dir/parts"
-    umo_fs_mkdir "$_dpkg_dir/triggers"
-    touch "$_dpkg_dir/status" 2>/dev/null || true
+    umo_fs_mkdir "$_dpkg_dir" \
+        "$_dpkg_dir/updates" "$_dpkg_dir/info" \
+        "$_dpkg_dir/parts" "$_dpkg_dir/triggers"
+    touch "$_dpkg_dir/status" "$_dpkg_dir/status-old" 2>/dev/null || true
     touch "$_dpkg_dir/available" 2>/dev/null || true
+    touch "$_dpkg_dir/lock" "$_dpkg_dir/lock-frontend" 2>/dev/null || true
     chmod -R u+rw "$_dpkg_dir" 2>/dev/null || true
+
+    # Pre-create directories that package maintainer scripts (postinst) write to
+    for _mpd in \
+        /var/lib/dbus /var/cache/debconf /var/cache/apt/archives/partial \
+        /var/lib/xfonts /var/lib/fontconfig /var/log/apt \
+        /etc/X11 /usr/share/X11 /var/lib/update-alternatives; do
+        umo_fs_mkdir "$UMO_PROOT_DIR$_mpd" 2>/dev/null || true
+    done
 
     umo_fs_mkdir "$UMO_PROOT_DIR/usr/sbin"
     cat > "$UMO_PROOT_DIR/usr/sbin/policy-rc.d" << 'POLICY'

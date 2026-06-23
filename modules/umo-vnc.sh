@@ -20,53 +20,62 @@ umo_vnc_install() {
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 
-# Phase 0: Repair any broken/half-configured dpkg state from rootfs extraction
+# Suppress noisy download/progress lines but keep errors
+_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+
+echo "=== UMO VNC INSTALL LOG ==="
+
+# Phase 0: Repair dpkg state from rootfs extraction
+echo "--- [0] Repairing dpkg state ---"
 dpkg --configure -a 2>&1 || true
 apt-get -f install -y 2>&1 || true
 
 # Phase 1: Update package lists
-apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
+echo "--- [1] Updating package lists ---"
+apt-get update -y 2>&1 | _apt_filter || true
 
-# Phase 2: Install foundation (apt-utils REQUIRED for proper debconf configuration)
-apt-get install -y ubuntu-keyring 2>&1 | tail -3 || true
-apt-get update -y 2>&1 | grep -v "^Ign\|^W:\|^Err\|^Get:" || true
-apt-get install -y apt-utils dialog tzdata 2>&1 | tail -5 || true
+# Phase 2: Foundation packages (apt-utils needed for debconf, dialog for TUI)
+echo "--- [2] Installing foundation (apt-utils) ---"
+apt-get install -y ubuntu-keyring 2>&1 | _apt_filter || true
+apt-get update -y 2>&1 | _apt_filter || true
+apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 || true
 dpkg --configure -a 2>&1 || true
 
-# Phase 3: Install TigerVNC + dependencies (first attempt)
-apt-get install -y \
-    tigervnc-standalone-server \
-    tigervnc-viewer \
-    tigervnc-common \
-    dbus-x11 \
-    xfonts-base \
-    xfonts-75dpi \
-    xfonts-100dpi 2>&1 | tail -15
+# Phase 3: Install fonts first (their postinst runs font cache updates)
+echo "--- [3] Installing xfonts ---"
+apt-get install -y --no-install-recommends xfonts-base xfonts-encodings xfonts-utils 2>&1 || true
+dpkg --configure -a 2>&1 || true
+apt-get install -y --no-install-recommends xfonts-75dpi xfonts-100dpi 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
-# Phase 4: Recovery — dpkg error 100 leaves packages unpacked but unconfigured
-if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
-    dpkg --configure -a 2>&1 || true
-    apt-get -f install -y 2>&1 | tail -5 || true
+# Phase 4: Install dbus-x11 (postinst creates /var/lib/dbus/machine-id)
+echo "--- [4] Installing dbus-x11 ---"
+apt-get install -y --no-install-recommends dbus-x11 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
-    # Retry: second pass finishes configuration of already-unpacked packages
-    apt-get install -y \
-        tigervnc-standalone-server \
-        tigervnc-viewer \
-        tigervnc-common \
-        dbus-x11 \
-        xfonts-base \
-        xfonts-75dpi \
-        xfonts-100dpi 2>&1 | tail -10
-    dpkg --configure -a 2>&1 || true
-fi
+# Phase 5: Install TigerVNC
+echo "--- [5] Installing TigerVNC ---"
+apt-get install -y --no-install-recommends \
+    tigervnc-standalone-server tigervnc-viewer tigervnc-common 2>&1 || true
+dpkg --configure -a 2>&1 || true
+
+# Phase 6: Recovery pass — fix broken deps and retry config
+echo "--- [6] Recovery pass ---"
+apt-get -f install -y 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 # Final verification
-if ! command -v tigervncserver >/dev/null 2>&1 && ! command -v vncserver >/dev/null 2>&1; then
-    echo "ERROR: TigerVNC installation failed"
-    echo "--- dpkg audit (broken/half-configured packages) ---"
-    dpkg --audit 2>&1 | head -20
-    exit 1
+if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 2>&1; then
+    echo "=== TigerVNC installed successfully ==="
+    exit 0
 fi
+
+echo "=== ERROR: TigerVNC installation failed ==="
+echo "--- dpkg audit (broken packages) ---"
+dpkg --audit 2>&1 | head -30
+echo "--- dpkg status (tigervnc) ---"
+dpkg -l 'tigervnc*' 2>&1 | tail -10
+exit 1
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
     umo_run_quiet "Installing TigerVNC..." "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
