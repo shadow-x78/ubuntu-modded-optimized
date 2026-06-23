@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [v3.2.9] - 2026-06-23
 
 ### 🐛 Fixed
+- **APT NO_PUBKEY Error:** Fixed `NO_PUBKEY 871920D1991BC93C` by dynamically downloading and installing the official `ubuntu-keyring` `.deb` package directly from Ubuntu Ports before initializing the container user. This entirely eliminates the need for APT security bypasses or keyserver reliance.
 - **DPKG Fcntl/Privilege Error (100):** Fixed `dpkg` error code 100 during package installation by bypassing APT `fcntl` locks (`Debug::NoLocking "1"`) and disabling privilege dropping.
 - **Proot Extraction Permissions (Hardlinks):** Restored `--link2symlink` globally. While EXT4 supports symlinks natively, Android's SELinux policy enforces severe restrictions preventing unprivileged apps from using the `link` system call. Without `--link2symlink`, extracting the Ubuntu base fails on `tar: Cannot hard link ... Permission denied`. This flag converts hardlinks correctly and allows `tar` to finish unpacking. With this restored, AND the `/dev/shm` mount correctly mapped, the installation will proceed perfectly.
 

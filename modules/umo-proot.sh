@@ -35,7 +35,6 @@ umo_proot_prepare() {
     echo 'APT::Sandbox::User "root";' > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Options {"--force-all";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
-    # Clean up any bad keys
     rm -f "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2018.asc" "$UMO_PROOT_DIR/etc/apt/trusted.gpg.d/ubuntu-2012.asc" 2>/dev/null || true
 
     echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
@@ -192,7 +191,6 @@ umo_proot_exec() {
 umo_proot_create_user() {
     umo_log_step "Creating user 'ubuntu'..."
 
-    # Fetch official ubuntu-keyring from ports to install binary GPG keys directly
     _keyring_url=$(curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/" | grep -o 'href="ubuntu-keyring_[0-9\.]*_all.deb"' | tail -n 1 | cut -d '"' -f 2 || true)
     if [ -n "$_keyring_url" ]; then
         curl -sL "http://ports.ubuntu.com/ubuntu-ports/pool/main/u/ubuntu-keyring/$_keyring_url" -o "$UMO_PROOT_DIR/root/ubuntu-keyring.deb" 2>/dev/null || true
