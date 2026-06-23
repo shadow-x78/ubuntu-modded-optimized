@@ -36,6 +36,7 @@ umo_proot_prepare() {
     echo 'Dpkg::Options {"--force-all"; "--force-unsafe-io";};' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'Dpkg::Use-Pty "0";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
 
+
     echo 'DPkg::FlushSTDIN "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::Run-Directory "/";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
     echo 'DPkg::DropPrivileges "false";' >> "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null || true
@@ -98,6 +99,7 @@ umo_proot_create_scripts() {
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
+# UMO — Ubuntu Login Wrapper
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -126,6 +128,7 @@ EOF
 
     cat > "$UMO_TERMUX_HOME/umo-user.sh" << EOF
 #!/bin/sh
+# UMO — Ubuntu User Login
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -148,6 +151,7 @@ EOF
 
     cat > "$UMO_TERMUX_HOME/umo-start.sh" << 'EOF'
 #!/bin/sh
+# UMO — Quick Start
 echo "[==>] Starting UMO environment..."
 termux-wake-lock 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true
