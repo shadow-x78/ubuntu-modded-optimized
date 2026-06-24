@@ -14,7 +14,7 @@ UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_TERMUX_PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 
 umo_proot_prepare() {
-    umo_log_step "Preparing proot container..."
+    umo_log_step "Preparing proot container"
 
     for _d in dev proc sys tmp sdcard data termux root home/umo; do
         umo_fs_mkdir "$UMO_PROOT_DIR/$_d"
@@ -31,29 +31,16 @@ umo_proot_prepare() {
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d"
     printf 'force-unsafe-io\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
-    # Relocate dpkg database to Termux internal storage (ext4 — supports rename()).
-    # The rootfs may be on a filesystem that denies rename(), which breaks dpkg
-    # (dpkg does: rename(status→status-old) on every package install).
-    # We bind-mount this onto /var/lib/dpkg inside proot via umo-login.sh.
     _dpkg_src="$UMO_PROOT_DIR/var/lib/dpkg"
-    _dpkg_tmp="$UMO_TERMUX_PREFIX/tmp/umo-dpkg"
 
-    # Ensure source dirs exist in rootfs (for initial structure)
     umo_fs_mkdir "$_dpkg_src" \
         "$_dpkg_src/updates" "$_dpkg_src/info" \
         "$_dpkg_src/parts" "$_dpkg_src/triggers"
 
-    # Create the working dpkg database on Termux storage
-    umo_fs_mkdir "$_dpkg_tmp"
-    # Copy existing database from rootfs (if any packages are pre-installed)
-    cp -a "$_dpkg_src/." "$_dpkg_tmp/" 2>/dev/null || true
-    for _sub in updates info parts triggers; do
-        umo_fs_mkdir "$_dpkg_tmp/$_sub"
-    done
     for _f in status status-old available lock lock-frontend; do
-        touch "$_dpkg_tmp/$_f" 2>/dev/null || true
+        touch "$_dpkg_src/$_f" 2>/dev/null || true
     done
-    chmod -R u+rwX "$_dpkg_tmp" 2>/dev/null || true
+    chmod -R 755 "$_dpkg_src" 2>/dev/null || true
 
     umo_fs_mkdir "$UMO_PROOT_DIR/usr/sbin"
     cat > "$UMO_PROOT_DIR/usr/sbin/policy-rc.d" << 'POLICY'
@@ -100,6 +87,7 @@ umo_proot_cmd() {
     fi
 
     printf 'proot \
+        --link2symlink \
         --sysvipc \
         -0 \
         -r %s \
@@ -110,7 +98,6 @@ umo_proot_cmd() {
         -b %s:/termux \
         -b /data \
         -b %s/tmp:/tmp -b %s/tmp:/dev/shm \
-        -b %s/tmp/umo-dpkg:/var/lib/dpkg \
         %s \
         -w %s \
         /usr/bin/env -i \
@@ -120,12 +107,10 @@ umo_proot_cmd() {
         LANG=C.UTF-8 \
         PULSE_SERVER=127.0.0.1 \
         PULSE_LATENCY_MSEC=60 \
-        PROOT_NO_SECCOMP=1 \
         /bin/bash --login' \
         "$UMO_PROOT_DIR" \
         "$UMO_TERMUX_HOME" \
         "$UMO_TERMUX_HOME" \
-        "$UMO_TERMUX_PREFIX" \
         "$UMO_TERMUX_PREFIX" \
         "$UMO_TERMUX_PREFIX" \
         "${_audio_bind}" \
@@ -135,7 +120,7 @@ umo_proot_cmd() {
 }
 
 umo_proot_create_scripts() {
-    umo_log_step "Creating login wrappers..."
+    umo_log_step "Creating login wrappers"
 
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
     rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
@@ -148,7 +133,6 @@ PREFIX="$UMO_TERMUX_PREFIX"
 
 [ -d "\$INSTALL_DIR" ] || { echo "[ERR] UMO not installed."; exit 1; }
 
-export PROOT_NO_SECCOMP=1
 unset LD_PRELOAD
 unset LD_LIBRARY_PATH
 
@@ -158,15 +142,14 @@ AUDIO_SOCK=""
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
-    -b "\$PREFIX/tmp/umo-dpkg:/var/lib/dpkg" \
     \$AUDIO_SOCK \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
     /bin/bash --login "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-login.sh"
@@ -177,20 +160,18 @@ EOF
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
-export PROOT_NO_SECCOMP=1
 unset LD_PRELOAD
 unset LD_LIBRARY_PATH
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --sysvipc -0 -r "\$INSTALL_DIR" \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
     -b /dev -b /proc -b /sys \
     -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
-    -b "\$PREFIX/tmp/umo-dpkg:/var/lib/dpkg" \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/home/umo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 PROOT_NO_SECCOMP=1 \
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
     /bin/su - umo "\$@"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
@@ -237,7 +218,7 @@ umo_proot_exec() {
 }
 
 umo_proot_create_user() {
-    umo_log_step "Creating default user 'umo'..."
+    umo_log_step "Creating default user 'umo'"
 
     _etc="$UMO_PROOT_DIR/etc"
 

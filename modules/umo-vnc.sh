@@ -14,7 +14,7 @@ UMO_VNC_DEPTH="${UMO_VNC_DEPTH:-24}"
 UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 
 umo_vnc_install() {
-    umo_log_step "Installing VNC server..."
+    umo_log_step "Installing VNC server"
     cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -75,7 +75,7 @@ INNER
 }
 
 umo_vnc_configure() {
-    umo_log_step "Configuring VNC..."
+    umo_log_step "Configuring VNC"
 
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
     umo_fs_mkdir "$_vnc_dir"
@@ -83,7 +83,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-3.3.5}" \
+            "UMO_VERSION" "${UMO_VERSION:-3.3.6}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
@@ -107,7 +107,7 @@ umo_vnc_configure() {
 }
 
 umo_vnc_create_scripts() {
-    umo_log_step "Creating VNC scripts..."
+    umo_log_step "Creating VNC scripts"
 
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc" << 'EOF'
 #!/bin/sh

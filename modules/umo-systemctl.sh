@@ -8,7 +8,7 @@ _UMO_MOD_SYSCTL_LOADED=1
 . "${UMO_LIB_DIR:-./lib}/core-ansi.sh"
 
 umo_systemctl_install() {
-    umo_log_step "Installing systemctl emulator..."
+    umo_log_step "Installing systemctl emulator"
 
     _bin="${UMO_INSTALL_DIR:?}/usr/local/bin/systemctl"
     cat > "$_bin" << 'EOF'

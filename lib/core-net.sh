@@ -116,7 +116,7 @@ umo_net_extract() {
     [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
     mkdir -p "$_dest"
 
-    umo_log_step "Extracting archive..."
+    umo_log_step "Extracting archive"
 
     case "$_archive" in
         *.tar.gz|*.tgz)
