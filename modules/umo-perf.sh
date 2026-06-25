@@ -39,6 +39,28 @@ EOC
         printf '%s\n' 'APT::Get::Assume-Yes "true";' >> "${UMO_INSTALL_DIR:?}$_apt_conf"
     fi
 
+    cat > "$UMO_INSTALL_DIR/root/divert-triggers.sh" << 'INNER'
+#!/bin/sh
+export DEBIAN_FRONTEND=noninteractive
+
+if command -v debconf-set-selections >/dev/null 2>&1; then
+    echo "man-db man-db/auto-update boolean false" | debconf-set-selections 2>/dev/null || true
+fi
+
+for _bin in gtk-update-icon-cache update-initramfs systemd-hwdb update-command-not-found update-mime-database update-desktop-database; do
+    if [ -e "/usr/bin/$_bin" ] && [ ! -L "/usr/bin/$_bin" ]; then
+        dpkg-divert --local --rename --add "/usr/bin/$_bin" 2>/dev/null || true
+        ln -sf /bin/true "/usr/bin/$_bin"
+    elif [ -e "/usr/sbin/$_bin" ] && [ ! -L "/usr/sbin/$_bin" ]; then
+        dpkg-divert --local --rename --add "/usr/sbin/$_bin" 2>/dev/null || true
+        ln -sf /bin/true "/usr/sbin/$_bin"
+    fi
+done
+INNER
+    chmod +x "$UMO_INSTALL_DIR/root/divert-triggers.sh"
+    "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" >/dev/null 2>&1
+    rm -f "$UMO_INSTALL_DIR/root/divert-triggers.sh"
+
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)."
 }
 
