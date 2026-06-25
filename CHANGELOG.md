@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [v3.3.8] - 2026-06-25
 
 ### ✨ Added
+- **Login Banner:** Injected the UMO ASCII logo and a separator line into `.bashrc`, displaying it right before `neofetch` upon login for a more branded and polished experience.
 - **Self Update:** Redesigned the `umo update` command to act as a self-updater. It now executes `git pull` on the main repository directory, pulling the latest installer and module code directly from GitHub without needing to re-clone the repository.
 
 ### 🗑️ Removed
