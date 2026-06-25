@@ -17,7 +17,7 @@ umo_sys_require_termux() {
     if ! umo_sys_is_termux; then
         umo_die "UMO must run inside Termux environment."
     fi
-    umo_log_ok "Termux environment verified."
+    umo_log_ok "Termux environment verified"
 }
 
 umo_sys_arch() {
@@ -52,7 +52,7 @@ umo_sys_require_space() {
     if [ "$_free_mb" -lt "$_required_mb" ]; then
         umo_die "Insufficient storage: ${_free_mb}MB free, ${_required_mb}MB required."
     fi
-    umo_log_ok "Storage: ${_free_gb}GB available (${_required_mb}MB required)."
+    umo_log_ok "Storage: ${_free_gb}GB available (${_required_mb}MB required)"
 }
 
 umo_sys_ram_mb() {
@@ -72,7 +72,7 @@ umo_sys_has_internet() {
 
 umo_sys_require_internet() {
     if umo_sys_has_internet; then
-        umo_log_ok "Internet connection verified."
+        umo_log_ok "Internet connection verified"
     else
         umo_die "No internet connection. Please connect and retry."
     fi
