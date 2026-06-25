@@ -283,7 +283,7 @@ _umo_run_update() {
         git fetch origin main || { _umo_err "Failed to fetch updates"; exit 1; }
         git reset --hard origin/main || { _umo_err "Failed to update UMO"; exit 1; }
         _umo_ok "UMO has been updated successfully"
-        printf "  %b[ ℹ ]%b %bYou may need to run '%b%b%b' again to apply changes.%b\n" "$_UMO_B_CYAN" "$_UMO_NC" "$_UMO_DIM" "$_UMO_NC" "$_UMO_B_CYAN" "bash install.sh" "$_UMO_DIM" "$_UMO_NC"
+        printf "  %b[ ℹ ]%b You may need to run '%b%s%b' again to apply changes.\n" "$_UMO_CYN" "$_UMO_NC" "$_UMO_CYN" "bash install.sh" "$_UMO_NC"
     else
         _umo_err "UMO was not installed via git clone. Cannot auto-update"
         exit 1
