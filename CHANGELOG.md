@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.8] - 2026-06-25
+
+### ✨ Added
+- **Self Update:** Redesigned the `umo update` command to act as a self-updater. It now executes `git pull` on the main repository directory, pulling the latest installer and module code directly from GitHub without needing to re-clone the repository.
+
+### 🗑️ Removed
+- **Default Start Alias:** Removed the default `start` alias for the `umo` CLI. Executing `umo` without arguments will no longer arbitrarily start the container. Users must explicitly specify an action (e.g., `umo login` or `umo user`), and the `umo` alias has been removed from the help menu entirely.
+
 ## [v3.3.7] - 2026-06-25
 
 ### ⚡ Performance

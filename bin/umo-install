@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.3.7"
+export UMO_VERSION="3.3.8"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -204,9 +204,12 @@ umo_phase_finalize() {
         fi
     done
 
-    cat > "$HOME/../usr/bin/umo" << 'UMOCMD'
+    cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="3.3.7"
+_UMO_VERSION="3.3.8"
+_UMO_REPO_DIR="${SCRIPT_DIR}"
+UMOCMD
+    cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
 _UMO_DIM='\033[2m'
@@ -260,9 +263,16 @@ _umo_status() {
 }
 
 _umo_run_update() {
-    _umo_info "Updating Ubuntu packages..."
-    "$_UMO_TERMUX_HOME/umo-login.sh" -c "apt-get update -y && apt-get upgrade -y && apt-get autoremove -y"
-    _umo_ok "Update complete."
+    _umo_info "Updating UMO from GitHub..."
+    if [ -d "$_UMO_REPO_DIR/.git" ]; then
+        cd "$_UMO_REPO_DIR" || exit 1
+        git pull origin main || { _umo_err "Failed to update UMO."; exit 1; }
+        _umo_ok "UMO has been updated successfully."
+        _umo_info "You may need to run ./install.sh again to apply changes."
+    else
+        _umo_err "UMO was not installed via git clone. Cannot auto-update."
+        exit 1
+    fi
 }
 
 _umo_run_cmd() {
@@ -314,7 +324,6 @@ _umo_help() {
     printf "  ${_UMO_BOLD}Usage:${_UMO_NC}  ${_UMO_CYN}umo${_UMO_NC} ${_UMO_DIM}[COMMAND] [OPTIONS]${_UMO_NC}\n\n"
 
     printf "  ${_UMO_BOLD}${_UMO_PRI}Session${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio (default)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Stop all UMO processes"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Show running status of UMO services"
     printf "\n"
@@ -327,7 +336,7 @@ _umo_help() {
 
     printf "  ${_UMO_BOLD}${_UMO_PRI}System${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start VNC server only"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Update all Ubuntu packages"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Update UMO script from GitHub"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Run a command inside Ubuntu"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Backup Ubuntu container"
     printf "\n"
@@ -338,7 +347,7 @@ _umo_help() {
     printf "\n"
 
     printf "  ${_UMO_BOLD}Examples:${_UMO_NC}\n"
-    printf "    ${_UMO_DIM}\$ umo${_UMO_NC}                          Start Ubuntu\n"
+    printf "    ${_UMO_DIM}\$ umo login${_UMO_NC}                     Login to Ubuntu\n"
     printf "    ${_UMO_DIM}\$ umo status${_UMO_NC}                    Check services\n"
     printf "    ${_UMO_DIM}\$ umo --user myuser${_UMO_NC}             Switch to user\n"
     printf "    ${_UMO_DIM}\$ umo run \"apt list --installed\"${_UMO_NC} Run command\n"
@@ -347,7 +356,6 @@ _umo_help() {
 }
 
 case "$1" in
-    start)                  exec "$_UMO_TERMUX_HOME/umo-start.sh" ;;
     stop)                   exec "$_UMO_TERMUX_HOME/umo-stop.sh" ;;
     login)                  exec "$_UMO_TERMUX_HOME/umo-login.sh" ;;
     user)                   exec "$_UMO_TERMUX_HOME/umo-user.sh" ;;
@@ -400,13 +408,12 @@ umo_phase_summary() {
     umo_repeat "$UMO_LINE_H" 11
     printf "%b\n\n" "$UMO_NC"
 
-    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo" "$UMO_NC" "Start Ubuntu + VNC + Audio"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo stop" "$UMO_NC" "Stop all services"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo login" "$UMO_NC" "Login as root"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo user" "$UMO_NC" "Login as default user"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --user <name>" "$UMO_NC" "Switch default user"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo status" "$UMO_NC" "Show service status"
-    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update Ubuntu packages"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update UMO script"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --help" "$UMO_NC" "Full command reference"
 
     _readme_dir="$UMO_INSTALL_DIR/root/.umo"
@@ -419,7 +426,6 @@ umo_phase_summary() {
 ========================================
 
 Commands (run from Termux):
-  umo                  Start Ubuntu + VNC + Audio
   umo stop             Stop all services
   umo login            Login as root
   umo user             Login as default user
