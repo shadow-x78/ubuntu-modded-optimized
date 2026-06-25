@@ -17,6 +17,7 @@
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
+[![نجوم](https://img.shields.io/github/stars/Shadow-x78/termux-ubuntu-umo?style=flat-square&color=eab308&logo=github&label=النجوم)](https://github.com/Shadow-x78/termux-ubuntu-umo/stargazers)
 
 </div>
 

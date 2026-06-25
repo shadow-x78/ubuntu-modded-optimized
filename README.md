@@ -17,6 +17,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
+[![Stars](https://img.shields.io/github/stars/Shadow-x78/termux-ubuntu-umo?style=flat-square&color=eab308&logo=github)](https://github.com/Shadow-x78/termux-ubuntu-umo/stargazers)
 
 </div>
 
