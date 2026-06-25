@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### ✨ Added
 - **Start Command:** Reintroduced `umo start` to the CLI wrapper. It behaves similarly to the old default behavior, explicitly starting the Ubuntu session alongside VNC and Audio servers.
 - **Login Separation:** Clarified that `umo login` and `umo user` perform a clean standard login without initiating background VNC or Audio servers.
+- **Legacy Alias Cleanup:** Added an automatic cleanup routine during installation that safely removes legacy `umo` and `startubuntu` aliases from the user's `~/.bashrc` and `~/.zshrc`, ensuring the new CLI wrapper works perfectly without interference.
 
 ## [v3.3.8] - 2026-06-25
 

@@ -190,6 +190,14 @@ umo_phase_finalize() {
     "$HOME/umo-login.sh" -c "dpkg --configure -a" 2>/dev/null || true
     "$HOME/umo-login.sh" -c "usermod -aG sudo umo" 2>/dev/null || true
 
+    for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        if [ -f "$_rc" ]; then
+            sed -i '/alias umo=/d' "$_rc" 2>/dev/null || true
+            sed -i '/alias startubuntu=/d' "$_rc" 2>/dev/null || true
+            sed -i '/alias loginubuntu=/d' "$_rc" 2>/dev/null || true
+        fi
+    done
+
     for _pid in $(pgrep -f "proot" 2>/dev/null); do
         kill "$_pid" 2>/dev/null || true
     done
