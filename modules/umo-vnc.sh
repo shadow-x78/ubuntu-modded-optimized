@@ -132,7 +132,6 @@ $_vnc_cmd "$VNC_DISPLAY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
     -name "UMO Desktop" \
-    -deferUpdate 1 \
     -alwaysshared \
     -Log "*:stderr:100" &
 
