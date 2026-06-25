@@ -199,9 +199,8 @@ umo_phase_finalize() {
     done
 
     for _pid in $(pgrep -f "proot" 2>/dev/null); do
-        kill "$_pid" 2>/dev/null || true
+        kill -9 "$_pid" 2>/dev/null || true
     done
-    wait 2>/dev/null || true
 
     for _script in start stop; do
         _src="$SCRIPT_DIR/bin/umo-$_script"
@@ -455,10 +454,10 @@ README_EOF
     printf "\n  %bRun %bumo --help%b%b for the full command reference.%b\n\n" "$UMO_DIM" "$UMO_B_CYAN" "$UMO_NC" "$UMO_DIM" "$UMO_NC"
 
     for _pid in $(pgrep -f "umo-login.sh" 2>/dev/null); do
-        kill "$_pid" 2>/dev/null || true
+        kill -9 "$_pid" 2>/dev/null || true
     done
     for _pid in $(pgrep -f "proot.*umo" 2>/dev/null); do
-        kill "$_pid" 2>/dev/null || true
+        kill -9 "$_pid" 2>/dev/null || true
     done
 }
 
@@ -557,4 +556,5 @@ umo_main() {
 }
 
 umo_main "$@"
+exec >&- 2>&-
 exit 0

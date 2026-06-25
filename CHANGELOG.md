@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - **Login Separation:** Clarified that `umo login` and `umo user` perform a clean standard login without initiating background VNC or Audio servers.
 - **Legacy Alias Cleanup:** Added an automatic cleanup routine during installation that safely removes legacy `umo` and `startubuntu` aliases from the user's `~/.bashrc` and `~/.zshrc`, ensuring the new CLI wrapper works perfectly without interference.
 
+### 🐛 Fixed
+- **Installer Hang:** Resolved an issue where the installer would hang at the "Installation Complete" screen because background daemons (like `dbus-daemon`) spawned during installation were keeping the terminal's file descriptors open.
+
 ## [v3.3.8] - 2026-06-25
 
 ### ✨ Added
