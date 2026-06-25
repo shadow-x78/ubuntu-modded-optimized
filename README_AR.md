@@ -222,6 +222,6 @@ UMO/
 بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 [سجل التغييرات](CHANGELOG.md)
 
-<sub>&copy; 2026 Shadow-x78</sub>
+<sub>Ubuntu Modded Optimized (UMO)</sub>
 
 </div>
