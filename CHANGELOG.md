@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 ### 🎨 Changed
 - **UI:** Changed `umo_log_step` labels to use imperative verbs (e.g., "Install XFCE4" instead of "Installing XFCE4") for cleaner and more consistent terminal output.
 - **UI:** Removed trailing dots from all `umo_log_step` output labels to keep the interface clean and concise.
+- **UI:** Removed "Checking internet connectivity" log step; the script now simply displays the final connection status directly.
 
 ### ⚡ Performance
 - **Massive Speedup for Apps & Themes:** Disabled notorious PRoot bottlenecks (`gtk-update-icon-cache`, `update-initramfs`, `systemd-hwdb`, `update-command-not-found`, `update-mime-database`, `update-desktop-database`) and disabled `man-db` auto-updates. This prevents infinite hangs and slashes installation times for massive packages (like `xfce4`, `papirus-icon-theme` and `libreoffice`) by bypassing useless trigger generation inside the container.

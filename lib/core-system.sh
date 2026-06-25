@@ -71,7 +71,6 @@ umo_sys_has_internet() {
 }
 
 umo_sys_require_internet() {
-    umo_log_info "Checking internet connectivity..."
     if umo_sys_has_internet; then
         umo_log_ok "Internet connection verified."
     else
