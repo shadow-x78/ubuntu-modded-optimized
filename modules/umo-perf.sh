@@ -28,7 +28,7 @@ Acquire::Languages "none";
 Acquire::PDiffs "false";
 Acquire::ForceIPv4 "true";
 Acquire::Queue-Mode "host";
-DPkg::Options {"--force-unsafe-io"};
+DPkg::Options:: "--force-unsafe-io";
 EOC
     fi
 
