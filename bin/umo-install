@@ -283,7 +283,7 @@ _umo_run_update() {
         git fetch origin main || { _umo_err "Failed to fetch updates."; exit 1; }
         git reset --hard origin/main || { _umo_err "Failed to update UMO."; exit 1; }
         _umo_ok "UMO has been updated successfully."
-        _umo_info "You may need to run ./install.sh again to apply changes."
+        _umo_info "You may need to run 'bash install.sh' again to apply changes."
     else
         _umo_err "UMO was not installed via git clone. Cannot auto-update."
         exit 1
@@ -299,6 +299,7 @@ _umo_run_cmd() {
 }
 
 _umo_set_user() {
+    _umo_header
     _new_user="$1"
     if [ -z "$_new_user" ]; then
         _umo_err "Usage: umo --user <username>"
@@ -319,6 +320,7 @@ _umo_set_user() {
 }
 
 _umo_backup() {
+    _umo_header
     _bak_dir="${1:-$_UMO_TERMUX_HOME/umo-backup}"
     _bak_file="$_bak_dir/umo-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
     _install_dir=$(grep 'INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
