@@ -31,13 +31,21 @@ else
     printf "\n"
     printf "  %b➜%b  Starting Ubuntu + VNC + Audio...\n" "$_UMO_CYN" "$_UMO_NC"
 
-    "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" &
+    "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" >/dev/null 2>&1 &
     sleep 3
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
     [ -z "$IP" ] && IP="127.0.0.1"
 
-    printf "\n"
+    printf "\n${_UMO_PRI}"
+    printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
+    printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
+    printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
+    printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
+    printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
+    printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+    printf "${_UMO_NC}\n"
+
     printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
     printf "  %b%b▸ UMO Session Active%b\n" "$_UMO_BOLD" "$_UMO_GRN" "$_UMO_NC"
     printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
@@ -48,6 +56,5 @@ else
     printf "\n"
     printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
     printf "\n"
-
-    exec "$TERMUX_HOME/umo-login.sh"
 fi
+

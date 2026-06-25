@@ -42,7 +42,7 @@ dpkg --configure -a 2>&1 || true
 
 echo "--- [5] Installing TigerVNC ---"
 apt-get install -y --no-install-recommends \
-    tigervnc-standalone-server tigervnc-viewer tigervnc-common 2>&1 | _apt_filter || true
+    tigervnc-standalone-server tigervnc-viewer tigervnc-common tigervnc-tools 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 || true
 
 echo "--- [6] Recovery: fix broken deps ---"
