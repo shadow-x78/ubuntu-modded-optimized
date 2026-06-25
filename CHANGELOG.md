@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **`dpkg` Function not implemented / Permission denied (DEFINITIVE FIX):** The `dpkg` database fails when installing packages on Termux because `dpkg` attempts to use the `link()` syscall to back up `status` to `status-old`. Android 8+ blocks `link()` calls for untrusted apps, resulting in `Permission denied` or `ENOSYS`. **Solution:** Removed the faulty `$PREFIX/tmp/umo-dpkg` bind-mount and removed `PROOT_NO_SECCOMP=1` (which disabled syscall filtering and caused `Function not implemented` errors on `execveat`/`linkat`). Added `--link2symlink` to all `proot` login wrappers (`umo-login.sh`, `umo-user.sh`, `umo_proot_cmd`). This natively intercepts `link()` via seccomp and translates it to `symlink()`, completely bypassing the Android restriction and allowing `dpkg` and `dpkg-query` to operate seamlessly.
 
 ### 🎨 Changed
+- **UI:** Changed `umo_log_step` labels to use imperative verbs (e.g., "Install XFCE4" instead of "Installing XFCE4") for cleaner and more consistent terminal output.
 - **UI:** Removed trailing dots from all `umo_log_step` output labels to keep the interface clean and concise.
 
 ### 🔄 Updated

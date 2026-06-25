@@ -10,7 +10,7 @@ _UMO_MOD_DE_LOADED=1
 UMO_DE="${UMO_DE:-xfce4}"
 
 umo_de_lxde() {
-    umo_log_step "Installing LXDE (ultra-lightweight)"
+    umo_log_step "Install LXDE (ultra-lightweight)"
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -22,7 +22,7 @@ INNER
 }
 
 umo_de_xfce4() {
-    umo_log_step "Installing XFCE4 (recommended)"
+    umo_log_step "Install XFCE4 (recommended)"
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -35,7 +35,7 @@ INNER
 }
 
 umo_de_openbox() {
-    umo_log_step "Installing Openbox (minimal)"
+    umo_log_step "Install Openbox (minimal)"
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -47,7 +47,7 @@ INNER
 }
 
 umo_de_minimal() {
-    umo_log_step "Installing minimal X11"
+    umo_log_step "Install minimal X11"
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive

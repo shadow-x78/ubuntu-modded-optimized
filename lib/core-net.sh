@@ -54,7 +54,7 @@ umo_net_download() {
     _url="$1"
     _output="$2"
 
-    umo_log_step "Downloading: $(basename "$_url")"
+    umo_log_step "Download: $(basename "$_url")"
 
     if umo_sys_has_cmd wget; then
         wget --quiet --timeout=60 --tries=3 -O "$_output" "$_url" 2>/dev/null
@@ -116,7 +116,7 @@ umo_net_extract() {
     [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
     mkdir -p "$_dest"
 
-    umo_log_step "Extracting archive"
+    umo_log_step "Extract archive"
 
     case "$_archive" in
         *.tar.gz|*.tgz)

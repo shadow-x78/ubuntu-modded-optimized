@@ -11,7 +11,7 @@ _UMO_MOD_THEME_LOADED=1
 UMO_THEME="${UMO_THEME:-umo-dark}"
 
 umo_theme_install_packages() {
-    umo_log_step "Installing theme packages"
+    umo_log_step "Install theme packages"
 
     _theme_pkgs="papirus-icon-theme fonts-inter fonts-noto fonts-noto-core"
     _theme_pkgs="$_theme_pkgs fonts-jetbrains-mono xfonts-terminus"
@@ -27,7 +27,7 @@ INNER
     umo_run_quiet "Installing theme packages" "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
 
     if ! "$HOME/umo-login.sh" -c "dpkg -l | grep -q orchis" 2>/dev/null; then
-        umo_log_step "Downloading Orchis theme"
+        umo_log_step "Download Orchis theme"
         umo_run_quiet "Downloading Orchis theme" "$HOME/umo-login.sh" -c "
             wget -q 'https://github.com/vinceliuice/Orchis-theme/archive/refs/tags/2024-09-20.tar.gz' -O /root/orchis.tar.gz 2>/dev/null && \\
             tar xzf /root/orchis.tar.gz -C /root/ && \\
@@ -42,7 +42,7 @@ INNER
 }
 
 umo_theme_apply_gtk() {
-    umo_log_step "Applying GTK theme configuration"
+    umo_log_step "Apply GTK theme configuration"
 
     _theme_dir="$SCRIPT_DIR/config/theme"
 
@@ -73,7 +73,7 @@ umo_theme_apply_gtk() {
 }
 
 umo_theme_apply_icons() {
-    umo_log_step "Configuring icon theme"
+    umo_log_step "Configure icon theme"
 
     _xfce_conf="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml"
     umo_fs_mkdir "$_xfce_conf"
@@ -86,7 +86,7 @@ umo_theme_apply_icons() {
 }
 
 umo_theme_apply_fonts() {
-    umo_log_step "Configuring fonts"
+    umo_log_step "Configure fonts"
 
     _fc_dir="$UMO_INSTALL_DIR/etc/fonts/conf.d"
     umo_fs_mkdir "$_fc_dir"
@@ -98,7 +98,7 @@ umo_theme_apply_fonts() {
 }
 
 umo_theme_apply_panel() {
-    umo_log_step "Configuring XFCE panel layout"
+    umo_log_step "Configure XFCE panel layout"
 
     _panel_dir="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml"
     umo_fs_mkdir "$_panel_dir"
@@ -112,7 +112,7 @@ umo_theme_apply_panel() {
 }
 
 umo_theme_apply_wallpaper() {
-    umo_log_step "Setting wallpaper"
+    umo_log_step "Set wallpaper"
 
     _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-wallpaper.jpg"
     _wp_dir="$UMO_INSTALL_DIR/usr/share/wallpapers"
@@ -134,7 +134,7 @@ umo_theme_apply_wallpaper() {
 
 umo_theme_setup() {
     [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme disabled."; return 0; }
-    umo_log_step "Applying UMO Desktop Theme ($UMO_THEME)"
+    umo_log_step "Apply UMO Desktop Theme ($UMO_THEME)"
 
     umo_theme_install_packages
     umo_theme_apply_gtk

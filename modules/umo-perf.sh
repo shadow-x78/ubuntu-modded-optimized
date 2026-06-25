@@ -11,7 +11,7 @@ _UMO_MOD_PERF_LOADED=1
 UMO_PERF_MODE="${UMO_PERF_MODE:-balanced}"
 
 umo_perf_apt() {
-    umo_log_step "Optimizing APT configuration"
+    umo_log_step "Optimize APT configuration"
 
     _apt_conf="/etc/apt/apt.conf.d/99umo-speed"
     _template="$SCRIPT_DIR/config/templates/apt-umo-speed.conf"
@@ -43,7 +43,7 @@ EOC
 }
 
 umo_perf_debloat() {
-    umo_log_step "Removing unnecessary services"
+    umo_log_step "Remove unnecessary services"
 
     _bloat="snapd unattended-upgrades apport ModemManager modemmanager cups cups-browsed avahi-daemon"
 
@@ -65,7 +65,7 @@ INNER
 }
 
 umo_perf_dns() {
-    umo_log_step "Hardening DNS configuration"
+    umo_log_step "Harden DNS configuration"
 
     _resolv="$UMO_INSTALL_DIR/etc/resolv.conf"
     cat > "$_resolv" << 'EOR'
@@ -81,7 +81,7 @@ EOR
 }
 
 umo_perf_cleanup() {
-    umo_log_step "Cleaning up"
+    umo_log_step "Clean up"
 
     cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
@@ -95,7 +95,7 @@ INNER
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh"
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
-        umo_log_step "Removing documentation and locale data (--lean)"
+        umo_log_step "Remove documentation and locale data (--lean)"
         rm -rf "$UMO_INSTALL_DIR/usr/share/doc" 2>/dev/null || true
         rm -rf "$UMO_INSTALL_DIR/usr/share/man" 2>/dev/null || true
         rm -rf "$UMO_INSTALL_DIR/usr/share/locale" 2>/dev/null || true
@@ -105,7 +105,7 @@ INNER
 }
 
 umo_perf_gpu() {
-    umo_log_step "Configuring GPU rendering"
+    umo_log_step "Configure GPU rendering"
 
     umo_fs_patch "$UMO_INSTALL_DIR/root/.bashrc" "# ===== UMO GPU =====" '
 export GALLIUM_DRIVER=virpipe
@@ -127,7 +127,7 @@ export LIBGL_ALWAYS_SOFTWARE=0
 }
 
 umo_perf_vnc() {
-    umo_log_step "Tuning VNC performance"
+    umo_log_step "Tune VNC performance"
 
     if [ "$UMO_PERF_MODE" = "aggressive" ]; then
         export UMO_VNC_DEPTH=16
@@ -142,7 +142,7 @@ umo_perf_vnc() {
 }
 
 umo_perf_desktop() {
-    umo_log_step "Optimizing desktop environment"
+    umo_log_step "Optimize desktop environment"
 
     cat > "$UMO_INSTALL_DIR/root/perf-desktop.sh" << 'INNER'
 #!/bin/sh
@@ -160,7 +160,7 @@ INNER
 }
 
 umo_perf_setup() {
-    umo_log_step "Applying performance tuning (mode: $UMO_PERF_MODE)"
+    umo_log_step "Apply performance tuning (mode: $UMO_PERF_MODE)"
 
     umo_perf_apt
     umo_perf_dns

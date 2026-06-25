@@ -14,7 +14,7 @@ UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_TERMUX_PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 
 umo_proot_prepare() {
-    umo_log_step "Preparing proot container"
+    umo_log_step "Prepare proot container"
 
     for _d in dev proc sys tmp sdcard data termux root home/umo; do
         umo_fs_mkdir "$UMO_PROOT_DIR/$_d"
@@ -120,7 +120,7 @@ umo_proot_cmd() {
 }
 
 umo_proot_create_scripts() {
-    umo_log_step "Creating login wrappers"
+    umo_log_step "Create login wrappers"
 
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
     rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
@@ -218,7 +218,7 @@ umo_proot_exec() {
 }
 
 umo_proot_create_user() {
-    umo_log_step "Creating default user 'umo'"
+    umo_log_step "Create default user 'umo'"
 
     _etc="$UMO_PROOT_DIR/etc"
 
