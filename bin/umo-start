@@ -36,7 +36,7 @@ if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
     fi
     export DISPLAY=:0
     export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
-    termux-x11 :0 2>/dev/null &
+    nohup termux-x11 :0 >/dev/null 2>&1 &
     sleep 2
 
     printf "\033[1A\033[2K"
@@ -62,7 +62,7 @@ else
 
     printf "  %b[ ⚙ ] Initializing UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
-    "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" >/dev/null 2>&1 &
+    nohup "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" >/dev/null 2>&1 &
     sleep 3
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
