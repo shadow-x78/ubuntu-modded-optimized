@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="3.3.8"
+export UMO_VERSION="3.3.9"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -206,7 +206,7 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="3.3.8"
+_UMO_VERSION="3.3.9"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
     cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
@@ -327,6 +327,7 @@ _umo_help() {
     printf "  ${_UMO_BOLD}COMMANDS:${_UMO_NC}\n"
     
     printf "  ${_UMO_DIM}Login & Session${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio session"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Start a root shell session"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Start a default user shell session"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all UMO running processes"
@@ -355,6 +356,7 @@ _umo_help() {
 }
 
 case "$1" in
+    start)                  exec "$_UMO_TERMUX_HOME/umo-start.sh" "$2" ;;
     stop)                   exec "$_UMO_TERMUX_HOME/umo-stop.sh" ;;
     login)                  exec "$_UMO_TERMUX_HOME/umo-login.sh" ;;
     user)                   exec "$_UMO_TERMUX_HOME/umo-user.sh" ;;
