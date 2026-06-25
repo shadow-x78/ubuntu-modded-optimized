@@ -28,8 +28,6 @@ Acquire::Languages "none";
 Acquire::PDiffs "false";
 Acquire::ForceIPv4 "true";
 Acquire::Queue-Mode "host";
-DPkg::Use-Pty "0";
-quiet "2";
 EOC
     fi
 
@@ -96,8 +94,6 @@ INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh"
-
-    umo_log_ok "Debloating completed"
 }
 
 umo_perf_dns() {

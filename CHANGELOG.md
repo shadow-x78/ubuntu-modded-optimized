@@ -2,12 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.7] - 2026-06-25
+
+### 👁️ Visibility & UX
+- **Global Installation Transparency:** Removed the silent `umo_run_quiet` wrapper from all major installation phases, including Desktop Environment (XFCE4/Openbox), Applications, VNC Server, and Themes. Additionally removed `quiet "2"` from the global `apt.conf`. Because XFCE4 and its icon themes contain over 80,000 files, PRoot must intercept hundreds of thousands of system calls, which fundamentally takes several minutes on Android storage. Previously, hiding this process behind a silent "Loading" spinner caused psychological time dilation and made it appear as if the installer had frozen. Now, the native `apt` progress output is fully visible across all heavy operations so users can monitor the exact extraction progress in real-time.
+
+### ⚡ Optimized
+- **Spinner Fork Bomb:** Rewrote the `umo_spinner` to entirely eliminate subshell forking (`cut` and `printf`). The previous implementation spawned new processes 4 times per second to animate the spinner, which unintentionally created a "fork bomb" effect on Android Termux, aggressively starving the CPU and slowing down the entire `install.sh` pipeline (especially extraction and configuration). The spinner now uses pure POSIX shell parameter expansion, resulting in zero overhead.
+- **Browser Installation Hangs:** Removed Snap-dependent browser packages (`firefox` and `chromium-browser`) from the default App Suite. In Ubuntu 24.04, these packages attempt to invoke `snapd` and `systemd`, which are fundamentally incompatible with Android PRoot. This caused the installer to silently hang for 10-20 minutes waiting for Snap socket timeouts. The installer now exclusively targets `firefox-esr` (a native `.deb` package) to ensure a lightning-fast browser installation phase.
+
 ## [v4.0.6] - 2026-06-25
 
 ### 🐛 Fixed
 - **DPKG I/O Bypass:** Reverted `eatmydata` in favor of the native `force-unsafe-io` configuration. The previous `eatmydata` wrapper strategy failed because `apt-get` internally executes the absolute path `/usr/bin/dpkg`, bypassing the `/usr/local/bin` wrapper. This caused `dpkg` to silently fall back to slow, synchronous `fsync()` system calls, resulting in extreme slowness during XFCE4 and Theme extraction on Android flash storage. The native `force-unsafe-io` approach definitively eliminates `fsync` overhead at the package manager level.
-
-## [v4.0.5] - 2026-06-25
 
 ### ⚡ Optimized
 - **Massive I/O Speedup (eatmydata):** Integrated `eatmydata` natively into the installation pipeline. `apt-get` and `dpkg` are now globally wrapped with `libeatmydata`, safely bypassing synchronous `fsync()` syscalls without risking Android kernel dirty page freezes. This drastically accelerates the extraction of Desktop Environments and Themes.

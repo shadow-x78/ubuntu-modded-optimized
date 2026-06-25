@@ -65,10 +65,15 @@ ls -la /var/lib/dpkg/status* 2>&1
 exit 1
 INNER
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
-    umo_run_quiet "Installing TigerVNC..." "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
-    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
-
-    umo_log_ok "TigerVNC installed"
+    printf "  %b>%b  Installing TigerVNC...\n" "$UMO_B_CYAN" "$UMO_NC"
+    "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    _rc=$?
+    if [ "$_rc" -eq 0 ]; then
+        printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
+    else
+        printf "  %b%s%b  TigerVNC installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
+    fi
+    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
 }
 
 umo_vnc_configure() {
@@ -80,7 +85,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.0.5}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.0.7}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi

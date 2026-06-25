@@ -23,17 +23,23 @@ apt-get install -y -q $_theme_pkgs 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
-    umo_run_quiet "Installing theme packages" "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
+    printf "  %b>%b  Installing theme packages...\n" "$UMO_B_CYAN" "$UMO_NC"
+    "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
+    _rc=$?
+    if [ "$_rc" -eq 0 ]; then
+        printf "  %b%s%b  Theme packages installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
+    else
+        printf "  %b%s%b  Theme packages installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
+    fi
 
     if ! "$HOME/umo-login.sh" -c "dpkg -l | grep -q orchis" 2>/dev/null; then
-        umo_log_step "Download Orchis theme"
-        umo_run_quiet "Downloading Orchis theme" "$HOME/umo-login.sh" -c "
+        umo_run_quiet "Downloading and extracting Orchis theme" "$HOME/umo-login.sh" -c "
             wget -q 'https://github.com/vinceliuice/Orchis-theme/archive/refs/tags/2024-09-20.tar.gz' -O /root/orchis.tar.gz 2>/dev/null && \\
             tar xzf /root/orchis.tar.gz -C /root/ && \\
             cd /root/Orchis-theme-* && \\
-            ./install.sh -t default -c dark --tweaks solid 2>/dev/null; \\
+            ./install.sh -t default -c dark --tweaks solid >/dev/null 2>&1; \\
             rm -rf /root/orchis* /root/Orchis*
-        " || umo_log_warn "Orchis theme download failed (non-critical)"
+        " || umo_log_warn "Orchis theme download/extraction failed (non-critical)"
     fi
 
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"

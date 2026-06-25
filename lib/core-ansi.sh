@@ -206,16 +206,17 @@ umo_spinner() {
     _i=0
 
     if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
-        _spin_set='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+        set -- "⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏"
         _spin_len=10
     else
-        _spin_set='|/-\\'
+        set -- "|" "/" "-" "\\"
         _spin_len=4
     fi
 
     umo_cursor_hide
     while true; do
-        _char=$(printf '%s' "$_spin_set" | cut -c$((_i + 1))-$((_i + 1)))
+        _idx=$((_i + 1))
+        eval "_char=\${$_idx}"
         printf "\r  %b%s%b  %s%b" "$UMO_B_CYAN" "$_char" "$UMO_NC" "$_msg" "$UMO_NC"
         _i=$(( (_i + 1) % _spin_len ))
         sleep 0.25
@@ -288,7 +289,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.5}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.7}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -315,7 +316,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-4.0.5}"
+    _ver="${UMO_VERSION:-4.0.7}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

@@ -57,9 +57,15 @@ INNER
 _run_de_installer() {
     _label="$1"
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
-    umo_run_quiet "Installing $_label..." "$HOME/umo-login.sh" -c "bash /root/install-de.sh"
-    rm -f "${UMO_INSTALL_DIR}/root/install-de.sh"
-    umo_log_ok "Desktop environment installed"
+    printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
+    "$HOME/umo-login.sh" -c "bash /root/install-de.sh"
+    _rc=$?
+    if [ "$_rc" -eq 0 ]; then
+        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
+    else
+        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_rc"
+    fi
+    rm -f "${UMO_INSTALL_DIR}/root/install-de.sh" 2>/dev/null || true
 }
 
 umo_de_install() {

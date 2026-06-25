@@ -25,8 +25,7 @@ locale-gen en_US.UTF-8 || true
 umo_apps_browsers() {
     umo_log_step "Install browsers"
     _run_installer "Browsers" "
-apt-get install -y firefox || apt-get install -y firefox-esr || true
-apt-get install -y chromium-browser || apt-get install -y chromium || true
+apt-get install -y firefox-esr || true
 dpkg --configure -a || true
 "
 }
@@ -71,8 +70,15 @@ _run_installer() {
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
     printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
-    umo_run_quiet "Installing $_label..." "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
-    rm -f "$_script"
+    printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
+    "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
+    _rc=$?
+    if [ "$_rc" -eq 0 ]; then
+        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
+    else
+        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_rc"
+    fi
+    rm -f "$_script" 2>/dev/null || true
 }
 
 umo_apps_install() {
