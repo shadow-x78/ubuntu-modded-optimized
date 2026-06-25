@@ -346,7 +346,7 @@ _umo_help() {
     printf "\n"
 }
 
-case "${1:-start}" in
+case "$1" in
     start)                  exec "$_UMO_TERMUX_HOME/umo-start.sh" ;;
     stop)                   exec "$_UMO_TERMUX_HOME/umo-stop.sh" ;;
     login)                  exec "$_UMO_TERMUX_HOME/umo-login.sh" ;;
@@ -359,6 +359,11 @@ case "${1:-start}" in
     --user|-u)              shift; _umo_set_user "$1" ;;
     --version|-v|version)   printf "\n  ${_UMO_PRI}UMO${_UMO_NC} v${_UMO_VERSION}\n\n" ;;
     help|--help|-h)         _umo_help ;;
+    "")
+        _umo_err "No command provided."
+        printf "  Run '${_UMO_CYN}umo --help${_UMO_NC}' for usage.\n\n"
+        exit 1
+        ;;
     *)
         _umo_err "Unknown command: $1"
         printf "  Run '${_UMO_CYN}umo --help${_UMO_NC}' for usage.\n\n"
@@ -437,7 +442,6 @@ README_EOF
     for _pid in $(pgrep -f "proot.*umo" 2>/dev/null); do
         kill "$_pid" 2>/dev/null || true
     done
-    wait 2>/dev/null || true
 }
 
 umo_cli_parse() {
