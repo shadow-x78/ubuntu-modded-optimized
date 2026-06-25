@@ -114,10 +114,10 @@ umo login
 | الأمر | الوصف |
 |-------|-------|
 | `umo start` | بدء الجلسة مع VNC والصوت |
-| `umo login` | الدخول كـ root |
-| `umo user` | الدخول كمستخدم افتراضي |
 | `umo stop` | إيقاف جميع الخدمات |
 | `umo status` | عرض حالة الخدمات |
+| `umo login` | الدخول كـ root |
+| `umo user` | الدخول كمستخدم افتراضي |
 | `umo update` | تحديث النظام من GitHub |
 ### داخل Ubuntu
 

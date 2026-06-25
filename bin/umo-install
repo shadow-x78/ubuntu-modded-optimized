@@ -326,18 +326,21 @@ _umo_help() {
 
     printf "  ${_UMO_BOLD}COMMANDS:${_UMO_NC}\n"
     
-    printf "  ${_UMO_DIM}Login & Session${_UMO_NC}\n"
+    printf "  ${_UMO_DIM}Session Lifecycle${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio session"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Start a root shell session"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Start a default user shell session"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all UMO running processes"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "status"             "Display running status of services"
     printf "\n"
 
-    printf "  ${_UMO_DIM}System & Management${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Start the VNC server"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Update UMO system from GitHub"
+    printf "  ${_UMO_DIM}Terminal Access${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Start a root shell session"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Start a default user shell session"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "run <cmd>"          "Execute a command inside Ubuntu"
+    printf "\n"
+
+    printf "  ${_UMO_DIM}System & Management${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Start the VNC server manually"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Update UMO system from GitHub"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "backup [dir]"       "Create a tarball backup of the container"
     printf "\n"
 

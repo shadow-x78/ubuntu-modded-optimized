@@ -114,10 +114,10 @@ umo login
 | Command | Description |
 |---------|-------------|
 | `umo start` | Start session with VNC & Audio |
-| `umo login` | Login as root |
-| `umo user` | Login as default user |
 | `umo stop` | Stop all services |
 | `umo status` | Show running status of services |
+| `umo login` | Login as root |
+| `umo user` | Login as default user |
 | `umo update` | Update UMO system from GitHub |
 ### Inside Ubuntu
 
