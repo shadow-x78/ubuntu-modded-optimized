@@ -321,37 +321,36 @@ _umo_backup() {
 
 _umo_help() {
     _umo_header
-    printf "  ${_UMO_BOLD}Usage:${_UMO_NC}  ${_UMO_CYN}umo${_UMO_NC} ${_UMO_DIM}[COMMAND] [OPTIONS]${_UMO_NC}\n\n"
+    printf "  ${_UMO_BOLD}USAGE:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}umo${_UMO_NC} <command> [options]\n\n"
 
-    printf "  ${_UMO_BOLD}${_UMO_PRI}Session${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Stop all UMO processes"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Show running status of UMO services"
+    printf "  ${_UMO_BOLD}COMMANDS:${_UMO_NC}\n"
+    
+    printf "  ${_UMO_DIM}Login & Session${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Start a root shell session"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Start a default user shell session"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all UMO running processes"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "status"             "Display running status of services"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}${_UMO_PRI}Login${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "login"              "Login as root"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Login as default user"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"      "Switch default user & login"
+    printf "  ${_UMO_DIM}System & Management${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Start the VNC server"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Update UMO system from GitHub"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "run <cmd>"          "Execute a command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "backup [dir]"       "Create a tarball backup of the container"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}${_UMO_PRI}System${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start VNC server only"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Update UMO script from GitHub"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Run a command inside Ubuntu"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Backup Ubuntu container"
+    printf "  ${_UMO_BOLD}OPTIONS:${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "--user <name>"      "Switch the default user and login"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "-h, --help"         "Print this help information"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "-v, --version"      "Print version information"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}${_UMO_PRI}Info${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--help, -h"         "Show this help message"
-    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--version, -v"      "Show UMO version"
-    printf "\n"
-
-    printf "  ${_UMO_BOLD}Examples:${_UMO_NC}\n"
-    printf "    ${_UMO_DIM}\$ umo login${_UMO_NC}                     Login to Ubuntu\n"
-    printf "    ${_UMO_DIM}\$ umo status${_UMO_NC}                    Check services\n"
-    printf "    ${_UMO_DIM}\$ umo --user myuser${_UMO_NC}             Switch to user\n"
-    printf "    ${_UMO_DIM}\$ umo run \"apt list --installed\"${_UMO_NC} Run command\n"
-    printf "    ${_UMO_DIM}\$ umo backup ~/backups${_UMO_NC}          Backup rootfs\n"
+    printf "  ${_UMO_BOLD}EXAMPLES:${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}\$ umo login${_UMO_NC}                    # Login to container\n"
+    printf "    ${_UMO_DIM}\$ umo run \"apt update\"${_UMO_NC}         # Run a command seamlessly\n"
+    printf "    ${_UMO_DIM}\$ umo --user myuser${_UMO_NC}            # Switch user to 'myuser'\n"
+    printf "    ${_UMO_DIM}\$ umo backup ~/backups${_UMO_NC}         # Backup rootfs to dir\n"
     printf "\n"
 }
 
@@ -463,21 +462,28 @@ umo_cli_parse() {
             --theme=*)   UMO_THEME="${_arg#*=}" ;;
             --lean)      UMO_LEAN=1 ;;
             --help|-h)
-                cat << 'BANNER'
-Usage: umo-install [OPTIONS]
-
-Options:
-  --no-gui, --non-interactive   Non-interactive mode
-  --de=xfce4|lxde|openbox       Desktop environment
-  --apps=basic|dev|media|full   Application set
-  --dir=PATH                    Installation directory
-  --ubuntu=22.04|24.04          Ubuntu version
-  --version=22.04|24.04         (alias for --ubuntu)
-  --perf=balanced|aggressive|off Performance level  [default: balanced]
-  --theme=umo-dark|umo-light|minimal|none  Desktop theme
-  --lean                        Remove docs/man/locales (save space)
-  --help, -h                    Show this help
-BANNER
+                printf "\n  %bUbuntu Modded Optimized (UMO) Installer%b\n\n" "$UMO_BOLD" "$UMO_NC"
+                printf "  %bUSAGE:%b\n" "$UMO_BOLD" "$UMO_NC"
+                printf "    %bumo-install%b [OPTIONS]\n\n" "$UMO_B_CYAN" "$UMO_NC"
+                
+                printf "  %bOPTIONS:%b\n" "$UMO_BOLD" "$UMO_NC"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "-h, --help" "$UMO_NC" "Print help information"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--no-gui, --non-interactive" "$UMO_NC" "Run in non-interactive mode"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--lean" "$UMO_NC" "Remove docs/man/locales to save space"
+                printf "\n"
+                
+                printf "  %bCONFIGURATION:%b\n" "$UMO_BOLD" "$UMO_NC"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--de=<env>" "$UMO_NC" "Desktop environment (xfce4, lxde, openbox)"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--apps=<set>" "$UMO_NC" "Application set (basic, dev, media, full)"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--dir=<path>" "$UMO_NC" "Installation directory"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--ubuntu=<version>" "$UMO_NC" "Ubuntu version (22.04, 24.04)"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--perf=<mode>" "$UMO_NC" "Performance level (balanced, aggressive, off) [default: balanced]"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--theme=<theme>" "$UMO_NC" "Desktop theme (umo-dark, umo-light, minimal, none)"
+                printf "\n"
+                
+                printf "  %bEXAMPLES:%b\n" "$UMO_BOLD" "$UMO_NC"
+                printf "    %b\$ umo-install --no-gui --de=xfce4 --apps=full%b\n" "$UMO_DIM" "$UMO_NC"
+                printf "    %b\$ umo-install --dir=/data/data/com.termux/files/home/ubuntu%b\n\n" "$UMO_DIM" "$UMO_NC"
                 exit 0
                 ;;
         esac

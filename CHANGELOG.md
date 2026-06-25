@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file.
 - **Login Banner:** Injected the UMO ASCII logo and a separator line into `.bashrc`, displaying it right before `neofetch` upon login for a more branded and polished experience.
 - **Self Update:** Redesigned the `umo update` command to act as a self-updater. It now executes `git pull` on the main repository directory, pulling the latest installer and module code directly from GitHub without needing to re-clone the repository.
 
+### 💄 UI/UX
+- **Professional Help Menus:** Completely redesigned the `--help` output for both the `umo` CLI wrapper and `umo-install` installer. The new output mimics global professional packages (like `docker` or `apt`), featuring bold headers, categorized options, colorized CLI flags, and clear contextual examples.
+
 ### 🗑️ Removed
 - **Default Start Alias:** Removed the default `start` alias for the `umo` CLI. Executing `umo` without arguments will no longer arbitrarily start the container. Users must explicitly specify an action (e.g., `umo login` or `umo user`), and the `umo` alias has been removed from the help menu entirely.
 
