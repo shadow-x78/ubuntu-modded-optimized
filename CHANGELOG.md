@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [v4.0.1] - 2026-06-25
 
 ### 🐛 Fixed
-- **Terminal Hang on Exit:** Prevented background daemons (like `gpg-agent`) from inheriting terminal file descriptors during installation, allowing the installer to exit cleanly without freezing Termux.
-- **VNC Server Stability:** Fixed an issue where the VNC server would stop immediately by removing the unsupported `-deferUpdate` parameter from TigerVNC and replacing `wait` with a continuous polling loop for `Xvnc`.
+- **Terminal Hang on Exit:** Prevented background daemons (like `gpg-agent`) from inheriting terminal file descriptors during installation by properly redirecting stdout, allowing the installer to exit cleanly without freezing Termux.
+- **VNC Server Stability:** Fixed an issue where the VNC server would stop immediately by removing the unsupported `-deferUpdate` parameter from TigerVNC, disabling the GLX extension to prevent Signal 6 (Aborted) crashes, and replacing `wait` with a continuous polling loop for `Xvnc`.
 - **CLI Output:** Fixed a bug in `umo update` where the success message was repeated twice and lacked the correct color formatting.
 
 ### 🗑️ Removed
