@@ -14,7 +14,6 @@ umo_de_lxde() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
 apt-get install -y lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true
 dpkg --configure -a || true
 INNER
@@ -26,7 +25,6 @@ umo_de_xfce4() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
 apt-get install -y xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11 || true
 apt-get install -y xubuntu-icon-theme xfce4-whiskermenu-plugin || true
 dpkg --configure -a || true
@@ -39,7 +37,6 @@ umo_de_openbox() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
 apt-get install -y openbox obconf lxterminal pcmanfm tint2 feh || true
 dpkg --configure -a || true
 INNER
@@ -51,7 +48,6 @@ umo_de_minimal() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
 apt-get install -y xterm xfonts-base || true
 dpkg --configure -a || true
 INNER

@@ -27,9 +27,6 @@ _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setti
 # Repair any half-configured packages from rootfs extraction
 dpkg --configure -a 2>&1 || true
 
-echo "--- [1] apt update ---"
-apt-get update -y 2>&1 | _apt_filter || true
-
 echo "--- [2] Installing apt-utils (required for debconf) ---"
 apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 || true

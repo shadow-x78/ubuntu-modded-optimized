@@ -25,9 +25,21 @@ Acquire::Retries "3";
 Acquire::http::Timeout "60";
 Acquire::https::Timeout "60";
 Acquire::Languages "none";
+Acquire::PDiffs "false";
+Acquire::ForceIPv4 "true";
 Acquire::Queue-Mode "host";
+DPkg::Options {"--force-unsafe-io"};
 EOC
     fi
+
+    _dpkg_exclude="/etc/dpkg/dpkg.cfg.d/99umo-excludes"
+    cat > "${UMO_INSTALL_DIR:?}$_dpkg_exclude" << 'EOD'
+path-exclude=/usr/share/doc/*
+path-exclude=/usr/share/man/*
+path-exclude=/usr/share/info/*
+path-exclude=/usr/share/locale/*
+path-include=/usr/share/locale/en/*
+EOD
 
     if command -v eatmydata >/dev/null 2>&1; then
         _apt_cmd="eatmydata apt-get"
@@ -60,6 +72,9 @@ INNER
     chmod +x "$UMO_INSTALL_DIR/root/divert-triggers.sh"
     "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" >/dev/null 2>&1
     rm -f "$UMO_INSTALL_DIR/root/divert-triggers.sh"
+
+    umo_log_step "Update package lists (Global)"
+    "$HOME/umo-login.sh" -c "apt-get update -qq" >/dev/null 2>&1 || true
 
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)."
 }
