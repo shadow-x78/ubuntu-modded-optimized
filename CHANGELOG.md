@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Fixed
 - **Legacy Alias Cleanup:** Cleaned only `alias umo=` from bash/zsh profiles to avoid unintended side effects while ensuring the CLI wrapper functions correctly.
 - **DPKG Install Hang:** Removed aggressive `dpkg fsync` disables (`force-unsafe-io`) that were causing APT and DPKG to hang indefinitely during package installations (e.g., Theme packages) inside PRoot.
+- **Background Processes Hang:** Added aggressive cleanup (`pkill -9`) for all UMO-related daemons (`dbus-daemon`, `pulseaudio`, `Xvnc`, `termux-x11`) at the end of the installer to ensure the installer exits gracefully without hanging the terminal.
+- **VNC Password Error:** Added `tigervnc-tools` dependency to fix the `tigervncpasswd: command not found` error during `umo start`.
+- **UMO Start Refactor:** Refactored the `umo start` command to strictly act as a service starter. It now elegantly displays the UMO logo, Session status, VNC details, and Audio status, then returns to the Termux prompt without forcefully dropping the user into the Ubuntu bash shell.
 
 ## [v3.3.9] - 2026-06-25
 
