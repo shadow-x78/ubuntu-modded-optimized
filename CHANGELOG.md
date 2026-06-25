@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.5] - 2026-06-25
+
+### ⚡ Optimized
+- **Massive I/O Speedup (eatmydata):** Integrated `eatmydata` natively into the installation pipeline. `apt-get` and `dpkg` are now globally wrapped with `libeatmydata`, safely bypassing synchronous `fsync()` syscalls without risking Android kernel dirty page freezes. This drastically accelerates the extraction of Desktop Environments and Themes.
+- **Console I/O Bottleneck:** Added `quiet "2"` and `DPkg::Use-Pty "0"` to the PRoot `apt.conf` to completely suppress thousands of lines of progress bar updates from `apt` and `dpkg` that were creating severe `ptrace` context-switch bottlenecks via the stdout pipe during installation.
+
 ## [v4.0.4] - 2026-06-25
 
 ### ⚡ Optimized

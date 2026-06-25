@@ -28,6 +28,8 @@ Acquire::Languages "none";
 Acquire::PDiffs "false";
 Acquire::ForceIPv4 "true";
 Acquire::Queue-Mode "host";
+DPkg::Use-Pty "0";
+quiet "2";
 EOC
     fi
 
@@ -39,12 +41,6 @@ path-exclude=/usr/share/info/*
 path-exclude=/usr/share/locale/*
 path-include=/usr/share/locale/en/*
 EOD
-
-    if command -v eatmydata >/dev/null 2>&1; then
-        _apt_cmd="eatmydata apt-get"
-    else
-        _apt_cmd="apt-get"
-    fi
 
     if [ "$UMO_PERF_MODE" = "aggressive" ]; then
         printf '%s\n' 'APT::Get::Assume-Yes "true";' >> "${UMO_INSTALL_DIR:?}$_apt_conf"
@@ -71,6 +67,25 @@ INNER
     chmod +x "$UMO_INSTALL_DIR/root/divert-triggers.sh"
     "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1
     rm -f "$UMO_INSTALL_DIR/root/divert-triggers.sh"
+
+    cat > "$UMO_INSTALL_DIR/root/install-eatmydata.sh" << 'INNER'
+#!/bin/sh
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y eatmydata 2>/dev/null || true
+if [ -f /usr/bin/eatmydata ]; then
+    echo '#!/bin/sh' > /usr/local/bin/dpkg
+    echo 'exec eatmydata /usr/bin/dpkg "$@"' >> /usr/local/bin/dpkg
+    chmod +x /usr/local/bin/dpkg
+    
+    echo '#!/bin/sh' > /usr/local/bin/apt-get
+    echo 'exec eatmydata /usr/bin/apt-get "$@"' >> /usr/local/bin/apt-get
+    chmod +x /usr/local/bin/apt-get
+fi
+INNER
+    chmod +x "$UMO_INSTALL_DIR/root/install-eatmydata.sh"
+    umo_run_quiet "Optimizing I/O (eatmydata)..." "$HOME/umo-login.sh" -c "bash /root/install-eatmydata.sh"
+    rm -f "$UMO_INSTALL_DIR/root/install-eatmydata.sh"
 
     umo_log_step "Update package lists (Global)"
     "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
