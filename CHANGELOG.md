@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.3.7] - 2026-06-25
+
+### ⚡ Performance
+- **Ultimate APT & DPKG Tuning:** Removed 14 redundant `apt-get update` calls across all installation phases, replacing them with a single global update. Injected `dpkg` exclusions to prevent extraction of useless offline documentation (Man pages, Info, Locales) and optimized APT (`Acquire::Languages "none"`, `Acquire::PDiffs "false"`, `Acquire::ForceIPv4 "true"`). This drastically reduces network overhead and bypasses millions of I/O operations inside the PRoot container during package installation.
+- **Massive Speedup for Apps & Themes:** Disabled notorious PRoot bottlenecks (`gtk-update-icon-cache`, `update-initramfs`, `systemd-hwdb`, `update-command-not-found`, `update-mime-database`, `update-desktop-database`) and disabled `man-db` auto-updates. This prevents infinite hangs and slashes installation times for massive packages (like `xfce4`, `papirus-icon-theme` and `libreoffice`) by bypassing useless trigger generation inside the container.
+
+### 🔄 Updated
+- **Version bump:** All files updated from 3.3.6 → 3.3.7.
+
 ## [v3.3.6] - 2026-06-25
 
 ### 🐛 Fixed
@@ -11,10 +20,6 @@ All notable changes to this project will be documented in this file.
 - **UI:** Changed `umo_log_step` labels to use imperative verbs (e.g., "Install XFCE4" instead of "Installing XFCE4") for cleaner and more consistent terminal output.
 - **UI:** Removed trailing dots from all `umo_log_step` output labels to keep the interface clean and concise.
 - **UI:** Removed "Checking internet connectivity" log step; the script now simply displays the final connection status directly.
-
-### ⚡ Performance
-- **Ultimate APT & DPKG Tuning:** Removed 14 redundant `apt-get update` calls across all installation phases, replacing them with a single global update. Injected `dpkg` exclusions to prevent extraction of useless offline documentation (Man pages, Info, Locales) and optimized APT (`Acquire::Languages "none"`, `Acquire::PDiffs "false"`, `Acquire::ForceIPv4 "true"`). This drastically reduces network overhead and bypasses millions of I/O operations inside the PRoot container during package installation.
-- **Massive Speedup for Apps & Themes:** Disabled notorious PRoot bottlenecks (`gtk-update-icon-cache`, `update-initramfs`, `systemd-hwdb`, `update-command-not-found`, `update-mime-database`, `update-desktop-database`) and disabled `man-db` auto-updates. This prevents infinite hangs and slashes installation times for massive packages (like `xfce4`, `papirus-icon-theme` and `libreoffice`) by bypassing useless trigger generation inside the container.
 
 ### 🔄 Updated
 - **Version bump:** All files updated from 3.3.5 → 3.3.6.
