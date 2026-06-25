@@ -62,7 +62,12 @@ Full Ubuntu on your Android device — one command, zero hassle
 <a id="screenshots"></a>
 ## 🖼️ Screenshots
 
-> **Coming soon**
+<p align="center">
+  <img src="assets/screenshots/01_version_selection.jpg" width="24%" alt="Version Selection">
+  <img src="assets/screenshots/02_desktop_selection.jpg" width="24%" alt="Desktop Selection">
+  <img src="assets/screenshots/03_configuration_summary.jpg" width="24%" alt="Configuration Summary">
+  <img src="assets/screenshots/04_installation_complete.jpg" width="24%" alt="Installation Complete">
+</p>
 
 ---
 

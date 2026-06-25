@@ -62,7 +62,12 @@
 <a id="screenshots"></a>
 ## 🖼️ لقطات الشاشة
 
-> **قريباً**
+<p align="center">
+  <img src="assets/screenshots/01_version_selection.jpg" width="24%" alt="اختيار الإصدار">
+  <img src="assets/screenshots/02_desktop_selection.jpg" width="24%" alt="اختيار الواجهة">
+  <img src="assets/screenshots/03_configuration_summary.jpg" width="24%" alt="ملخص الإعدادات">
+  <img src="assets/screenshots/04_installation_complete.jpg" width="24%" alt="اكتمال التثبيت">
+</p>
 
 ---
 
