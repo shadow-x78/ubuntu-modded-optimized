@@ -38,7 +38,7 @@
 
 ```bash
 termux-wake-lock
-~/umo-start.sh
+umo login
 ```
 
 > Keep Termux open in the foreground or use a persistent notification to prevent Android from killing it.
@@ -54,8 +54,8 @@ termux-wake-lock
 
 ```bash
 # Restart everything (recommended)
-~/umo-stop.sh
-~/umo-start.sh
+umo stop
+umo login
 
 # Or start PulseAudio manually inside Ubuntu
 pulseaudio --start
@@ -93,8 +93,8 @@ systemctl disable <service>
 
 ```bash
 # Stop all services and restart
-~/umo-stop.sh
-~/umo-start.sh
+umo stop
+umo login
 ```
 
 If the issue persists, kill any lingering VNC processes:
