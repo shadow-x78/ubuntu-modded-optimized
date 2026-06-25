@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.3] - 2026-06-25
+
+### 🐛 Fixed
+- **DPKG Fatal Error:** Fixed `dpkg` aborting with `unknown system group 'messagebus'` during finalization. This was caused by an Ubuntu packaging bug leaving orphaned `dpkg-statoverride` entries after debloating `dbus`. The override is now forcefully cleaned.
+- **Colors:** Fixed the missing orange theme color `_UMO_PRI` when running `umo stop`.
+
 ## [v4.0.2] - 2026-06-25
 
 ### 🐛 Fixed

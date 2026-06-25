@@ -87,6 +87,7 @@ umo_perf_debloat() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
+sed -i '/messagebus/d' /var/lib/dpkg/statoverride 2>/dev/null || true
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 apt-get update -y
