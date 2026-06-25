@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.0] - 2026-06-25
+
+### ✨ Added
+- **Version Command:** Added `umo version` command to display current installed version.
+- **Improved Updater:** Improved `umo update` to forcefully reset local changes (`git reset --hard origin/main`), preventing abort errors during updates.
+- **Refined CLI:** Logically categorized help menu commands and updated command descriptions.
+
+### 🐛 Fixed
+- **Legacy Alias Cleanup:** Cleaned only `alias umo=` from bash/zsh profiles to avoid unintended side effects while ensuring the CLI wrapper functions correctly.
+
 ## [v3.3.9] - 2026-06-25
 
 ### ✨ Added

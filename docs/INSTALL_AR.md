@@ -2,7 +2,7 @@
 
 # دليل التثبيت — UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-3.3.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -148,7 +148,8 @@ umo login
 | `umo status` | عرض حالة الخدمات |
 | `umo login` | الدخول كـ root |
 | `umo user` | الدخول كمستخدم افتراضي |
-| `umo update` | تحديث النظام من GitHub |
+| `umo update` | جلب وتطبيق أحدث التحديثات من GitHub |
+| `umo version` | عرض إصدار UMO الحالي |
 
 ### داخل Ubuntu
 

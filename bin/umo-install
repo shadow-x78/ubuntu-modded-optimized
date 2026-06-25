@@ -193,8 +193,6 @@ umo_phase_finalize() {
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
             sed -i '/alias umo=/d' "$_rc" 2>/dev/null || true
-            sed -i '/alias startubuntu=/d' "$_rc" 2>/dev/null || true
-            sed -i '/alias loginubuntu=/d' "$_rc" 2>/dev/null || true
         fi
     done
 
@@ -213,7 +211,7 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="3.3.9"
+_UMO_VERSION="4.0.0"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
     cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
@@ -273,7 +271,8 @@ _umo_run_update() {
     _umo_info "Updating UMO from GitHub..."
     if [ -d "$_UMO_REPO_DIR/.git" ]; then
         cd "$_UMO_REPO_DIR" || exit 1
-        git pull origin main || { _umo_err "Failed to update UMO."; exit 1; }
+        git fetch origin main || { _umo_err "Failed to fetch updates."; exit 1; }
+        git reset --hard origin/main || { _umo_err "Failed to update UMO."; exit 1; }
         _umo_ok "UMO has been updated successfully."
         _umo_info "You may need to run ./install.sh again to apply changes."
     else
@@ -334,21 +333,23 @@ _umo_help() {
     printf "  ${_UMO_BOLD}COMMANDS:${_UMO_NC}\n"
     
     printf "  ${_UMO_DIM}Session Lifecycle${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "start"              "Start Ubuntu + VNC + Audio session"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all UMO running processes"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "status"             "Display running status of services"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "start"              "Boot up Ubuntu with VNC & Audio servers"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all running UMO services"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "status"             "Display real-time status of UMO services"
     printf "\n"
 
     printf "  ${_UMO_DIM}Terminal Access${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Start a root shell session"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Start a default user shell session"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "run <cmd>"          "Execute a command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Access Ubuntu via root shell"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Access Ubuntu via default user shell"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "run <cmd>"          "Execute a single command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "--user <name>"      "Switch default user login"
     printf "\n"
 
     printf "  ${_UMO_DIM}System & Management${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Start the VNC server manually"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Update UMO system from GitHub"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Manually trigger the VNC server"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Fetch and apply latest updates from GitHub"
     printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "backup [dir]"       "Create a tarball backup of the container"
+    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "version"            "Display current UMO version"
     printf "\n"
 
     printf "  ${_UMO_BOLD}OPTIONS:${_UMO_NC}\n"
