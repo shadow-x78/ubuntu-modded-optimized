@@ -16,6 +16,7 @@ vncserver "$VNC_DISPLAY" \
     -localhost no \
     -name "UMO Desktop" \
     -alwaysshared \
+    -extension GLX \
     -Log "*:stderr:100" &
 
 sleep 2

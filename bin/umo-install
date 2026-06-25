@@ -185,10 +185,10 @@ umo_phase_finalize() {
     elif [ -f "$_src_list" ]; then
         cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
     fi
-    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "apt-get install -y sudo" </dev/null 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "dpkg --configure -a" </dev/null 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "usermod -aG sudo umo" </dev/null 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
+    "$HOME/umo-login.sh" -c "apt-get install -y sudo" </dev/null >/dev/null 2>&1 || true
+    "$HOME/umo-login.sh" -c "dpkg --configure -a" </dev/null >/dev/null 2>&1 || true
+    "$HOME/umo-login.sh" -c "usermod -aG sudo umo" </dev/null >/dev/null 2>&1 || true
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
@@ -312,7 +312,7 @@ _umo_set_user() {
         exit 1
     fi
     _umo_info "Switching default user to: $_new_user"
-    "$_UMO_TERMUX_HOME/umo-login.sh" -c "id $_new_user >/dev/null 2>&1 || { useradd -m -s /bin/bash $_new_user && echo '${_new_user}:${_new_user}' | chpasswd; }"
+    "$_UMO_TERMUX_HOME/umo-login.sh" -c "id $_new_user >/dev/null 2>&1 || { useradd -m -s /bin/bash $_new_user && echo '${_new_user}:${_new_user}' | chpasswd; }" </dev/null >/dev/null 2>&1
     sed -i "s|/bin/su - [^ ]*|/bin/su - $_new_user|g" "$_user_sh" 2>/dev/null || true
     sed -i "s|HOME=/home/[^ ]*|HOME=/home/$_new_user|g" "$_user_sh" 2>/dev/null || true
     _umo_ok "Default user is now: $_new_user"
