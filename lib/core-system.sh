@@ -86,7 +86,7 @@ umo_sys_require_cmd() {
     _cmd="$1"
     _pkg="${2:-$_cmd}"
     if ! umo_sys_has_cmd "$_cmd"; then
-        umo_log_warn "Missing: $_cmd. Attempting to install $_pkg.."
+        umo_log_warn "Missing: $_cmd. Attempting to install $_pkg..."
         pkg install -y "$_pkg" 2>/dev/null || \
         apt-get install -y "$_pkg" 2>/dev/null || \
         umo_die "Failed to install $_pkg"
@@ -116,7 +116,7 @@ umo_sys_is_running() {
 
 umo_sys_setup_storage() {
     if [ ! -d "$HOME/storage" ]; then
-        umo_log_warn "Storage not configured. Running termux-setup-storage.."
+        umo_log_warn "Storage not configured. Running termux-setup-storage..."
         termux-setup-storage || true
     fi
 }

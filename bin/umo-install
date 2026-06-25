@@ -277,7 +277,7 @@ _umo_status() {
 
 _umo_run_update() {
     _umo_header
-    _umo_info "Updating UMO from GitHub.."
+    _umo_info "Updating UMO from GitHub..."
     if [ -d "$_UMO_REPO_DIR/.git" ]; then
         cd "$_UMO_REPO_DIR" || exit 1
         git fetch origin main || { _umo_err "Failed to fetch updates"; exit 1; }

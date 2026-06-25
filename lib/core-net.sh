@@ -89,7 +89,7 @@ umo_net_download_mirrors() {
             umo_log_info "Using cached archive."
             return 0
         else
-            umo_log_warn "Cached archive is corrupt, re-downloading.."
+            umo_log_warn "Cached archive is corrupt, re-downloading..."
             rm -f "$_output"
         fi
     fi
