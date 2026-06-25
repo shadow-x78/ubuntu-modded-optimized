@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # UMO — Ubuntu User Login (template)
 INSTALL_DIR="{{INSTALL_DIR}}"
 PREFIX="{{TERMUX_PREFIX}}"

@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # UMO — Stop VNC (template)
 echo "[==>] Stopping VNC..."
 vncserver -kill :1 2>/dev/null || true

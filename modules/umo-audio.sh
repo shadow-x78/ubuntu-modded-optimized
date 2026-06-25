@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # UMO — PulseAudio Audio Bridge (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 

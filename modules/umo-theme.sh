@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # UMO — Desktop Theme Engine (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
