@@ -63,10 +63,11 @@ Full Ubuntu on your Android device — one command, zero hassle
 ## 🖼️ Screenshots
 
 <p align="center">
-  <img src="assets/screenshots/01_version_selection.jpg" width="24%" alt="Version Selection">
-  <img src="assets/screenshots/02_desktop_selection.jpg" width="24%" alt="Desktop Selection">
-  <img src="assets/screenshots/03_configuration_summary.jpg" width="24%" alt="Configuration Summary">
-  <img src="assets/screenshots/04_installation_complete.jpg" width="24%" alt="Installation Complete">
+  <img src="assets/screenshots/01_system_check.jpg" width="19%" alt="System Check">
+  <img src="assets/screenshots/02_version_selection.jpg" width="19%" alt="Version Selection">
+  <img src="assets/screenshots/03_desktop_selection.jpg" width="19%" alt="Desktop Selection">
+  <img src="assets/screenshots/04_configuration_summary.jpg" width="19%" alt="Configuration Summary">
+  <img src="assets/screenshots/05_installation_complete.jpg" width="19%" alt="Installation Complete">
 </p>
 
 ---
