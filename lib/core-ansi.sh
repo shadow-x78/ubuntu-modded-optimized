@@ -294,9 +294,10 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
 
     _auth="By Shadow-x78"
-    _authlen=$(printf '%s' "$_auth" | wc -m)
+    _auth_link="\033]8;;https://github.com/Shadow-x78/termux-ubuntu-umo\033\\\\${_auth}\033]8;;\033\\\\"
+    _authlen=13
     _authpad=$(( (_cols - _authlen) / 2 )); [ "$_authpad" -lt 0 ] && _authpad=0
-    printf "%b%*s%s%b\n\n" "$UMO_COLOR_MUTED" "$_authpad" '' "$_auth" "$UMO_NC"
+    printf "%b%*s%b%b\n\n" "$UMO_COLOR_MUTED" "$_authpad" '' "$_auth_link" "$UMO_NC"
 }
 
 umo_banner_compact() {
