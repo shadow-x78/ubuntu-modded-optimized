@@ -59,7 +59,7 @@ _run_de_installer() {
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
     umo_run_quiet "Installing $_label..." "$HOME/umo-login.sh" -c "bash /root/install-de.sh"
     rm -f "${UMO_INSTALL_DIR}/root/install-de.sh"
-    umo_log_ok "Desktop environment installed."
+    umo_log_ok "Desktop environment installed"
 }
 
 umo_de_install() {

@@ -15,10 +15,10 @@ umo_audio_install_termux() {
     if ! command -v pulseaudio >/dev/null 2>&1; then
         pkg install -y pulseaudio 2>/dev/null || \
         apt-get install -y pulseaudio 2>/dev/null || \
-        umo_log_warn "Could not auto-install pulseaudio."
+        umo_log_warn "Could not auto-install pulseaudio"
     fi
 
-    umo_log_ok "PulseAudio ready."
+    umo_log_ok "PulseAudio ready"
 }
 
 umo_audio_configure() {
@@ -36,7 +36,7 @@ EOF
 
     mkdir -p "$UMO_TERMUX_PREFIX/root/pulse-runtime"
 
-    umo_log_ok "PulseAudio bridge configured."
+    umo_log_ok "PulseAudio bridge configured"
 }
 
 umo_audio_setup() {

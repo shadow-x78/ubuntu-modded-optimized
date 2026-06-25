@@ -95,5 +95,5 @@ umo_apps_install() {
             umo_apps_basic
             ;;
     esac
-    umo_log_ok "All applications installed."
+    umo_log_ok "All applications installed"
 }

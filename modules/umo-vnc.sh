@@ -68,7 +68,7 @@ INNER
     umo_run_quiet "Installing TigerVNC..." "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
     rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
 
-    umo_log_ok "TigerVNC installed."
+    umo_log_ok "TigerVNC installed"
 }
 
 umo_vnc_configure() {
@@ -99,7 +99,7 @@ umo_vnc_configure() {
         "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo 'umo' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
     fi
 
-    umo_log_ok "VNC configured."
+    umo_log_ok "VNC configured"
 }
 
 umo_vnc_create_scripts() {
@@ -205,7 +205,7 @@ exec "$HOME/umo-login.sh" -c "umo-stopvnc"
 EOF
     chmod +x "$HOME/umo-vnc-stop.sh"
 
-    umo_log_ok "VNC scripts created."
+    umo_log_ok "VNC scripts created"
 }
 
 umo_vnc_setup() {

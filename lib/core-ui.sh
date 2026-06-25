@@ -113,7 +113,7 @@ umo_ui_confirm() {
         case "$_ans_lower" in
             y|yes) return 0 ;;
             n|no)  return 1 ;;
-            *) umo_log_warn "Please answer yes or no." ;;
+            *) umo_log_warn "Please answer yes or no" ;;
         esac
     done
 }

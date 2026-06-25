@@ -15,7 +15,7 @@ umo_sys_is_termux() {
 
 umo_sys_require_termux() {
     if ! umo_sys_is_termux; then
-        umo_die "UMO must run inside Termux environment."
+        umo_die "UMO must run inside Termux environment"
     fi
     umo_log_ok "Termux environment verified"
 }
@@ -33,7 +33,7 @@ umo_sys_require_arch() {
     _current=$(umo_sys_arch)
     case "$_current" in
         aarch64) umo_log_ok "Architecture: $_current (supported)" ;;
-        *)       umo_die "Unsupported architecture: $_current. UMO requires an ARM64 (aarch64) device." ;;
+        *)       umo_die "Unsupported architecture: $_current. UMO requires an ARM64 (aarch64) device" ;;
     esac
 }
 
@@ -50,7 +50,7 @@ umo_sys_require_space() {
     _free_gb=$((_free_mb / 1024))
 
     if [ "$_free_mb" -lt "$_required_mb" ]; then
-        umo_die "Insufficient storage: ${_free_mb}MB free, ${_required_mb}MB required."
+        umo_die "Insufficient storage: ${_free_mb}MB free, ${_required_mb}MB required"
     fi
     umo_log_ok "Storage: ${_free_gb}GB available (${_required_mb}MB required)"
 }
@@ -74,7 +74,7 @@ umo_sys_require_internet() {
     if umo_sys_has_internet; then
         umo_log_ok "Internet connection verified"
     else
-        umo_die "No internet connection. Please connect and retry."
+        umo_die "No internet connection. Please connect and retry"
     fi
 }
 
@@ -86,10 +86,10 @@ umo_sys_require_cmd() {
     _cmd="$1"
     _pkg="${2:-$_cmd}"
     if ! umo_sys_has_cmd "$_cmd"; then
-        umo_log_warn "Missing: $_cmd. Attempting to install $_pkg..."
+        umo_log_warn "Missing: $_cmd. Attempting to install $_pkg.."
         pkg install -y "$_pkg" 2>/dev/null || \
         apt-get install -y "$_pkg" 2>/dev/null || \
-        umo_die "Failed to install $_pkg."
+        umo_die "Failed to install $_pkg"
     fi
 }
 
@@ -116,7 +116,7 @@ umo_sys_is_running() {
 
 umo_sys_setup_storage() {
     if [ ! -d "$HOME/storage" ]; then
-        umo_log_warn "Storage not configured. Running termux-setup-storage..."
+        umo_log_warn "Storage not configured. Running termux-setup-storage.."
         termux-setup-storage || true
     fi
 }

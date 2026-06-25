@@ -33,11 +33,11 @@ INNER
             cd /root/Orchis-theme-* && \\
             ./install.sh -t default -c dark --tweaks solid 2>/dev/null; \\
             rm -rf /root/orchis* /root/Orchis*
-        " || umo_log_warn "Orchis theme download failed (non-critical)."
+        " || umo_log_warn "Orchis theme download failed (non-critical)"
     fi
 
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"
-    umo_log_ok "Theme packages installed."
+    umo_log_ok "Theme packages installed"
 }
 
 umo_theme_apply_gtk() {
@@ -68,7 +68,7 @@ umo_theme_apply_gtk() {
     chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.config" 2>/dev/null || true
     chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.gtkrc-2.0" 2>/dev/null || true
 
-    umo_log_ok "GTK configuration applied."
+    umo_log_ok "GTK configuration applied"
 }
 
 umo_theme_apply_icons() {
@@ -81,7 +81,7 @@ umo_theme_apply_icons() {
         sed -i 's|IconThemeName.*|IconThemeName" type="string" value="Papirus-Dark"/>|' "$_xfce_conf/xsettings.xml" 2>/dev/null || true
     fi
 
-    umo_log_ok "Icon theme set to Papirus-Dark."
+    umo_log_ok "Icon theme set to Papirus-Dark"
 }
 
 umo_theme_apply_fonts() {
@@ -93,7 +93,7 @@ umo_theme_apply_fonts() {
         cp -f "$SCRIPT_DIR/config/theme/fontconfig/01-umo-fonts.conf" "$_fc_dir/"
     fi
 
-    umo_log_ok "Font configuration applied."
+    umo_log_ok "Font configuration applied"
 }
 
 umo_theme_apply_panel() {
@@ -107,7 +107,7 @@ umo_theme_apply_panel() {
 
     rm -f "$UMO_INSTALL_DIR/root/.config/xfce4/panel/panels.xml" 2>/dev/null || true
 
-    umo_log_ok "Panel layout applied."
+    umo_log_ok "Panel layout applied"
 }
 
 umo_theme_apply_wallpaper() {
@@ -144,5 +144,5 @@ umo_theme_setup() {
         umo_theme_apply_wallpaper
     fi
 
-    umo_log_ok "Desktop theme applied."
+    umo_log_ok "Desktop theme applied"
 }

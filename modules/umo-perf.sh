@@ -75,7 +75,7 @@ INNER
     umo_log_step "Update package lists (Global)"
     "$HOME/umo-login.sh" -c "apt-get update -qq" >/dev/null 2>&1 || true
 
-    umo_log_ok "APT configured (mode: $UMO_PERF_MODE)."
+    umo_log_ok "APT configured (mode: $UMO_PERF_MODE)"
 }
 
 umo_perf_debloat() {
@@ -97,7 +97,7 @@ INNER
     umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh"
 
-    umo_log_ok "Debloating completed."
+    umo_log_ok "Debloating completed"
 }
 
 umo_perf_dns() {
@@ -113,7 +113,7 @@ EOR
 
     chattr +i "$_resolv" 2>/dev/null || true
 
-    umo_log_ok "DNS configured (Cloudflare + Google + Quad9)."
+    umo_log_ok "DNS configured (Cloudflare + Google + Quad9)"
 }
 
 umo_perf_cleanup() {
@@ -137,7 +137,7 @@ INNER
         rm -rf "$UMO_INSTALL_DIR/usr/share/locale" 2>/dev/null || true
     fi
 
-    umo_log_ok "Cleanup complete."
+    umo_log_ok "Cleanup complete"
 }
 
 umo_perf_gpu() {
@@ -159,7 +159,7 @@ export LIBGL_ALWAYS_SOFTWARE=0
 '
     fi
 
-    umo_log_ok "GPU rendering configured."
+    umo_log_ok "GPU rendering configured"
 }
 
 umo_perf_vnc() {
@@ -174,7 +174,7 @@ umo_perf_vnc() {
         sed -i 's|use_compositing" type="bool" value="true"|use_compositing" type="bool" value="false"|g' "$_xfce_settings" 2>/dev/null || true
     fi
 
-    umo_log_ok "VNC tuned."
+    umo_log_ok "VNC tuned"
 }
 
 umo_perf_desktop() {
@@ -192,7 +192,7 @@ INNER
     umo_run_quiet "Applying desktop tweaks..." "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh"
     rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh"
 
-    umo_log_ok "Desktop optimizations applied."
+    umo_log_ok "Desktop optimizations applied"
 }
 
 umo_perf_setup() {
@@ -209,5 +209,5 @@ umo_perf_setup() {
         umo_perf_desktop
     fi
 
-    umo_log_ok "Performance optimizations complete."
+    umo_log_ok "Performance optimizations complete"
 }

@@ -84,7 +84,7 @@ EOF
         ln -sf /usr/local/bin/systemctl "${UMO_INSTALL_DIR}/bin/systemctl" 2>/dev/null || true
     fi
 
-    umo_log_ok "Systemctl emulator installed."
+    umo_log_ok "Systemctl emulator installed"
 }
 
 umo_systemctl_ssh_helper() {

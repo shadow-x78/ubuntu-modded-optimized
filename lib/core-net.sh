@@ -21,13 +21,17 @@ umo_net_mirror_list() {
 
     case "$_ver" in
         22.04|jammy)
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04.5-base-${_uarch}.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04.5/release/ubuntu-base-22.04.5-base-${_uarch}.tar.gz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-${_uarch}.tar.gz"
             ;;
         24.04|noble)
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.1-base-${_uarch}.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04.1/release/ubuntu-base-24.04.1-base-${_uarch}.tar.gz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-${_uarch}.tar.gz"
             ;;
         *)
-            echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-${_uarch}.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04.5-base-${_uarch}.tar.gz"
             ;;
     esac
 }
@@ -69,7 +73,7 @@ umo_net_download() {
         umo_net__validate_file "$_output" || return 1
         return 0
     else
-        umo_die "No download tool available. Install wget or curl."
+        umo_die "No download tool available. Install wget or curl"
     fi
 }
 
@@ -85,7 +89,7 @@ umo_net_download_mirrors() {
             umo_log_info "Using cached archive."
             return 0
         else
-            umo_log_warn "Cached archive is corrupt, re-downloading..."
+            umo_log_warn "Cached archive is corrupt, re-downloading.."
             rm -f "$_output"
         fi
     fi
@@ -97,16 +101,16 @@ umo_net_download_mirrors() {
             if umo_net__validate_file "$_output"; then
                 return 0
             else
-                umo_log_warn "Downloaded file invalid or corrupt, trying next mirror..."
+                umo_log_warn "Downloaded file invalid or corrupt, trying next mirror"
                 rm -f "$_output"
             fi
         else
-            umo_log_warn "Mirror failed, trying next..."
+            umo_log_warn "Mirror failed, trying next"
             rm -f "$_output"
         fi
     done
 
-    umo_die "All download mirrors failed."
+    umo_die "All download mirrors failed"
 }
 
 umo_net_extract() {
@@ -122,24 +126,24 @@ umo_net_extract() {
         *.tar.gz|*.tgz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (gzip). Archive may be corrupt — re-run to re-download."
+                umo_die "Extraction failed (gzip). Archive may be corrupt — re-run to re-download"
             ;;
         *.tar.xz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (xz). Archive may be corrupt — re-run to re-download."
+                umo_die "Extraction failed (xz). Archive may be corrupt — re-run to re-download"
             ;;
         *.zip)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 unzip -q "$_archive" -d "$_dest" || \
-                umo_die "Extraction failed (zip)."
+                umo_die "Extraction failed (zip)"
             ;;
         *)
             umo_die "Unknown archive format: $_archive"
             ;;
     esac
 
-    umo_log_ok "Extraction complete."
+    umo_log_ok "Extraction complete"
 }
 
 umo_net_verify_sha256() {
@@ -147,7 +151,7 @@ umo_net_verify_sha256() {
     _expected="$2"
 
     if [ -z "$_expected" ]; then
-        umo_log_warn "No checksum provided, skipping verification."
+        umo_log_warn "No checksum provided, skipping verification"
         return 0
     fi
 
@@ -158,7 +162,7 @@ umo_net_verify_sha256() {
     fi
 
     if [ "$_actual" = "$_expected" ]; then
-        umo_log_ok "Checksum verified (SHA-256)."
+        umo_log_ok "Checksum verified (SHA-256)"
         return 0
     else
         umo_log_err "Checksum mismatch!"

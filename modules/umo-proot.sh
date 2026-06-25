@@ -70,7 +70,7 @@ APT::Acquire::AllowInsecureRepositories "true";
 APTCONF
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
-    umo_log_ok "Proot directories ready."
+    umo_log_ok "Proot directories ready"
 }
 
 umo_proot_cmd() {
@@ -185,7 +185,7 @@ exec "$HOME/umo-login.sh"
 EOF
     chmod +x "$UMO_TERMUX_HOME/umo-start.sh"
 
-    umo_log_ok "Login scripts ready."
+    umo_log_ok "Login scripts ready"
 }
 
 umo_proot_patch_bashrc() {
@@ -277,7 +277,7 @@ SRCLIST
         "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
         2>/dev/null || true
 
-    umo_log_ok "User 'umo' created (password: umo)."
+    umo_log_ok "User 'umo' created (password: umo)"
 }
 
 umo_proot_setup() {
