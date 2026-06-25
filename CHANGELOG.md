@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.2] - 2026-06-25
+
+### 🐛 Fixed
+- **VNC Server Crash:** Disabled the `GLX` extension natively via environment variables (`MESA_NO_SHM=1`, `GALLIUM_DRIVER=llvmpipe`, `LIBGL_ALWAYS_SOFTWARE=1`) to prevent Signal 6 crashes when parsing arguments in newer TigerVNC wrapper scripts.
+- **Installer Exit Hang:** Prevented the `termux-wake-unlock` API call from hanging the finalization phase by running it fully in the background.
+- **UI Consistency:** Wrapped remaining initialization and setup headers in `umo_run_quiet` to ensure uniform loading messages throughout the installation.
+
 ## [v4.0.1] - 2026-06-25
 
 ### 🐛 Fixed

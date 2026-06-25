@@ -80,7 +80,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.0.1}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.0.2}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
@@ -127,13 +127,16 @@ else
     exit 1
 fi
 
+export MESA_NO_SHM=1
+export GALLIUM_DRIVER=llvmpipe
+export LIBGL_ALWAYS_SOFTWARE=1
+
 $_vnc_cmd "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
     -name "UMO Desktop" \
     -alwaysshared \
-    -extension GLX \
     -Log "*:stderr:100" &
 
 sleep 2

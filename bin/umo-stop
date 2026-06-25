@@ -21,7 +21,7 @@ for _proc in Xvnc termux-x11 dbus-daemon pulseaudio dconf-service xfce4-session 
     pkill -9 -f "$_proc" 2>/dev/null || true
 done
 
-termux-wake-unlock 2>/dev/null || true
+termux-wake-unlock >/dev/null 2>&1 &
 
 printf "\033[1A\033[2K"
 printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"

@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.0.1"
+export UMO_VERSION="4.0.2"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -136,8 +136,8 @@ umo_phase_download() {
 umo_phase_proot() {
     umo_ui_header "Proot Container"
     export UMO_INSTALL_DIR
-    umo_proot_setup
-    umo_proot_create_user
+    umo_run_quiet "Configuring Proot Container..." umo_proot_setup
+    umo_run_quiet "Setting up Container User..." umo_proot_create_user
 }
 
 umo_phase_vnc() {
@@ -150,13 +150,13 @@ umo_phase_vnc() {
 umo_phase_audio() {
     umo_ui_header "Audio Bridge"
     export UMO_INSTALL_DIR
-    umo_audio_setup
+    umo_run_quiet "Configuring Audio Bridge..." umo_audio_setup
 }
 
 umo_phase_systemctl() {
     umo_ui_header "Systemctl Emulator"
     export UMO_INSTALL_DIR
-    umo_systemctl_setup
+    umo_run_quiet "Configuring Systemctl Emulator..." umo_systemctl_setup
 }
 
 umo_phase_desktop() {
@@ -177,22 +177,26 @@ umo_phase_apps() {
 umo_phase_finalize() {
     umo_ui_header "Finalizing"
 
-    _codename="jammy"
-    [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _codename="noble"
-    _src_list="$SCRIPT_DIR/config/sources.list"
-    if [ -f "$_src_list" ] && grep -q 'jammy' "$_src_list" 2>/dev/null; then
-        sed '/^deb/ s/jammy/'"$_codename"'/g' "$_src_list" > "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
-    elif [ -f "$_src_list" ]; then
-        cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
-    fi
-    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
-    "$HOME/umo-login.sh" -c "apt-get install -y sudo" </dev/null >/dev/null 2>&1 || true
-    "$HOME/umo-login.sh" -c "dpkg --configure -a" </dev/null >/dev/null 2>&1 || true
-    "$HOME/umo-login.sh" -c "usermod -aG sudo umo" </dev/null >/dev/null 2>&1 || true
+    umo_run_quiet "Configuring APT sources..." sh -c "
+        _codename=\"jammy\"
+        [ \"$UMO_UBUNTU_VERSION\" = \"24.04\" ] && _codename=\"noble\"
+        _src_list=\"$SCRIPT_DIR/config/sources.list\"
+        if [ -f \"\$_src_list\" ] && grep -q 'jammy' \"\$_src_list\" 2>/dev/null; then
+            sed '/^deb/ s/jammy/'\"\$_codename\"'/g' \"\$_src_list\" > \"$UMO_INSTALL_DIR/etc/apt/sources.list\" 2>/dev/null || true
+        elif [ -f \"\$_src_list\" ]; then
+            cp \"\$_src_list\" \"$UMO_INSTALL_DIR/etc/apt/sources.list\" 2>/dev/null || true
+        fi
+    "
+    umo_run_quiet "Updating package indices..." "$HOME/umo-login.sh" -c "apt-get update -qq"
+    umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo"
+    umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a"
+    umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo"
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
             sed -i '/alias umo=/d' "$_rc" 2>/dev/null || true
+            sed -i '/alias startvnc=/d' "$_rc" 2>/dev/null || true
+            sed -i '/alias stopvnc=/d' "$_rc" 2>/dev/null || true
         fi
     done
 
@@ -211,7 +215,7 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="4.0.1"
+_UMO_VERSION="4.0.2"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
     cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
@@ -424,7 +428,7 @@ umo_phase_summary() {
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Path"    "$UMO_INSTALL_DIR"
 
-    termux-wake-unlock 2>/dev/null || true
+    termux-wake-unlock >/dev/null 2>&1 &
     umo_kv "VNC"     "$_ip:5901"
     umo_kv "User"    "umo (password: umo)"
 

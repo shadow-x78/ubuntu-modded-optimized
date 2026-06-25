@@ -10,13 +10,16 @@ sleep 1
 
 pulseaudio --start 2>/dev/null || true
 
+export MESA_NO_SHM=1
+export GALLIUM_DRIVER=llvmpipe
+export LIBGL_ALWAYS_SOFTWARE=1
+
 vncserver "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
     -name "UMO Desktop" \
     -alwaysshared \
-    -extension GLX \
     -Log "*:stderr:100" &
 
 sleep 2
