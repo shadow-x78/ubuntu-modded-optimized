@@ -226,7 +226,15 @@ _UMO_YEL='\033[38;5;220m'
 _UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 
 _umo_header() {
-    printf "\n  ${_UMO_BOLD}${_UMO_PRI}▸ UMO${_UMO_NC}  ${_UMO_DIM}Ubuntu Modded Optimized${_UMO_NC}  ${_UMO_DIM}v${_UMO_VERSION}${_UMO_NC}\n"
+    printf "\n${_UMO_PRI}"
+    printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
+    printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
+    printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
+    printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
+    printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
+    printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+    printf "${_UMO_NC}\n"
+    printf "  ${_UMO_DIM}Ubuntu Modded Optimized · v${_UMO_VERSION}${_UMO_NC}\n"
     printf "  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n\n"
 }
 
@@ -268,6 +276,7 @@ _umo_status() {
 }
 
 _umo_run_update() {
+    _umo_header
     _umo_info "Updating UMO from GitHub..."
     if [ -d "$_UMO_REPO_DIR/.git" ]; then
         cd "$_UMO_REPO_DIR" || exit 1
@@ -377,7 +386,7 @@ case "$1" in
     run)                    shift; _umo_run_cmd "$@" ;;
     backup)                 shift; _umo_backup "$@" ;;
     --user|-u)              shift; _umo_set_user "$1" ;;
-    --version|-v|version)   printf "\n  ${_UMO_PRI}UMO${_UMO_NC} v${_UMO_VERSION}\n\n" ;;
+    --version|-v|version)   _umo_header ;;
     help|--help|-h)         _umo_help ;;
     "")
         _umo_err "No command provided."
