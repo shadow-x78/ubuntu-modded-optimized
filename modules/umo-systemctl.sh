@@ -87,24 +87,6 @@ EOF
     umo_log_ok "Systemctl emulator installed"
 }
 
-umo_systemctl_ssh_helper() {
-    _template="$SCRIPT_DIR/config/templates/umo-start-ssh.sh"
-    _output="${UMO_INSTALL_DIR}/usr/local/bin/umo-start-ssh"
-    if [ -f "$_template" ]; then
-        umo_fs_render "$_template" "$_output"
-    else
-        cat > "$_output" << 'EOF'
-#!/bin/sh
-echo "[==>] Starting SSH server..."
-[ -d /run/sshd ] || mkdir -p /run/sshd
-[ -f /etc/ssh/ssh_host_rsa_key ] || ssh-keygen -A 2>/dev/null || true
-/usr/sbin/sshd -D "$@"
-EOF
-    fi
-    chmod +x "$_output"
-}
-
 umo_systemctl_setup() {
     umo_systemctl_install
-    umo_systemctl_ssh_helper
 }
