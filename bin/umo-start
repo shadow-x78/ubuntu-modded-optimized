@@ -17,15 +17,38 @@ pulseaudio --start 2>/dev/null || true
 sleep 1
 
 if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
-    printf "  %b➜%b  Starting with Termux:X11...\n" "$_UMO_CYN" "$_UMO_NC"
+    printf "\n${_UMO_PRI}"
+    printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
+    printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
+    printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
+    printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
+    printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
+    printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+    printf "${_UMO_NC}\n"
+
+    printf "  %b[ ⚙ ] Initializing Termux:X11 services...%b\n" "$_UMO_DIM" "$_UMO_NC"
+
     if ! command -v termux-x11 >/dev/null 2>&1; then
+        printf "\033[1A\033[2K"
         printf "  %b!%b  termux-x11-nightly not installed.\n" "$_UMO_PRI" "$_UMO_NC"
         printf "  %b\$ pkg install x11-repo && pkg install termux-x11-nightly%b\n" "$_UMO_DIM" "$_UMO_NC"
+        exit 1
     fi
     export DISPLAY=:0
     export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
     termux-x11 :0 2>/dev/null &
     sleep 2
+
+    printf "\033[1A\033[2K"
+    printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
+    printf "  %b%b▸ UMO X11 Session Active%b\n" "$_UMO_BOLD" "$_UMO_GRN" "$_UMO_NC"
+    printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
+    printf "\n"
+    printf "  %bDisplay:%b   %b:0%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_UMO_NC"
+    printf "  %bStop:%b      %bumo stop%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_UMO_NC"
+    printf "\n"
+    printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
+    printf "\n"
     exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; export XDG_RUNTIME_DIR=${TMPDIR:-/tmp}; bash"
 else
     printf "\n${_UMO_PRI}"

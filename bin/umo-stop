@@ -4,16 +4,28 @@
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 
-echo "[UMO] Stopping session..."
+printf "\n${_UMO_PRI}"
+printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
+printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
+printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
+printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
+printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
+printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+printf "${_UMO_NC}\n"
 
-"$TERMUX_HOME/umo-login.sh" -c "umo-stopvnc" 2>/dev/null || true
+printf "  %b[ ⚙ ] Stopping UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
-for _pid in $(ps -ef 2>/dev/null | grep -i xvnc | grep -v grep | awk '{print $2}'); do
-    kill -9 "$_pid" 2>/dev/null || true
+"$TERMUX_HOME/umo-login.sh" -c "umo-stopvnc" >/dev/null 2>&1 || true
+
+for _proc in Xvnc termux-x11 dbus-daemon pulseaudio dconf-service xfce4-session proot; do
+    pkill -9 -f "$_proc" 2>/dev/null || true
 done
-
-pulseaudio --kill 2>/dev/null || true
 
 termux-wake-unlock 2>/dev/null || true
 
-echo "[UMO] Session stopped."
+printf "\033[1A\033[2K"
+printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
+printf "  %b%b▸ UMO Session Stopped%b\n" "$_UMO_BOLD" "$_UMO_GRN" "$_UMO_NC"
+printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
+printf "\n"
+
