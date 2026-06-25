@@ -222,6 +222,6 @@ Distributed under the [MIT License](LICENSE).
 Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 [Changelog](CHANGELOG.md)
 
-<sub>Ubuntu Modded Optimized (UMO)</sub>
+<sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>
 
 </div>

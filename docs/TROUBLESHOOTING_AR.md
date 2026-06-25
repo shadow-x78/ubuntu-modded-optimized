@@ -165,6 +165,6 @@ cat ~/.umo/logs/install.log
 بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 [العودة إلى README](../README_AR.md)
 
-<sub>Ubuntu Modded Optimized (UMO)</sub>
+<sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>
 
 </div>

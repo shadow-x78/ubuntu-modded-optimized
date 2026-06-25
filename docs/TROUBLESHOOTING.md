@@ -165,6 +165,6 @@ If the problem persists, open an issue with the log attached:
 Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
 [Back to README](../README.md)
 
-<sub>Ubuntu Modded Optimized (UMO)</sub>
+<sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>
 
 </div>
