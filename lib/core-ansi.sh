@@ -233,7 +233,7 @@ umo_run_quiet() {
     _spin_pid=$!
 
     _rc=0
-    "$@" > "$_logfile" 2>&1 || _rc=$?
+    "$@" </dev/null > "$_logfile" 2>&1 || _rc=$?
 
     kill "$_spin_pid" 2>/dev/null
     wait "$_spin_pid" 2>/dev/null || true

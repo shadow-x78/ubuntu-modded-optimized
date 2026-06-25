@@ -69,11 +69,11 @@ for _bin in gtk-update-icon-cache update-initramfs systemd-hwdb update-command-n
 done
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/divert-triggers.sh"
-    "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" >/dev/null 2>&1
+    "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1
     rm -f "$UMO_INSTALL_DIR/root/divert-triggers.sh"
 
     umo_log_step "Update package lists (Global)"
-    "$HOME/umo-login.sh" -c "apt-get update -qq" >/dev/null 2>&1 || true
+    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
 
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)"
 }

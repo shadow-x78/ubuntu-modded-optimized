@@ -185,10 +185,10 @@ umo_phase_finalize() {
     elif [ -f "$_src_list" ]; then
         cp "$_src_list" "$UMO_INSTALL_DIR/etc/apt/sources.list" 2>/dev/null || true
     fi
-    "$HOME/umo-login.sh" -c "apt-get update -qq" 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "apt-get install -y sudo" 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "dpkg --configure -a" 2>/dev/null || true
-    "$HOME/umo-login.sh" -c "usermod -aG sudo umo" 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "apt-get install -y sudo" </dev/null 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "dpkg --configure -a" </dev/null 2>/dev/null || true
+    "$HOME/umo-login.sh" -c "usermod -aG sudo umo" </dev/null 2>/dev/null || true
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
@@ -196,7 +196,7 @@ umo_phase_finalize() {
         fi
     done
 
-    for _proc in proot dbus-daemon pulseaudio Xvnc termux-x11 dconf-service xfce4-session; do
+    for _proc in proot dbus-daemon pulseaudio Xvnc termux-x11 dconf-service xfce4-session gpg-agent dirmngr; do
         pkill -9 -f "$_proc" 2>/dev/null || true
     done
 
@@ -423,6 +423,8 @@ umo_phase_summary() {
     umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Path"    "$UMO_INSTALL_DIR"
+
+    termux-wake-unlock 2>/dev/null || true
     umo_kv "VNC"     "$_ip:5901"
     umo_kv "User"    "umo (password: umo)"
 
