@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [v4.0.1] - 2026-06-25
 
 ### 🐛 Fixed
-- **VNC Server Stability:** Fixed an issue where the VNC server would stop immediately due to the PRoot session exiting prematurely by replacing `wait` with a continuous polling loop for `Xvnc`.
+- **Terminal Hang on Exit:** Prevented background daemons (like `gpg-agent`) from inheriting terminal file descriptors during installation, allowing the installer to exit cleanly without freezing Termux.
+- **VNC Server Stability:** Fixed an issue where the VNC server would stop immediately by removing the unsupported `-deferUpdate` parameter from TigerVNC and replacing `wait` with a continuous polling loop for `Xvnc`.
+- **CLI Output:** Fixed a bug in `umo update` where the success message was repeated twice and lacked the correct color formatting.
+
+### 🗑️ Removed
+- **Obsolete SSH Script:** Removed the obsolete `umo-start-ssh` helper script from the codebase as it is no longer used or necessary.
 
 ## [v4.0.0] - 2026-06-25
 
