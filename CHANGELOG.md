@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.6] - 2026-06-25
+
+### 🐛 Fixed
+- **DPKG I/O Bypass:** Reverted `eatmydata` in favor of the native `force-unsafe-io` configuration. The previous `eatmydata` wrapper strategy failed because `apt-get` internally executes the absolute path `/usr/bin/dpkg`, bypassing the `/usr/local/bin` wrapper. This caused `dpkg` to silently fall back to slow, synchronous `fsync()` system calls, resulting in extreme slowness during XFCE4 and Theme extraction on Android flash storage. The native `force-unsafe-io` approach definitively eliminates `fsync` overhead at the package manager level.
+
 ## [v4.0.5] - 2026-06-25
 
 ### ⚡ Optimized
@@ -19,7 +24,7 @@ All notable changes to this project will be documented in this file.
 - **DPKG Fatal Error:** Fixed `dpkg` aborting with `unknown system group 'messagebus'` during finalization. This was caused by an Ubuntu packaging bug leaving orphaned `dpkg-statoverride` entries after debloating `dbus`. The override is now forcefully cleaned.
 - **Colors:** Fixed the missing orange theme color `_UMO_PRI` when running `umo stop`.
 
-## [v4.0.2] - 2026-06-25
+## [v4.0.3] - 2026-06-25
 
 ### 🐛 Fixed
 - **VNC Server Crash:** Disabled the `GLX` extension natively via environment variables (`MESA_NO_SHM=1`, `GALLIUM_DRIVER=llvmpipe`, `LIBGL_ALWAYS_SOFTWARE=1`) to prevent Signal 6 crashes when parsing arguments in newer TigerVNC wrapper scripts.
