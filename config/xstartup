@@ -4,8 +4,6 @@ export PULSE_SERVER=127.0.0.1
 export PULSE_LATENCY_MSEC=30
 export DISPLAY={{DISPLAY}}
 export XAUTHORITY="$HOME/.Xauthority"
-export GALLIUM_DRIVER=virpipe
-export MESA_GL_VERSION_OVERRIDE=4.0
 
 xset s off
 xset -dpms
