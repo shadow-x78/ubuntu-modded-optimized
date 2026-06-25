@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [v4.0.7] - 2026-06-25
 
+### 🐛 Fixed
+- **VNC Status Detection:** Updated `umo status` and session control scripts to correctly detect and kill `Xtigervnc` in addition to `Xvnc`, preventing false "Stopped" reports and fixing "already running" errors when restarting VNC.
+- **VNC Password:** Changed the default VNC password from `umo` (which was silently rejected for being under 6 characters) to `ubuntu`. Updated all documentation and UI summaries to clarify the VNC password.
+- **VNC Server Output:** Removed the background `&` execution from the VNC server startup command. The script now correctly checks the exit status of `vncserver` and prevents the success logo from displaying if the server fails to start.
+
+
 ### 👁️ Visibility & UX
 - **Global Installation Transparency:** Removed the silent `umo_run_quiet` wrapper from all major installation phases, including Desktop Environment (XFCE4/Openbox), Applications, VNC Server, and Themes. Additionally removed `quiet "2"` from the global `apt.conf`. Because XFCE4 and its icon themes contain over 80,000 files, PRoot must intercept hundreds of thousands of system calls, which fundamentally takes several minutes on Android storage. Previously, hiding this process behind a silent "Loading" spinner caused psychological time dilation and made it appear as if the installer had frozen. Now, the native `apt` progress output is fully visible across all heavy operations so users can monitor the exact extraction progress in real-time.
 

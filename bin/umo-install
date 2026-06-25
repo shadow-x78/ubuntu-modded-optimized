@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # UMO — Main Installer (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
@@ -200,7 +200,7 @@ umo_phase_finalize() {
         fi
     done
 
-    for _proc in proot dbus-daemon pulseaudio Xvnc termux-x11 dconf-service xfce4-session gpg-agent dirmngr; do
+    for _proc in proot dbus-daemon pulseaudio Xvnc Xtigervnc termux-x11 dconf-service xfce4-session gpg-agent dirmngr; do
         pkill -9 -f "$_proc" 2>/dev/null || true
     done
 
@@ -262,6 +262,7 @@ _umo_status() {
     fi
 
     _vnc_pid=$(pgrep -f "Xvnc" 2>/dev/null | head -1)
+    [ -z "$_vnc_pid" ] && _vnc_pid=$(pgrep -f "Xtigervnc" 2>/dev/null | head -1)
     if [ -n "$_vnc_pid" ]; then
         _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
         [ -z "$_ip" ] && _ip="127.0.0.1"
@@ -430,7 +431,7 @@ umo_phase_summary() {
 
     termux-wake-unlock >/dev/null 2>&1 &
     umo_kv "VNC"     "$_ip:5901"
-    umo_kv "User"    "umo (password: umo)"
+    umo_kv "User"    "umo (login: umo, VNC: ubuntu)"
 
     printf "\n  %b%bGet Started%b\n" "$UMO_BOLD" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
@@ -466,7 +467,7 @@ Commands (run from Termux):
   umo --help           Full help
 
 VNC: $_ip:5901
-User: umo / Password: umo
+User: umo (Login pass: umo, VNC pass: ubuntu)
 
 ========================================
 README_EOF

@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # UMO — Proot Container Manager (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 

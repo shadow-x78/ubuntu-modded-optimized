@@ -21,7 +21,7 @@ printf "  %b[ ⚙ ] Stopping UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
 "$TERMUX_HOME/umo-login.sh" -c "umo-stopvnc" >/dev/null 2>&1 || true
 
-for _proc in Xvnc termux-x11 dbus-daemon pulseaudio dconf-service xfce4-session proot; do
+for _proc in Xvnc Xtigervnc termux-x11 dbus-daemon pulseaudio dconf-service xfce4-session proot; do
     pkill -9 -f "$_proc" 2>/dev/null || true
 done
 

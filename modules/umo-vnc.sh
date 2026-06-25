@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # UMO — VNC Server Manager (MIT License)
 # https://github.com/Shadow-x78/termux-ubuntu-umo
 
@@ -92,7 +92,7 @@ umo_vnc_configure() {
 
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo 'umo' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
+        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo 'ubuntu' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
     fi
 
     umo_log_ok "VNC configured"
@@ -108,7 +108,7 @@ VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 
-for _pid in $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
+for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
 sleep 1
 
 pulseaudio --start 2>/dev/null || true
@@ -127,13 +127,16 @@ export MESA_NO_SHM=1
 export GALLIUM_DRIVER=llvmpipe
 export LIBGL_ALWAYS_SOFTWARE=1
 
-$_vnc_cmd "$VNC_DISPLAY" \
+if ! $_vnc_cmd "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \
     -name "UMO Desktop" \
     -alwaysshared \
-    -Log "*:stderr:100" &
+    -Log "*:stderr:100"; then
+    echo "  [!] Failed to start VNC server"
+    exit 1
+fi
 
 sleep 2
 
@@ -167,8 +170,8 @@ printf "\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
 
-# Keep script alive as long as Xvnc is running
-while pgrep -f "Xvnc" >/dev/null 2>&1; do
+# Keep script alive as long as Xvnc or Xtigervnc is running
+while pgrep -f "Xvnc" >/dev/null 2>&1 || pgrep -f "Xtigervnc" >/dev/null 2>&1; do
     sleep 3
 done
 EOF
@@ -187,7 +190,7 @@ if [ -n "$_vnc_cmd" ]; then
     $_vnc_cmd -kill :1 2>/dev/null || true
     $_vnc_cmd -kill :2 2>/dev/null || true
 fi
-for _pid in $(pgrep -f Xvnc 2>/dev/null); do kill -9 "$_pid" 2>/dev/null || true; done
+for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill -9 "$_pid" 2>/dev/null || true; done
 printf "  \033[38;5;34m✔\033[0m  VNC stopped.\n"
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc"
