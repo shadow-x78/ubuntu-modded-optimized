@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.1] - 2026-06-25
+
+### 🐛 Fixed
+- **VNC Server Stability:** Fixed an issue where the VNC server would stop immediately due to the PRoot session exiting prematurely by replacing `wait` with a continuous polling loop for `Xvnc`.
+
 ## [v4.0.0] - 2026-06-25
 
 ### ✨ Added

@@ -80,7 +80,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.0.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.0.1}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
@@ -168,8 +168,10 @@ printf "\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
 
-wait
-
+# Keep script alive as long as Xvnc is running
+while pgrep -f "Xvnc" >/dev/null 2>&1; do
+    sleep 3
+done
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
 
