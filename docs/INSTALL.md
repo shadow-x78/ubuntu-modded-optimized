@@ -24,6 +24,7 @@
 - [Silent Install](#silent-install)
 - [Desktop Environments](#desktop-environments)
 - [Application Groups](#application-groups)
+- [Other Options](#other-options)
 - [First Boot](#first-boot)
 - [Commands Reference](#commands)
 - [Uninstall](#uninstall)
@@ -105,16 +106,27 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 ---
 
+<a id="other-options"></a>
+## ⚙️ Other Options
+
+| Flag | Description |
+|------|-------------|
+| `--perf=<mode>` | Set performance level (`balanced`, `aggressive`, `off`) |
+| `--theme=<theme>` | Set desktop theme (`umo-dark`, `minimal`, `none`) |
+| `--lean` | Remove docs/man/locales to save space |
+
+---
+
 <a id="first-boot"></a>
 ## 🔐 First Boot
 
 ```bash
 # Start Ubuntu (VNC + Audio)
-~/umo-start.sh
+umo login
 
 # Connect via VNC viewer
 # Address : localhost:5901
-# Password: ubuntu  ← change this immediately!
+# Password: umo  ← change this immediately!
 ```
 
 > **Change the VNC password right after first login:**
@@ -131,11 +143,11 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | Command | Description |
 |---------|-------------|
-| `~/umo-start.sh` | Start Ubuntu + VNC + Audio |
-| `~/umo-stop.sh` | Stop all services |
-| `~/umo-login.sh` | Login as root |
-| `~/umo-user.sh` | Login as ubuntu user |
-| `~/umo-vnc-start.sh` | Start VNC only |
+| `umo login` | Login as root |
+| `umo user` | Login as default user |
+| `umo stop` | Stop all services |
+| `umo status` | Show running status of services |
+| `umo update` | Update UMO system from GitHub |
 
 ### Inside Ubuntu
 

@@ -24,6 +24,7 @@
 - [التثبيت الصامت](#silent-install)
 - [بيئات سطح المكتب](#desktop-environments)
 - [مجموعات التطبيقات](#application-groups)
+- [خيارات إضافية](#other-options)
 - [أول تشغيل](#first-boot)
 - [مرجع الأوامر](#commands)
 - [إلغاء التثبيت](#uninstall)
@@ -105,16 +106,27 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 ---
 
+<a id="other-options"></a>
+## ⚙️ خيارات إضافية
+
+| الـ Flag | الوصف |
+|----------|-------|
+| `--perf=<mode>` | تعيين مستوى الأداء (`balanced`, `aggressive`, `off`) |
+| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `minimal`, `none`) |
+| `--lean` | حذف التوثيق واللغات لتوفير المساحة |
+
+---
+
 <a id="first-boot"></a>
 ## 🔐 أول تشغيل
 
 ```bash
 # تشغيل Ubuntu (VNC + الصوت)
-~/umo-start.sh
+umo login
 
 # الاتصال عبر تطبيق VNC
 # العنوان  : localhost:5901
-# كلمة المرور: ubuntu  ← غيّرها فوراً!
+# كلمة المرور: umo  ← غيّرها فوراً!
 ```
 
 > **غيِّر كلمة مرور VNC مباشرة بعد أول دخول:**
@@ -131,11 +143,11 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | الأمر | الوصف |
 |-------|-------|
-| `~/umo-start.sh` | تشغيل Ubuntu + VNC + الصوت |
-| `~/umo-stop.sh` | إيقاف جميع الخدمات |
-| `~/umo-login.sh` | الدخول كـ root |
-| `~/umo-user.sh` | الدخول كمستخدم ubuntu |
-| `~/umo-vnc-start.sh` | تشغيل VNC فقط |
+| `umo login` | الدخول كـ root |
+| `umo user` | الدخول كمستخدم افتراضي |
+| `umo stop` | إيقاف جميع الخدمات |
+| `umo status` | عرض حالة الخدمات |
+| `umo update` | تحديث النظام من GitHub |
 
 ### داخل Ubuntu
 

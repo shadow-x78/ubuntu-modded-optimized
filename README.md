@@ -31,6 +31,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 ## 📋 Table of Contents
 
 - [What is UMO?](#what-is-umo)
+- [Screenshots](#screenshots)
 - [Desktop Environments](#desktop-environments)
 - [Quick Start](#quick-start)
 - [Commands](#commands)
@@ -55,6 +56,13 @@ Full Ubuntu on your Android device — one command, zero hassle
 | No audio inside proot | ❌ Manual workaround | ✅ PulseAudio TCP bridge |
 | `systemctl` fails | ❌ Confusing errors | ✅ Generic shell emulator (any service) |
 | 20+ manual steps | ❌ Too complex | ✅ One command: `bash install.sh` |
+
+---
+
+<a id="screenshots"></a>
+## 🖼️ Screenshots
+
+> **Coming soon**
 
 ---
 
@@ -87,7 +95,7 @@ bash install.sh
 bash install.sh --no-gui --de=xfce4 --apps=full
 
 # Start Ubuntu
-~/umo-start.sh
+umo login
 ```
 
 ---
@@ -99,11 +107,11 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 
 | Command | Description |
 |---------|-------------|
-| `~/umo-start.sh` | Start Ubuntu + VNC + Audio |
-| `~/umo-stop.sh` | Stop all services |
-| `~/umo-login.sh` | Login as root |
-| `~/umo-user.sh` | Login as ubuntu user |
-| `~/umo-vnc-start.sh` | Start VNC only |
+| `umo login` | Login as root |
+| `umo user` | Login as default user |
+| `umo stop` | Stop all services |
+| `umo status` | Show running status of services |
+| `umo update` | Update UMO system from GitHub |
 ### Inside Ubuntu
 
 | Command | Description |
@@ -126,7 +134,10 @@ bash install.sh [OPTIONS]
   --de=xfce4|lxde|openbox        Choose desktop environment
   --apps=basic|dev|media|full    Application group to install
   --dir=PATH                     Custom installation directory
-  --version=22.04|24.04          Ubuntu version to install
+  --ubuntu=22.04|24.04           Ubuntu version to install
+  --perf=balanced|aggressive|off Choose performance tuning level
+  --theme=umo-dark|minimal|none  Choose desktop theme
+  --lean                         Remove docs/man/locales to save space
 ```
 
 ---

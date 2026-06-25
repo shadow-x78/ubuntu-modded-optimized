@@ -31,6 +31,7 @@
 ## 📋 فهرس المحتويات
 
 - [ما هو UMO؟](#what-is-umo)
+- [لقطات الشاشة](#screenshots)
 - [بيئات سطح المكتب](#desktop-environments)
 - [البدء السريع](#quick-start)
 - [الأوامر](#commands)
@@ -55,6 +56,13 @@
 | لا صوت داخل proot | ❌ حل يدوي | ✅ جسر PulseAudio عبر TCP |
 | `systemctl` يفشل | ❌ أخطاء محيّرة | ✅ محاكي shell عام (أي خدمة) |
 | عشرون خطوة يدوية | ❌ معقد للغاية | ✅ أمر واحد: `bash install.sh` |
+
+---
+
+<a id="screenshots"></a>
+## 🖼️ لقطات الشاشة
+
+> **قريباً**
 
 ---
 
@@ -87,7 +95,7 @@ bash install.sh
 bash install.sh --no-gui --de=xfce4 --apps=full
 
 # تشغيل Ubuntu
-~/umo-start.sh
+umo login
 ```
 
 ---
@@ -99,11 +107,11 @@ bash install.sh --no-gui --de=xfce4 --apps=full
 
 | الأمر | الوصف |
 |-------|-------|
-| `~/umo-start.sh` | تشغيل Ubuntu + VNC + الصوت |
-| `~/umo-stop.sh` | إيقاف جميع الخدمات |
-| `~/umo-login.sh` | الدخول كـ root |
-| `~/umo-user.sh` | الدخول كمستخدم ubuntu |
-| `~/umo-vnc-start.sh` | تشغيل VNC فقط |
+| `umo login` | الدخول كـ root |
+| `umo user` | الدخول كمستخدم افتراضي |
+| `umo stop` | إيقاف جميع الخدمات |
+| `umo status` | عرض حالة الخدمات |
+| `umo update` | تحديث النظام من GitHub |
 ### داخل Ubuntu
 
 | الأمر | الوصف |
@@ -126,7 +134,10 @@ bash install.sh [OPTIONS]
   --de=xfce4|lxde|openbox        اختيار بيئة سطح المكتب
   --apps=basic|dev|media|full    مجموعة التطبيقات المراد تثبيتها
   --dir=PATH                     مسار تثبيت مخصص
-  --version=22.04|24.04          إصدار Ubuntu المطلوب
+  --ubuntu=22.04|24.04           إصدار Ubuntu المطلوب
+  --perf=balanced|aggressive|off اختيار مستوى الأداء
+  --theme=umo-dark|minimal|none  اختيار مظهر سطح المكتب
+  --lean                         حذف ملفات التوثيق واللغات لتوفير المساحة
 ```
 
 ---
