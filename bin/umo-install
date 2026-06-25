@@ -431,11 +431,13 @@ umo_phase_summary() {
     umo_repeat "$UMO_LINE_H" 11
     printf "%b\n\n" "$UMO_NC"
 
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo start" "$UMO_NC" "Start UMO session & VNC"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo stop" "$UMO_NC" "Stop all services"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo login" "$UMO_NC" "Login as root"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo user" "$UMO_NC" "Login as default user"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --user <name>" "$UMO_NC" "Switch default user"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo status" "$UMO_NC" "Show service status"
+    printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo backup" "$UMO_NC" "Backup system rootfs"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update UMO script"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --help" "$UMO_NC" "Full command reference"
 
@@ -568,5 +570,6 @@ umo_main() {
 }
 
 umo_main "$@"
-exec >&- 2>&-
+pkill -9 -P $$ 2>/dev/null || true
+exec 0<&- 1>&- 2>&-
 exit 0
