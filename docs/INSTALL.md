@@ -143,6 +143,7 @@ umo login
 
 | Command | Description |
 |---------|-------------|
+| `umo start` | Start session with VNC & Audio |
 | `umo login` | Login as root |
 | `umo user` | Login as default user |
 | `umo stop` | Stop all services |
