@@ -1,4 +1,4 @@
-﻿# Bash additions for Ubuntu Modded environment
+# Bash additions for Ubuntu Modded environment
 # Source this in ~/.bashrc
 
 export PULSE_SERVER=127.0.0.1
