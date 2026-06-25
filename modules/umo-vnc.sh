@@ -96,8 +96,7 @@ umo_vnc_configure() {
 
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "vncpasswd >/dev/null 2>&1" || \
-        printf 'umo\numo\n' | "$HOME/umo-login.sh" -c "tigervncpasswd >/dev/null 2>&1" || true
+        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo 'umo' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
     fi
 
     umo_log_ok "VNC configured."
@@ -168,6 +167,9 @@ printf "  ${_BOLD}Resolution:${_NC} ${_DIM}%s${_NC}\n" "$VNC_GEOMETRY"
 printf "\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
+
+wait
+
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
 
