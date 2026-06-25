@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 Fixed
 - **Legacy Alias Cleanup:** Cleaned only `alias umo=` from bash/zsh profiles to avoid unintended side effects while ensuring the CLI wrapper functions correctly.
+- **DPKG Install Hang:** Removed aggressive `dpkg fsync` disables (`force-unsafe-io`) that were causing APT and DPKG to hang indefinitely during package installations (e.g., Theme packages) inside PRoot.
 
 ## [v3.3.9] - 2026-06-25
 

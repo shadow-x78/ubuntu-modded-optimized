@@ -29,7 +29,6 @@ umo_proot_prepare() {
     fi
 
     umo_fs_mkdir "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d"
-    printf 'force-unsafe-io\n' > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/umo-proot" 2>/dev/null || true
 
     _dpkg_src="$UMO_PROOT_DIR/var/lib/dpkg"
 
@@ -59,7 +58,6 @@ POLICY
     cat > "$UMO_PROOT_DIR/etc/apt/apt.conf.d/99-umo-sandbox" 2>/dev/null << 'APTCONF'
 APT::Sandbox::User "root";
 Dpkg::Options:: "--force-all";
-Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Options:: "--force-confdef";
 Dpkg::Options:: "--force-confold";
 Dpkg::Use-Pty "0";
