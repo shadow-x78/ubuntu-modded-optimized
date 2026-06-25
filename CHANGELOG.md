@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.4] - 2026-06-25
+
+### ⚡ Optimized
+- **Installation Speed:** Fixed extreme CPU starvation caused by `umo_spinner` creating too many `sleep` process forks per second on Android (`sleep 0.08` to `sleep 0.25`). This drastically improves the execution speed of heavy `apt-get` tasks during installation.
+
 ## [v4.0.3] - 2026-06-25
 
 ### 🐛 Fixed

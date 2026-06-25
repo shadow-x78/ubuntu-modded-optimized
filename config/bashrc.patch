@@ -1,4 +1,4 @@
-# Bash additions for Ubuntu Modded environment
+﻿# Bash additions for Ubuntu Modded environment
 # Source this in ~/.bashrc
 
 export PULSE_SERVER=127.0.0.1
@@ -27,7 +27,7 @@ if [ -n "$PS1" ]; then
     printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
     printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
     printf "\033[0m\n"
-    printf "  \033[2mUbuntu Modded Optimized · v4.0.3\033[0m\n"
+    printf "  \033[2mUbuntu Modded Optimized · v4.0.4\033[0m\n"
     printf "  \033[38;5;208m────────────────────────────────────────\033[0m\n\n"
     command -v neofetch >/dev/null 2>&1 && neofetch
 fi
