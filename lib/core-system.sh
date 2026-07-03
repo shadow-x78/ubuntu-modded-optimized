@@ -29,12 +29,36 @@ umo_sys_arch() {
     esac
 }
 
+umo_sys_supported_archs() {
+    printf '%s\n' aarch64
+}
+
+umo_sys_arch_supported() {
+    _arch="$1"
+    umo_sys_supported_archs | grep -qx "$_arch"
+}
+
 umo_sys_require_arch() {
-    _current=$(umo_sys_arch)
-    case "$_current" in
-        aarch64) umo_log_ok "Architecture: $_current (supported)" ;;
-        *)       umo_die "Unsupported architecture: $_current. UMO requires an ARM64 (aarch64) device" ;;
-    esac
+    _detected=$(uname -m)
+    _normalized=$(umo_sys_arch)
+
+    if umo_sys_arch_supported "$_normalized"; then
+        umo_log_ok "Architecture: $_normalized (detected: $_detected, supported)"
+        return 0
+    fi
+
+    _supported_list=$(umo_sys_supported_archs | tr '\n' ' ' | sed 's/ $//')
+
+    umo_log_err "Unsupported architecture: $_detected (normalized: $_normalized)"
+    umo_log_err "  Supported: $_supported_list"
+    umo_log_err "  Reason: aarch64 (ARM64) is the only architecture Termux"
+    umo_log_err "          can run reliably with full Ubuntu proot; armhf"
+    umo_log_err "          lacks modern Ubuntu packages and x86_64 hits"
+    umo_log_err "          kernel-level ptrace blocking on Android."
+    umo_log_err "  Fix:   Use a device with an ARM64 (aarch64) CPU."
+    umo_log_err "         Nearly all phones and tablets from 2018 onward"
+    umo_log_err "         are ARM64. Verify with: uname -m  (should print aarch64)"
+    umo_die "Aborting because the host architecture is not supported."
 }
 
 umo_sys_disk_free_mb() {
