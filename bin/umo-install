@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.0.7"
+export UMO_VERSION="4.0.8"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -187,7 +187,6 @@ umo_phase_finalize() {
             cp \"\$_src_list\" \"$UMO_INSTALL_DIR/etc/apt/sources.list\" 2>/dev/null || true
         fi
     "
-    umo_run_quiet "Updating package indices..." "$HOME/umo-login.sh" -c "apt-get update -qq"
     umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo"
     umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a"
     umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo"
@@ -215,7 +214,7 @@ umo_phase_finalize() {
 
     cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="4.0.7"
+_UMO_VERSION="4.0.8"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
     cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
@@ -429,7 +428,7 @@ umo_phase_summary() {
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Path"    "$UMO_INSTALL_DIR"
 
-    termux-wake-unlock >/dev/null 2>&1 &
+    termux-wake-unlock >/dev/null 2>&1 || true
     umo_kv "VNC"     "$_ip:5901"
     umo_kv "User"    "umo (login: umo, VNC: ubuntu)"
 
@@ -570,4 +569,5 @@ umo_main() {
 }
 
 umo_main "$@"
+trap - EXIT INT TERM HUP
 exit 0
