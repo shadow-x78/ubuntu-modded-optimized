@@ -27,7 +27,9 @@ Acquire::https::Timeout "60";
 Acquire::Languages "none";
 Acquire::PDiffs "false";
 Acquire::ForceIPv4 "true";
-Acquire::Queue-Mode "host";
+Acquire::http::Pipeline-Depth "10";
+Acquire::https::Pipeline-Depth "10";
+Acquire::http::No-Cache "true";
 EOC
     fi
 
@@ -87,7 +89,6 @@ apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
 sed -i '/messagebus/d' /var/lib/dpkg/statoverride 2>/dev/null || true
 apt-get clean
 rm -rf /var/lib/apt/lists/*
-apt-get update -y
 apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
@@ -119,7 +120,7 @@ umo_perf_cleanup() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 apt-get clean
-rm -rf /var/lib/apt/lists/*
+rm -rf /var/lib/apt/lists/* || true
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"

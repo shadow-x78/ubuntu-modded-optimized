@@ -230,14 +230,23 @@ umo_run_quiet() {
     mkdir -p "$_logdir"
     _logfile="$_logdir/umo-quiet-$$.log"
 
+    _spin_pid=""
+    _umo_spinner_cleanup() {
+        [ -n "$_spin_pid" ] && kill -KILL "$_spin_pid" 2>/dev/null
+        wait "$_spin_pid" 2>/dev/null || true
+        umo_cursor_show 2>/dev/null
+    }
+    trap _umo_spinner_cleanup EXIT INT TERM
+
     umo_spinner "$_label" &
     _spin_pid=$!
 
     _rc=0
     "$@" </dev/null > "$_logfile" 2>&1 || _rc=$?
 
-    kill "$_spin_pid" 2>/dev/null
+    kill -KILL "$_spin_pid" 2>/dev/null
     wait "$_spin_pid" 2>/dev/null || true
+    _spin_pid=""
     umo_line_clear
     umo_cursor_show
 
@@ -245,6 +254,7 @@ umo_run_quiet() {
         printf "  %b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
         umo_log_file "$_label"
         rm -f "$_logfile"
+        trap - EXIT INT TERM
         return 0
     else
         printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
@@ -254,6 +264,7 @@ umo_run_quiet() {
                 printf "    %s\n" "$_line"
             done
         fi
+        trap - EXIT INT TERM
         return 1
     fi
 }
@@ -289,7 +300,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.7}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.8}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -316,7 +327,7 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-4.0.7}"
+    _ver="${UMO_VERSION:-4.0.8}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver — $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)
