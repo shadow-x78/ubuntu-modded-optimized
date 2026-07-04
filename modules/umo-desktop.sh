@@ -26,6 +26,12 @@ umo_de_xfce4() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
+
+echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
+echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
 
 for _round in 1 2 3; do
     dpkg --configure -a 2>&1 || true

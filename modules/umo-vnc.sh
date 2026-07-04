@@ -19,7 +19,13 @@ umo_vnc_install() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+
+echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
+echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
 
 for _round in 1 2 3; do
     dpkg --configure -a 2>&1 | _apt_filter || true
