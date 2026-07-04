@@ -64,9 +64,11 @@ Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";
 DPKg::FlushSTDIN "false";
 DPkg::Run-Directory "/";
-DPkg::DropPrivileges "false";
-DPkg::NoTriggers "true";
-DPkg::TriggersPending "false";
+DPKg::DropPrivileges "false";
+DPKg::NoTriggers "true";
+DPKg::TriggersPending "false";
+Dpkg::Post-Invoke {};
+Dpkg::Pre-Invoke {};
 Debug::NoLocking "1";
 APT::Get::AllowUnauthenticated "true";
 APT::Acquire::AllowInsecureRepositories "true";
@@ -75,6 +77,13 @@ APTCONF
     cat > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/force-unsafe-io" 2>/dev/null << 'DPCFG'
 force-unsafe-io
 DPCFG
+
+    for _f in invoke-rc.d service systemctl; do
+        if [ -x "/usr/sbin/$_f" ] && [ ! -L "/usr/sbin/$_f" ]; then
+            mv "/usr/sbin/$_f" "/usr/sbin/$_f.real" 2>/dev/null || true
+            ln -sf /bin/true "/usr/sbin/$_f"
+        fi
+    done
 
     cat > "$UMO_PROOT_DIR/root/divert-triggers.sh" << 'DIVERT'
 #!/bin/sh

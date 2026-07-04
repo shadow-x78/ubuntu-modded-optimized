@@ -18,7 +18,10 @@ umo_theme_install_packages() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y -q $_theme_pkgs 2>/dev/null || true
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
+timeout 600 apt-get install -y -q --no-install-recommends $_theme_pkgs 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"

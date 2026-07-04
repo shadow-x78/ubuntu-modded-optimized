@@ -35,10 +35,10 @@ for _round in 1 2 3; do
         dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
     done
 done
-apt-get -f install -y 2>&1 | _apt_filter || true
+timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 | _apt_filter || true
 
-apt-get install -y --no-install-recommends \
+timeout 600 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
     libpng16-16 libbrotli1 fonts-dejavu-core ucf \
     x11-common x11-xkb-utils xauth xkb-data \
@@ -54,7 +54,7 @@ apt-get install -y --no-install-recommends \
     2>&1 | _apt_filter || true
 
 dpkg --configure -a 2>&1 | _apt_filter || true
-apt-get -f install -y 2>&1 | _apt_filter || true
+timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 | _apt_filter || true
 
 if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 2>&1; then
