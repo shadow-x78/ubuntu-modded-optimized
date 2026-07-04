@@ -550,6 +550,21 @@ umo_phase_theme() {
 umo_main() {
     umo_cli_parse "$@"
 
+    _umo_exit_code=0
+    _umo_sigint_cleanup() {
+        _umo_exit_code=${_umo_exit_code:-130}
+        trap - EXIT INT TERM HUP
+        for _sig in INT TERM HUP; do trap "" "$_sig"; done
+        _inst_dir="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
+        _inst_re=$(printf '%s' "$_inst_dir" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
+        _login_re=$(printf '%s' "$HOME/umo-login.sh" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
+        pkill -KILL -f "proot.*${_inst_re}" 2>/dev/null || true
+        pkill -KILL -f "${_login_re}" 2>/dev/null || true
+        umo_cursor_show 2>/dev/null
+        exit "$_umo_exit_code"
+    }
+    trap _umo_sigint_cleanup EXIT INT TERM HUP
+
     [ "$UMO_APP_SET" = "full" ] && [ -z "$UMO_THEME" ] && UMO_THEME="umo-dark"
 
     umo_phase_check

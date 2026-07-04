@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.8] - 2026-07-04
+
+### ⚡ Optimized
+- **dpkg fsync Disabled Inside Proot:** `modules/umo-proot.sh:99-umo-sandbox` now sets `DPKg::NoTriggers "true"`, `DPKg::TriggersPending "false"`, and `Dpkg::Options:: "--force-unsafe-io"`. The proot also gets its own `/etc/dpkg/dpkg.cfg.d/force-unsafe-io`. The previous v4.0.8 changes reduced network/APT overhead; the dominant remaining cost — dpkg's `fsync()` per-file writes during `apt-get install` on Android storage — is now removed.
+- **Trigger Hooks Diverted at Proot Creation:** The `divert-triggers.sh` block (gtk-update-icon-cache, update-initramfs, systemd-hwdb, update-command-not-found, update-mime-database, update-desktop-database, plus man-db auto-update) now runs from `umo_proot_prepare` — once, before any `apt-get install` fires — rather than from `umo_perf_apt`. Duplicate execution path removed from `modules/umo-perf.sh`.
+
+### 🐛 Fixed
+- **Installer Hang on Ctrl+C:** `bin/umo-install:umo_main` now installs a top-level `trap _umo_sigint_cleanup EXIT INT TERM HUP`. On any exit (including Ctrl+C), every `proot` rooted at `$UMO_INSTALL_DIR` and every `umo-login.sh` helper still attached to the tty is `kill -KILL`'d, the cursor is restored, and the script exits with the saved exit code (130 for SIGINT). Replaces the v4.0.8 condition where partial-failure runs could leave orphaned proot children holding the terminal open until the user pressed Ctrl+C a second time.
+
 ## [v4.0.8] - 2026-07-03
 
 ### ⚡ Optimized
