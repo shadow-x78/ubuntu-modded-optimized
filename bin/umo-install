@@ -199,6 +199,20 @@ umo_phase_finalize() {
         done
     "
 
+    _cplt_body='export DEBIAN_FRONTEND=noninteractive
+_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+for _round in 1 2; do
+    timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
+    _broken=$(dpkg -l 2>/dev/null | awk "/^iU|^iF|^hF/{print \$2}")
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
+    done
+    timeout 300 apt-get -f install -y 2>&1 | _apt_filter || true
+done'
+    umo_run_quiet "Configuring any remaining packages..." "$HOME/umo-login.sh" -c "$_cplt_body" || true
+    umo_run_quiet "Cleaning dpkg locks..." "$HOME/umo-login.sh" -c "rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true" || true
+
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
             sed -i '/alias umo=/d' "$_rc" 2>/dev/null || true
@@ -566,9 +580,20 @@ umo_main() {
         _inst_dir="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
         _inst_re=$(printf '%s' "$_inst_dir" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
         _login_re=$(printf '%s' "$HOME/umo-login.sh" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
-        pkill -KILL -f "proot.*${_inst_re}" 2>/dev/null || true
-        pkill -KILL -f "${_login_re}" 2>/dev/null || true
-        umo_cursor_show 2>/dev/null
+        timeout 5 sh -c "
+            pkill -KILL -f 'proot.*${_inst_re}'      2>/dev/null || true
+            pkill -KILL -f '${_login_re}'              2>/dev/null || true
+            pkill -KILL -f 'install-vnc.sh'             2>/dev/null || true
+            pkill -KILL -f 'install-de.sh'              2>/dev/null || true
+            pkill -KILL -f 'install-theme.sh'           2>/dev/null || true
+            pkill -KILL -f 'debloat.sh'                 2>/dev/null || true
+            pkill -KILL -f 'cleanup.sh'                 2>/dev/null || true
+            pkill -KILL -f 'perf-desktop.sh'            2>/dev/null || true
+            pkill -KILL -f 'divert-triggers.sh'         2>/dev/null || true
+            pkill -KILL -f 'apt-get'                     2>/dev/null || true
+            pkill -KILL -f 'dpkg'                        2>/dev/null || true
+            umo_cursor_show 2>/dev/null
+        " 2>/dev/null
         exit "$_umo_exit_code"
     }
     trap _umo_sigint_cleanup EXIT INT TERM HUP
