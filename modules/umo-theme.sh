@@ -13,8 +13,7 @@ UMO_THEME="${UMO_THEME:-umo-dark}"
 umo_theme_install_packages() {
     umo_log_step "Install theme packages"
 
-    _theme_pkgs="papirus-icon-theme fonts-inter fonts-noto fonts-noto-core"
-    _theme_pkgs="$_theme_pkgs fonts-jetbrains-mono xfonts-terminus"
+    _theme_pkgs="fonts-inter fonts-jetbrains-mono fonts-dejavu-core gnome-icon-theme"
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
 #!/bin/sh
