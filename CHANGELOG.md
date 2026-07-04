@@ -5,22 +5,16 @@ All notable changes to this project will be documented in this file.
 ## [v4.0.8] - 2026-07-04
 
 ### ⚡ Optimized
-- **dpkg fsync Disabled Inside Proot:** `modules/umo-proot.sh:99-umo-sandbox` now sets `DPKg::NoTriggers "true"`, `DPKg::TriggersPending "false"`, and `Dpkg::Options:: "--force-unsafe-io"`. The proot also gets its own `/etc/dpkg/dpkg.cfg.d/force-unsafe-io`. The previous v4.0.8 changes reduced network/APT overhead; the dominant remaining cost — dpkg's `fsync()` per-file writes during `apt-get install` on Android storage — is now removed.
-- **Trigger Hooks Diverted at Proot Creation:** The `divert-triggers.sh` block (gtk-update-icon-cache, update-initramfs, systemd-hwdb, update-command-not-found, update-mime-database, update-desktop-database, plus man-db auto-update) now runs from `umo_proot_prepare` — once, before any `apt-get install` fires — rather than from `umo_perf_apt`. Duplicate execution path removed from `modules/umo-perf.sh`.
-
-### 🐛 Fixed
-- **Installer Hang on Ctrl+C:** `bin/umo-install:umo_main` now installs a top-level `trap _umo_sigint_cleanup EXIT INT TERM HUP`. On any exit (including Ctrl+C), every `proot` rooted at `$UMO_INSTALL_DIR` and every `umo-login.sh` helper still attached to the tty is `kill -KILL`'d, the cursor is restored, and the script exits with the saved exit code (130 for SIGINT). Replaces the v4.0.8 condition where partial-failure runs could leave orphaned proot children holding the terminal open until the user pressed Ctrl+C a second time.
-
-## [v4.0.8] - 2026-07-03
-
-### ⚡ Optimized
 - **APT Single-Mirror Parallelism:** Removed `Acquire::Queue-Mode "host"` from `config/templates/apt-umo-speed.conf` and the fallback heredoc in `modules/umo-perf.sh`. Replaced with `Acquire::http::Pipeline-Depth "10"`, `Acquire::https::Pipeline-Depth "10"`, and `Acquire::http::No-Cache "true"`. The Ubuntu mirror is a single host (`ports.ubuntu.com`), so the previous `host` mode serialized every package download; the new pipeline mode opens up to 10 parallel HTTP requests on the same host, dramatically cutting wall time on slow connections.
 - **Redundant `apt-get update` Eliminated:** Removed three of the four `apt-get update` calls per install. `modules/umo-perf.sh:73` is now the single canonical refresh before the install pipeline; the redundant updates inside `debloat.sh`, `cleanup.sh`, and `bin/umo-install:190` are gone. Only the post-`rm -rf` refresh inside `cleanup.sh` is retained so later phases (`umo_phase_desktop`, `umo_phase_apps`, `umo_phase_finalize`) still see a valid package index.
+- **dpkg fsync Disabled Inside Proot:** `modules/umo-proot.sh:99-umo-sandbox` now sets `DPKg::NoTriggers "true"`, `DPKg::TriggersPending "false"`, and `Dpkg::Options:: "--force-unsafe-io"`. The proot also gets its own `/etc/dpkg/dpkg.cfg.d/force-unsafe-io`. The dominant remaining cost — dpkg's `fsync()` per-file writes during `apt-get install` on Android storage — is now removed.
+- **Trigger Hooks Diverted at Proot Creation:** The `divert-triggers.sh` block (gtk-update-icon-cache, update-initramfs, systemd-hwdb, update-command-not-found, update-mime-database, update-desktop-database, plus man-db auto-update) now runs from `umo_proot_prepare` — once, before any `apt-get install` fires — rather than from `umo_perf_apt`. Duplicate execution path removed from `modules/umo-perf.sh`.
 
 ### 🐛 Fixed
 - **Installer Hang on Exit (SIGKILL trap):** `lib/core-ansi.sh:umo_run_quiet` now installs a per-call `trap _umo_spinner_cleanup EXIT INT TERM` that forcibly `kill -KILL`s the backgrounded spinner. The inline kill was also upgraded from SIGTERM to SIGKILL, ensuring the spinner is fully dead before the function returns. The trap is released on every return path so it never leaks into the caller. This eliminates the "script never exits, must press Ctrl+C" condition caused by half-dead spinner processes still holding the tty.
 - **Orphaned `termux-wake-unlock`:** `bin/umo-install:432` — removed the trailing `&` from `termux-wake-unlock` so the call no longer leaves an orphan at the end of `umo_phase_summary`. Added `|| true` to keep `set -e` safe.
 - **Final Exit Trap Cleanup:** `bin/umo-install:573` — `exit 0` is now preceded by `trap - EXIT INT TERM HUP` to drop any lingering trap before the script terminates.
+- **Installer Hang on Ctrl+C:** `bin/umo-install:umo_main` now installs a top-level `trap _umo_sigint_cleanup EXIT INT TERM HUP`. On any exit (including Ctrl+C), every `proot` rooted at `$UMO_INSTALL_DIR` and every `umo-login.sh` helper still attached to the tty is `kill -KILL`'d, the cursor is restored, and the script exits with the saved exit code (130 for SIGINT). Replaces the older condition where partial-failure runs could leave orphaned proot children holding the terminal open until the user pressed Ctrl+C a second time.
 
 ### 🔄 Updated
 - **Version Bump:** All version sources (`UMO_VERSION` in `bin/umo-install`, fallback defaults in `lib/core-ansi.sh` and `modules/umo-vnc.sh`, the embedded version inside the generated `umo` wrapper script, `config/bashrc.patch`, and every README/INSTALL/TROUBLESHOOTING/SECURITY badge) bumped from 4.0.7 → 4.0.8.
