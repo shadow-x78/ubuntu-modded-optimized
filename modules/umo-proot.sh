@@ -60,14 +60,41 @@ APT::Sandbox::User "root";
 Dpkg::Options:: "--force-all";
 Dpkg::Options:: "--force-confdef";
 Dpkg::Options:: "--force-confold";
+Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";
-DPkg::FlushSTDIN "false";
+DPKg::FlushSTDIN "false";
 DPkg::Run-Directory "/";
 DPkg::DropPrivileges "false";
+DPkg::NoTriggers "true";
+DPkg::TriggersPending "false";
 Debug::NoLocking "1";
 APT::Get::AllowUnauthenticated "true";
 APT::Acquire::AllowInsecureRepositories "true";
 APTCONF
+
+    cat > "$UMO_PROOT_DIR/etc/dpkg/dpkg.cfg.d/force-unsafe-io" 2>/dev/null << 'DPCFG'
+force-unsafe-io
+DPCFG
+
+    cat > "$UMO_PROOT_DIR/root/divert-triggers.sh" << 'DIVERT'
+#!/bin/sh
+export DEBIAN_FRONTEND=noninteractive
+if command -v debconf-set-selections >/dev/null 2>&1; then
+    echo "man-db man-db/auto-update boolean false" | debconf-set-selections 2>/dev/null || true
+fi
+for _bin in gtk-update-icon-cache update-initramfs systemd-hwdb update-command-not-found update-mime-database update-desktop-database; do
+    if [ -e "/usr/bin/$_bin" ] && [ ! -L "/usr/bin/$_bin" ]; then
+        dpkg-divert --local --rename --add "/usr/bin/$_bin" 2>/dev/null || true
+        ln -sf /bin/true "/usr/bin/$_bin"
+    elif [ -e "/usr/sbin/$_bin" ] && [ ! -L "/usr/sbin/$_bin" ]; then
+        dpkg-divert --local --rename --add "/usr/sbin/$_bin" 2>/dev/null || true
+        ln -sf /bin/true "/usr/sbin/$_bin"
+    fi
+done
+DIVERT
+    chmod +x "$UMO_PROOT_DIR/root/divert-triggers.sh"
+    "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
+    rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh"
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
     umo_log_ok "Proot directories ready"
