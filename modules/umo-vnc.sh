@@ -21,27 +21,19 @@ export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 
-# Repair any half-configured packages from rootfs extraction
-dpkg --configure -a 2>&1 || true
-
-apt-get install -y --no-install-recommends apt-utils dialog tzdata 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 || true
-
-apt-get install -y --no-install-recommends xfonts-base xfonts-encodings xfonts-utils 2>&1 | _apt_filter || true
-apt-get install -y --no-install-recommends xfonts-75dpi xfonts-100dpi 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 || true
-
-apt-get install -y --no-install-recommends dbus-x11 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 || true
+dpkg --configure -a 2>&1 | _apt_filter || true
 
 apt-get install -y --no-install-recommends \
-    tigervnc-standalone-server tigervnc-viewer tigervnc-common tigervnc-tools 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 || true
+    apt-utils dialog tzdata \
+    xfonts-base xfonts-encodings xfonts-utils \
+    dbus-x11 \
+    tigervnc-standalone-server tigervnc-viewer tigervnc-common tigervnc-tools \
+    2>&1 | _apt_filter || true
 
+dpkg --configure -a 2>&1 | _apt_filter || true
 apt-get -f install -y 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 || true
+dpkg --configure -a 2>&1 | _apt_filter || true
 
-# Final verification
 if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 2>&1; then
     exit 0
 fi
