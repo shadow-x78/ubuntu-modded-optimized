@@ -21,7 +21,14 @@ export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 
-dpkg --configure -a 2>&1 | _apt_filter || true
+for _round in 1 2 3; do
+    dpkg --configure -a 2>&1 | _apt_filter || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
+    done
+done
 apt-get -f install -y 2>&1 | _apt_filter || true
 dpkg --configure -a 2>&1 | _apt_filter || true
 

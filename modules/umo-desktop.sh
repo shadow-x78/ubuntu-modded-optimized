@@ -27,8 +27,16 @@ umo_de_xfce4() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 
-dpkg --configure -a 2>&1 || true
+for _round in 1 2 3; do
+    dpkg --configure -a 2>&1 || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 || true
+    done
+done
 apt-get -f install -y 2>&1 || true
+dpkg --configure -a 2>&1 || true
 
 apt-get install -y --no-install-recommends \
     xfce4-panel xfce4-session xfce4-settings xfwm4 \
