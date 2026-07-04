@@ -14,19 +14,27 @@ umo_de_lxde() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true
+apt-get install -y --no-install-recommends \
+    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true
 dpkg --configure -a || true
 INNER
     _run_de_installer "LXDE"
 }
 
 umo_de_xfce4() {
-    umo_log_step "Install XFCE4 (recommended)"
+    umo_log_step "Install XFCE4 (minimal set)"
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y xfce4 xfce4-goodies xfce4-terminal thunar dbus-x11 || true
-apt-get install -y xubuntu-icon-theme xfce4-whiskermenu-plugin || true
+
+apt-get install -y --no-install-recommends \
+    xfce4-panel xfce4-session xfce4-settings xfwm4 \
+    xfce4-terminal thunar dbus-x11 x11-xserver-utils \
+    gnome-icon-theme || true
+
+[ "${UMO_XFCE4_WHISKERMENU:-0}" = "1" ] && \
+    apt-get install -y --no-install-recommends xfce4-whiskermenu-plugin || true
+
 dpkg --configure -a || true
 INNER
     _run_de_installer "XFCE4"
@@ -37,7 +45,7 @@ umo_de_openbox() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y openbox obconf lxterminal pcmanfm tint2 feh || true
+apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh || true
 dpkg --configure -a || true
 INNER
     _run_de_installer "Openbox"
@@ -48,7 +56,7 @@ umo_de_minimal() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y xterm xfonts-base || true
+apt-get install -y --no-install-recommends xterm xfonts-base || true
 dpkg --configure -a || true
 INNER
     _run_de_installer "minimal X11"
