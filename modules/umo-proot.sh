@@ -106,6 +106,8 @@ DIVERT
     rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh"
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
+    : > "$UMO_PROOT_DIR/var/lib/dpkg/lock"
+    : > "$UMO_PROOT_DIR/var/lib/dpkg/lock-frontend"
     umo_log_ok "Proot directories ready"
 }
 
