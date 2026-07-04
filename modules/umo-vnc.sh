@@ -22,8 +22,14 @@ export TZ=Etc/UTC
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 
 dpkg --configure -a 2>&1 | _apt_filter || true
+apt-get -f install -y 2>&1 | _apt_filter || true
+dpkg --configure -a 2>&1 | _apt_filter || true
 
 apt-get install -y --no-install-recommends \
+    fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
+    libpng16-16 libbrotli1 fonts-dejavu-core \
+    x11-common xkb-data x11-xkb-utils xauth libbsd0 libxfont2 \
+    libfile-readbackwards-perl libfltk1.3 libfltk-images1.3 \
     apt-utils dialog tzdata \
     xfonts-base xfonts-encodings xfonts-utils \
     dbus-x11 \

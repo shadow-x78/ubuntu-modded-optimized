@@ -27,6 +27,9 @@ umo_de_xfce4() {
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 
+dpkg --configure -a 2>&1 || true
+apt-get -f install -y 2>&1 || true
+
 apt-get install -y --no-install-recommends \
     xfce4-panel xfce4-session xfce4-settings xfwm4 \
     xfce4-terminal thunar dbus-x11 x11-xserver-utils \
@@ -35,7 +38,8 @@ apt-get install -y --no-install-recommends \
 [ "${UMO_XFCE4_WHISKERMENU:-0}" = "1" ] && \
     apt-get install -y --no-install-recommends xfce4-whiskermenu-plugin || true
 
-dpkg --configure -a || true
+dpkg --configure -a 2>&1 || true
+apt-get -f install -y 2>&1 || true
 INNER
     _run_de_installer "XFCE4"
 }
