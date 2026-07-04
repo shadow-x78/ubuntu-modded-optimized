@@ -40,8 +40,12 @@ dpkg --configure -a 2>&1 | _apt_filter || true
 
 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
-    libpng16-16 libbrotli1 fonts-dejavu-core \
-    x11-common xkb-data x11-xkb-utils xauth libbsd0 libxfont2 \
+    libpng16-16 libbrotli1 fonts-dejavu-core ucf \
+    x11-common x11-xkb-utils xauth xkb-data \
+    libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 \
+    libbsd0 libmd0 libxfont2 libfontenc1 libxcursor1 libxext6 \
+    libxfixes3 libxft2 libxinerama1 libxrender1 libxi6 libxrandr2 \
+    libxt6 libxaw7 libxkbfile1 libxmuu1 libpixman-1-0 libjpeg8 libgl1 \
     libfile-readbackwards-perl libfltk1.3 libfltk-images1.3 \
     apt-utils dialog tzdata \
     xfonts-base xfonts-encodings xfonts-utils \
