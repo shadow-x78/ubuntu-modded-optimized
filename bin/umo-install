@@ -190,6 +190,14 @@ umo_phase_finalize() {
     umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo"
     umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a"
     umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo"
+    umo_run_quiet "Restoring service binaries..." "$HOME/umo-login.sh" -c "
+        for _f in invoke-rc.d service systemctl; do
+            if [ -L \"/usr/sbin/\$_f\" ] && [ -f \"/usr/sbin/\$_f.real\" ]; then
+                rm -f \"/usr/sbin/\$_f\"
+                mv \"/usr/sbin/\$_f.real\" \"/usr/sbin/\$_f\"
+            fi
+        done
+    "
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then

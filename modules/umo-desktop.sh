@@ -14,9 +14,29 @@ umo_de_lxde() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends \
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
+
+echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
+echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
+
+for _round in 1 2 3; do
+    dpkg --configure -a 2>&1 || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 || true
+    done
+done
+timeout 600 apt-get -f install -y 2>&1 || true
+dpkg --configure -a 2>&1 || true
+
+timeout 600 apt-get install -y --no-install-recommends \
     lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true
-dpkg --configure -a || true
+
+dpkg --configure -a 2>&1 || true
+timeout 600 apt-get -f install -y 2>&1 || true
 INNER
     _run_de_installer "LXDE"
 }
@@ -41,19 +61,19 @@ for _round in 1 2 3; do
         dpkg --remove --force-depends "$_pkg" 2>&1 || true
     done
 done
-apt-get -f install -y 2>&1 || true
+timeout 600 apt-get -f install -y 2>&1 || true
 dpkg --configure -a 2>&1 || true
 
-apt-get install -y --no-install-recommends \
+timeout 600 apt-get install -y --no-install-recommends \
     xfce4-panel xfce4-session xfce4-settings xfwm4 \
     xfce4-terminal thunar dbus-x11 x11-xserver-utils \
     gnome-icon-theme || true
 
 [ "${UMO_XFCE4_WHISKERMENU:-0}" = "1" ] && \
-    apt-get install -y --no-install-recommends xfce4-whiskermenu-plugin || true
+    timeout 600 apt-get install -y --no-install-recommends xfce4-whiskermenu-plugin || true
 
 dpkg --configure -a 2>&1 || true
-apt-get -f install -y 2>&1 || true
+timeout 600 apt-get -f install -y 2>&1 || true
 INNER
     _run_de_installer "XFCE4"
 }
@@ -63,8 +83,28 @@ umo_de_openbox() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh || true
-dpkg --configure -a || true
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
+
+echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
+echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
+
+for _round in 1 2 3; do
+    dpkg --configure -a 2>&1 || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 || true
+    done
+done
+timeout 600 apt-get -f install -y 2>&1 || true
+dpkg --configure -a 2>&1 || true
+
+timeout 600 apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh || true
+
+dpkg --configure -a 2>&1 || true
+timeout 600 apt-get -f install -y 2>&1 || true
 INNER
     _run_de_installer "Openbox"
 }
@@ -74,8 +114,28 @@ umo_de_minimal() {
     cat > "${UMO_INSTALL_DIR:?}/root/install-de.sh" << 'INNER'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-install-recommends xterm xfonts-base || true
-dpkg --configure -a || true
+export LC_ALL=C
+export LANG=C
+[ -t 0 ] && exec </dev/null
+
+echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
+echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
+
+for _round in 1 2 3; do
+    dpkg --configure -a 2>&1 || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -z "$_broken" ]; then break; fi
+    for _pkg in $_broken; do
+        dpkg --remove --force-depends "$_pkg" 2>&1 || true
+    done
+done
+timeout 600 apt-get -f install -y 2>&1 || true
+dpkg --configure -a 2>&1 || true
+
+timeout 600 apt-get install -y --no-install-recommends xterm xfonts-base || true
+
+dpkg --configure -a 2>&1 || true
+timeout 600 apt-get -f install -y 2>&1 || true
 INNER
     _run_de_installer "minimal X11"
 }
