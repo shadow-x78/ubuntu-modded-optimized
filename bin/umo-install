@@ -469,9 +469,9 @@ umo_phase_summary() {
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update UMO script"
     printf "  %b%-28s%b %s\n" "$UMO_B_CYAN" "umo --help" "$UMO_NC" "Full command reference"
 
-    _readme_dir="$UMO_INSTALL_DIR/root/.umo"
+_readme_dir="$UMO_INSTALL_DIR/root/.umo"
     umo_fs_mkdir "$_readme_dir" 2>/dev/null || true
-    cat > "$_readme_dir/README.txt" 2>/dev/null || true << README_EOF
+    timeout 5 sh -c "cat > '$_readme_dir/README.txt' 2>/dev/null" << README_EOF || true
 ========================================
   UMO Ubuntu — v$UMO_VERSION
   Version: $UMO_UBUNTU_VERSION
@@ -481,7 +481,7 @@ umo_phase_summary() {
 Commands (run from Termux):
   umo stop             Stop all services
   umo login            Login as root
-  umo user             Login as default user
+  umo user              Login as default user
   umo --user <name>    Switch user
   umo status           Show service status
   umo update           Update packages
