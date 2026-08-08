@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Quick-start Wrapper (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Quick-start Wrapper (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 printf '\033[2J\033[3J\033[H\033c'

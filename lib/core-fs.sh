@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Filesystem & Path Utilities (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Filesystem & Path Utilities (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_FS_LOADED:-}" ] || return 0
 _UMO_FS_LOADED=1

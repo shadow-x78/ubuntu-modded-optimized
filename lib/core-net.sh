@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Network & Download Engine (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Network & Download Engine (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_NET_LOADED:-}" ] || return 0
 _UMO_NET_LOADED=1
@@ -126,12 +126,12 @@ umo_net_extract() {
         *.tar.gz|*.tgz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (gzip). Archive may be corrupt — re-run to re-download"
+                umo_die "Extraction failed (gzip). Archive may be corrupt - re-run to re-download"
             ;;
         *.tar.xz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (xz). Archive may be corrupt — re-run to re-download"
+                umo_die "Extraction failed (xz). Archive may be corrupt - re-run to re-download"
             ;;
         *.zip)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \

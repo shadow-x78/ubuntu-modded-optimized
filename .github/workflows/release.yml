@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify version matches UMO_VERSION
+        run: |
+          code_ver=$(grep '^export UMO_VERSION=' bin/umo-install | cut -d'"' -f2)
+          if [ "$code_ver" != "${{ steps.ver.outputs.version }}" ]; then
+            echo "::error::Tag v${{ steps.ver.outputs.version }} != UMO_VERSION $code_ver in bin/umo-install"
+            exit 1
+          fi
+
+      - name: Syntax check before release
+        run: |
+          for f in install.sh bin/umo-install bin/umo-start bin/umo-stop \
+                   lib/*.sh modules/*.sh config/xstartup config/templates/*.sh; do
+            sh -n "$f" || exit 1
+          done
+
+      - name: Create tarball
+        run: |
+          tar --exclude='.git' --exclude='.kilo' --exclude='tests' \
+              --exclude='assets' --exclude-vcs \
+              -czf "umo-${{ steps.ver.outputs.version }}.tar.gz" \
+              install.sh bin lib modules config docs README.md README_AR.md \
+              LICENSE SECURITY.md CHANGELOG.md CONTRIBUTING.md
+
+      - name: Generate checksums
+        run: sha256sum "umo-${{ steps.ver.outputs.version }}.tar.gz" > "umo-${{ steps.ver.outputs.version }}.sha256"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            umo-${{ steps.ver.outputs.version }}.tar.gz
+            umo-${{ steps.ver.outputs.version }}.sha256
+          generate_release_notes: true

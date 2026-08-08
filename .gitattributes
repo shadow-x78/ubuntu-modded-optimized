@@ -1,3 +1,6 @@
+# ────────────────────────────────────────────────
+#  Line endings: enforce LF everywhere
+# ────────────────────────────────────────────────
 * text=auto eol=lf
 *.sh text eol=lf
 *.md text eol=lf

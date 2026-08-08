@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: Shellcheck (POSIX sh)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint all shell scripts
+        run: |
+          shellcheck -s sh \
+            install.sh \
+            bin/umo-install bin/umo-start bin/umo-stop \
+            lib/*.sh \
+            modules/*.sh \
+            config/xstartup \
+            config/templates/*.sh
+
+  syntax:
+    name: Syntax check (sh -n)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify POSIX sh syntax
+        run: |
+          for f in install.sh bin/umo-install bin/umo-start bin/umo-stop \
+                   lib/*.sh modules/*.sh config/xstartup config/templates/*.sh; do
+            sh -n "$f" || exit 1
+          done
+          echo "All scripts parse cleanly"
+
+  security:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for hardcoded secrets
+        run: |
+          if grep -rInE '(BEGIN (RSA|OPENSSH|PGP) PRIVATE KEY|api[_-]?key|secret|password|token)' \
+               --include='*.sh' --include='*.md' --exclude=CHANGELOG.md \
+               bin lib modules config install.sh 2>/dev/null | \
+               grep -viE '(vncpasswd|VNC password|passwordless|change this|vnc password|password:|# password)'; then
+            echo "::error::Potential secret found in tree"
+            exit 1
+          fi
+          echo "No secrets detected"

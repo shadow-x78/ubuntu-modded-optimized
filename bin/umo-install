@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Main Installer (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Main Installer (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 unset LD_PRELOAD
@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.0.8"
+export UMO_VERSION="4.0.9"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -61,8 +61,8 @@ umo_phase_config() {
     fi
 
     umo_ui_menu "Choose Ubuntu Version" \
-        "Ubuntu 22.04 LTS (Jammy — Stable, Recommended)" \
-        "Ubuntu 24.04 LTS (Noble — Latest)"
+        "Ubuntu 22.04 LTS (Jammy - Stable, Recommended)" \
+        "Ubuntu 24.04 LTS (Noble - Latest)"
 
     case "$UMO_MENU_IDX" in
         1) UMO_UBUNTU_VERSION="22.04" ;;
@@ -70,10 +70,10 @@ umo_phase_config() {
     esac
 
     umo_ui_menu "Choose Desktop Environment" \
-        "XFCE4 (Recommended — Balanced)" \
+        "XFCE4 (Recommended - Balanced)" \
         "LXDE (Ultra-Lightweight)" \
-        "Openbox (Minimal — Advanced)" \
-        "Minimal (CLI only — No GUI)"
+        "Openbox (Minimal - Advanced)" \
+        "Minimal (CLI only - No GUI)"
 
     case "$UMO_MENU_IDX" in
         1) UMO_DE="xfce4" ;;
@@ -287,7 +287,7 @@ _umo_status() {
     if [ -n "$_vnc_pid" ]; then
         _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
         [ -z "$_ip" ] && _ip="127.0.0.1"
-        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_GRN}Active${_UMO_NC} → ${_UMO_CYN}${_ip}:5901${_UMO_NC}\n"
+        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_GRN}Active${_UMO_NC} -> ${_UMO_CYN}${_ip}:5901${_UMO_NC}\n"
     else
         printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_DIM}Stopped${_UMO_NC}\n"
     fi
@@ -473,7 +473,7 @@ _readme_dir="$UMO_INSTALL_DIR/root/.umo"
     umo_fs_mkdir "$_readme_dir" 2>/dev/null || true
     timeout 5 sh -c "cat > '$_readme_dir/README.txt' 2>/dev/null" << README_EOF || true
 ========================================
-  UMO Ubuntu — v$UMO_VERSION
+  UMO Ubuntu - v$UMO_VERSION
   Version: $UMO_UBUNTU_VERSION
   Desktop: $UMO_DE
 ========================================

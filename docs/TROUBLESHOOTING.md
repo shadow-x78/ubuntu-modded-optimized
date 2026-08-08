@@ -1,8 +1,8 @@
 <div align="center">
 
-# Troubleshooting — UMO
+# Troubleshooting - UMO
 
-[![Version](https://img.shields.io/badge/version-4.0.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -141,7 +141,7 @@ pkg update && pkg upgrade
 bash install.sh
 ```
 
-> Make sure you are using Termux from **F-Droid or GitHub** — the Play Store version is outdated and unsupported.
+> Make sure you are using Termux from **F-Droid or GitHub** - the Play Store version is outdated and unsupported.
 
 ---
 
@@ -156,13 +156,13 @@ cat ~/.umo/logs/install.log
 
 If the problem persists, open an issue with the log attached:
 
-[→ Open an Issue](https://github.com/Shadow-x78/termux-ubuntu-umo/issues)
+[Open an Issue](https://github.com/shadow-x78/ubuntu-modded-optimized/issues)
 
 ---
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+Built by <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [Back to README](../README.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>

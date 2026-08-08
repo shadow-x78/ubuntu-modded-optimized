@@ -1,8 +1,8 @@
 <div align="center">
 
-# استكشاف الأخطاء وإصلاحها — UMO
+# استكشاف الأخطاء وإصلاحها - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -141,7 +141,7 @@ pkg update && pkg upgrade
 bash install.sh
 ```
 
-> تأكد من أنك تستخدم Termux من **F-Droid أو GitHub** — إصدار Play Store قديم وغير مدعوم.
+> تأكد من أنك تستخدم Termux من **F-Droid أو GitHub** - إصدار Play Store قديم وغير مدعوم.
 
 ---
 
@@ -156,13 +156,13 @@ cat ~/.umo/logs/install.log
 
 إذا استمرت المشكلة، افتح issue مع إرفاق السجل:
 
-[← افتح Issue](https://github.com/Shadow-x78/termux-ubuntu-umo/issues)
+[افتح Issue](https://github.com/shadow-x78/ubuntu-modded-optimized/issues)
 
 ---
 
 <div align="center">
 
-بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+بُني بواسطة <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [العودة إلى README](../README_AR.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>

@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Application Suite Installer (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Application Suite Installer (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_APPS_LOADED:-}" ] || return 0
 _UMO_MOD_APPS_LOADED=1

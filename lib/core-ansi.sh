@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — ANSI Terminal Engine (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - ANSI Terminal Engine (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_ANSI_LOADED:-}" ] || return 0
 _UMO_ANSI_LOADED=1
@@ -300,12 +300,12 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.8}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.0.9}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
 
-    _auth="By Shadow-x78"
+    _auth="By shadow-x78"
     _authlen=$(printf '%s' "$_auth" | wc -m)
     _authpad=$(( (_cols - _authlen) / 2 )); [ "$_authpad" -lt 0 ] && _authpad=0
     printf "%b%*s%s%b\n\n" "$UMO_COLOR_MUTED" "$_authpad" '' "$_auth" "$UMO_NC"
@@ -327,9 +327,9 @@ umo_logo() {
 umo_badge() {
     _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-4.0.8}"
+    _ver="${UMO_VERSION:-4.0.9}"
     _edition="${UMO_EDITION:-Open Source}"
-    _txt="v$_ver — $_edition Edition"
+    _txt="v$_ver - $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)
     _pad=$(( (_cols - _txtlen) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
     printf "%b%*s%s%b\n" "$UMO_DIM" "$_pad" '' "$_txt" "$UMO_NC"

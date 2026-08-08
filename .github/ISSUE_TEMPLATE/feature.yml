@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an improvement for UMO
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What limitation or friction does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What would change in the installer / modules / config?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you evaluate, and why is this one better?
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Out of scope:** x86 / x86_64 devices and Play Store Termux builds are not supported targets.

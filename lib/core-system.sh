@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — System & Platform Utilities (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - System & Platform Utilities (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_SYS_LOADED:-}" ] || return 0
 _UMO_SYS_LOADED=1

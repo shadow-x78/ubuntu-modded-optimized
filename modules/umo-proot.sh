@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Proot Container Manager (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Proot Container Manager (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_PROOT_LOADED:-}" ] || return 0
 _UMO_MOD_PROOT_LOADED=1
@@ -163,7 +163,7 @@ umo_proot_create_scripts() {
 
     cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
 #!/bin/sh
-# UMO — Ubuntu Login Wrapper
+# UMO - Ubuntu Login Wrapper
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -192,7 +192,7 @@ EOF
 
     cat > "$UMO_TERMUX_HOME/umo-user.sh" << EOF
 #!/bin/sh
-# UMO — Ubuntu User Login
+# UMO - Ubuntu User Login
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -214,7 +214,7 @@ EOF
 
     cat > "$UMO_TERMUX_HOME/umo-start.sh" << 'EOF'
 #!/bin/sh
-# UMO — Quick Start
+# UMO - Quick Start
 echo "[==>] Starting UMO environment..."
 termux-wake-lock 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true

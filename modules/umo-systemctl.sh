@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Systemctl Emulator (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Systemctl Emulator (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_SYSCTL_LOADED:-}" ] || return 0
 _UMO_MOD_SYSCTL_LOADED=1
@@ -13,7 +13,7 @@ umo_systemctl_install() {
     _bin="${UMO_INSTALL_DIR:?}/usr/local/bin/systemctl"
     cat > "$_bin" << 'EOF'
 #!/bin/sh
-# UMO Generic Systemctl — POSIX-compatible systemd emulator
+# UMO Generic Systemctl - POSIX-compatible systemd emulator
 
 ACTION="$1"
 UNIT="$2"

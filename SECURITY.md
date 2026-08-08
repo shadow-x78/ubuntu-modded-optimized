@@ -1,8 +1,8 @@
 <div align="center">
 
-# Security Policy — UMO
+# Security Policy - UMO
 
-[![Version](https://img.shields.io/badge/version-4.0.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -41,17 +41,17 @@ If you discover a security vulnerability in UMO, please report it **responsibly*
 
 **Preferred method:**
 - Open a private security advisory on GitHub:
-  [Security Advisories →](https://github.com/Shadow-x78/termux-ubuntu-umo/security/advisories/new)
+  [Security Advisories](https://github.com/shadow-x78/ubuntu-modded-optimized/security/advisories/new)
 
 **Alternative method:**
-- GitHub direct message to [@Shadow-x78](https://github.com/Shadow-x78)
+- GitHub direct message to [@shadow-x78](https://github.com/shadow-x78)
 
 **What to include:**
 
 | Field | Details |
 |-------|---------|
 | Description | Clear explanation of the vulnerability |
-| Reproduction | Steps to reproduce — minimal PoC if possible |
+| Reproduction | Steps to reproduce - minimal PoC if possible |
 | Component | Affected file / module and version |
 | Impact | Privilege escalation, data exposure, etc. |
 | Fix | Suggested mitigation (optional) |
@@ -98,9 +98,9 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 | Area | Risk | Mitigation |
 |------|------|------------|
 | Rootfs download | Supply-chain / MITM | Only HTTPS mirrors; checksums verified where available |
-| Proot execution | Container escape to Termux host | User-space proot — no root required; mounts limited to `dev`, `proc`, `sys`, `sdcard`, `termux` |
+| Proot execution | Container escape to Termux host | User-space proot - no root required; mounts limited to `dev`, `proc`, `sys`, `sdcard`, `termux` |
 | VNC password | Weak default (`ubuntu`) | User must change via `vncpasswd` after first login |
-| Sudo inside Ubuntu | `ubuntu` user has passwordless sudo | By design — local single-user Termux environment |
+| Sudo inside Ubuntu | `ubuntu` user has passwordless sudo | By design - local single-user Termux environment |
 | `$HOME` scripts | Overwritten on re-install | Scripts use `#!/bin/sh` minimal logic; no prompt before overwrite |
 
 ### Recommendations
@@ -112,10 +112,10 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 
 2. **Only install from the official repository:**
    ```bash
-   git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git
+   git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git
    ```
 
-3. **Keep Termux updated** via F-Droid or GitHub — not Play Store.
+3. **Keep Termux updated** via F-Droid or GitHub - not Play Store.
 
 4. **Never expose VNC port `5901`** to untrusted networks without a tunnel or VPN.
 
@@ -126,7 +126,7 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 <a id="audit"></a>
 ## 🔬 Security Audit
 
-UMO is written entirely in POSIX `sh` — no compiled binaries, no setuid/setgid, no kernel modules. A full install performs:
+UMO is written entirely in POSIX `sh` - no compiled binaries, no setuid/setgid, no kernel modules. A full install performs:
 
 - `mkdir -p` under `$HOME`
 - `proot` bind mounts
@@ -143,14 +143,14 @@ All logic is readable in plain shell. If you perform an audit, please share find
 
 We thank the following security researchers for responsible disclosure:
 
-*(None yet — be the first!)*
+*(None yet - be the first!)*
 
 ---
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
-<a href="https://github.com/Shadow-x78/termux-ubuntu-umo">termux-ubuntu-umo</a> ·
+Built by <a href="https://github.com/shadow-x78">shadow-x78</a> ·
+<a href="https://github.com/shadow-x78/ubuntu-modded-optimized">ubuntu-modded-optimized</a> ·
 [Back to README](../README.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>

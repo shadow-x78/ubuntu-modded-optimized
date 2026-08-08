@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — TUI Engine (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - TUI Engine (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_UI_LOADED:-}" ] || return 0
 _UMO_UI_LOADED=1

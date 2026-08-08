@@ -1,8 +1,8 @@
 <div align="center">
 
-# دليل التثبيت — UMO
+# دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -38,7 +38,7 @@
 |---------|---------|
 | Android | 8.0 أو أحدث |
 | المعالج | ARM64 (aarch64) |
-| Termux | من F-Droid أو GitHub — **ليس** من Play Store |
+| Termux | من F-Droid أو GitHub - **ليس** من Play Store |
 | التخزين | 2 GB+ مساحة حرة |
 | الشبكة | اتصال بالإنترنت مطلوب |
 
@@ -49,7 +49,7 @@
 
 ```bash
 # استنساخ المشروع
-git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git ~/UMO
+git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
 
 # تشغيل المثبِّت التفاعلي
@@ -87,7 +87,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | الـ Flag | البيئة | مناسبة لـ |
 |----------|--------|-----------|
-| `--de=xfce4` | XFCE4 | الاستخدام اليومي — أداء متوازن |
+| `--de=xfce4` | XFCE4 | الاستخدام اليومي - أداء متوازن |
 | `--de=lxde` | LXDE | الأجهزة القديمة وضعيفة الموارد |
 | `--de=openbox` | Openbox | المستخدمون المتقدمون، بصمة خفيفة |
 | `--de=minimal` | بدون واجهة | السيرفرات والاستخدام الخالص |
@@ -126,7 +126,7 @@ umo login
 
 # الاتصال عبر تطبيق VNC
 # العنوان  : localhost:5901
-# كلمة المرور: umo  ← غيّرها فوراً!
+# كلمة المرور: umo  (غيّرها فوراً!)
 ```
 
 > **غيِّر كلمة مرور VNC مباشرة بعد أول دخول:**
@@ -179,7 +179,7 @@ rm -rf ~/umo-ubuntu ~/.umo ~/umo-*.sh
 
 <div align="center">
 
-بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+بُني بواسطة <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [العودة إلى README](../README_AR.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>
