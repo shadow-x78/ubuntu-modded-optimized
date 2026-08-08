@@ -1,0 +1,55 @@
+name: Bug report
+description: Report broken behaviour or unexpected output
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please fill in every section below.
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Android / device / Termux / UMO versions.
+      placeholder: |
+        Android version: e.g. 14
+        Device / SoC: e.g. Snapdragon 8 Gen 2 (aarch64)
+        Termux version + source: e.g. 0.118.1 from F-Droid (NOT Play Store)
+        UMO version: e.g. 4.0.8
+        Free storage (df -h ~):
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste the relevant part of ~/.umo/logs/install.log
+      render: shell

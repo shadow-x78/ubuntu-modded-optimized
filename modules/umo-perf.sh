@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Performance Optimizer (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Performance Optimizer (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_PERF_LOADED:-}" ] || return 0
 _UMO_MOD_PERF_LOADED=1

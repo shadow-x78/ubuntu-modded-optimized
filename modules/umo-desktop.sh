@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — Desktop Environment Installer (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - Desktop Environment Installer (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_DE_LOADED:-}" ] || return 0
 _UMO_MOD_DE_LOADED=1

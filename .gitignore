@@ -1,4 +1,6 @@
-# UMO Runtime & Cache
+# ────────────────────────────────────────────────
+#  UMO Runtime & Cache
+# ────────────────────────────────────────────────
 *.bak
 *.tmp
 *.swp
@@ -6,31 +8,39 @@
 .umo/
 *.log
 
-# Agent / project metadata
-.kilo/
-AGENTS.md
-
-# Editor artifacts
+# ────────────────────────────────────────────────
+#  Editor artifacts
+# ────────────────────────────────────────────────
 .vscode/
 .idea/
 *.sublime-*
 
-# OS files
+# ────────────────────────────────────────────────
+#  OS files
+# ────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Temporary download artifacts during install
+# ────────────────────────────────────────────────
+#  Temporary download artifacts during install
+# ────────────────────────────────────────────────
 *.tar.xz.partial
 *.tar.gz.partial
 *.zip.partial
 
-# Runtime directories (created by installer)
+# ────────────────────────────────────────────────
+#  Runtime directories (created by installer)
+# ────────────────────────────────────────────────
 /cache/
 /logs/
 
-# Patch rejects
+# ────────────────────────────────────────────────
+#  Patch rejects
+# ────────────────────────────────────────────────
 *.rej
 *.orig
 
-# Tests (local only — not tracked)
+# ────────────────────────────────────────────────
+#  Tests (local only - not tracked)
+# ────────────────────────────────────────────────
 /tests/

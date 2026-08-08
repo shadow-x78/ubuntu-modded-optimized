@@ -1,8 +1,8 @@
 <div align="center">
 
-# Installation Guide — UMO
+# Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.0.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -38,7 +38,7 @@
 |-------------|---------|
 | Android | 8.0+ |
 | Architecture | ARM64 (aarch64) |
-| Termux | F-Droid or GitHub — **not** Play Store |
+| Termux | F-Droid or GitHub - **not** Play Store |
 | Storage | 2 GB+ free |
 | Network | Internet connection required |
 
@@ -49,7 +49,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git ~/UMO
+git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
 
 # Run the interactive installer
@@ -87,7 +87,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | Flag | Environment | Best For |
 |------|-------------|----------|
-| `--de=xfce4` | XFCE4 | Daily use — balanced performance |
+| `--de=xfce4` | XFCE4 | Daily use - balanced performance |
 | `--de=lxde` | LXDE | Low-end and older devices |
 | `--de=openbox` | Openbox | Advanced users, minimal footprint |
 | `--de=minimal` | None (CLI only) | Servers and headless usage |
@@ -126,7 +126,7 @@ umo login
 
 # Connect via VNC viewer
 # Address : localhost:5901
-# Password: umo  ← change this immediately!
+# Password: umo  (change this immediately!)
 ```
 
 > **Change the VNC password right after first login:**
@@ -179,7 +179,7 @@ rm -rf ~/umo-ubuntu ~/.umo ~/umo-*.sh
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+Built by <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [Back to README](../README.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>

@@ -11,13 +11,13 @@
 
 # Ubuntu Modded Optimized
 
-Full Ubuntu on your Android device — one command, zero hassle
+Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.0.8-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.9-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
-[![Stars](https://img.shields.io/github/stars/Shadow-x78/termux-ubuntu-umo?style=flat-square&color=eab308&logo=github)](https://github.com/Shadow-x78/termux-ubuntu-umo/stargazers)
+[![Stars](https://img.shields.io/github/stars/shadow-x78/ubuntu-modded-optimized?style=flat-square&color=eab308&logo=github)](https://github.com/shadow-x78/ubuntu-modded-optimized/stargazers)
 
 </div>
 
@@ -48,11 +48,11 @@ Full Ubuntu on your Android device — one command, zero hassle
 <a id="what-is-umo"></a>
 ## 🤔 What is UMO?
 
-**UMO (Ubuntu Modded Optimized)** is a free, open-source Ubuntu installer for Termux — rewritten from scratch to fix the root problems found in every similar project. No external UI dependencies, no manual configuration, no surprises.
+**UMO (Ubuntu Modded Optimized)** is a free, open-source Ubuntu installer for Termux - rewritten from scratch to fix the root problems found in every similar project. No external UI dependencies, no manual configuration, no surprises.
 
 | Problem | Other Projects | UMO |
 |---------|---------------|-----|
-| `dialog` breaks the UI | ❌ Still using it | ✅ Pure POSIX TUI — no deps |
+| `dialog` breaks the UI | ❌ Still using it | ✅ Pure POSIX TUI - no deps |
 | VNC dies on screen lock | ❌ No fix | ✅ `termux-wake-lock` built-in |
 | No audio inside proot | ❌ Manual workaround | ✅ PulseAudio TCP bridge |
 | `systemctl` fails | ❌ Confusing errors | ✅ Generic shell emulator (any service) |
@@ -78,7 +78,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 
 | Environment | Type | Best For |
 |-------------|------|----------|
-| **XFCE4** | Full DE | Daily use — balanced performance |
+| **XFCE4** | Full DE | Daily use - balanced performance |
 | **LXDE** | Lightweight DE | Low-end and older devices |
 | **Openbox** | Window Manager | Advanced users, minimal footprint |
 | **Minimal** | CLI only | Servers and headless usage |
@@ -92,7 +92,7 @@ Full Ubuntu on your Android device — one command, zero hassle
 
 ```bash
 # Clone the repository
-git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git ~/UMO
+git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
 
 # Interactive install (recommended)
@@ -154,8 +154,8 @@ bash install.sh [OPTIONS]
 <a id="requirements"></a>
 ## 📋 Requirements
 
-- Android 8.0+ — ARM64 processor (aarch64)
-- Termux from F-Droid or GitHub — **not** from Play Store
+- Android 8.0+ - ARM64 processor (aarch64)
+- Termux from F-Droid or GitHub - **not** from Play Store
 - 2 GB+ free storage
 - Internet connection
 
@@ -228,7 +228,7 @@ Distributed under the [MIT License](LICENSE).
 
 <div align="center">
 
-Built by <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+Built by <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [Changelog](CHANGELOG.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>

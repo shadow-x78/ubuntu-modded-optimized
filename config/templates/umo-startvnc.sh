@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO — Start VNC (template)
+# UMO - Start VNC (template)
 VNC_DISPLAY="${VNC_DISPLAY:-{{DISPLAY}}}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-{{VNC_DEPTH}}}"

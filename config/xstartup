@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO VNC Session — {{UMO_VERSION}}
+# UMO VNC Session - {{UMO_VERSION}}
 export PULSE_SERVER=127.0.0.1
 export PULSE_LATENCY_MSEC=30
 export DISPLAY={{DISPLAY}}

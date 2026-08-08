@@ -1,6 +1,6 @@
 #!/bin/sh
-# UMO — PulseAudio Audio Bridge (MIT License)
-# https://github.com/Shadow-x78/termux-ubuntu-umo
+# UMO - PulseAudio Audio Bridge (MIT License)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_AUDIO_LOADED:-}" ] || return 0
 _UMO_MOD_AUDIO_LOADED=1

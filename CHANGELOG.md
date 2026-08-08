@@ -2,13 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.0.9] - 2026-08-09
+
+### ✨ Added
+- **CI Pipeline:** `.github/workflows/ci.yml` with three jobs - POSIX `shellcheck` over every script, `sh -n` syntax validation, and a hardcoded-secret scan that fails the build on any private key or credential pattern.
+- **Release Workflow:** `.github/workflows/release.yml` triggers on `v*.*.*` tags, verifies the tag matches `UMO_VERSION` in `bin/umo-install`, runs syntax checks, and attaches a tarball + SHA256 checksum to the GitHub release.
+- **Release Helper:** `scripts/release.sh` bumps the version across `bin/umo-install`, README badges (EN/AR), `SECURITY.md`, and the fallback versions in `lib/core-ansi.sh` / `modules/umo-vnc.sh`, inserts a new `CHANGELOG.md` block, commits, and tags in one step.
+- **Community Health Files:** `CONTRIBUTING.md` (branch naming, `UMO | vX.Y.Z | type:` commit convention, POSIX sh style rules, PR and release process), GitHub issue forms (`bug.yml`, `feature.yml`), and a PR template with shellcheck/CHANGELOG checklists.
+
+### 🔧 Changed
+- **Repository URLs:** All links, clone commands, file headers, and shields badges migrated from `Shadow-x78/termux-ubuntu-umo` to `shadow-x78/ubuntu-modded-optimized` across 24 files; author name normalized to lowercase everywhere including `LICENSE` and the runtime banner (`lib/core-ansi.sh`).
+- **Docs Linking:** `README_AR.md` docs table now points at the Arabic guides (`INSTALL_AR.md`, `TROUBLESHOOTING_AR.md`); English README keeps the English variants.
+- **Punctuation Normalization:** Em dashes, Unicode arrows, and ellipses replaced with plain ASCII (`-`, `->`, `...`) across prose, comments, and user-facing strings; box-drawing and emoji glyphs guarded by the TUI remain untouched.
+- **Dotfile Comments:** `.gitignore`, `.gitattributes`, and `.editorconfig` now use visual group separators; `.editorconfig` retains the `[*.{sh,yml,yaml}]` and `[*.md]` overrides.
+
+### 🔒 Security
+- Nothing user-facing changed; the new secret-scan CI job guards future commits.
+
 ## [v4.0.8] - 2026-07-04
 
 ### ⚡ Optimized
 - **APT Single-Mirror Parallelism:** Removed `Acquire::Queue-Mode "host"` from `config/templates/apt-umo-speed.conf` and the fallback heredoc in `modules/umo-perf.sh`. Replaced with `Acquire::http::Pipeline-Depth "10"`, `Acquire::https::Pipeline-Depth "10"`, and `Acquire::http::No-Cache "true"`. The Ubuntu mirror is a single host (`ports.ubuntu.com`), so the previous `host` mode serialized every package download; the new pipeline mode opens up to 10 parallel HTTP requests on the same host, dramatically cutting wall time on slow connections.
 - **Redundant `apt-get update` Eliminated:** Removed three of the four `apt-get update` calls per install. `modules/umo-perf.sh:73` is now the single canonical refresh before the install pipeline; the redundant updates inside `debloat.sh`, `cleanup.sh`, and `bin/umo-install:190` are gone. Only the post-`rm -rf` refresh inside `cleanup.sh` is retained so later phases (`umo_phase_desktop`, `umo_phase_apps`, `umo_phase_finalize`) still see a valid package index.
-- **dpkg fsync Disabled Inside Proot:** `modules/umo-proot.sh:99-umo-sandbox` now sets `DPKg::NoTriggers "true"`, `DPKg::TriggersPending "false"`, and `Dpkg::Options:: "--force-unsafe-io"`. The proot also gets its own `/etc/dpkg/dpkg.cfg.d/force-unsafe-io`. The dominant remaining cost — dpkg's `fsync()` per-file writes during `apt-get install` on Android storage — is now removed.
-- **Trigger Hooks Diverted at Proot Creation:** The `divert-triggers.sh` block (gtk-update-icon-cache, update-initramfs, systemd-hwdb, update-command-not-found, update-mime-database, update-desktop-database, plus man-db auto-update) now runs from `umo_proot_prepare` — once, before any `apt-get install` fires — rather than from `umo_perf_apt`. Duplicate execution path removed from `modules/umo-perf.sh`.
+- **dpkg fsync Disabled Inside Proot:** `modules/umo-proot.sh:99-umo-sandbox` now sets `DPKg::NoTriggers "true"`, `DPKg::TriggersPending "false"`, and `Dpkg::Options:: "--force-unsafe-io"`. The proot also gets its own `/etc/dpkg/dpkg.cfg.d/force-unsafe-io`. The dominant remaining cost - dpkg's `fsync()` per-file writes during `apt-get install` on Android storage - is now removed.
+- **Trigger Hooks Diverted at Proot Creation:** The `divert-triggers.sh` block (gtk-update-icon-cache, update-initramfs, systemd-hwdb, update-command-not-found, update-mime-database, update-desktop-database, plus man-db auto-update) now runs from `umo_proot_prepare` - once, before any `apt-get install` fires - rather than from `umo_perf_apt`. Duplicate execution path removed from `modules/umo-perf.sh`.
 - **Theme Phase Speedup:** `modules/umo-theme.sh` now installs `fonts-inter fonts-jetbrains-mono fonts-dejavu-core gnome-icon-theme` instead of the old `papirus-icon-theme` + `fonts-noto` + `fonts-noto-core` + `xfonts-terminus` set. Total theme-package footprint drops from ~600 MB compressed to ~16 MB; visual identity is preserved because the GTK theme colors in `config/theme/gtk-3.0/settings.ini` and the font preferences in `01-umo-fonts.conf` override the underlying icon and font families.
 - **VNC Install Fix (single transaction):** `modules/umo-vnc.sh` collapses five separate `apt-get install` calls (`apt-utils dialog tzdata`, `xfonts-base/encodings/utils`, `xfonts-75dpi/100dpi`, `dbus-x11`, `tigervnc-*`) into a single `apt-get install -y --no-install-recommends` invocation so the dependency resolver plans ahead and avoids the `xfonts-100dpi Depends: xfonts-utils but it is not going to be installed` cycle. Also drops the legacy `xfonts-75dpi`/`xfonts-100dpi` bitmap fonts that TigerVNC does not need.
 - **XFCE4 Slim Install:** `modules/umo-desktop.sh:umo_de_xfce4` now installs `xfce4-panel xfce4-session xfce4-settings xfwm4 xfce4-terminal thunar dbus-x11 x11-xserver-utils gnome-icon-theme` in a single `--no-install-recommends` transaction. Replaces the old `xfce4` + `xfce4-goodies` meta-package (which pulled ~40 extra apps including orage, ristretto, xfburn, mousepad, parole) and the heavy `xubuntu-icon-theme`. `xfce4-whiskermenu-plugin` is now opt-in via `UMO_XFCE4_WHISKERMENU=1`. All four DE installers (`lxde`, `xfce4`, `openbox`, `minimal`) also gain the explicit `--no-install-recommends` flag for consistency.
@@ -16,18 +33,18 @@ All notable changes to this project will be documented in this file.
 - **Half-Configured Package Auto-Removal:** Both `install-vnc.sh` and the XFCE4 installer now open with a 3-round pre-repair loop: `dpkg --configure -a`, then inspect `dpkg -l` for `iU`/`iF`/`hF` flags, then `dpkg --remove --force-depends` every broken package. After the loop, `apt-get -f install -y` and a final `dpkg --configure -a` leave the system clean. This breaks the `fontconfig depends on libfontconfig1 not installed` cycle that previously forced the user to run `apt --fix-broken install` manually.
 - **tzdata Hang Fix:** Both `install-vnc.sh` and the XFCE4 installer now pre-seed tzdata's debconf (`tzdata/Areas=Etc`, `tzdata/Zones/Etc=UTC`) and redirect stdin away from the tty (`exec </dev/null` if interactive). This unblocks the `tzdata` postinst that was stalling on a debconf prompt even with `DEBIAN_FRONTEND=noninteractive`.
 - **tzdata/Service Postinst Hang Killed:** `modules/umo-proot.sh:umo_proot_prepare` now moves `/usr/sbin/invoke-rc.d`, `/usr/sbin/service`, and `/usr/sbin/systemctl` to `*.real` backups and replaces them with `/bin/true` symlinks for the duration of the install. The `99-umo-sandbox` apt.conf adds `Dpkg::Post-Invoke {}` and `Dpkg::Pre-Invoke {}` so apt never runs service-start hooks. All four DE installers + VNC + theme wrap every `apt-get install` and `apt-get -f install` with a `timeout 600` guard. `umo_phase_finalize` restores the real binaries in a new `Restoring service binaries` step after every apt call has finished, so VNC start uses the genuine service files once the install completes.
-- **Hardened Exit + Global dpkg Configuration Pass:** `bin/umo-install:umo_main` exit trap now wraps the pkill cleanup in a `timeout 5 sh -c '...'` so the script itself is bounded — even if a child wedges, the script returns within 5 seconds. The cleanup pkill list also covers `apt-get`, `dpkg`, and every heredoc installer script (`install-vnc.sh`, `install-de.sh`, `install-theme.sh`, `debloat.sh`, `cleanup.sh`, `perf-desktop.sh`, `divert-triggers.sh`). `bin/umo-install:umo_phase_finalize` adds a final `Configuring any remaining packages` pass that walks any package still in `iU`/`iF`/`hF` state to `ii` (or removes + re-installs via `apt-get -f install`), then a `Cleaning dpkg locks` step that removes any stale `dpkg` lock files. `modules/umo-proot.sh:umo_proot_prepare` pre-touches `var/lib/dpkg/lock` and `var/lib/dpkg/lock-frontend` so the first apt-get never sees a missing lock that could wedge the parent's `wait`.
+- **Hardened Exit + Global dpkg Configuration Pass:** `bin/umo-install:umo_main` exit trap now wraps the pkill cleanup in a `timeout 5 sh -c '...'` so the script itself is bounded - even if a child wedges, the script returns within 5 seconds. The cleanup pkill list also covers `apt-get`, `dpkg`, and every heredoc installer script (`install-vnc.sh`, `install-de.sh`, `install-theme.sh`, `debloat.sh`, `cleanup.sh`, `perf-desktop.sh`, `divert-triggers.sh`). `bin/umo-install:umo_phase_finalize` adds a final `Configuring any remaining packages` pass that walks any package still in `iU`/`iF`/`hF` state to `ii` (or removes + re-installs via `apt-get -f install`), then a `Cleaning dpkg locks` step that removes any stale `dpkg` lock files. `modules/umo-proot.sh:umo_proot_prepare` pre-touches `var/lib/dpkg/lock` and `var/lib/dpkg/lock-frontend` so the first apt-get never sees a missing lock that could wedge the parent's `wait`.
 - **Summary Phase README Hang Fixed:** `bin/umo-install:umo_phase_summary` README.txt write is now wrapped in `timeout 5 sh -c 'cat > ...' << README_EOF || true`. The previous `cat > file 2>/dev/null || true << README_EOF` parsing confused some shells (mksh/busybox on Termux) and could hang after printing "Get Started". The timeout caps any stall at 5 seconds.
 - **Explicit X11/freetype/libbsd Bootstrap Expanded:** `modules/umo-vnc.sh` install list grew to include `ucf`, `x11-xkb-utils xauth`, `libx11-6 libx11-data libxau6 libxcb1 libxdmcp6`, `libbsd0 libmd0 libxfont2 libfontenc1 libxcursor1 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxi6 libxrandr2 libxt6 libxaw7 libxkbfile1 libxmuu1 libpixman-1-0 libjpeg8 libgl1` so apt resolves the full X11/freetype/libbsd dep chain in one transaction, including the libs that previously required a separate `apt --fix-broken install` pass.
 
 ### 🐛 Fixed
 - **Installer Hang on Exit (SIGKILL trap):** `lib/core-ansi.sh:umo_run_quiet` now installs a per-call `trap _umo_spinner_cleanup EXIT INT TERM` that forcibly `kill -KILL`s the backgrounded spinner. The inline kill was also upgraded from SIGTERM to SIGKILL, ensuring the spinner is fully dead before the function returns. The trap is released on every return path so it never leaks into the caller. This eliminates the "script never exits, must press Ctrl+C" condition caused by half-dead spinner processes still holding the tty.
-- **Orphaned `termux-wake-unlock`:** `bin/umo-install:432` — removed the trailing `&` from `termux-wake-unlock` so the call no longer leaves an orphan at the end of `umo_phase_summary`. Added `|| true` to keep `set -e` safe.
-- **Final Exit Trap Cleanup:** `bin/umo-install:573` — `exit 0` is now preceded by `trap - EXIT INT TERM HUP` to drop any lingering trap before the script terminates.
+- **Orphaned `termux-wake-unlock`:** `bin/umo-install:432` - removed the trailing `&` from `termux-wake-unlock` so the call no longer leaves an orphan at the end of `umo_phase_summary`. Added `|| true` to keep `set -e` safe.
+- **Final Exit Trap Cleanup:** `bin/umo-install:573` - `exit 0` is now preceded by `trap - EXIT INT TERM HUP` to drop any lingering trap before the script terminates.
 - **Installer Hang on Ctrl+C:** `bin/umo-install:umo_main` now installs a top-level `trap _umo_sigint_cleanup EXIT INT TERM HUP`. On any exit (including Ctrl+C), every `proot` rooted at `$UMO_INSTALL_DIR` and every `umo-login.sh` helper still attached to the tty is `kill -KILL`'d, the cursor is restored, and the script exits with the saved exit code (130 for SIGINT). Replaces the older condition where partial-failure runs could leave orphaned proot children holding the terminal open until the user pressed Ctrl+C a second time.
 
 ### 🔄 Updated
-- **Version Bump:** All version sources (`UMO_VERSION` in `bin/umo-install`, fallback defaults in `lib/core-ansi.sh` and `modules/umo-vnc.sh`, the embedded version inside the generated `umo` wrapper script, `config/bashrc.patch`, and every README/INSTALL/TROUBLESHOOTING/SECURITY badge) bumped from 4.0.7 → 4.0.8.
+- **Version Bump:** All version sources (`UMO_VERSION` in `bin/umo-install`, fallback defaults in `lib/core-ansi.sh` and `modules/umo-vnc.sh`, the embedded version inside the generated `umo` wrapper script, `config/bashrc.patch`, and every README/INSTALL/TROUBLESHOOTING/SECURITY badge) bumped from 4.0.7 -> 4.0.8.
 
 ## [v4.0.7] - 2026-06-25
 
@@ -128,7 +145,7 @@ All notable changes to this project will be documented in this file.
 - **UMO CLI Default Behavior:** The `umo` command no longer defaults to `start` if executed without arguments. It now properly errors out and directs the user to `umo --help`.
 
 ### 🔄 Updated
-- **Version bump:** All files updated from 3.3.6 → 3.3.7.
+- **Version bump:** All files updated from 3.3.6 -> 3.3.7.
 
 ## [v3.3.6] - 2026-06-25
 
@@ -141,40 +158,40 @@ All notable changes to this project will be documented in this file.
 - **UI:** Removed "Checking internet connectivity" log step; the script now simply displays the final connection status directly.
 
 ### 🔄 Updated
-- **Version bump:** All files updated from 3.3.5 → 3.3.6.
+- **Version bump:** All files updated from 3.3.5 -> 3.3.6.
 
 ## [v3.3.5] - 2026-06-23
 
 ### 🐛 Fixed
-- **APT GPG / NO_PUBKEY (definitive fix):** Reverted `sources.list` to `[trusted=yes]` — `[signed-by=...]` fails on the minimal base rootfs where `ubuntu-archive-keyring.gpg` is absent. Combined with `apt-get update` filters (`grep -v "^Ign\|^W:\|^Err\|^Get:"`), the update output is now clean with zero GPG warnings.
-- **`dpkg: status-old` Permission Denied:** Pre-created writable `/var/lib/dpkg/status`, `status-old`, and sub-dirs (`updates`, `info`, `parts`, `triggers`) with `chmod -R u+rw` in `umo_proot_prepare` — fixes the cascade that broke all apt operations.
-- **Invalid `--no-lock` Option:** Removed `no-lock` from both `dpkg.cfg.d/umo-proot` and `Dpkg::Options:: "--no-lock"` from `apt.conf.d/99-umo-sandbox` — this is an apt flag, not a dpkg config option, and was corrupting every dpkg invocation.
-- **VNC Silent Failure:** `umo_vnc_install` now uses `command -v` check with `exit 1` instead of silent `|| true` — install failures surface in the log instead of being hidden.
-- **VNC dpkg Error 100 (definitive fix):** Added Phase 0 pre-repair (`dpkg --configure -a` + `apt-get -f install`) to fix half-configured rootfs state before any installs. Made `apt-utils` install visible (was silently swallowed by `2>/dev/null || true`, causing cascading debconf failures). Added Phase 4 recovery: on dpkg error 100, force-configure unpacked packages then retry the full install — the second pass finishes configuration that the first pass couldn't complete. Added `dpkg --audit` diagnostics on final failure.
+- **APT GPG / NO_PUBKEY (definitive fix):** Reverted `sources.list` to `[trusted=yes]` - `[signed-by=...]` fails on the minimal base rootfs where `ubuntu-archive-keyring.gpg` is absent. Combined with `apt-get update` filters (`grep -v "^Ign\|^W:\|^Err\|^Get:"`), the update output is now clean with zero GPG warnings.
+- **`dpkg: status-old` Permission Denied:** Pre-created writable `/var/lib/dpkg/status`, `status-old`, and sub-dirs (`updates`, `info`, `parts`, `triggers`) with `chmod -R u+rw` in `umo_proot_prepare` - fixes the cascade that broke all apt operations.
+- **Invalid `--no-lock` Option:** Removed `no-lock` from both `dpkg.cfg.d/umo-proot` and `Dpkg::Options:: "--no-lock"` from `apt.conf.d/99-umo-sandbox` - this is an apt flag, not a dpkg config option, and was corrupting every dpkg invocation.
+- **VNC Silent Failure:** `umo_vnc_install` now uses `command -v` check with `exit 1` instead of silent `|| true` - install failures surface in the log instead of being hidden.
+- **VNC dpkg Error 100 (definitive fix):** Added Phase 0 pre-repair (`dpkg --configure -a` + `apt-get -f install`) to fix half-configured rootfs state before any installs. Made `apt-utils` install visible (was silently swallowed by `2>/dev/null || true`, causing cascading debconf failures). Added Phase 4 recovery: on dpkg error 100, force-configure unpacked packages then retry the full install - the second pass finishes configuration that the first pass couldn't complete. Added `dpkg --audit` diagnostics on final failure.
 - **`dpkg: status-old` / lock files:** Actually pre-created `status-old`, `lock`, `lock-frontend` in `umo_proot_prepare` (previous CHANGELOG entry claimed this but code only created `status`/`available`). dpkg needs `status-old` to rename the active status file during writes; its absence caused error 100 on the proot filesystem. Pre-created postinst-writable directories: `/var/lib/dbus`, `/var/cache/debconf`, `/var/lib/xfonts`, `/var/lib/update-alternatives`, etc.
-- **VNC Install Staging:** Split the monolithic `apt-get install` into 6 staged groups (foundation → fonts → dbus → tigervnc) with `dpkg --configure -a` between each, so a single package's postinst failure no longer aborts the entire 7-package transaction. Each package group uses `--no-install-recommends` to minimize maintainer scripts. Replaced harmful `tail` output truncation (was hiding the real dpkg error behind 26+ "Get:" lines) with a `_apt_filter` that strips download noise but keeps errors. Added `dpkg -l 'tigervnc*'` status dump on failure.
-- **`dpkg: status-old` Permission Denied (ROOT CAUSE FIX):** Host-side `touch`/`chmod` in `umo_proot_prepare` was ineffective — proot's filesystem layer maps UIDs differently than the host. Created `umo_proot_fix_dpkg()` which runs `chmod`/`chown`/`cp` **from inside proot** (where dpkg actually operates), pre-populates `status-old` as a copy of `status`, and fixes lock file permissions. The fix runs once during `umo_proot_create_user` and is re-invoked between each VNC install stage via the reusable `/root/.umo/fix-dpkg.sh` script.
-- **`dpkg status-old` rename() denied (DEFINITIVE FIX):** The rootfs is stored on a filesystem where the kernel denies the `rename()` syscall — `dpkg` does `rename(status → status-old)` on every package install and this fails even though file *creation* works (`status-new` was successfully written). chmod/chown from both host-side and inside-proot proved ineffective because the denial is at the kernel/filesystem level, not Unix permissions. **Solution:** Relocate dpkg's database to `$PREFIX/tmp/umo-dpkg` (Termux internal storage = real ext4, fully supports `rename()`), bind-mounted onto `/var/lib/dpkg` inside proot via `-b $PREFIX/tmp/umo-dpkg:/var/lib/dpkg` in all three login wrappers (`umo-login.sh`, `umo-user.sh`, `umo_proot_cmd`). The database persists across sessions and all package installs (VNC, audio, desktop, apps) now operate on a filesystem that supports the operations dpkg requires.
+- **VNC Install Staging:** Split the monolithic `apt-get install` into 6 staged groups (foundation -> fonts -> dbus -> tigervnc) with `dpkg --configure -a` between each, so a single package's postinst failure no longer aborts the entire 7-package transaction. Each package group uses `--no-install-recommends` to minimize maintainer scripts. Replaced harmful `tail` output truncation (was hiding the real dpkg error behind 26+ "Get:" lines) with a `_apt_filter` that strips download noise but keeps errors. Added `dpkg -l 'tigervnc*'` status dump on failure.
+- **`dpkg: status-old` Permission Denied (ROOT CAUSE FIX):** Host-side `touch`/`chmod` in `umo_proot_prepare` was ineffective - proot's filesystem layer maps UIDs differently than the host. Created `umo_proot_fix_dpkg()` which runs `chmod`/`chown`/`cp` **from inside proot** (where dpkg actually operates), pre-populates `status-old` as a copy of `status`, and fixes lock file permissions. The fix runs once during `umo_proot_create_user` and is re-invoked between each VNC install stage via the reusable `/root/.umo/fix-dpkg.sh` script.
+- **`dpkg status-old` rename() denied (DEFINITIVE FIX):** The rootfs is stored on a filesystem where the kernel denies the `rename()` syscall - `dpkg` does `rename(status -> status-old)` on every package install and this fails even though file *creation* works (`status-new` was successfully written). chmod/chown from both host-side and inside-proot proved ineffective because the denial is at the kernel/filesystem level, not Unix permissions. **Solution:** Relocate dpkg's database to `$PREFIX/tmp/umo-dpkg` (Termux internal storage = real ext4, fully supports `rename()`), bind-mounted onto `/var/lib/dpkg` inside proot via `-b $PREFIX/tmp/umo-dpkg:/var/lib/dpkg` in all three login wrappers (`umo-login.sh`, `umo-user.sh`, `umo_proot_cmd`). The database persists across sessions and all package installs (VNC, audio, desktop, apps) now operate on a filesystem that supports the operations dpkg requires.
 - **`ls` ENOTDIR Spam:** Aliases now redirect stderr (`ls --color=auto 2>/dev/null`) to suppress proot `statx()` warnings on bind-mounted paths.
 - **Archive Extraction:** `umo_net_extract` uses `proot --link2symlink tar` (sdcard forbids hardlinks) while `umo_net__validate_file` runs `gzip -t` to auto-detect and re-download corrupt caches.
 - **Scrollback on Start:** `install.sh` and `umo_screen_clear` now emit `\033[3J` to purge the terminal scrollback buffer.
 
 ### 🔄 Changed
-- **Version bump:** All files updated from 3.3.4 → 3.3.5.
+- **Version bump:** All files updated from 3.3.4 -> 3.3.5.
 - **`config/sources.list`:** Reverted to `[trusted=yes]` (works on all rootfs variants).
 
 ## [v3.3.4] - 2026-06-23
 
 ### 🐛 Fixed
-- **`ls` / `la` ENOTDIR Spam:** Removed per-file `/proc/*` binds (`-b fake_proc/stat:/proc/stat` etc.) from proot login wrappers — binding regular files onto an already-bound `/proc` directory triggers a proot `statx()` path bug that returns `ENOTDIR` for every top-level rootfs entry, producing `ls: cannot access 'bin': Not a directory` on every shell. Now relies on real Android `/proc` which is fully readable.
+- **`ls` / `la` ENOTDIR Spam:** Removed per-file `/proc/*` binds (`-b fake_proc/stat:/proc/stat` etc.) from proot login wrappers - binding regular files onto an already-bound `/proc` directory triggers a proot `statx()` path bug that returns `ENOTDIR` for every top-level rootfs entry, producing `ls: cannot access 'bin': Not a directory` on every shell. Now relies on real Android `/proc` which is fully readable.
 - **`.fake_proc` Visible at `/`:** Relocating fake proc files inside the rootfs made them appear as `/.fake_proc` in `ls -a /`. Removed fake_proc entirely; a migration cleanup (`rm -rf "$rootfs/.fake_proc"`) runs on first start of updated installs.
 - **APT `NO_PUBKEY` + `Ign` Warnings:** Switched `sources.list` from `[trusted=yes]` (which still triggers GPG verification and emits `W: GPG error` + 4 `Ign` lines) to `[signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg]`. The keyring ships with every Ubuntu base rootfs, so `apt update` now verifies cleanly with no warnings. Falls back to `[trusted=yes]` on stripped rootfs images where the keyring is absent.
-- **Swap Fully Removed:** Deleted `umo_perf_swap()` function and its call in `umo_perf_setup()` — swap is entirely non-functional inside proot and was producing confusing `swapon failed` output even after the previous "skip" stub.
-- **Remaining `stty` Calls Removed:** Stripped the last `stty sane` + `trap` lines from `install.sh` and `bin/umo-install` — these were a leftover from the `stty -icanon` era and are no longer needed since the TUI uses plain `read`.
+- **Swap Fully Removed:** Deleted `umo_perf_swap()` function and its call in `umo_perf_setup()` - swap is entirely non-functional inside proot and was producing confusing `swapon failed` output even after the previous "skip" stub.
+- **Remaining `stty` Calls Removed:** Stripped the last `stty sane` + `trap` lines from `install.sh` and `bin/umo-install` - these were a leftover from the `stty -icanon` era and are no longer needed since the TUI uses plain `read`.
 
 ### 📝 Improved
 - **Module Documentation:** Added summary headers to `umo-apps.sh`, `umo-desktop.sh`, `umo-vnc.sh`, and `umo-perf.sh` describing their purpose and public API functions.
-- **Code Clarity:** Removed verbose inline comments from `umo-proot.sh` and other modules — each function now has a short explanatory header comment instead of multi-line rationales embedded in the logic.
+- **Code Clarity:** Removed verbose inline comments from `umo-proot.sh` and other modules - each function now has a short explanatory header comment instead of multi-line rationales embedded in the logic.
 
 ### 🔄 Changed
 - **`config/sources.list`:** Updated template to use `[signed-by=...]` with the official Ubuntu keyring path, matching what the installer writes into the container.
@@ -182,22 +199,22 @@ All notable changes to this project will be documented in this file.
 ## [v3.3.3] - 2026-06-23
 
 ### ✨ Added
-- **Unified ANSI Design:** All runtime outputs (VNC banner, session box, stop messages) now use the same ANSI style as the installer — no more ASCII `+---+` boxes.
+- **Unified ANSI Design:** All runtime outputs (VNC banner, session box, stop messages) now use the same ANSI style as the installer - no more ASCII `+---+` boxes.
 - **`umo --help` Improvements:** Examples now use generic `<name>` instead of hardcoded usernames; section headers are color-coded.
 - **Post-Install Summary:** Replaced old "Quick Commands" and "Inside Ubuntu" sections with a clean `umo` CLI reference table.
 
 ### 🐛 Fixed
 - **`vncserver: not found`:** VNC scripts now check `tigervncserver` first, then fallback to `vncserver`, with a clear error if neither is found.
 - **`pgrep: uptime`:** Removed `pgrep uptime` call from session start; uptime data now comes from fake `/proc/uptime`.
-- **`swapon failed` Warning:** Swap is not available inside proot — removed the swap setup entirely to avoid the confusing warning.
-- **Duplicate Log Messages:** Removed `umo_log_step` calls before `umo_run_quiet` in app/VNC installers — `umo_run_quiet` already shows the spinner label.
+- **`swapon failed` Warning:** Swap is not available inside proot - removed the swap setup entirely to avoid the confusing warning.
+- **Duplicate Log Messages:** Removed `umo_log_step` calls before `umo_run_quiet` in app/VNC installers - `umo_run_quiet` already shows the spinner label.
 - **`stty` Terminal Corruption:** Removed all `stty -echo` / `stty -icanon` / `dd` raw mode from TUI engine; all input now uses simple `read`.
 - **CRLF Line Endings:** Added `.gitattributes` to force LF; all `.sh` files verified clean.
 - **`setsid` Breaking stdin:** Removed `setsid` from `install.sh` which was creating a session without a controlling terminal.
 - **Auto-Exit After Install:** Added `stty sane` + `trap` at script entry to guarantee terminal restoration and clean exit.
 
 ### 🔄 Changed
-- **Phase Headers:** Shortened from "Installing VNC Server" → "VNC Server", "Configuring Audio Bridge" → "Audio Bridge", etc.
+- **Phase Headers:** Shortened from "Installing VNC Server" -> "VNC Server", "Configuring Audio Bridge" -> "Audio Bridge", etc.
 - **VNC Banner:** Now uses colored ANSI lines and labels instead of plain ASCII box art.
 - **Session Active Box:** Replaced with styled ANSI output matching the installer look; includes `umo stop` and `umo status` hints.
 
@@ -231,7 +248,7 @@ All notable changes to this project will be documented in this file.
 - **Default User Renamed:** Default container user changed from `ubuntu` to `umo` to match the project identity. Login credentials: `umo` / `umo`.
 
 ### 🐛 Fixed
-- **User Creation — Entirely Rewritten:** Replaced all proot-based user creation (adduser, groupadd, chpasswd) with direct host-side file manipulation. The new approach writes to `/etc/passwd`, `/etc/shadow`, `/etc/group`, `/etc/gshadow`, and `/etc/sudoers.d` directly from Termux, bypassing all PRoot `fcntl()` lock and ENOSYS syscall failures permanently.
+- **User Creation - Entirely Rewritten:** Replaced all proot-based user creation (adduser, groupadd, chpasswd) with direct host-side file manipulation. The new approach writes to `/etc/passwd`, `/etc/shadow`, `/etc/group`, `/etc/gshadow`, and `/etc/sudoers.d` directly from Termux, bypassing all PRoot `fcntl()` lock and ENOSYS syscall failures permanently.
 - **Stale Lock Files:** Added cleanup of `/etc/group.lock`, `/etc/passwd.lock`, `/etc/shadow.lock`, `/etc/gshadow.lock`, and `/etc/.pwd.lock` before user creation to prevent leftover locks from prior failed attempts.
 - **Password Hashing:** Password hash for `umo` is now generated with `openssl passwd -6` on the host before writing to `/etc/shadow`, avoiding `chpasswd` nscd/sssd cache flush errors inside proot entirely.
 
@@ -324,27 +341,27 @@ All notable changes to this project will be documented in this file.
 ## [v3.1.6] - 2026-06-17
 
 ### 🚀 Added
-- **Quiet Runner (`umo_run_quiet`):** `lib/core-ansi.sh` — wraps long-running commands with a Braille/ASCII spinner, captures output to a temp log, and on failure prints the last 30 lines. Replaces silent `2>/dev/null || true` swallowing across all modules.
-- **Download Validation:** `lib/core-net.sh` — minimum file-size guard (`_UMO_NET_MIN_SIZE=1 MB`) and `umo_net__validate_file()` prevent corrupted or truncated rootfs archives from being accepted.
-- **Timestamp Logging:** `lib/core-ansi.sh` — optional `UMO_LOG_TIME=1` prefix for every log line.
-- **Warn Color:** `lib/core-ansi.sh` — dedicated `UMO_COLOR_WARN` (ANSI 220 / bold yellow) replaces the previous reuse of `UMO_B_YELLOW`.
+- **Quiet Runner (`umo_run_quiet`):** `lib/core-ansi.sh` - wraps long-running commands with a Braille/ASCII spinner, captures output to a temp log, and on failure prints the last 30 lines. Replaces silent `2>/dev/null || true` swallowing across all modules.
+- **Download Validation:** `lib/core-net.sh` - minimum file-size guard (`_UMO_NET_MIN_SIZE=1 MB`) and `umo_net__validate_file()` prevent corrupted or truncated rootfs archives from being accepted.
+- **Timestamp Logging:** `lib/core-ansi.sh` - optional `UMO_LOG_TIME=1` prefix for every log line.
+- **Warn Color:** `lib/core-ansi.sh` - dedicated `UMO_COLOR_WARN` (ANSI 220 / bold yellow) replaces the previous reuse of `UMO_B_YELLOW`.
 
 ### 🎨 Changed
-- **Glyph Refresh:** `lib/core-ansi.sh` — step indicator changed to `▌`/`❯`, progress bar to `█/░`, spinner to Braille cycle `⠋⠙⠹...`, and added `UMO_G_RUN` glyph.
-- **Menu Polish:** `lib/core-ui.sh` — `umo_ui_header` now draws an under-rule with `─`; menus show `[Space]=Toggle [Enter]=Confirm` hint.
+- **Glyph Refresh:** `lib/core-ansi.sh` - step indicator changed to `▌`/`❯`, progress bar to `█/░`, spinner to Braille cycle `⠋⠙⠹...`, and added `UMO_G_RUN` glyph.
+- **Menu Polish:** `lib/core-ui.sh` - `umo_ui_header` now draws an under-rule with `─`; menus show `[Space]=Toggle [Enter]=Confirm` hint.
 - **Log Indentation:** All log helpers (`umo_log_ok`, `umo_log_err`, `umo_log_warn`, etc.) now use 2-space indentation for consistent hierarchy.
-- **Extraction Hardening:** `lib/core-net.sh` — archive extraction no longer silently ignores `tar`/`unzip` errors; non-zero exit codes now `umo_die` with the actual status.
+- **Extraction Hardening:** `lib/core-net.sh` - archive extraction no longer silently ignores `tar`/`unzip` errors; non-zero exit codes now `umo_die` with the actual status.
 - **App/Desktop Installers:** `_run_installer` and `_run_de_installer` now pass human-readable labels into `umo_run_quiet` so every install phase is visible and traceable.
 
 ### 🐛 Fixed
-- **Pkg Install Quiet:** `lib/core-system.sh` — `umo_sys_pkg_install` now wraps all package installs under a single `umo_run_quiet` spinner instead of printing raw `pkg`/`apt` stdout per package. Eliminates the #1 visual source of layout corruption.
-- **Download Output Leak:** `lib/core-net.sh` — `umo_net_download` switched from `--show-progress` to `--quiet` (wget) and `-s` (curl). The old `--show-progress` + `--progress=bar:force:noscroll` printed raw terminal control sequences that destroyed the TUI layout. On failure, the last 30 lines are available via `umo_run_quiet`.
-- **Archive Copy Robustness:** `lib/core-net.sh` — both cached-copy and post-download copy paths now guard `cp` failures with `{ ... } || { warn; rm; continue; }` instead of silently failing and leaving a missing file.
-- **Box-Drawing Fallback:** `lib/core-ansi.sh` + `lib/core-ui.sh` — new `UMO_LINE_H` variable guarded by `UMO_GLYPH_SUPPORT`. Draws `─` in UTF-8 environments and `-` in ASCII/non-UTF-8 locales, replacing the hardcoded Unicode rule that rendered as ``.
-- **Banner Line Bug:** `lib/core-ansi.sh` — corrected `_l7` line 7 of the UMO banner: format string `%b %*s %s %b` was consuming the color code as the width argument due to `%*s` eating two args. Now passes a valid color (`UMO_GRAD_1`) as the first `%b`.
-- **System Check Spacing:** `bin/umo-install` + `lib/core-system.sh` — `umo_phase_check` now opens with `umo_ui_header "System Check"`, and `umo_sys_require_internet` uses `umo_log_info` instead of `umo_log_step`. Prevents the overlapping `▌ Checking... ✔` visual clash.
-- **UTF-8 Detection:** `lib/core-ansi.sh` — glyph detection now falls back to `locale charmap` when `LANG`/`LC_ALL` variables do not contain "UTF-8". Respects `UMO_ASCII=1` for forced ASCII mode.
-- **Readme Whitespace:** `README.md` & `README_AR.md` — fixed stray extra space in ASCII logo bottom line.
+- **Pkg Install Quiet:** `lib/core-system.sh` - `umo_sys_pkg_install` now wraps all package installs under a single `umo_run_quiet` spinner instead of printing raw `pkg`/`apt` stdout per package. Eliminates the #1 visual source of layout corruption.
+- **Download Output Leak:** `lib/core-net.sh` - `umo_net_download` switched from `--show-progress` to `--quiet` (wget) and `-s` (curl). The old `--show-progress` + `--progress=bar:force:noscroll` printed raw terminal control sequences that destroyed the TUI layout. On failure, the last 30 lines are available via `umo_run_quiet`.
+- **Archive Copy Robustness:** `lib/core-net.sh` - both cached-copy and post-download copy paths now guard `cp` failures with `{ ... } || { warn; rm; continue; }` instead of silently failing and leaving a missing file.
+- **Box-Drawing Fallback:** `lib/core-ansi.sh` + `lib/core-ui.sh` - new `UMO_LINE_H` variable guarded by `UMO_GLYPH_SUPPORT`. Draws `─` in UTF-8 environments and `-` in ASCII/non-UTF-8 locales, replacing the hardcoded Unicode rule that rendered as ``.
+- **Banner Line Bug:** `lib/core-ansi.sh` - corrected `_l7` line 7 of the UMO banner: format string `%b %*s %s %b` was consuming the color code as the width argument due to `%*s` eating two args. Now passes a valid color (`UMO_GRAD_1`) as the first `%b`.
+- **System Check Spacing:** `bin/umo-install` + `lib/core-system.sh` - `umo_phase_check` now opens with `umo_ui_header "System Check"`, and `umo_sys_require_internet` uses `umo_log_info` instead of `umo_log_step`. Prevents the overlapping `▌ Checking... ✔` visual clash.
+- **UTF-8 Detection:** `lib/core-ansi.sh` - glyph detection now falls back to `locale charmap` when `LANG`/`LC_ALL` variables do not contain "UTF-8". Respects `UMO_ASCII=1` for forced ASCII mode.
+- **Readme Whitespace:** `README.md` & `README_AR.md` - fixed stray extra space in ASCII logo bottom line.
 
 ### 🔄 Updated
 - **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.6.
@@ -361,7 +378,7 @@ All notable changes to this project will be documented in this file.
   - Progress bar now uses `▣/▱` blocks with glyph fallback to `#/-`.
 
 ### 🐛 Fixed
-- **Same-File Copy Guard:** `lib/core-net.sh` — `cp` no longer fails with `are the same file` when cache path equals output path.
+- **Same-File Copy Guard:** `lib/core-net.sh` - `cp` no longer fails with `are the same file` when cache path equals output path.
 
 ### 🔄 Updated
 - **Version Bump:** All badges, fallback defaults, and `bin/umo-install` bumped to v3.1.5.
@@ -379,7 +396,7 @@ All notable changes to this project will be documented in this file.
 - **Configuration Summary:** Migrated to `umo_kv "Desktop"`, `Apps`, `Install`, `Version`.
 - **System Summary:** Migrated to `umo_kv "Platform"`, `Arch`, `Storage`, `RAM`, `Path`.
 - **Installation Complete:** Migrated to `umo_kv` lines for Version, Desktop, Path, VNC, Perf, User.
-- **Banner Author:** Label changed from `Shadow-x78` to `By Shadow-x78`.
+- **Banner Author:** Label changed from `shadow-x78` to `By shadow-x78`.
 - **Separators:** Replaced dash rules (`umo_rule`) with blank lines in `umo_ui_init`, `umo_ui_menu`, and `umo_ui_checklist`.
 - **Step Spacing:** `umo_log_step` now prepends a blank line before every `[==>]` message across all 41 call sites.
 
@@ -395,7 +412,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🎨 Changed
 - **Banner:** ASCII `UMO` logo now shown on all screen sizes; removed the `[UMO]` compact line.
-- **Tagline:** Reformatted to centered `Ubuntu Modded Optimized · v3.1.3` with `Shadow-x78` below.
+- **Tagline:** Reformatted to centered `Ubuntu Modded Optimized · v3.1.3` with `shadow-x78` below.
 
 ### 🔄 Updated
 - **Validation Panel:** `umo_ui_panel()` auto-fits any terminal width (minimum clamped to fit).
@@ -406,7 +423,7 @@ All notable changes to this project will be documented in this file.
 ## [v3.1.2] - 2026-06-17
 
 ### 🔄 Updated
-- **systemctl Emulator:** `umo-systemctl.sh` — now presented and documented as a
+- **systemctl Emulator:** `umo-systemctl.sh` - now presented and documented as a
   generic service manager (`start|stop|restart|status|enable|disable <service>`)
   instead of SSH-centric; clearer usage and status output.
 - **Docs:** README, INSTALL, TROUBLESHOOTING (EN+AR) examples use a generic
@@ -419,10 +436,10 @@ All notable changes to this project will be documented in this file.
 
 ### 🚀 Added
 - **ASCII Banner:** Restored large block-letter UMO logo (7-line) with orange gradient centering.
-- **Panel Overflow Guard:** `umo_ui_panel()` now trims lines wider than the box and appends `…`.
+- **Panel Overflow Guard:** `umo_ui_panel()` now trims lines wider than the box and appends `...`.
 
 ### 🔄 Updated
-- **Architecture Warning:** `core-system.sh` — clearer message for x86_64 users; indicates primary target is ARM64.
+- **Architecture Warning:** `core-system.sh` - clearer message for x86_64 users; indicates primary target is ARM64.
 - **Summary Panel:** Compact key labels (`Platform`, `Arch`, `Path`) to prevent overflow.
 - **Version Bump:** All badges, inline defaults, and `bin/umo-install` bumped to v3.1.1.
 
@@ -435,13 +452,13 @@ All notable changes to this project will be documented in this file.
 
 ### 🚀 Added
 - **256-Color Detection:** Auto-fallback between 256 / 16 / no-color modes via `tput colors`, `NO_COLOR`, `UMO_NO_256`.
-- **Brand Palette:** Ubuntu orange identity — `UMO_COLOR_PRIMARY` = `38;5;208m`.
+- **Brand Palette:** Ubuntu orange identity - `UMO_COLOR_PRIMARY` = `38;5;208m`.
 
 ### 🔄 Updated
-- **Logo Banner:** 6-line orange gradient (top light → bottom dark), centered via terminal width.
+- **Logo Banner:** 6-line orange gradient (top light -> bottom dark), centered via terminal width.
 - **TUI Panel:** `umo_ui_panel()` now auto-fits width to content instead of hardcoded 60.
-- **Session Box:** `bin/umo-start` — fixed misaligned VNC line, dynamic box width, inline color fallback.
-- **Summary Colors:** `bin/umo-install` — Quick Commands and Inside Ubuntu now use brand palette.
+- **Session Box:** `bin/umo-start` - fixed misaligned VNC line, dynamic box width, inline color fallback.
+- **Summary Colors:** `bin/umo-install` - Quick Commands and Inside Ubuntu now use brand palette.
 - **Changelog:** Formatted with emoji categories matching reference standard.
 - **Version Bump:** `bin/umo-install` and fallback defaults updated to v3.1.0.
 
@@ -455,9 +472,9 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Added
 - **ASCII Banner:** Refined Block banner + compact variant for narrow terminals.
 - **Ubuntu 24.04:** Noble Numbat support.
-- **Performance Flags:** `--perf=balanced|aggressive|off` — APT speed, swap, debloat, DNS hardening.
-- **Desktop Themes:** `--theme=umo-dark|umo-light|minimal|none` — Orchis-Dark, Papirus icons, fonts.
-- **Lean Mode:** `--lean` — strip docs/man/locales to save space.
+- **Performance Flags:** `--perf=balanced|aggressive|off` - APT speed, swap, debloat, DNS hardening.
+- **Desktop Themes:** `--theme=umo-dark|umo-light|minimal|none` - Orchis-Dark, Papirus icons, fonts.
+- **Lean Mode:** `--lean` - strip docs/man/locales to save space.
 - **Version Flag:** `--ubuntu=22.04|24.04` for explicit selection.
 - **VERSION Source:** `UMO_VERSION` variable in `bin/umo-install` is the single source of truth.
 
@@ -484,24 +501,24 @@ All notable changes to this project will be documented in this file.
 ## [v2.1.1] - 2026-06-16
 
 ### 📝 Documentation
-- **README:** Complete redesign — badges, centered header, anchored sections, language switcher.
-- **README_AR:** Added `README_AR.md` — full Arabic translation.
+- **README:** Complete redesign - badges, centered header, anchored sections, language switcher.
+- **README_AR:** Added `README_AR.md` - full Arabic translation.
 - **SECURITY:** Complete redesign with risk table and response timeline.
 - **INSTALL:** Redesigned with language switcher, expanded install modes.
-- **INSTALL_AR:** Added `docs/INSTALL_AR.md` — full Arabic translation.
+- **INSTALL_AR:** Added `docs/INSTALL_AR.md` - full Arabic translation.
 - **TROUBLESHOOTING:** Redesigned with language switcher, expanded fix sections.
 - **TROUBLESHOOTING_AR:** Added `docs/TROUBLESHOOTING_AR.md`.
 - **LICENSE:** Updated formatting to match project style.
 
 ### 🔄 Updated
-- **Version Bump:** `bin/umo-install` updated from v2.0.0 → v2.1.1.
+- **Version Bump:** `bin/umo-install` updated from v2.0.0 -> v2.1.1.
 
 ---
 
 ## [v2.1.0] - 2024-06-16
 
 ### 🚀 Added
-- **Open Source:** Re-licensed under MIT License — fully open source.
+- **Open Source:** Re-licensed under MIT License - fully open source.
 - **Community:** Open to contributions and community forks.
 
 ### 🔄 Updated
@@ -513,17 +530,17 @@ All notable changes to this project will be documented in this file.
 ## [v2.0.0] - 2024-06-16
 
 ### 🚀 Added
-- **Core Engine:** `lib/core-ansi.sh` — ANSI color engine with 256-color support.
-- **Core Engine:** `lib/core-ui.sh` — Interactive TUI: menus, checklists, prompts.
-- **Core Engine:** `lib/core-system.sh` — Hardware detection, dependency management.
-- **Core Engine:** `lib/core-net.sh` — Multi-mirror download with resume.
-- **Core Engine:** `lib/core-fs.sh` — Safe file operations, atomic writes, backups.
-- **Modules:** `umo-proot.sh` — Container preparation, login wrappers.
-- **Modules:** `umo-vnc.sh` — TigerVNC installation, session control.
-- **Modules:** `umo-audio.sh` — PulseAudio bridge configuration.
-- **Modules:** `umo-systemctl.sh` — systemd emulator.
-- **Modules:** `umo-desktop.sh` — DE installer (LXDE / XFCE4 / Openbox).
-- **Modules:** `umo-apps.sh` — Application suite installer.
+- **Core Engine:** `lib/core-ansi.sh` - ANSI color engine with 256-color support.
+- **Core Engine:** `lib/core-ui.sh` - Interactive TUI: menus, checklists, prompts.
+- **Core Engine:** `lib/core-system.sh` - Hardware detection, dependency management.
+- **Core Engine:** `lib/core-net.sh` - Multi-mirror download with resume.
+- **Core Engine:** `lib/core-fs.sh` - Safe file operations, atomic writes, backups.
+- **Modules:** `umo-proot.sh` - Container preparation, login wrappers.
+- **Modules:** `umo-vnc.sh` - TigerVNC installation, session control.
+- **Modules:** `umo-audio.sh` - PulseAudio bridge configuration.
+- **Modules:** `umo-systemctl.sh` - systemd emulator.
+- **Modules:** `umo-desktop.sh` - DE installer (LXDE / XFCE4 / Openbox).
+- **Modules:** `umo-apps.sh` - Application suite installer.
 - **CLI:** `--no-gui` non-interactive mode.
 - **CLI:** `--de=` / `--apps=` / `--dir=` flags.
 - **UX:** Progress bars with percentage and spinners for background tasks.
@@ -533,20 +550,20 @@ All notable changes to this project will be documented in this file.
 ### 🔄 Updated
 - **Architecture:** Complete rewrite with modular library system.
 - **Compatibility:** Full POSIX sh compliance across all scripts.
-- **Dependencies:** Zero external UI dependencies — no `dialog` / `whiptail`.
+- **Dependencies:** Zero external UI dependencies - no `dialog` / `whiptail`.
 
 ### 🐛 Fixed
-- **VNC:** Screen lock kills VNC → `termux-wake-lock` integrated.
-- **Audio:** No audio in proot → PulseAudio TCP bridge.
-- **systemctl:** `systemctl` fails → Shell-compatible emulator.
-- **TUI:** `dialog` broken → Pure POSIX TUI replacement.
+- **VNC:** Screen lock kills VNC -> `termux-wake-lock` integrated.
+- **Audio:** No audio in proot -> PulseAudio TCP bridge.
+- **systemctl:** `systemctl` fails -> Shell-compatible emulator.
+- **TUI:** `dialog` broken -> Pure POSIX TUI replacement.
 
 ---
 
 ## [v1.0.0] - 2024-01-15
 
 ### 🎉 Initial Release
-- **Launch:** Initial release of UMO — Ubuntu Modded Optimized for Termux.
+- **Launch:** Initial release of UMO - Ubuntu Modded Optimized for Termux.
 - **Support:**
   - Ubuntu 22.04 via proot-distro
   - VNC setup with TigerVNC

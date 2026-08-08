@@ -11,13 +11,13 @@
 
 # Ubuntu Modded Optimized
 
-أوبنتو كامل على هاتفك الأندرويد — أمر واحد، بدون تعقيد
+أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.8-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.0.9-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
-[![نجوم](https://img.shields.io/github/stars/Shadow-x78/termux-ubuntu-umo?style=flat-square&color=eab308&logo=github&label=النجوم)](https://github.com/Shadow-x78/termux-ubuntu-umo/stargazers)
+[![نجوم](https://img.shields.io/github/stars/shadow-x78/ubuntu-modded-optimized?style=flat-square&color=eab308&logo=github&label=النجوم)](https://github.com/shadow-x78/ubuntu-modded-optimized/stargazers)
 
 </div>
 
@@ -52,7 +52,7 @@
 
 | المشكلة | المشاريع الأخرى | UMO |
 |---------|----------------|-----|
-| واجهة `dialog` تنكسر | ❌ لا تزال تستخدمها | ✅ TUI نقي بـ POSIX sh — بدون تبعيات |
+| واجهة `dialog` تنكسر | ❌ لا تزال تستخدمها | ✅ TUI نقي بـ POSIX sh - بدون تبعيات |
 | VNC يموت عند قفل الشاشة | ❌ لا يوجد حل | ✅ `termux-wake-lock` مدمج |
 | لا صوت داخل proot | ❌ حل يدوي | ✅ جسر PulseAudio عبر TCP |
 | `systemctl` يفشل | ❌ أخطاء محيّرة | ✅ محاكي shell عام (أي خدمة) |
@@ -78,7 +78,7 @@
 
 | البيئة | النوع | مناسبة لـ |
 |--------|-------|-----------|
-| **XFCE4** | Full DE | الاستخدام اليومي — أداء متوازن |
+| **XFCE4** | Full DE | الاستخدام اليومي - أداء متوازن |
 | **LXDE** | Lightweight DE | الأجهزة القديمة وضعيفة الموارد |
 | **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة |
 | **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة |
@@ -92,7 +92,7 @@
 
 ```bash
 # استنساخ المشروع
-git clone https://github.com/Shadow-x78/termux-ubuntu-umo.git ~/UMO
+git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
 
 # تثبيت تفاعلي (موصى به)
@@ -154,8 +154,8 @@ bash install.sh [OPTIONS]
 <a id="requirements"></a>
 ## 📋 المتطلبات
 
-- Android 8.0+ — معالج ARM64 بنية (aarch64)
-- Termux من F-Droid أو GitHub — **ليس** من Play Store
+- Android 8.0+ - معالج ARM64 بنية (aarch64)
+- Termux من F-Droid أو GitHub - **ليس** من Play Store
 - مساحة حرة 2 GB+
 - اتصال بالإنترنت
 
@@ -203,8 +203,8 @@ UMO/
 
 | المستند | الوصف |
 |---------|-------|
-| [INSTALL.md](docs/INSTALL.md) | دليل التثبيت التفصيلي |
-| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | المشاكل الشائعة وحلولها |
+| [INSTALL_AR.md](docs/INSTALL_AR.md) | دليل التثبيت التفصيلي |
+| [TROUBLESHOOTING_AR.md](docs/TROUBLESHOOTING_AR.md) | المشاكل الشائعة وحلولها |
 
 ---
 
@@ -228,7 +228,7 @@ UMO/
 
 <div align="center">
 
-بُني بواسطة <a href="https://github.com/Shadow-x78">Shadow-x78</a> ·
+بُني بواسطة <a href="https://github.com/shadow-x78">shadow-x78</a> ·
 [سجل التغييرات](CHANGELOG.md)
 
 <sub>&copy; 2026 Ubuntu Modded Optimized (UMO)</sub>
