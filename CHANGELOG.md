@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v4.2.0] - 2026-08-09
+## [v4.2.0] - 2026-08-10
 
 ### 🐛 Fixed
 - **Dynamic APT Sources for 24.04:** `umo-proot.sh` now generates `sources.list` with the correct codename (`noble` for 24.04, `jammy` otherwise) instead of hardcoding jammy and patching it later with `sed` in finalize. The finalize step uses the same dynamic generation, so both paths agree.
