@@ -5,4 +5,5 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "UMO | ci |"
+      prefix: "UMO | chore |"
+      include: "scope"
