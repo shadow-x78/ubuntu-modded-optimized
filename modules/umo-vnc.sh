@@ -94,7 +94,6 @@ BODY
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
         return 1
     fi
-    # Run installer only in real install context (not during dev smoke tests)
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
         "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
     fi

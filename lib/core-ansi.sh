@@ -270,7 +270,6 @@ umo_run_quiet() {
 }
 
 umo_term_cols() {
-    # Cache terminal width to avoid repeated tput spawns
     if [ -z "${UMO_TERM_COLS:-}" ]; then
         UMO_TERM_COLS=$(tput cols 2>/dev/null || echo 80)
         [ -z "$UMO_TERM_COLS" ] && UMO_TERM_COLS=80
