@@ -263,23 +263,29 @@ _umo_header() {
     printf "  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n\n"
 }
 
-_umo_ok()   { printf "  ${_UMO_GRN}✔${_UMO_NC}  %s\n" "$1"; }
-_umo_err()  { printf "  ${_UMO_RED}✖${_UMO_NC}  %s\n" "$1" >&2; }
-_umo_info() { printf "  ${_UMO_CYN}➜${_UMO_NC}  %s\n" "$1"; }
-_umo_warn() { printf "  ${_UMO_YEL}!${_UMO_NC}  %s\n" "$1"; }
+_umo_plate() {
+    printf "\n  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n"
+    printf "  ${_UMO_BOLD}UMO${_UMO_NC} ${_UMO_CYN}v${_UMO_VERSION}${_UMO_NC} ${_UMO_DIM}· $1${_UMO_NC}\n"
+    printf "  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n\n"
+}
+
+_umo_ok()   { printf "  ${_UMO_GRN}[OK]${_UMO_NC}  %s\n" "$1"; }
+_umo_err()  { printf "  ${_UMO_RED}[ERR]${_UMO_NC} %s\n" "$1" >&2; }
+_umo_info() { printf "  ${_UMO_CYN}[..]${_UMO_NC}  %s\n" "$1"; }
+_umo_warn() { printf "  ${_UMO_YEL}[!!]${_UMO_NC}  %s\n" "$1"; }
+_umo_kv()   { printf "  ${_UMO_BOLD}%-14s${_UMO_NC} %b\n" "$1" "$2"; }
 
 _umo_status() {
-    _umo_header
+    _umo_plate "Service Status"
     _login="$_UMO_TERMUX_HOME/umo-login.sh"
-    [ -f "$_login" ] && _installed="${_UMO_GRN}Installed${_UMO_NC}" || _installed="${_UMO_RED}Not installed${_UMO_NC}"
-    printf "  ${_UMO_BOLD}Container:${_UMO_NC}  "
-    printf "${_installed}\n"
+    [ -f "$_login" ] && _installed="${_UMO_GRN}installed${_UMO_NC}" || _installed="${_UMO_RED}not installed${_UMO_NC}"
+    _umo_kv "Container" "$_installed"
 
     _proot_pids=$(pgrep -f "proot.*umo" 2>/dev/null | tr '\n' ' ')
     if [ -n "$_proot_pids" ]; then
-        printf "  ${_UMO_BOLD}Session:${_UMO_NC}    ${_UMO_GRN}Running${_UMO_NC} (PID: $_proot_pids)\n"
+        _umo_kv "Session" "${_UMO_GRN}running${_UMO_NC} ${_UMO_DIM}(pid $_proot_pids)${_UMO_NC}"
     else
-        printf "  ${_UMO_BOLD}Session:${_UMO_NC}    ${_UMO_DIM}Stopped${_UMO_NC}\n"
+        _umo_kv "Session" "${_UMO_DIM}stopped${_UMO_NC}"
     fi
 
     _vnc_pid=$(pgrep -f "Xvnc" 2>/dev/null | head -1)
@@ -287,33 +293,131 @@ _umo_status() {
     if [ -n "$_vnc_pid" ]; then
         _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
         [ -z "$_ip" ] && _ip="127.0.0.1"
-        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_GRN}Active${_UMO_NC} -> ${_UMO_CYN}${_ip}:5901${_UMO_NC}\n"
+        _umo_kv "VNC" "${_UMO_GRN}active${_UMO_NC} ${_UMO_CYN}${_ip}:5901${_UMO_NC}"
     else
-        printf "  ${_UMO_BOLD}VNC:${_UMO_NC}        ${_UMO_DIM}Stopped${_UMO_NC}\n"
+        _umo_kv "VNC" "${_UMO_DIM}stopped${_UMO_NC}"
     fi
 
     _pulse=$(pgrep -f "pulseaudio" 2>/dev/null | head -1)
     if [ -n "$_pulse" ]; then
-        printf "  ${_UMO_BOLD}Audio:${_UMO_NC}      ${_UMO_GRN}Running${_UMO_NC}\n"
+        _umo_kv "Audio" "${_UMO_GRN}running${_UMO_NC}"
     else
-        printf "  ${_UMO_BOLD}Audio:${_UMO_NC}      ${_UMO_DIM}Stopped${_UMO_NC}\n"
+        _umo_kv "Audio" "${_UMO_DIM}stopped${_UMO_NC}"
+    fi
+
+    if [ -d "$_UMO_REPO_DIR/.git" ]; then
+        git -C "$_UMO_REPO_DIR" fetch origin main >/dev/null 2>&1 || true
+        _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
+        if [ "$_behind" -gt 0 ] 2>/dev/null; then
+            _umo_kv "Updates" "${_UMO_YEL}$_behind new commits on main${_UMO_NC} (umo update)"
+        else
+            _umo_kv "Updates" "${_UMO_DIM}up to date${_UMO_NC}"
+        fi
     fi
     printf "\n"
 }
 
+_umo_refresh_host() {
+    _umo_info "Refreshing host-side scripts..."
+    _tpl="$_UMO_REPO_DIR/config/templates"
+    _inst_dir=$(grep '^INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
+    [ -z "$_inst_dir" ] && _inst_dir="$HOME/umo-ubuntu"
+
+    if [ -f "$_tpl/umo-login.sh" ]; then
+        sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
+            -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
+            "$_tpl/umo-login.sh" > "$_UMO_TERMUX_HOME/umo-login.sh"
+        chmod +x "$_UMO_TERMUX_HOME/umo-login.sh"
+    fi
+    for _pair in umo-user.sh:umo-user.sh umo-startvnc.sh:umo-vnc-start.sh umo-stopvnc.sh:umo-vnc-stop.sh; do
+        _src="$_tpl/${_pair%%:*}"
+        _dst="$_UMO_TERMUX_HOME/${_pair##*:}"
+        if [ -f "$_src" ]; then
+            sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
+                -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
+                -e "s|{{DISPLAY}}|:1|g" \
+                -e "s|{{VNC_DEPTH}}|24|g" \
+                -e "s|{{VNC_PORT}}|5901|g" \
+                "$_src" > "$_dst"
+            chmod +x "$_dst"
+        fi
+    done
+    for _script in start stop; do
+        [ -f "$_UMO_REPO_DIR/bin/umo-$_script" ] || continue
+        cp -f "$_UMO_REPO_DIR/bin/umo-$_script" "$_UMO_TERMUX_HOME/umo-$_script.sh"
+        chmod +x "$_UMO_TERMUX_HOME/umo-$_script.sh"
+    done
+    _umo_ok "Host scripts updated"
+}
+
+_umo_refresh_container() {
+    [ -f "$_UMO_TERMUX_HOME/umo-login.sh" ] || return 0
+    if ! pgrep -f "proot.*umo" >/dev/null 2>&1; then
+        _umo_warn "Container is not running, skipping in-container hooks"
+        return 0
+    fi
+    _umo_info "Applying in-container update hooks..."
+    "$_UMO_TERMUX_HOME/umo-login.sh" -c "
+        [ -f /etc/apt/apt.conf.d/99-umo-speed ] && true
+        rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
+    " </dev/null >/dev/null 2>&1 || true
+    _umo_ok "Container hooks applied"
+}
+
 _umo_run_update() {
-    _umo_header
-    _umo_info "Updating UMO from GitHub..."
-    if [ -d "$_UMO_REPO_DIR/.git" ]; then
-        cd "$_UMO_REPO_DIR" || exit 1
-        git fetch origin main || { _umo_err "Failed to fetch updates"; exit 1; }
-        git reset --hard origin/main || { _umo_err "Failed to update UMO"; exit 1; }
-        _umo_ok "UMO has been updated successfully"
-        printf "  %b[ ℹ ]%b You may need to run '%b%s%b' again to apply changes.\n" "$_UMO_CYN" "$_UMO_NC" "$_UMO_CYN" "bash install.sh" "$_UMO_NC"
-    else
-        _umo_err "UMO was not installed via git clone. Cannot auto-update"
+    _umo_plate "Update"
+    if [ ! -d "$_UMO_REPO_DIR/.git" ]; then
+        _umo_err "UMO was not installed via git clone, cannot auto-update"
         exit 1
     fi
+
+    _umo_info "Fetching latest changes from origin/main..."
+    if ! git -C "$_UMO_REPO_DIR" fetch origin main 2>/dev/null; then
+        _umo_err "Could not reach GitHub. Check your connection and retry."
+        exit 1
+    fi
+
+    _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
+    if [ "$_behind" -eq 0 ] 2>/dev/null; then
+        _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+        exit 0
+    fi
+
+    printf "  ${_UMO_DIM}%s new commits on main:${_UMO_NC}\n" "$_behind"
+    git -C "$_UMO_REPO_DIR" log --oneline --no-decorate HEAD..origin/main 2>/dev/null | head -10 | while IFS= read -r _line; do
+        printf "  ${_UMO_CYN}  ➜${_UMO_NC} %s\n" "$_line"
+    done
+    printf "\n"
+
+    _stashed=0
+    if [ -n "$(git -C "$_UMO_REPO_DIR" status --porcelain 2>/dev/null)" ]; then
+        _umo_warn "Local modifications detected, stashing them first"
+        git -C "$_UMO_REPO_DIR" stash push -m "umo auto-stash $(date +%Y%m%d-%H%M%S)" >/dev/null 2>&1 && _stashed=1
+    fi
+
+    if ! git -C "$_UMO_REPO_DIR" reset --hard origin/main >/dev/null 2>&1; then
+        _umo_err "Failed to apply updates"
+        [ "$_stashed" = 1 ] && git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1 || true
+        exit 1
+    fi
+
+    if [ "$_stashed" = 1 ]; then
+        if git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1; then
+            _umo_ok "Your local changes were preserved"
+        else
+            _umo_warn "Stash kept (conflict), resolve with: git -C $_UMO_REPO_DIR stash pop"
+        fi
+    fi
+
+    _new_ver=$(sed -n 's/^export UMO_VERSION="\([^"]*\)"/\1/p' "$_UMO_REPO_DIR/bin/umo-install" 2>/dev/null)
+    [ -n "$_new_ver" ] && _UMO_VERSION="$_new_ver"
+
+    _umo_refresh_host
+    _umo_refresh_container
+
+    printf "\n"
+    _umo_ok "UMO updated to v$_UMO_VERSION"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo status${_UMO_DIM} to verify the environment.${_UMO_NC}\n\n"
 }
 
 _umo_run_cmd() {
@@ -325,7 +429,7 @@ _umo_run_cmd() {
 }
 
 _umo_set_user() {
-    _umo_header
+    _umo_plate "User"
     _new_user="$1"
     if [ -z "$_new_user" ]; then
         _umo_err "Usage: umo --user <username>"
@@ -342,14 +446,14 @@ _umo_set_user() {
     sed -i "s|/bin/su - [^ ]*|/bin/su - $_new_user|g" "$_user_sh" 2>/dev/null || true
     sed -i "s|HOME=/home/[^ ]*|HOME=/home/$_new_user|g" "$_user_sh" 2>/dev/null || true
     _umo_ok "Default user is now: $_new_user"
-    _umo_info "Run 'umo user' to login as $_new_user"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo user${_UMO_DIM} to login as ${_new_user}.${_UMO_NC}\n\n"
 }
 
 _umo_backup() {
-    _umo_header
+    _umo_plate "Backup"
     _bak_dir="${1:-$_UMO_TERMUX_HOME/umo-backup}"
     _bak_file="$_bak_dir/umo-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
-    _install_dir=$(grep 'INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
+    _install_dir=$(grep '^INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
     if [ -z "$_install_dir" ] || [ ! -d "$_install_dir" ]; then
         _umo_err "Cannot find UMO install directory"
         exit 1
@@ -358,48 +462,45 @@ _umo_backup() {
     _umo_info "Backing up to: $_bak_file"
     tar -czf "$_bak_file" -C "$(dirname "$_install_dir")" "$(basename "$_install_dir")" 2>/dev/null
     _sz=$(du -sh "$_bak_file" 2>/dev/null | cut -f1)
-    _umo_ok "Backup complete! Size: $_sz"
-    _umo_info "File: $_bak_file"
+    _umo_ok "Backup complete (size: $_sz)"
+    printf "  ${_UMO_DIM}%s${_UMO_NC}\n\n" "$_bak_file"
 }
 
 _umo_help() {
-    _umo_header
-    printf "  ${_UMO_BOLD}USAGE:${_UMO_NC}\n"
+    _umo_plate "Command Reference"
+
+    printf "  ${_UMO_BOLD}USAGE${_UMO_NC}\n"
     printf "    ${_UMO_CYN}umo${_UMO_NC} <command> [options]\n\n"
 
-    printf "  ${_UMO_BOLD}COMMANDS:${_UMO_NC}\n"
-    
-    printf "  ${_UMO_DIM}Session Lifecycle${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "start"              "Boot up Ubuntu with VNC & Audio servers"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "stop"               "Terminate all running UMO services"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "status"             "Display real-time status of UMO services"
+    printf "  ${_UMO_PRI}Session Lifecycle${_UMO_NC} ${_UMO_DIM}(control the running environment)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "start"              "Boot Ubuntu with VNC and audio servers"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Terminate all running UMO services"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Live service status and update check"
     printf "\n"
 
-    printf "  ${_UMO_DIM}Terminal Access${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "login"              "Access Ubuntu via root shell"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "user"               "Access Ubuntu via default user shell"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "run <cmd>"          "Execute a single command inside Ubuntu"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "--user <name>"      "Switch default user login"
+    printf "  ${_UMO_PRI}Terminal Access${_UMO_NC} ${_UMO_DIM}(work inside the container)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "login"              "Root shell inside Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Shell as the default user"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Execute one command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"      "Switch the default login user"
     printf "\n"
 
-    printf "  ${_UMO_DIM}System & Management${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "vnc"                "Manually trigger the VNC server"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "update"             "Fetch and apply latest updates from GitHub"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "backup [dir]"       "Create a tarball backup of the container"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "version"            "Display current UMO version"
+    printf "  ${_UMO_PRI}Maintenance${_UMO_NC} ${_UMO_DIM}(keep UMO current and safe)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start the VNC server manually"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Fetch and apply the latest UMO version"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Archive the rootfs to <dir>"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}OPTIONS:${_UMO_NC}\n"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "--user <name>"      "Switch the default user and login"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "-h, --help"         "Print this help information"
-    printf "    ${_UMO_CYN}%-20s${_UMO_NC} %s\n" "-v, --version"      "Print version information"
+    printf "  ${_UMO_PRI}General${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "version"            "Print version banner"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "help"               "This reference"
     printf "\n"
 
-    printf "  ${_UMO_BOLD}EXAMPLES:${_UMO_NC}\n"
-    printf "    ${_UMO_DIM}\$ umo login${_UMO_NC}                    # Login to container\n"
-    printf "    ${_UMO_DIM}\$ umo run \"apt update\"${_UMO_NC}         # Run a command seamlessly\n"
-    printf "    ${_UMO_DIM}\$ umo --user myuser${_UMO_NC}            # Switch user to 'myuser'\n"
-    printf "    ${_UMO_DIM}\$ umo backup ~/backups${_UMO_NC}         # Backup rootfs to dir\n"
+    printf "  ${_UMO_PRI}Common Tasks${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}$\033[0m ${_UMO_CYN}umo login${_UMO_NC}                  shell into the container\n"
+    printf "    ${_UMO_DIM}$\033[0m ${_UMO_CYN}umo start${_UMO_NC}                  launch desktop, connect at :5901\n"
+    printf "    ${_UMO_DIM}$\033[0m ${_UMO_CYN}umo backup && umo update${_UMO_NC} backup first, then upgrade\n"
+    printf "    ${_UMO_DIM}$\033[0m ${_UMO_CYN}umo run \"apt list --upgradable\"${_UMO_NC}  inspect container packages\n"
     printf "\n"
 }
 

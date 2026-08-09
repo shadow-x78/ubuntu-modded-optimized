@@ -119,7 +119,7 @@ umo login
 | `umo status` | عرض حالة الخدمات |
 | `umo login` | الدخول كـ root |
 | `umo user` | الدخول كمستخدم افتراضي |
-| `umo update` | جلب وتطبيق أحدث التحديثات من GitHub |
+| `umo update` | جلب آخر الالتزامات وتحديث سكربتات الهوست وتطبيق hooks الحاوية |
 | `umo version` | عرض إصدار UMO الحالي |
 ### داخل Ubuntu
 
