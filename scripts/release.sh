@@ -70,6 +70,8 @@ fi
 # ── 3. Fallback version strings in source files ────────────────
 # Replace any literal old fallback version regardless of current value
 sed -i "s/UMO_VERSION:-[0-9][0-9.]*/UMO_VERSION:-$NEW_VER/g" lib/core-ansi.sh modules/umo-vnc.sh 2>/dev/null || true
+# Keep dependabot commit prefix pinned to the current release
+sed -i "s/UMO | v[0-9][0-9.]* | chore:/UMO | v$NEW_VER | chore:/" .github/dependabot.yml 2>/dev/null || true
 
 # ── 4. CHANGELOG.md: insert new version block on top ──────────
 TODAY=$(date +%Y-%m-%d)
@@ -104,7 +106,7 @@ grep -q "UMO_VERSION=\"$NEW_VER\"" bin/umo-install || {
 
 # ── 6. Commit and tag ──────────────────────────────────────────
 # Stage every file that carries a version string or badge so nothing is missed
-git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh
+git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh .github/dependabot.yml
 _md_new=$(grep -rl --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
 [ -n "$_md_new" ] && echo "$_md_new" | xargs git add
 
