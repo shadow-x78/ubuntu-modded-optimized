@@ -13,7 +13,7 @@ jobs:
     name: Create GitHub release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Extract version from tag
         id: ver
@@ -47,7 +47,7 @@ jobs:
         run: sha256sum "umo-${{ steps.ver.outputs.version }}.tar.gz" > "umo-${{ steps.ver.outputs.version }}.sha256"
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             umo-${{ steps.ver.outputs.version }}.tar.gz
