@@ -269,9 +269,18 @@ umo_run_quiet() {
     fi
 }
 
+umo_term_cols() {
+    # Cache terminal width to avoid repeated tput spawns
+    if [ -z "${UMO_TERM_COLS:-}" ]; then
+        UMO_TERM_COLS=$(tput cols 2>/dev/null || echo 80)
+        [ -z "$UMO_TERM_COLS" ] && UMO_TERM_COLS=80
+    fi
+    printf '%s' "$UMO_TERM_COLS"
+}
+
 umo_rule() {
     _char="${1:-$UMO_LINE_H}"
-    _cols="${2:-$(tput cols 2>/dev/null || echo 80)}"
+    _cols="${2:-$(umo_term_cols)}"
     _cols="${_cols:-80}"
     printf "%b" "$UMO_COLOR_PRIMARY"
     umo_repeat "$_char" "$_cols"; printf '\n'
@@ -279,7 +288,7 @@ umo_rule() {
 }
 
 umo_banner_full() {
-    _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
+    _cols="${1:-$(umo_term_cols)}"
     _cols="${_cols:-80}"
 
     _l1='██╗   ██╗███╗   ███╗ ██████╗  '
@@ -300,7 +309,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.1.0}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.2.0}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
@@ -316,8 +325,7 @@ umo_banner_compact() {
 }
 
 umo_banner() {
-    _w=$(tput cols 2>/dev/null || echo 60)
-    umo_banner_full "$_w"
+    umo_banner_full "$(umo_term_cols)"
 }
 
 umo_logo() {
@@ -325,9 +333,9 @@ umo_logo() {
 }
 
 umo_badge() {
-    _cols="${1:-$(tput cols 2>/dev/null || echo 80)}"
+    _cols="${1:-$(umo_term_cols)}"
     _cols="${_cols:-80}"
-    _ver="${UMO_VERSION:-4.1.0}"
+    _ver="${UMO_VERSION:-4.2.0}"
     _edition="${UMO_EDITION:-Open Source}"
     _txt="v$_ver - $_edition Edition"
     _txtlen=$(printf '%s' "$_txt" | wc -m)

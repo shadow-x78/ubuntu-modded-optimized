@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.2.0] - 2026-08-09
+
+### 🐛 Fixed
+- **Dynamic APT Sources for 24.04:** `umo-proot.sh` now generates `sources.list` with the correct codename (`noble` for 24.04, `jammy` otherwise) instead of hardcoding jammy and patching it later with `sed` in finalize. The finalize step uses the same dynamic generation, so both paths agree.
+- **Broken `install-vnc.sh` Generation Risk:** The VNC module now builds the inner installer via block-grouped heredocs with a syntax self-check (`sh -n`) before execution, and refuses to run when `umo-login.sh` is missing or non-executable (was: silent failure leaving a corrupt script).
+- **Half-Open dpkg Repair:** The 3-round `dpkg --configure -a` loops in the VNC and DE installers are replaced by a single shared `_um_apt_repair` body: configure once, remove broken packages only if any exist, then `apt-get -f install` and re-configure. Same behaviour, one round less, and identical logic in all installers.
+- **VNC Binary Detection Drift:** `config/templates/umo-startvnc.sh` / `umo-stopvnc.sh` now detect `tigervncserver` first and fall back to `vncserver`, matching the runtime scripts in `modules/umo-vnc.sh` (was: templates assumed plain `vncserver`).
+- **Hidden Password Input:** `umo_ui_password` now actually suppresses echo via `stty -echo` (with non-TTY fallback) instead of just printing "(input hidden)".
+- **Flaky Internet Check:** `umo_sys_has_internet` probes DNS (`ports.ubuntu.com`) and the Ubuntu mirror over HTTPS instead of `http://google.com`, which fails on captive portals and DNS-filtered networks.
+- **Update Throttle Precision:** `umo status` update fetch cache reduced from 1 hour to 10 minutes; the opt-in flag `UMO_CHECK_UPDATES=1` still applies.
+- **Configurable VNC Password:** `UMO_VNC_PASSWORD` env var overrides the default VNC password during install (default unchanged).
+- **Guarded divert-triggers:** `umo_proot_setup` runs the in-container divert script only after `umo-login.sh` exists and is executable (was: relied on `|| true` masking the failure).
+- **Signal-Safe Password Prompt:** `umo_ui_password` restores terminal echo via a `trap` on INT/TERM so Ctrl+C can no longer leave the terminal in a no-echo state; empty/EOF input is handled explicitly.
+
+### 🔧 Changed
+- **Centralized Exports:** `UMO_INSTALL_DIR`, `UMO_UBUNTU_VERSION`, `UMO_DE`, `UMO_APP_SET`, `UMO_PERF_MODE`, `UMO_THEME`, `UMO_LEAN` are exported once in the installer top level instead of inside every phase function.
+- **Terminal Width Cache:** `umo_term_cols()` caches `tput cols` once per process; `umo_rule`, `umo_banner*`, and `umo_badge` reuse it instead of spawning `tput` repeatedly.
+- **Template Render Safety:** `umo_fs_render` warns on leftover `{{PLACEHOLDER}}` tokens so a missed substitution surfaces during install instead of producing a broken file.
+- **Finalize Alias Cleanup:** The 6 separate `sed -i` calls on `.bashrc`/`.zshrc` collapse into one `sed -i -e ... -e ...` per file.
+
+### 🧹 Removed
+- **tests/ Directory:** Deleted (contained only an empty, ignored `run.sh`); references dropped from `.gitignore` and the release tarball exclusions.
+
 ## [v4.1.1] - 2026-08-09
 
 ### 🐛 Fixed

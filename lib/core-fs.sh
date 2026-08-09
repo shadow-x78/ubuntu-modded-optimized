@@ -72,6 +72,11 @@ umo_fs_render() {
         _content=$(printf '%s' "$_content" | sed "s|{{$_key}}|$_val|g")
     done
 
+    _remaining=$(printf '%s' "$_content" | grep -oE '\{\{[A-Z_][A-Z0-9_]*\}\}' | head -5 || true)
+    if [ -n "$_remaining" ]; then
+        umo_log_warn "Unreplaced placeholders in $_output: $_remaining"
+    fi
+
     umo_fs_write "$_output" "$_content"
 }
 

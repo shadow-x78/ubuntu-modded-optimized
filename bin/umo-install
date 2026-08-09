@@ -32,6 +32,8 @@ UMO_THEME="${UMO_THEME:-}"
 UMO_LEAN="${UMO_LEAN:-0}"
 UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
 
+export UMO_INSTALL_DIR UMO_UBUNTU_VERSION UMO_DE UMO_APP_SET UMO_PERF_MODE UMO_THEME UMO_LEAN UMO_NON_INTERACTIVE
+
 umo_phase_check() {
     umo_ui_init
     umo_ui_header "System Check"
@@ -109,9 +111,7 @@ umo_phase_config() {
 
 umo_phase_download() {
     umo_ui_header "Ubuntu RootFS"
-    export UMO_INSTALL_DIR
     export UMO_CACHE_DIR="$HOME/.umo/cache"
-    export UMO_UBUNTU_VERSION
     umo_fs_mkdir "$UMO_CACHE_DIR"
 
     _arch=$(uname -m)
@@ -135,7 +135,6 @@ umo_phase_download() {
 
 umo_phase_proot() {
     umo_ui_header "Proot Container"
-    export UMO_INSTALL_DIR
     umo_run_quiet "Configuring Proot Container..." umo_proot_setup
     umo_run_quiet "Setting up Container User..." umo_proot_create_user
 }
@@ -143,50 +142,41 @@ umo_phase_proot() {
 umo_phase_vnc() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping VNC (minimal mode)."; return 0; }
     umo_ui_header "VNC Server"
-    export UMO_INSTALL_DIR
     umo_vnc_setup
 }
 
 umo_phase_audio() {
     umo_ui_header "Audio Bridge"
-    export UMO_INSTALL_DIR
     umo_run_quiet "Configuring Audio Bridge..." umo_audio_setup
 }
 
 umo_phase_systemctl() {
     umo_ui_header "Systemctl Emulator"
-    export UMO_INSTALL_DIR
     umo_run_quiet "Configuring Systemctl Emulator..." umo_systemctl_setup
 }
 
 umo_phase_desktop() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping desktop (minimal mode)."; return 0; }
     umo_ui_header "Desktop Environment"
-    export UMO_INSTALL_DIR
-    export UMO_DE
     umo_de_install
 }
 
 umo_phase_apps() {
     umo_ui_header "Applications"
-    export UMO_INSTALL_DIR
-    export UMO_APP_SET
     umo_apps_install
 }
 
 umo_phase_finalize() {
     umo_ui_header "Finalizing"
 
-    umo_run_quiet "Configuring APT sources..." sh -c "
-        _codename=\"jammy\"
-        [ \"$UMO_UBUNTU_VERSION\" = \"24.04\" ] && _codename=\"noble\"
-        _src_list=\"$SCRIPT_DIR/config/sources.list\"
-        if [ -f \"\$_src_list\" ] && grep -q 'jammy' \"\$_src_list\" 2>/dev/null; then
-            sed '/^deb/ s/jammy/'\"\$_codename\"'/g' \"\$_src_list\" > \"$UMO_INSTALL_DIR/etc/apt/sources.list\" 2>/dev/null || true
-        elif [ -f \"\$_src_list\" ]; then
-            cp \"\$_src_list\" \"$UMO_INSTALL_DIR/etc/apt/sources.list\" 2>/dev/null || true
-        fi
-    "
+    _umo_finalize_codename="jammy"
+    [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _umo_finalize_codename="noble"
+    umo_run_quiet "Configuring APT sources..." sh -c "printf '%s\n' \
+        'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename} main restricted universe multiverse' \
+        'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-updates main restricted universe multiverse' \
+        'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-backports main restricted universe multiverse' \
+        'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-security main restricted universe multiverse' \
+        > \"$UMO_INSTALL_DIR/etc/apt/sources.list\""
     umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo"
     umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a"
     umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo"
@@ -201,23 +191,21 @@ umo_phase_finalize() {
 
     _cplt_body='export DEBIAN_FRONTEND=noninteractive
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
-for _round in 1 2; do
-    timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
-    _broken=$(dpkg -l 2>/dev/null | awk "/^iU|^iF|^hF/{print \$2}")
-    if [ -z "$_broken" ]; then break; fi
+timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
+_broken=$(dpkg -l 2>/dev/null | awk "/^iU|^iF|^hF/{print \$2}")
+if [ -n "$_broken" ]; then
     for _pkg in $_broken; do
         dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
     done
     timeout 300 apt-get -f install -y 2>&1 | _apt_filter || true
-done'
+    timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
+fi'
     umo_run_quiet "Configuring any remaining packages..." "$HOME/umo-login.sh" -c "$_cplt_body" || true
     umo_run_quiet "Cleaning dpkg locks..." "$HOME/umo-login.sh" -c "rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true" || true
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         if [ -f "$_rc" ]; then
-            sed -i '/alias umo=/d' "$_rc" 2>/dev/null || true
-            sed -i '/alias startvnc=/d' "$_rc" 2>/dev/null || true
-            sed -i '/alias stopvnc=/d' "$_rc" 2>/dev/null || true
+            sed -i -e '/alias umo=/d' -e '/alias startvnc=/d' -e '/alias stopvnc=/d' "$_rc" 2>/dev/null || true
         fi
     done
 
@@ -310,7 +298,8 @@ _umo_status() {
         _stale=1
         if [ -f "$_fh" ]; then
             _fh_age=$(( $(date +%s) - $(stat -c %Y "$_fh" 2>/dev/null || echo 0) ))
-            [ "$_fh_age" -lt 3600 ] && _stale=0
+            # Throttle: only fetch if last fetch is older than 10 minutes (600s)
+            [ "$_fh_age" -lt 600 ] && _stale=0
         fi
         [ "$_stale" = 1 ] && git -C "$_UMO_REPO_DIR" fetch origin main >/dev/null 2>&1 || true
         _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
@@ -656,9 +645,6 @@ umo_cli_parse() {
 umo_phase_perf() {
     [ "$UMO_PERF_MODE" = "off" ] && { umo_log_info "Performance tuning disabled."; return 0; }
     umo_ui_header "Performance Tuning"
-    export UMO_INSTALL_DIR
-    export UMO_PERF_MODE
-    export UMO_LEAN
     if command -v umo_perf_setup >/dev/null 2>&1; then
         umo_perf_setup
         umo_log_ok "Performance optimizations applied (mode: $UMO_PERF_MODE)"
@@ -672,8 +658,6 @@ umo_phase_perf() {
 umo_phase_theme() {
     [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme disabled."; return 0; }
     umo_ui_header "Desktop Theme"
-    export UMO_INSTALL_DIR
-    export UMO_THEME
     export SCRIPT_DIR
     if command -v umo_theme_setup >/dev/null 2>&1; then
         umo_theme_setup
