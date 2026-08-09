@@ -36,11 +36,12 @@ jobs:
 
       - name: Create tarball
         run: |
-          tar --exclude='.git' --exclude='.kilo' --exclude='tests' \
+          tar --exclude='.git' --exclude='.kilo' \
               --exclude='assets' --exclude-vcs \
               -czf "umo-${{ steps.ver.outputs.version }}.tar.gz" \
-              install.sh bin lib modules config docs README.md README_AR.md \
-              LICENSE SECURITY.md CHANGELOG.md CONTRIBUTING.md
+              install.sh bin lib modules config docs scripts README.md README_AR.md \
+              LICENSE SECURITY.md CHANGELOG.md CONTRIBUTING.md \
+              .editorconfig .gitattributes
 
       - name: Generate checksums
         run: sha256sum "umo-${{ steps.ver.outputs.version }}.tar.gz" > "umo-${{ steps.ver.outputs.version }}.sha256"

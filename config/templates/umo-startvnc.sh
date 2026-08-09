@@ -14,7 +14,17 @@ export MESA_NO_SHM=1
 export GALLIUM_DRIVER=llvmpipe
 export LIBGL_ALWAYS_SOFTWARE=1
 
-if ! vncserver "$VNC_DISPLAY" \
+_vnc_cmd=""
+if command -v tigervncserver >/dev/null 2>&1; then
+    _vnc_cmd="tigervncserver"
+elif command -v vncserver >/dev/null 2>&1; then
+    _vnc_cmd="vncserver"
+else
+    echo "  [!] VNC server not found. Install with: apt install tigervnc-standalone-server"
+    exit 1
+fi
+
+if ! "$_vnc_cmd" "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
     -localhost no \

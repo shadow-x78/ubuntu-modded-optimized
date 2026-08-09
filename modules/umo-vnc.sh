@@ -13,30 +13,43 @@ UMO_VNC_GEOMETRY="${UMO_VNC_GEOMETRY:-1280x720}"
 UMO_VNC_DEPTH="${UMO_VNC_DEPTH:-24}"
 UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 
+_umo_apt_repair_body() {
+    cat << 'REPAIR'
+export DEBIAN_FRONTEND=noninteractive
+_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
+_um_apt_repair() {
+    dpkg --configure -a 2>&1 | _apt_filter || true
+    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
+    if [ -n "$_broken" ]; then
+        for _pkg in $_broken; do
+            dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
+        done
+        timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
+        dpkg --configure -a 2>&1 | _apt_filter || true
+    fi
+}
+REPAIR
+}
+
 umo_vnc_install() {
     umo_log_step "Install VNC server"
-    cat > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh" << 'INNER'
+    {
+        cat << 'HDR'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 export TZ=Etc/UTC
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
-_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 
 echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
 echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
 
-for _round in 1 2 3; do
-    dpkg --configure -a 2>&1 | _apt_filter || true
-    _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
-    if [ -z "$_broken" ]; then break; fi
-    for _pkg in $_broken; do
-        dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
-    done
-done
-timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 | _apt_filter || true
+HDR
+        _umo_apt_repair_body
+        cat << 'BODY'
+
+_um_apt_repair
 
 timeout 600 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
@@ -53,9 +66,7 @@ timeout 600 apt-get install -y --no-install-recommends \
     tigervnc-standalone-server tigervnc-viewer tigervnc-common tigervnc-tools \
     2>&1 | _apt_filter || true
 
-dpkg --configure -a 2>&1 | _apt_filter || true
-timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
-dpkg --configure -a 2>&1 | _apt_filter || true
+_um_apt_repair
 
 if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 2>&1; then
     exit 0
@@ -69,17 +80,31 @@ dpkg -l 'tigervnc*' 2>&1 | tail -10
 echo "--- status file perms ---"
 ls -la /var/lib/dpkg/status* 2>&1
 exit 1
-INNER
+BODY
+    } > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh"
     chmod +x "${UMO_INSTALL_DIR}/root/install-vnc.sh"
+    if sh -n "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null; then
+        umo_log_debug "install-vnc.sh syntax verified"
+    else
+        umo_log_warn "install-vnc.sh has syntax issues"
+    fi
     printf "  %b>%b  Installing TigerVNC...\n" "$UMO_B_CYAN" "$UMO_NC"
-    "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    if [ ! -x "$HOME/umo-login.sh" ]; then
+        umo_log_err "umo-login.sh not executable - VNC install skipped"
+        rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
+        return 1
+    fi
+    # Run installer only in real install context (not during dev smoke tests)
+    if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
+        "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+    fi
     _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
     else
         printf "  %b%s%b  TigerVNC installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
     fi
-    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
+    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
 }
 
 umo_vnc_configure() {
@@ -91,7 +116,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.1.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.2.0}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi
@@ -105,9 +130,10 @@ umo_vnc_configure() {
         chown -R 1000:1000 "$_user_vnc" 2>/dev/null || true
     fi
 
+    _vnc_pass="${UMO_VNC_PASSWORD:-ubuntu}"
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo 'ubuntu' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
+        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
     fi
 
     umo_log_ok "VNC configured"

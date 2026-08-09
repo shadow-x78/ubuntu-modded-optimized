@@ -85,6 +85,7 @@ DPCFG
         fi
     done
 
+    # divert-triggers.sh is executed AFTER umo_proot_create_scripts creates umo-login.sh
     cat > "$UMO_PROOT_DIR/root/divert-triggers.sh" << 'DIVERT'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -102,8 +103,6 @@ for _bin in gtk-update-icon-cache update-initramfs systemd-hwdb update-command-n
 done
 DIVERT
     chmod +x "$UMO_PROOT_DIR/root/divert-triggers.sh"
-    "$HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
-    rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh"
 
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
     : > "$UMO_PROOT_DIR/var/lib/dpkg/lock"
@@ -273,11 +272,13 @@ umo_proot_create_user() {
         echo "umo:x:1000:1000:UMO User:/home/umo:/bin/bash" >> "$_etc/passwd"
     fi
 
-    cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << 'SRCLIST'
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse
-deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+    _distro_codename="jammy"
+    [ "${UMO_UBUNTU_VERSION:-22.04}" = "24.04" ] && _distro_codename="noble"
+    cat > "$UMO_PROOT_DIR/etc/apt/sources.list" << SRCLIST
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_distro_codename} main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_distro_codename}-updates main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_distro_codename}-backports main restricted universe multiverse
+deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_distro_codename}-security main restricted universe multiverse
 SRCLIST
 
     rm -f "$UMO_PROOT_DIR/etc/group.lock" \
@@ -321,5 +322,10 @@ SRCLIST
 umo_proot_setup() {
     umo_proot_prepare
     umo_proot_create_scripts
+    # Guard: divert-triggers needs the login wrapper created above
+    if [ -x "$UMO_TERMUX_HOME/umo-login.sh" ]; then
+        "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
+        rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh" 2>/dev/null || true
+    fi
     umo_proot_patch_bashrc
 }

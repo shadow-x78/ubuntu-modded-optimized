@@ -137,7 +137,18 @@ umo_ui_input() {
 umo_ui_password() {
     _prompt="$1"
     printf "%b  %s (input hidden)%b: " "$UMO_B_WHITE" "$_prompt" "$UMO_NC"
-    read -r _ans
+    _ans=""
+    if [ -t 0 ]; then
+        # Restore echo even on ^C or other signals during read
+        stty -echo 2>/dev/null
+        trap 'stty echo 2>/dev/null; printf "\n"; trap - INT TERM; return 130 2>/dev/null || exit 130' INT TERM
+        IFS= read -r _ans || true
+        stty echo 2>/dev/null
+        printf "\n"
+        trap - INT TERM
+    else
+        IFS= read -r _ans || true
+    fi
     UMO_INPUT_RESULT="$_ans"
 }
 

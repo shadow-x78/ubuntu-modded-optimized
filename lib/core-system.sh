@@ -88,9 +88,17 @@ umo_sys_ram_mb() {
 }
 
 umo_sys_has_internet() {
-    wget -q --spider --timeout=5 http://google.com 2>/dev/null && return 0
-    curl -s --max-time 5 http://google.com >/dev/null 2>&1 && return 0
-    ping -c 1 -W 3 8.8.8.8 >/dev/null 2>&1 && return 0
+    # DNS-based check first (more reliable than HTTP pings in captive networks)
+    if command -v nslookup >/dev/null 2>&1; then
+        nslookup ports.ubuntu.com >/dev/null 2>&1 && return 0
+    fi
+    if command -v getent >/dev/null 2>&1; then
+        getent hosts ports.ubuntu.com >/dev/null 2>&1 && return 0
+    fi
+    # Fallback to actual HTTPS probe on Ubuntu mirrors
+    wget -q --spider --timeout=6 https://ports.ubuntu.com 2>/dev/null && return 0
+    curl -s --max-time 6 -o /dev/null https://ports.ubuntu.com 2>/dev/null && return 0
+    ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1 && return 0
     return 1
 }
 

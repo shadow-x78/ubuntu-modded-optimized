@@ -48,9 +48,11 @@ echo "[..] Bumping $OLD_VER -> $NEW_VER"
 # ── 1. bin/umo-install ──────────────────────────────────────────
 sed -i "s/^export UMO_VERSION=\"$OLD_VER\"/export UMO_VERSION=\"$NEW_VER\"/" bin/umo-install
 
-# ── 2. Badges in README files and SECURITY.md ──────────────────
-sed -i "s/version-$OLD_VER-/version-$NEW_VER-/" README.md SECURITY.md docs/INSTALL.md docs/TROUBLESHOOTING.md
-sed -i "s/الإصدار-$OLD_VER-/الإصدار-$NEW_VER-/" README_AR.md docs/INSTALL_AR.md docs/TROUBLESHOOTING_AR.md
+# ── 2. Badges in ALL markdown files ────────────────────────────
+# Covers README.md, README_AR.md, SECURITY.md, and docs/*.md
+grep -rl --include='*.md' "version-$OLD_VER\|الإصدار-$OLD_VER" . | xargs sed -i \
+    -e "s/version-$OLD_VER/version-$NEW_VER/g" \
+    -e "s/الإصدار-$OLD_VER/الإصدار-$NEW_VER/g"
 
 # ── 3. lib/core-ansi.sh fallback version ───────────────────────
 sed -i "s/UMO_VERSION:-$OLD_VER/UMO_VERSION:-$NEW_VER/" lib/core-ansi.sh modules/umo-vnc.sh 2>/dev/null || true
@@ -83,9 +85,9 @@ grep -q "UMO_VERSION=\"$NEW_VER\"" bin/umo-install || {
 }
 
 # ── 6. Commit and tag ──────────────────────────────────────────
-git add bin/umo-install README.md README_AR.md SECURITY.md CHANGELOG.md \
-        docs/INSTALL.md docs/INSTALL_AR.md docs/TROUBLESHOOTING.md docs/TROUBLESHOOTING_AR.md \
-        lib/core-ansi.sh modules/umo-vnc.sh
+# Stage every file that carries a version string or badge so nothing is missed
+git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh
+grep -rl --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" . | xargs git add
 
 git commit -m "UMO | v$NEW_VER | release: bump to $NEW_VER"
 git tag -a "v$NEW_VER" -m "UMO v$NEW_VER"
