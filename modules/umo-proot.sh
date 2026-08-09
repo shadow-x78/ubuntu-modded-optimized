@@ -85,7 +85,6 @@ DPCFG
         fi
     done
 
-    # divert-triggers.sh is executed AFTER umo_proot_create_scripts creates umo-login.sh
     cat > "$UMO_PROOT_DIR/root/divert-triggers.sh" << 'DIVERT'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
@@ -322,7 +321,6 @@ SRCLIST
 umo_proot_setup() {
     umo_proot_prepare
     umo_proot_create_scripts
-    # Guard: divert-triggers needs the login wrapper created above
     if [ -x "$UMO_TERMUX_HOME/umo-login.sh" ]; then
         "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
         rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh" 2>/dev/null || true

@@ -37,7 +37,6 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
         echo "Error: working tree is dirty. Commit or stash changes first." >&2
         exit 1
     fi
-    # Reset the pre-bumped file so the release commit captures it cleanly
     git checkout -- bin/umo-install
 fi
 
@@ -109,7 +108,7 @@ git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh
 _md_new=$(grep -rl --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
 [ -n "$_md_new" ] && echo "$_md_new" | xargs git add
 
-git commit -m "UMO | v$NEW_VER | release: bump to $NEW_VER"
+git commit -m "UMO | v$NEW_VER | release: version bump and docs sync to $NEW_VER"
 git tag -a "v$NEW_VER" -m "UMO v$NEW_VER"
 
 echo
