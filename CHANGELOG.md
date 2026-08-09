@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.1.0] - 2026-08-09
+
+### ✨ Added
+- **Smart Update Flow (`umo update`):** Rewritten from a bare `git fetch + reset --hard` into a full pipeline: fetch, commit count diff (`HEAD..origin/main`), changelog preview in the terminal, automatic stash of any local modifications (restored after reset, kept as named stash on conflict), then host-side refresh + in-container hooks.
+- **Update Awareness in `umo status`:** New `Updates` line fetches `origin/main` (best-effort, non-blocking) and reports `N new commits on main (umo update)` or `up to date`.
+- **Host Script Refresh:** `_umo_refresh_host` re-renders `umo-login.sh`, `umo-user.sh`, `umo-vnc-start.sh`, `umo-vnc-stop.sh`, `umo-start.sh`, `umo-stop.sh` from the updated `config/templates/` placeholders (`{{INSTALL_DIR}}`, `{{TERMUX_PREFIX}}`, `{{DISPLAY}}`, `{{VNC_DEPTH}}`, `{{VNC_PORT}}`).
+- **Container Hooks:** `_umo_refresh_container` drops dpkg lock cleanup and apt-speed reapplied inside the running proot (only when a session is active).
+
+### 🔧 Changed
+- **CLI Layout:** `umo help` and `umo status` now use a compact header (`UMO vX.Y.Z · section` inside a `─` rule) instead of the full ASCII banner; the banner only shows on `umo version` and `umo start`.
+- **Status Format:** Migrated to a key-value grid (`Container`, `Session`, `VNC`, `Audio`, `Updates`) with consistent padding and lowercase status tokens (installed / running / active / stopped), matching the installer's `_umo_kv` helper.
+- **Help Categorisation:** Commands regrouped as `Session Lifecycle` / `Terminal Access` / `Maintenance` / `General` with per-group subtitles, plus a `Common Tasks` block reflecting real workflows (backup before update, connect at :5901 after start, etc.).
+- **Update Messaging:** Aligns with the rest of the tool: `[OK]`, `[..]`, `[ERR]`, `[!!]` badges and dim/cyan hints, replacing the previous glyph mix of `✔`, `✖`, `➜`, `!`.
+
 ## [v4.0.9] - 2026-08-09
 
 ### ✨ Added
