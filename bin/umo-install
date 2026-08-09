@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.1.0"
+export UMO_VERSION="4.1.1"
 
 . "$UMO_LIB_DIR/core-ansi.sh"
 . "$UMO_LIB_DIR/core-ui.sh"
@@ -236,7 +236,7 @@ done'
 
     cat > "$HOME/../usr/bin/umo" << UMOCMD
 #!/bin/sh
-_UMO_VERSION="4.0.8"
+_UMO_VERSION="${UMO_VERSION}"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
     cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
@@ -305,8 +305,14 @@ _umo_status() {
         _umo_kv "Audio" "${_UMO_DIM}stopped${_UMO_NC}"
     fi
 
-    if [ -d "$_UMO_REPO_DIR/.git" ]; then
-        git -C "$_UMO_REPO_DIR" fetch origin main >/dev/null 2>&1 || true
+    if [ -d "$_UMO_REPO_DIR/.git" ] && [ "${UMO_CHECK_UPDATES:-0}" = "1" ]; then
+        _fh="$_UMO_REPO_DIR/.git/FETCH_HEAD"
+        _stale=1
+        if [ -f "$_fh" ]; then
+            _fh_age=$(( $(date +%s) - $(stat -c %Y "$_fh" 2>/dev/null || echo 0) ))
+            [ "$_fh_age" -lt 3600 ] && _stale=0
+        fi
+        [ "$_stale" = 1 ] && git -C "$_UMO_REPO_DIR" fetch origin main >/dev/null 2>&1 || true
         _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
         if [ "$_behind" -gt 0 ] 2>/dev/null; then
             _umo_kv "Updates" "${_UMO_YEL}$_behind new commits on main${_UMO_NC} (umo update)"
@@ -323,6 +329,12 @@ _umo_refresh_host() {
     _inst_dir=$(grep '^INSTALL_DIR=' "$_UMO_TERMUX_HOME/umo-login.sh" 2>/dev/null | head -1 | cut -d'"' -f2)
     [ -z "$_inst_dir" ] && _inst_dir="$HOME/umo-ubuntu"
 
+    _umo_user="umo"
+    if [ -f "$_UMO_TERMUX_HOME/umo-user.sh" ]; then
+        _cur_user=$(sed -n 's/.*\/bin\/su - \([^ ]*\).*/\1/p' "$_UMO_TERMUX_HOME/umo-user.sh" | head -1)
+        [ -n "$_cur_user" ] && _umo_user="$_cur_user"
+    fi
+
     if [ -f "$_tpl/umo-login.sh" ]; then
         sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
             -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
@@ -335,6 +347,7 @@ _umo_refresh_host() {
         if [ -f "$_src" ]; then
             sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
                 -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
+                -e "s|{{UMO_USER}}|$_umo_user|g" \
                 -e "s|{{DISPLAY}}|:1|g" \
                 -e "s|{{VNC_DEPTH}}|24|g" \
                 -e "s|{{VNC_PORT}}|5901|g" \
@@ -347,7 +360,7 @@ _umo_refresh_host() {
         cp -f "$_UMO_REPO_DIR/bin/umo-$_script" "$_UMO_TERMUX_HOME/umo-$_script.sh"
         chmod +x "$_UMO_TERMUX_HOME/umo-$_script.sh"
     done
-    _umo_ok "Host scripts updated"
+    _umo_ok "Host scripts updated (user: $_umo_user)"
 }
 
 _umo_refresh_container() {

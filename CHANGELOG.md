@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.1.1] - 2026-08-09
+
+### 🐛 Fixed
+- **Template Drift in Update Refresh:** Unified `config/templates/umo-login.sh` and `config/templates/umo-user.sh` with the runtime heredocs from `modules/umo-proot.sh`. The refresh now uses the same flags (`--sysvipc`, `-b "$PREFIX/tmp:/dev/shm"`, `unset LD_PRELOAD/LD_LIBRARY_PATH`, correct pulse socket path) - previously `umo update` would silently downgrade the login wrapper.
+- **User Detection in Update:** `_umo_refresh_host` now detects the current default user from the existing `umo-user.sh` (parses `/bin/su - <user>`) and preserves it through re-rendering, fixing a bug where custom-named users would be reset to `ubuntu` after update.
+- **Status Fetch Stall:** `umo status` no longer fetches from origin on every invocation. The update check is now opt-in via `UMO_CHECK_UPDATES=1` and caches results for 1 hour via `.git/FETCH_HEAD` mtime.
+- **CI Permissions:** Shellcheck exclusions are now scoped and documented in the workflow; the `$AUDIO_SOCK` unquoted expansion in templates remains intentional (needs splitting for proot args) and is excluded from lint.
+
 ## [v4.1.0] - 2026-08-09
 
 ### ✨ Added
