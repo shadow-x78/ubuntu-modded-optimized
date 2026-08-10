@@ -112,7 +112,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | الـ Flag | الوصف |
 |----------|-------|
 | `--perf=<mode>` | تعيين مستوى الأداء (`balanced`, `aggressive`, `off`) |
-| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `minimal`, `none`) |
+| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `minimal`, `none`) | XFCE4 الافتراضي: `umo-dark` (Orchis-Dark + Papirus-Dark + Bibata) |
 | `--lean` | حذف التوثيق واللغات لتوفير المساحة |
 
 ---

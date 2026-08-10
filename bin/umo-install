@@ -28,7 +28,7 @@ UMO_UBUNTU_VERSION="${UMO_UBUNTU_VERSION:-22.04}"
 UMO_DE="${UMO_DE:-xfce4}"
 UMO_APP_SET="${UMO_APP_SET:-basic}"
 UMO_PERF_MODE="${UMO_PERF_MODE:-balanced}"
-UMO_THEME="${UMO_THEME:-}"
+UMO_THEME="${UMO_THEME:-umo-dark}"
 UMO_LEAN="${UMO_LEAN:-0}"
 UMO_NON_INTERACTIVE="${UMO_NON_INTERACTIVE:-}"
 
@@ -695,7 +695,10 @@ umo_main() {
     }
     trap _umo_sigint_cleanup EXIT INT TERM HUP
 
-    [ "$UMO_APP_SET" = "full" ] && [ -z "$UMO_THEME" ] && UMO_THEME="umo-dark"
+    case "$UMO_THEME" in
+        umo-dark|umo-light|none|'') ;;
+        *) UMO_THEME="umo-dark" ;;
+    esac
 
     umo_phase_check
     umo_phase_deps

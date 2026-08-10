@@ -145,7 +145,7 @@ bash install.sh [OPTIONS]
   --dir=PATH                     مسار تثبيت مخصص
   --ubuntu=22.04|24.04           إصدار Ubuntu المطلوب
   --perf=balanced|aggressive|off اختيار مستوى الأداء
-  --theme=umo-dark|minimal|none  اختيار مظهر سطح المكتب
+  --theme=umo-dark|minimal|none  اختيار مظهر سطح المكتب (الافتراضي xfce4: umo-dark، Orchis-Dark + Papirus-Dark)
   --lean                         حذف ملفات التوثيق واللغات لتوفير المساحة
 ```
 

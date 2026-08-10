@@ -112,7 +112,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | Flag | Description |
 |------|-------------|
 | `--perf=<mode>` | Set performance level (`balanced`, `aggressive`, `off`) |
-| `--theme=<theme>` | Set desktop theme (`umo-dark`, `minimal`, `none`) |
+| `--theme=<theme>` | Set desktop theme (`umo-dark`, `minimal`, `none`) - XFCE4 default is `umo-dark` (Orchis-Dark + Papirus-Dark + Bibata cursor) |
 | `--lean` | Remove docs/man/locales to save space |
 
 ---

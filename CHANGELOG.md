@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.3.0] - 2026-08-10
+
+### ✨ Added
+- **Professional XFCE4 Theme Engine:** Complete desktop visual overhaul with Orchis-Dark GTK theme, Papirus-Dark icons, Bibata cursor, Inter/JetBrains Mono fonts, and a fully configured XFCE4 panel (Whiskermenu + tasklist + systray + clock).
+- **Desktop Essentials Always Included:** `xfce4-terminal`, `thunar`, `xfce4-screenshooter`, `xfce4-taskmanager`, and `mousepad` are now installed with every XFCE4 deployment regardless of `--apps` selection.
+- **Deterministic Panel Layout:** `xfce4-panel.xml` rewritten with proper plugin IDs (1-5), separator with expand=true, and application menu properties.
+
+### 🐛 Fixed
+- **Theme Package Source:** Replaced fragile GitHub Orchis theme download with Ubuntu `apt` packages (`papirus-icon-theme`, `fonts-inter`, `fonts-jetbrains-mono`).
+- **XFCE4 Panel Missing Clock:** Fixed incomplete `plugin-ids` array that caused the clock plugin to never appear.
+- **Wallpaper Never Applied:** `xfce4-desktop.xml` is now generated with the correct structure instead of relying on `sed` after first-run creation.
+- **`UMO_THEME` Validation:** Invalid theme identifiers are now sanitized to `umo-dark` instead of silently failing; `--apps=full` no longer forces a non-existent theme.
+- **Theme Defaults:** `UMO_THEME` now defaults to `umo-dark` (was empty), ensuring XFCE4 always gets the professional theme unless explicitly set to `none`.
+
+### 🔧 Changed
+- **Theme Command:** `umo_theme_apply_icons` and `umo_theme_apply_wallpaper` removed; replaced by `umo_theme_apply_desktop_config` which generates the full desktop XML directly.
+- **CLI Documentation:** All docs updated to reflect XFCE4 professional theme defaults.
+
 ## [v4.2.0] - 2026-08-10
 
 ### 🐛 Fixed

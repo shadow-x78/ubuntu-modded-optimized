@@ -145,7 +145,7 @@ bash install.sh [OPTIONS]
   --dir=PATH                     Custom installation directory
   --ubuntu=22.04|24.04           Ubuntu version to install
   --perf=balanced|aggressive|off Choose performance tuning level
-  --theme=umo-dark|minimal|none  Choose desktop theme
+  --theme=umo-dark|minimal|none  Choose desktop theme (XFCE4 default: umo-dark, Orchis-Dark + Papirus-Dark)
   --lean                         Remove docs/man/locales to save space
 ```
 
