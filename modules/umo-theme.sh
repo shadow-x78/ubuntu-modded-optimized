@@ -13,7 +13,8 @@ UMO_THEME="${UMO_THEME:-umo-dark}"
 umo_theme_install_packages() {
     umo_log_step "Install theme packages"
 
-    _theme_pkgs="fonts-inter fonts-jetbrains-mono fonts-dejavu-core gnome-icon-theme"
+    _theme_pkgs="fonts-inter fonts-jetbrains-mono fonts-dejavu-core \
+                 gnome-icon-theme papirus-icon-theme"
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
 #!/bin/sh
@@ -33,17 +34,6 @@ INNER
     else
         printf "  %b%s%b  Theme packages installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
     fi
-
-    if ! "$HOME/umo-login.sh" -c "dpkg -l | grep -q orchis" 2>/dev/null; then
-        umo_run_quiet "Downloading and extracting Orchis theme" "$HOME/umo-login.sh" -c "
-            wget -q 'https://github.com/vinceliuice/Orchis-theme/archive/refs/tags/2024-09-20.tar.gz' -O /root/orchis.tar.gz 2>/dev/null && \\
-            tar xzf /root/orchis.tar.gz -C /root/ && \\
-            cd /root/Orchis-theme-* && \\
-            ./install.sh -t default -c dark --tweaks solid >/dev/null 2>&1; \\
-            rm -rf /root/orchis* /root/Orchis*
-        " || umo_log_warn "Orchis theme download/extraction failed (non-critical)"
-    fi
-
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"
     umo_log_ok "Theme packages installed"
 }
@@ -79,19 +69,6 @@ umo_theme_apply_gtk() {
     umo_log_ok "GTK configuration applied"
 }
 
-umo_theme_apply_icons() {
-    umo_log_step "Configure icon theme"
-
-    _xfce_conf="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml"
-    umo_fs_mkdir "$_xfce_conf"
-
-    if [ -f "$_xfce_conf/xsettings.xml" ]; then
-        sed -i 's|IconThemeName.*|IconThemeName" type="string" value="Papirus-Dark"/>|' "$_xfce_conf/xsettings.xml" 2>/dev/null || true
-    fi
-
-    umo_log_ok "Icon theme set to Papirus-Dark"
-}
-
 umo_theme_apply_fonts() {
     umo_log_step "Configure fonts"
 
@@ -118,8 +95,8 @@ umo_theme_apply_panel() {
     umo_log_ok "Panel layout applied"
 }
 
-umo_theme_apply_wallpaper() {
-    umo_log_step "Set wallpaper"
+umo_theme_apply_desktop_config() {
+    umo_log_step "Configure XFCE desktop and wallpaper"
 
     _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-wallpaper.jpg"
     _wp_dir="$UMO_INSTALL_DIR/usr/share/wallpapers"
@@ -128,15 +105,27 @@ umo_theme_apply_wallpaper() {
     if [ -f "$_wp_src" ]; then
         umo_fs_mkdir "$_wp_dir"
         cp -f "$_wp_src" "$_wp_dst"
-
-        _xfce_props="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
-        umo_fs_mkdir "$(dirname "$_xfce_props")"
-        if [ -f "$_xfce_props" ]; then
-            sed -i 's|last-image.*|last-image" type="string" value="/usr/share/wallpapers/umo-wallpaper.jpg"/>|' "$_xfce_props" 2>/dev/null || true
-        fi
     else
-        umo_log_info "No wallpaper file found, skipping."
+        umo_log_info "No wallpaper file found, continuing without wallpaper"
     fi
+
+    _desk_xml="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
+    umo_fs_mkdir "$(dirname "$_desk_xml")"
+    cat > "$_desk_xml" << 'EOD'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitor0" type="empty">
+        <property name="last-image" type="string" value="/usr/share/wallpapers/umo-wallpaper.jpg"/>
+      </property>
+    </property>
+  </property>
+  <property name="last" type="empty">
+    <property name="window-alignment" type="int" value="1"/>
+  </property>
+</channel>
+EOD
 }
 
 umo_theme_setup() {
@@ -145,11 +134,10 @@ umo_theme_setup() {
 
     umo_theme_install_packages
     umo_theme_apply_gtk
-    umo_theme_apply_icons
     umo_theme_apply_fonts
     if [ "$UMO_DE" = "xfce4" ] || [ "$UMO_DE" = "xfce" ]; then
         umo_theme_apply_panel
-        umo_theme_apply_wallpaper
+        umo_theme_apply_desktop_config
     fi
 
     umo_log_ok "Desktop theme applied"
