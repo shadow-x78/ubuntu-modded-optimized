@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Performance Optimizer (MIT License)
+# UMO - Performance Optimizer (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_PERF_LOADED:-}" ] || return 0

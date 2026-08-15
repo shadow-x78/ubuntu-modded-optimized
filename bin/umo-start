@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Session Controller [start] (MIT License)
+# UMO - Session Controller [start] (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"

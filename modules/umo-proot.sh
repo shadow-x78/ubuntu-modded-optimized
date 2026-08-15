@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Proot Container Manager (MIT License)
+# UMO - Proot Container Manager (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_PROOT_LOADED:-}" ] || return 0

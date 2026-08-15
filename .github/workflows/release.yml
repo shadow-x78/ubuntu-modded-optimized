@@ -36,7 +36,7 @@ jobs:
 
       - name: Create tarball
         run: |
-          tar --exclude='.git' --exclude='.kilo' \
+          tar --exclude='.git' \
               --exclude='assets' --exclude-vcs \
               -czf "umo-${{ steps.ver.outputs.version }}.tar.gz" \
               install.sh bin lib modules config docs scripts README.md README_AR.md \

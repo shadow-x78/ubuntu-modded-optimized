@@ -13,8 +13,8 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.3.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
-[![الرخصة](https://img.shields.io/badge/الرخصة-MIT-dc2626?style=flat-square)](LICENSE)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.4.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
 [![نجوم](https://img.shields.io/github/stars/shadow-x78/ubuntu-modded-optimized?style=flat-square&color=eab308&logo=github&label=النجوم)](https://github.com/shadow-x78/ubuntu-modded-optimized/stargazers)
@@ -192,7 +192,7 @@ UMO/
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
 ├── install.sh               # نقطة الدخول السريعة
 ├── CHANGELOG.md             # سجل التغييرات
-├── LICENSE                  # MIT License
+├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # الملف الرئيسي
 ```
 
@@ -222,7 +222,7 @@ UMO/
 <a id="license"></a>
 ## 📜 الرخصة
 
-موزَّع تحت [رخصة MIT](LICENSE).
+مرخّص تحت [رخصة GPL-3.0](LICENSE).
 
 ---
 

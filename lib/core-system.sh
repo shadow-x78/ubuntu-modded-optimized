@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - System & Platform Utilities (MIT License)
+# UMO - System & Platform Utilities (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_SYS_LOADED:-}" ] || return 0

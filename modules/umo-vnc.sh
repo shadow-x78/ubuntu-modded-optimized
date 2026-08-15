@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - VNC Server Manager (MIT License)
+# UMO - VNC Server Manager (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_VNC_LOADED:-}" ] || return 0
@@ -115,7 +115,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.3.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.4.0}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     fi

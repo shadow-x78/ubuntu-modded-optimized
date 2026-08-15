@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Release Helper (MIT License)
+# UMO - Release Helper (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 #
 # Usage: ./scripts/release.sh <new-version>

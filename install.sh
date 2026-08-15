@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Quick-start Wrapper (MIT License)
+# UMO - Quick-start Wrapper (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e

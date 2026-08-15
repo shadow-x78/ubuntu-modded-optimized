@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - TUI Engine (MIT License)
+# UMO - TUI Engine (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_UI_LOADED:-}" ] || return 0

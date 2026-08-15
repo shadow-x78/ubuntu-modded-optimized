@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Application Suite Installer (MIT License)
+# UMO - Application Suite Installer (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_APPS_LOADED:-}" ] || return 0

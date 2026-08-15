@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Systemctl Emulator (MIT License)
+# UMO - Systemctl Emulator (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_SYSCTL_LOADED:-}" ] || return 0
