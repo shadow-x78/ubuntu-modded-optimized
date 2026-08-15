@@ -119,7 +119,7 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 
 4. **Never expose VNC port `5901`** to untrusted networks without a tunnel or VPN.
 
-5. **Review `.vnc/xstartup` and `bashrc.patch`** before running if cloned from a fork.
+5. **Review `.vnc/xstartup`** before running if cloned from a fork.
 
 ---
 

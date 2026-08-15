@@ -43,7 +43,6 @@ _um_apt_repair
 FTR
 }
 
-# $1 = extra apt lines (already shell-expanded by caller if needed)
 _umo_de_build() {
     _pkgs_block="$1"
     {

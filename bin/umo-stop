@@ -5,8 +5,10 @@
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 
 _UMO_NC='\033[0m'
+_UMO_BOLD='\033[1m'
 _UMO_DIM='\033[2m'
 _UMO_PRI='\033[38;5;208m'
+_UMO_GRN='\033[38;5;34m'
 
 printf "\n${_UMO_PRI}"
 printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"

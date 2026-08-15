@@ -586,7 +586,7 @@ Commands (run from Termux):
   umo user              Login as default user
   umo --user <name>    Switch user
   umo status           Show service status
-  umo update           Update packages
+  umo update           Update UMO tool
   umo --help           Full help
 
 VNC: $_ip:5901

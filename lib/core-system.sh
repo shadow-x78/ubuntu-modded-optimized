@@ -112,38 +112,6 @@ umo_sys_has_cmd() {
     command -v "$1" >/dev/null 2>&1
 }
 
-umo_sys_require_cmd() {
-    _cmd="$1"
-    _pkg="${2:-$_cmd}"
-    if ! umo_sys_has_cmd "$_cmd"; then
-        umo_log_warn "Missing: $_cmd. Attempting to install $_pkg..."
-        pkg install -y "$_pkg" 2>/dev/null || \
-        apt-get install -y "$_pkg" 2>/dev/null || \
-        umo_die "Failed to install $_pkg"
-    fi
-}
-
-umo_sys_pkg_install() {
-    [ $# -eq 0 ] && return 0
-    if command -v pkg >/dev/null 2>&1; then
-        umo_run_quiet "Installing dependencies" pkg install -y "$@" || true
-    else
-        umo_run_quiet "Installing dependencies" apt-get install -y "$@" || true
-    fi
-}
-
-umo_sys_kill_by_name() {
-    for _name in "$@"; do
-        for _pid in $(pgrep -x "$_name" 2>/dev/null || true); do
-            kill -9 "$_pid" 2>/dev/null || true
-        done
-    done
-}
-
-umo_sys_is_running() {
-    pgrep -x "$1" >/dev/null 2>&1
-}
-
 umo_sys_setup_storage() {
     if [ ! -d "$HOME/storage" ]; then
         umo_log_warn "Storage not configured. Running termux-setup-storage..."
