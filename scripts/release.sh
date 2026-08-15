@@ -50,7 +50,7 @@ else
     sed -i "s/^export UMO_VERSION=\"$OLD_VER\"/export UMO_VERSION=\"$NEW_VER\"/" bin/umo-install
 fi
 
-_md_files=$(grep -rl --include='*.md' "version-[0-9]\|الإصدار-[0-9]" .)
+_md_files=$(grep -rl --exclude-dir=.kilo --include='*.md' "version-[0-9]\|الإصدار-[0-9]" .)
 if [ -n "$_md_files" ]; then
     echo "$_md_files" | xargs sed -i \
         -e "s/version-[0-9][0-9.]*/version-$NEW_VER/g" \
@@ -88,7 +88,7 @@ grep -q "UMO_VERSION=\"$NEW_VER\"" bin/umo-install || {
 }
 
 git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh
-_md_new=$(grep -rl --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
+_md_new=$(grep -rl --exclude-dir=.kilo --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
 [ -n "$_md_new" ] && echo "$_md_new" | xargs git add
 
 git commit -m "UMO | v$NEW_VER | release: version bump and docs sync to $NEW_VER"
