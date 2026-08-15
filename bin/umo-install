@@ -365,49 +365,138 @@ _umo_refresh_container() {
     _umo_ok "Container hooks applied"
 }
 
-_umo_run_update() {
-    _umo_plate "Update"
-    if [ ! -d "$_UMO_REPO_DIR/.git" ]; then
-        _umo_err "UMO was not installed via git clone, cannot auto-update"
+_umo_check_latest_release() {
+    _rel_json="$_UMO_TERMUX_HOME/.umo/cache/latest-release.json"
+    mkdir -p "$(dirname "$_rel_json")" || return 1
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL --max-time 60 -o "$_rel_json" \
+            "https://api.github.com/repos/shadow-x78/ubuntu-modded-optimized/releases/latest" 2>/dev/null || return 1
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -T 60 -O "$_rel_json" \
+            "https://api.github.com/repos/shadow-x78/ubuntu-modded-optimized/releases/latest" 2>/dev/null || return 1
+    else
+        return 1
+    fi
+    _latest_tag=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\{0,1\}\([^"]*\)".*/\1/p' "$_rel_json" | head -1)
+    [ -n "$_latest_tag" ]
+}
+
+_umo_update_release() {
+    _umo_info "Checking for new release on GitHub..."
+    if ! _umo_check_latest_release; then
+        _umo_err "Could not reach GitHub Releases API. Check your connection and retry."
         exit 1
     fi
-
-    _umo_info "Fetching latest changes from origin/main..."
-    if ! git -C "$_UMO_REPO_DIR" fetch origin main 2>/dev/null; then
-        _umo_err "Could not reach GitHub. Check your connection and retry."
-        exit 1
-    fi
-
-    _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
-    if [ "$_behind" -eq 0 ] 2>/dev/null; then
+    if [ "$_latest_tag" = "$_UMO_VERSION" ]; then
         _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
         exit 0
     fi
+    printf "  ${_UMO_DIM}v%s -> v%s${_UMO_NC}\n" "$_UMO_VERSION" "$_latest_tag"
 
-    printf "  ${_UMO_DIM}%s new commits on main:${_UMO_NC}\n" "$_behind"
-    git -C "$_UMO_REPO_DIR" log --oneline --no-decorate HEAD..origin/main 2>/dev/null | head -10 | while IFS= read -r _line; do
-        printf "  ${_UMO_CYN}  ➜${_UMO_NC} %s\n" "$_line"
-    done
-    printf "\n"
-
-    _stashed=0
-    if [ -n "$(git -C "$_UMO_REPO_DIR" status --porcelain 2>/dev/null)" ]; then
-        _umo_warn "Local modifications detected, stashing them first"
-        git -C "$_UMO_REPO_DIR" stash push -m "umo auto-stash $(date +%Y%m%d-%H%M%S)" >/dev/null 2>&1 && _stashed=1
-    fi
-
-    if ! git -C "$_UMO_REPO_DIR" reset --hard origin/main >/dev/null 2>&1; then
-        _umo_err "Failed to apply updates"
-        [ "$_stashed" = 1 ] && git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1 || true
+    _tb_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\(.*\.tar\.gz\)".*/\1/p' "$_rel_json" | head -1)
+    _sh_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\(.*\.sha256\)".*/\1/p' "$_rel_json" | head -1)
+    if [ -z "$_tb_url" ] || [ -z "$_sh_url" ]; then
+        _umo_err "Release v$_latest_tag has no downloadable tarball"
         exit 1
     fi
 
-    if [ "$_stashed" = 1 ]; then
-        if git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1; then
-            _umo_ok "Your local changes were preserved"
-        else
-            _umo_warn "Stash kept (conflict), resolve with: git -C $_UMO_REPO_DIR stash pop"
+    _cache="$(dirname "$_rel_json")"
+    _tb_file="$_cache/$(basename "$_tb_url")"
+    _sh_file="$_cache/$(basename "$_sh_url")"
+
+    _umo_info "Downloading release v$_latest_tag..."
+    if command -v curl >/dev/null 2>&1; then
+        if ! curl -fsSL --max-time 300 -o "$_tb_file" "$_tb_url" || ! curl -fsSL --max-time 60 -o "$_sh_file" "$_sh_url"; then
+            _umo_err "Download failed"
+            exit 1
         fi
+    else
+        if ! wget -q -T 300 -O "$_tb_file" "$_tb_url" || ! wget -q -T 60 -O "$_sh_file" "$_sh_url"; then
+            _umo_err "Download failed"
+            exit 1
+        fi
+    fi
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        _actual=$(sha256sum "$_tb_file" | awk '{print $1}')
+    else
+        _actual=$(shasum -a 256 "$_tb_file" 2>/dev/null | awk '{print $1}')
+    fi
+    _expected=$(awk '{print $1}' "$_sh_file")
+    if [ -z "$_actual" ] || [ "$_actual" != "$_expected" ]; then
+        _umo_err "SHA-256 verification failed, aborting update"
+        rm -f "$_tb_file" "$_sh_file"
+        exit 1
+    fi
+    _umo_ok "SHA-256 verified"
+
+    _tmp_dir="$_UMO_REPO_DIR.new.tmp.$$"
+    rm -rf "$_tmp_dir"
+    mkdir -p "$_tmp_dir"
+    if ! tar -xzf "$_tb_file" -C "$_tmp_dir" 2>/dev/null; then
+        _umo_err "Extraction failed"
+        rm -rf "$_tmp_dir"
+        exit 1
+    fi
+    if [ ! -f "$_tmp_dir/bin/umo-install" ]; then
+        _umo_err "Release tarball is malformed, aborting update"
+        rm -rf "$_tmp_dir"
+        exit 1
+    fi
+
+    rm -rf "$_UMO_REPO_DIR.old"
+    mv "$_UMO_REPO_DIR" "$_UMO_REPO_DIR.old"
+    mv "$_tmp_dir" "$_UMO_REPO_DIR"
+    rm -rf "$_UMO_REPO_DIR.old"
+    rm -f "$_tb_file" "$_sh_file" "$_rel_json" 2>/dev/null
+    chmod +x "$_UMO_REPO_DIR/bin/umo-install" 2>/dev/null || true
+
+    _umo_ok "Release v$_latest_tag installed"
+}
+
+_umo_run_update() {
+    _umo_plate "Update"
+
+    if [ -d "$_UMO_REPO_DIR/.git" ]; then
+        _umo_info "Fetching latest changes from origin/main..."
+        if ! git -C "$_UMO_REPO_DIR" fetch origin main 2>/dev/null; then
+            _umo_err "Could not reach GitHub. Check your connection and retry."
+            exit 1
+        fi
+
+        _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
+        if [ "$_behind" -eq 0 ] 2>/dev/null; then
+            _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+            exit 0
+        fi
+
+        printf "  ${_UMO_DIM}%s new commits on main:${_UMO_NC}\n" "$_behind"
+        git -C "$_UMO_REPO_DIR" log --oneline --no-decorate HEAD..origin/main 2>/dev/null | head -10 | while IFS= read -r _line; do
+            printf "  ${_UMO_CYN}  ➜${_UMO_NC} %s\n" "$_line"
+        done
+        printf "\n"
+
+        _stashed=0
+        if [ -n "$(git -C "$_UMO_REPO_DIR" status --porcelain 2>/dev/null)" ]; then
+            _umo_warn "Local modifications detected, stashing them first"
+            git -C "$_UMO_REPO_DIR" stash push -m "umo auto-stash $(date +%Y%m%d-%H%M%S)" >/dev/null 2>&1 && _stashed=1
+        fi
+
+        if ! git -C "$_UMO_REPO_DIR" reset --hard origin/main >/dev/null 2>&1; then
+            _umo_err "Failed to apply updates"
+            [ "$_stashed" = 1 ] && git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1 || true
+            exit 1
+        fi
+
+        if [ "$_stashed" = 1 ]; then
+            if git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1; then
+                _umo_ok "Your local changes were preserved"
+            else
+                _umo_warn "Stash kept (conflict), resolve with: git -C $_UMO_REPO_DIR stash pop"
+            fi
+        fi
+    else
+        _umo_update_release
     fi
 
     _new_ver=$(sed -n 's/^export UMO_VERSION="\([^"]*\)"/\1/p' "$_UMO_REPO_DIR/bin/umo-install" 2>/dev/null)
@@ -627,7 +716,7 @@ umo_cli_parse() {
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--dir=<path>" "$UMO_NC" "Installation directory"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--ubuntu=<version>" "$UMO_NC" "Ubuntu version (22.04, 24.04)"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--perf=<mode>" "$UMO_NC" "Performance level (balanced, aggressive, off) [default: balanced]"
-                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--theme=<theme>" "$UMO_NC" "Desktop theme (umo-dark, umo-light, minimal, none)"
+                printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--theme=<theme>" "$UMO_NC" "Desktop theme (umo-dark, umo-light, none)"
                 printf "\n"
                 
                 printf "  %bEXAMPLES:%b\n" "$UMO_BOLD" "$UMO_NC"

@@ -48,11 +48,14 @@
 ## 🚀 التثبيت
 
 ```bash
-# استنساخ المشروع
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+```
+
+تنزيل آخر إصدار من GitHub (مع تحقق SHA-256) ثم تشغيل المثبِّت. للمساهمين يمكن التثبيت من الكود المصدري:
+
+```bash
 git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
-
-# تشغيل المثبِّت التفاعلي
 bash install.sh
 ```
 
@@ -112,7 +115,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | الـ Flag | الوصف |
 |----------|-------|
 | `--perf=<mode>` | تعيين مستوى الأداء (`balanced`, `aggressive`, `off`) |
-| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `minimal`, `none`) | XFCE4 الافتراضي: `umo-dark` (Orchis-Dark + Papirus-Dark + Bibata) |
+| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `umo-light`, `none`) - الافتراضي `umo-dark` (Materia-dark + أيقونات Papirus-Dark + مؤشر DMZ) |
 | `--lean` | حذف التوثيق واللغات لتوفير المساحة |
 
 ---
@@ -121,12 +124,15 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 ## 🔐 أول تشغيل
 
 ```bash
-# تشغيل Ubuntu (VNC + الصوت)
+# بدء جلسة Ubuntu (VNC + الصوت)
+umo start
+
+# أو الدخول مباشرة عبر الطرفية
 umo login
 
 # الاتصال عبر تطبيق VNC
-# العنوان  : localhost:5901
-# كلمة المرور: umo  (غيّرها فوراً!)
+# العنوان    : localhost:5901
+# كلمة المرور: ubuntu  (غيِّرها فورا!)
 ```
 
 > **غيِّر كلمة مرور VNC مباشرة بعد أول دخول:**

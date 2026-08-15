@@ -1,0 +1,5 @@
+#!/bin/sh
+tint2 &
+if [ -f /usr/share/wallpapers/umo-wallpaper.jpg ]; then
+    feh --bg-fill /usr/share/wallpapers/umo-wallpaper.jpg &
+fi

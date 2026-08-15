@@ -76,12 +76,14 @@
 <a id="desktop-environments"></a>
 ## 🖥️ بيئات سطح المكتب
 
-| البيئة | النوع | مناسبة لـ |
-|--------|-------|-----------|
-| **XFCE4** | Full DE | الاستخدام اليومي - أداء متوازن |
-| **LXDE** | Lightweight DE | الأجهزة القديمة وضعيفة الموارد |
-| **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة |
-| **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة |
+| البيئة | النوع | مناسبة لـ | تصميم UMO |
+|--------|-------|-----------|-----------|
+| **XFCE4** | Full DE | الاستخدام اليومي - أداء متوازن | بانر مصمم، نوافذ xfwm4، خلفية، قائمة whisker |
+| **LXDE** | Lightweight DE | الأجهزة القديمة وضعيفة الموارد | lxpanel مصمم، خلفية عبر pcmanfm |
+| **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة | نوافذ Clearlooks، بانر tint2، قائمة root |
+| **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة | طرفية فقط - بدون سمة |
+
+جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة GTK من Materia، أيقونات Papirus، مؤشر DMZ، خطا Inter + JetBrains Mono، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً، بالوضع الداكن أو الفاتح.
 
 **يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl عام · التحكم بالجلسات
 
@@ -91,17 +93,27 @@
 ## 🚀 البدء السريع
 
 ```bash
-# استنساخ المشروع
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+```
+
+يقوم بتنزيل آخر إصدار من GitHub (مع تحقق SHA-256) وتشغيل المثبّت. للتثبيت الصامت:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh -o get.sh && sh get.sh --no-gui --de=xfce4 --apps=full
+```
+
+### من الكود المصدري (للمساهمين)
+
+```bash
 git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
-
-# تثبيت تفاعلي (موصى به)
 bash install.sh
+```
 
-# تثبيت صامت بـ flags
-bash install.sh --no-gui --de=xfce4 --apps=full
+بعد التثبيت:
 
-# تشغيل Ubuntu
+```bash
+umo start
 umo login
 ```
 
@@ -119,7 +131,7 @@ umo login
 | `umo status` | عرض حالة الخدمات |
 | `umo login` | الدخول كـ root |
 | `umo user` | الدخول كمستخدم افتراضي |
-| `umo update` | جلب آخر الالتزامات وتحديث سكربتات الهوست وتطبيق hooks الحاوية |
+| `umo update` | جلب آخر إصدار (تثبيت الإصدار) أو الالتزامات (git clone)، وتحديث سكربتات الهوست وتطبيق hooks الحاوية |
 | `umo version` | عرض إصدار UMO الحالي |
 ### داخل Ubuntu
 
@@ -145,7 +157,8 @@ bash install.sh [OPTIONS]
   --dir=PATH                     مسار تثبيت مخصص
   --ubuntu=22.04|24.04           إصدار Ubuntu المطلوب
   --perf=balanced|aggressive|off اختيار مستوى الأداء
-  --theme=umo-dark|minimal|none  اختيار مظهر سطح المكتب (الافتراضي xfce4: umo-dark، Orchis-Dark + Papirus-Dark)
+  --theme=umo-dark|umo-light|none
+                                 اختيار مظهر سطح المكتب (الافتراضي: umo-dark)
   --lean                         حذف ملفات التوثيق واللغات لتوفير المساحة
 ```
 
@@ -182,13 +195,16 @@ UMO/
 │   ├── umo-audio.sh         # جسر PulseAudio عبر TCP
 │   ├── umo-systemctl.sh     # محاكي systemctl
 │   ├── umo-desktop.sh       # مثبِّت بيئات سطح المكتب
+│   ├── umo-theme.sh         # محرك تصميم الواجهات (كل بيئات سطح المكتب)
 │   └── umo-apps.sh          # مثبِّت مجموعات التطبيقات
 ├── config/
-│   └── xstartup             # قالب جلسة VNC
+│   ├── xstartup             # قالب جلسة VNC
+│   └── theme/               # قوالب التصميم: GTK، XFCE4، LXDE، Openbox، الخطوط، الخلفية
 ├── docs/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
 ├── install.sh               # نقطة الدخول السريعة
+├── get.sh                   # مثبِّت سطر واحد (curl | sh)
 ├── CHANGELOG.md             # سجل التغييرات
 ├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # الملف الرئيسي

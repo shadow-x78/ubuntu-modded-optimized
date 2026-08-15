@@ -76,12 +76,14 @@ Full Ubuntu on your Android device - one command, zero hassle
 <a id="desktop-environments"></a>
 ## 🖥️ Desktop Environments
 
-| Environment | Type | Best For |
-|-------------|------|----------|
-| **XFCE4** | Full DE | Daily use - balanced performance |
-| **LXDE** | Lightweight DE | Low-end and older devices |
-| **Openbox** | Window Manager | Advanced users, minimal footprint |
-| **Minimal** | CLI only | Servers and headless usage |
+| Environment | Type | Best For | UMO Design |
+|-------------|------|----------|------------|
+| **XFCE4** | Full DE | Daily use - balanced performance | Themed panel, xfwm4 windows, wallpaper, whiskermenu |
+| **LXDE** | Lightweight DE | Low-end and older devices | Themed lxpanel, pcmanfm wallpaper |
+| **Openbox** | Window Manager | Advanced users, minimal footprint | Clearlooks windows, tint2 panel, root menu |
+| **Minimal** | CLI only | Servers and headless usage | Terminal only - no theme applied |
+
+All graphical desktops get the full design system: Materi GTK theme, Papirus icons, DMZ cursors, Inter + JetBrains Mono fonts, and the UMO wallpaper - applied to **both** root and the `umo` user, in dark or light mode.
 
 **Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Generic systemctl emulator · Session Control
 
@@ -91,17 +93,27 @@ Full Ubuntu on your Android device - one command, zero hassle
 ## 🚀 Quick Start
 
 ```bash
-# Clone the repository
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+```
+
+Downloads the latest release from GitHub (SHA-256 verified) and launches the installer. For a non-interactive install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh -o get.sh && sh get.sh --no-gui --de=xfce4 --apps=full
+```
+
+### From source (contributors)
+
+```bash
 git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
-
-# Interactive install (recommended)
 bash install.sh
+```
 
-# Silent install with flags
-bash install.sh --no-gui --de=xfce4 --apps=full
+After installation:
 
-# Start Ubuntu
+```bash
+umo start
 umo login
 ```
 
@@ -119,7 +131,7 @@ umo login
 | `umo status` | Show running status of services |
 | `umo login` | Login as root |
 | `umo user` | Login as default user |
-| `umo update` | Pull latest commits, refresh host scripts, apply container hooks |
+| `umo update` | Pull latest release (release install) or commits (git clone), refresh host scripts, apply container hooks |
 | `umo version` | Display current UMO version |
 ### Inside Ubuntu
 
@@ -145,7 +157,8 @@ bash install.sh [OPTIONS]
   --dir=PATH                     Custom installation directory
   --ubuntu=22.04|24.04           Ubuntu version to install
   --perf=balanced|aggressive|off Choose performance tuning level
-  --theme=umo-dark|minimal|none  Choose desktop theme (XFCE4 default: umo-dark, Orchis-Dark + Papirus-Dark)
+  --theme=umo-dark|umo-light|none
+                                 Choose desktop theme (default: umo-dark)
   --lean                         Remove docs/man/locales to save space
 ```
 
@@ -171,8 +184,8 @@ UMO/
 │   ├── umo-start            # Session starter (Termux-side)
 │   └── umo-stop             # Session stopper (Termux-side)
 ├── lib/
-│   ├── core-ansi.sh         # ANSI colors, logging, banners, progress
-│   ├── core-ui.sh           # TUI: menus, prompts, panels
+│   ├── core-ansi.sh         # ANSI colors, logging, banners
+│   ├── core-ui.sh           # TUI: menus, prompts, confirms
 │   ├── core-system.sh       # Platform detection, storage, internet
 │   ├── core-net.sh          # Downloads, mirrors, extraction
 │   └── core-fs.sh           # Safe file ops, backups, templates
@@ -182,13 +195,16 @@ UMO/
 │   ├── umo-audio.sh         # PulseAudio TCP bridge
 │   ├── umo-systemctl.sh     # Generic systemctl emulator
 │   ├── umo-desktop.sh       # DE installer (XFCE4 / LXDE / Openbox)
+│   ├── umo-theme.sh         # Desktop design engine (all DEs)
 │   └── umo-apps.sh          # App group installer
 ├── config/
-│   └── xstartup             # VNC session template
+│   ├── xstartup             # VNC session template
+│   └── theme/               # Design templates: GTK, XFCE4, LXDE, Openbox, fonts, wallpaper
 ├── docs/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes
 ├── install.sh               # Quick-start entry point
+├── get.sh                   # One-liner release installer (curl | sh)
 ├── CHANGELOG.md             # Release history
 ├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # This file

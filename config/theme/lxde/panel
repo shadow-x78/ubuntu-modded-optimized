@@ -1,0 +1,79 @@
+Global {
+    edge=bottom
+    allign=left
+    margin=0
+    widthtype=percent
+    width=100
+    height=30
+    transparent=0
+    tintcolor=#000000
+    alpha=255
+    autohide=0
+    setdocktype=1
+    setpartialstrut=1
+    usefontcolor=0
+    fontsize=10
+    fontcolor=#ffffff
+    usefontsize=0
+    background=0
+    iconsize=22
+}
+
+Plugin {
+    type = menu
+    Config {
+        name=Menu
+        image=start-here
+        system {
+        }
+        separator {
+        }
+        item {
+            command=logout
+            image=gnome-logout
+            name=Logout
+        }
+    }
+}
+
+Plugin {
+    type = launchbar
+    Config {
+        Button {
+            id=lxterminal.desktop
+        }
+        Button {
+            id=pcmanfm.desktop
+        }
+    }
+}
+
+Plugin {
+    type = taskbar
+    expand=1
+    Config {
+        tooltips=1
+        IconsOnly=0
+        ShowAllDesks=0
+        UseMouseWheel=1
+        UseUrgencyHint=1
+        FlatButton=0
+        MaxTaskWidth=160
+        spacing=1
+    }
+}
+
+Plugin {
+    type = tray
+}
+
+Plugin {
+    type = clock
+    Config {
+        ClockFmt=%H:%M
+        TooltipFmt=%A %B %d
+        BoldFont=0
+        IconOnly=0
+        CenterText=0
+    }
+}

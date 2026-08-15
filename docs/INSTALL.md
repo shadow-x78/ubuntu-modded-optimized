@@ -48,11 +48,14 @@
 ## 🚀 Install
 
 ```bash
-# Clone the repository
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+```
+
+Downloads the latest GitHub release (SHA-256 verified) and launches the installer. For contributors, install from source instead:
+
+```bash
 git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git ~/UMO
 cd ~/UMO
-
-# Run the interactive installer
 bash install.sh
 ```
 
@@ -112,7 +115,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | Flag | Description |
 |------|-------------|
 | `--perf=<mode>` | Set performance level (`balanced`, `aggressive`, `off`) |
-| `--theme=<theme>` | Set desktop theme (`umo-dark`, `minimal`, `none`) - XFCE4 default is `umo-dark` (Orchis-Dark + Papirus-Dark + Bibata cursor) |
+| `--theme=<theme>` | Set desktop theme (`umo-dark`, `umo-light`, `none`) - default is `umo-dark` (Materia-dark GTK + Papirus-Dark icons + DMZ cursor) |
 | `--lean` | Remove docs/man/locales to save space |
 
 ---
@@ -121,12 +124,15 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 ## 🔐 First Boot
 
 ```bash
-# Start Ubuntu (VNC + Audio)
+# Start Ubuntu session (VNC + Audio)
+umo start
+
+# Or login directly in your terminal
 umo login
 
 # Connect via VNC viewer
-# Address : localhost:5901
-# Password: umo  (change this immediately!)
+# Address: localhost:5901
+# Password: ubuntu  (change this immediately!)
 ```
 
 > **Change the VNC password right after first login:**

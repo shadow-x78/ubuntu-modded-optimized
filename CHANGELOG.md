@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.6.0] - 2026-08-16
+
+### ✨ Added
+- **Full Desktop Design System:** Every graphical desktop now gets a complete bespoke theme, built exclusively from packages available in the official Ubuntu repositories — Materia GTK theme, Papirus icons, DMZ cursors, Inter + JetBrains Mono fonts, and the UMO wallpaper.
+- **Real Light Mode:** `--theme=umo-light` is now a genuine light theme (Materia-light + Papirus-Light) with per-DE panel and wallpaper colors; `umo-dark` remains the default.
+- **LXDE Design:** Themed `lxpanel` bottom panel (menu, launchers, taskbar, tray, clock), `lxsession` desktop config, and `pcmanfm` wallpaper — applied to both root and the `umo` user.
+- **Openbox Design:** `rc.xml` with Clearlooks windows and Inter titlebar fonts, a custom tint2 panel (launcher/taskbar/clock), a generated root menu, and `feh` wallpaper via autostart.
+- **One-Liner Installer:** `curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh` — downloads the latest GitHub release, verifies its SHA-256 checksum, installs to `~/.local/share/umo`, and launches the installer (interactive or `--no-gui`).
+- **Release-Based Updates:** `umo update` now auto-detects the install mode — git-clone installs keep the existing fetch/reset flow, release installs download the newest tagged tarball with SHA-256 verification and swap the install atomically.
+- `get.sh` is shipped inside every release tarball and passes all checks (shellcheck + `sh -n`) in CI.
+
+### 🐛 Fixed
+- **Broken GTK Theme:** configs referenced `Orchis-Dark` + `Bibata-Modern-Ice`, which were never installed (not available via apt) — everything silently fell back to GTK defaults. All configs now use apt-installable packages that are actually installed.
+- **Theme Not Applied to Default User:** XFCE panel/window-manager/desktop configs were written only under root's home; they are now applied to both root and the `umo` user for every DE.
+- **Dead Theme Mode:** `--theme=umo-light` previously applied the exact same files as `umo-dark` with no visual difference.
+- **xstartup Fallback:** the VNC session fallback ended with `exec twm`, which is not installed anywhere — replaced with `exec xterm`.
+- **Docs Inaccuracies:** install docs showed a wrong VNC password and missing `umo start` step; both READMEs' theme descriptions now match reality.
+
+### 🔧 Changed
+- **Theme Engine Rewrite:** `modules/umo-theme.sh` rebuilt around a mode map (dark/light) with template rendering (`umo_fs_render`) instead of static config files; `config/theme/` reorganized into `gtk-2.0/`, `gtk-3.0/`, `xfce4/`, `lxde/`, `openbox/`, `fontconfig/`, `wallpaper/`.
+- **Openbox Package Set:** added `exo-utils` (menu browser launch) alongside the existing set; XFCE keeps its dedicated install path.
+- **Security Model:** release tarballs are now SHA-256 verified by both `get.sh` and `umo update`; SECURITY.md reflects checksum verification and points users to the one-liner.
+
 ## [v4.5.0] - 2026-08-16
 
 ### 🐛 Fixed
