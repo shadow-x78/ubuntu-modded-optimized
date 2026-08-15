@@ -109,50 +109,6 @@ DIVERT
     umo_log_ok "Proot directories ready"
 }
 
-umo_proot_cmd() {
-    _user="${1:-root}"
-    _workdir="${2:-/root}"
-
-    _audio_bind=""
-    if [ -S "$UMO_TERMUX_PREFIX/root/pulse-$(id -u)/native" ]; then
-        _audio_bind="-b $UMO_TERMUX_PREFIX/root/pulse-$(id -u)/native:/root/pulse-native"
-    elif [ -S "$UMO_TERMUX_PREFIX/root/pulse-native" ]; then
-        _audio_bind="-b $UMO_TERMUX_PREFIX/root/pulse-native:/root/pulse-native"
-    fi
-
-    printf 'proot \
-        --link2symlink \
-        --sysvipc \
-        -0 \
-        -r %s \
-        -b /dev \
-        -b /proc \
-        -b /sys \
-        -b %s:/sdcard \
-        -b %s:/termux \
-        -b /data \
-        -b %s/tmp:/tmp -b %s/tmp:/dev/shm \
-        %s \
-        -w %s \
-        /usr/bin/env -i \
-        HOME=%s \
-        PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-        TERM=%s \
-        LANG=C.UTF-8 \
-        PULSE_SERVER=127.0.0.1 \
-        PULSE_LATENCY_MSEC=60 \
-        /bin/bash --login' \
-        "$UMO_PROOT_DIR" \
-        "$UMO_TERMUX_HOME" \
-        "$UMO_TERMUX_HOME" \
-        "$UMO_TERMUX_PREFIX" \
-        "$UMO_TERMUX_PREFIX" \
-        "${_audio_bind}" \
-        "$_workdir" \
-        "$_workdir" \
-        "${TERM:-xterm-256color}"
-}
-
 umo_proot_create_scripts() {
     umo_log_step "Create login wrappers"
 
@@ -256,10 +212,6 @@ if [ -n "$PS1" ]; then
     command -v neofetch >/dev/null 2>&1 && neofetch
 fi
 '
-}
-
-umo_proot_exec() {
-    "$UMO_TERMUX_HOME/umo-login.sh" -c "$*"
 }
 
 umo_proot_create_user() {

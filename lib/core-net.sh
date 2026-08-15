@@ -11,7 +11,7 @@ _UMO_NET_MIN_SIZE=1048576
 
 umo_net_mirror_list() {
     _ver="${1:-22.04}"
-    
+
     _arch=$(uname -m)
     case "$_arch" in
         aarch64|arm64) _uarch="arm64" ;;
@@ -37,7 +37,6 @@ umo_net_mirror_list() {
 }
 
 umo_net__file_size() {
-    _f="$1"
     stat -c%s "$1" 2>/dev/null || stat -f%z "$1" 2>/dev/null || echo 0
 }
 
@@ -144,51 +143,4 @@ umo_net_extract() {
     esac
 
     umo_log_ok "Extraction complete"
-}
-
-umo_net_verify_sha256() {
-    _file="$1"
-    _expected="$2"
-
-    if [ -z "$_expected" ]; then
-        umo_log_warn "No checksum provided, skipping verification"
-        return 0
-    fi
-
-    if command -v sha256sum >/dev/null 2>&1; then
-        _actual=$(sha256sum "$_file" | awk '{print $1}')
-    else
-        _actual=$(shasum -a 256 "$_file" 2>/dev/null | awk '{print $1}')
-    fi
-
-    if [ "$_actual" = "$_expected" ]; then
-        umo_log_ok "Checksum verified (SHA-256)"
-        return 0
-    else
-        umo_log_err "Checksum mismatch!"
-        umo_log_err "  Expected: $_expected"
-        umo_log_err "  Actual:   $_actual"
-        return 1
-    fi
-}
-
-umo_net_speedtest() {
-    _url="$1"
-    _start=$(date +%s)
-    _tmp="/tmp/.umo_speedtest_$$"
-
-    wget -q -O "$_tmp" "$_url" 2>/dev/null || \
-    curl -s -o "$_tmp" "$_url" 2>/dev/null || {
-        echo "0"
-        return
-    }
-
-    _size=$(stat -c%s "$_tmp" 2>/dev/null || stat -f%z "$_tmp" 2>/dev/null || echo 0)
-    _end=$(date +%s)
-    _duration=$((_end - _start))
-    rm -f "$_tmp"
-
-    [ "$_duration" -eq 0 ] && _duration=1
-    _speed=$((_size / _duration / 1024))
-    echo "$_speed"
 }

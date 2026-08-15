@@ -184,9 +184,7 @@ UMO/
 │   ├── umo-desktop.sh       # مثبِّت بيئات سطح المكتب
 │   └── umo-apps.sh          # مثبِّت مجموعات التطبيقات
 ├── config/
-│   ├── xstartup             # قالب جلسة VNC
-│   ├── bashrc.patch         # تحسينات الـ shell داخل Ubuntu
-│   └── sources.list         # قائمة مرايا Ubuntu
+│   └── xstartup             # قالب جلسة VNC
 ├── docs/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها

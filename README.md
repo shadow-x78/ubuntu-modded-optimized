@@ -180,13 +180,11 @@ UMO/
 │   ├── umo-proot.sh         # Proot container setup
 │   ├── umo-vnc.sh           # TigerVNC installation & session scripts
 │   ├── umo-audio.sh         # PulseAudio TCP bridge
-│       ├── umo-systemctl.sh     # Generic systemctl emulator
+│   ├── umo-systemctl.sh     # Generic systemctl emulator
 │   ├── umo-desktop.sh       # DE installer (XFCE4 / LXDE / Openbox)
 │   └── umo-apps.sh          # App group installer
 ├── config/
-│   ├── xstartup             # VNC session template
-│   ├── bashrc.patch         # Shell enhancements for Ubuntu
-│   └── sources.list         # Ubuntu mirror list
+│   └── xstartup             # VNC session template
 ├── docs/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes

@@ -94,10 +94,10 @@ BODY
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
         return 1
     fi
+    _rc=0
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
-        "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh"
+        "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh" || _rc=$?
     fi
-    _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
     else
@@ -210,7 +210,6 @@ printf "\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
 
-# Keep script alive as long as Xvnc or Xtigervnc is running
 while pgrep -f "Xvnc" >/dev/null 2>&1 || pgrep -f "Xtigervnc" >/dev/null 2>&1; do
     sleep 3
 done

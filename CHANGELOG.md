@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.5.0] - 2026-08-16
+
+### 🐛 Fixed
+- **Stop Banner Colors:** `bin/umo-stop` used `$_UMO_BOLD` / `$_UMO_GRN` without defining them; both are now declared so the "Session Stopped" banner renders correctly.
+- **VNC Install False Success:** `modules/umo-vnc.sh` captured the exit code of the dev-mode guard instead of the installer itself; `_rc` is now captured around the actual install run, so `UMO_DEV_MODE=1` can no longer report success for a skipped install.
+- **Container README Text:** the generated in-container `README.txt` now states that `umo update` updates the UMO tool (it previously claimed it updates packages).
+
+### 🗑️ Removed
+- **Dead Code:** 25 unreferenced functions dropped from `lib/` and `modules/umo-proot.sh` (`umo_progress`, `umo_ui_password`, `umo_net_speedtest`, `umo_proot_cmd`, `umo_banner_compact`, ...), plus ~30 unused ANSI palette variables from `lib/core-ansi.sh`.
+- **Unused Config Files:** `config/sources.list` and `config/bashrc.patch` deleted — no script consumed them; both contents are generated inline at install time.
+- **Mid-code Comments:** stripped from every shell script and the CI workflow; the 3-line file headers (shebang / license / repo URL) are retained.
+
+### 🔧 Changed
+- **Docs Sync:** README / README_AR project-structure trees and SECURITY.md no longer reference the deleted config files; fixed tree-drawing indentation for `umo-systemctl.sh` in README.md.
+
 ## [v4.4.0] - 2026-08-16
 
 ### 🔧 Changed
