@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Desktop Environment Installer (MIT License)
+# UMO - Desktop Environment Installer (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_DE_LOADED:-}" ] || return 0

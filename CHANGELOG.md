@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.4.0] - 2026-08-16
+
+### 🔧 Changed
+- **Re-licensed to GPL-3.0-or-later:** The project license moves from MIT to GPL-3.0-or-later, aligning with the author's other projects (e.g. Orbiscreen). `LICENSE` now contains the standard GPL-3.0 text; all script headers use `(GPL-3.0-or-later)`; README/README_AR/docs/SECURITY badges and license sections now reference GPL-3.0; `CONTRIBUTING.md` and the PR template header checklist updated to the new convention. Previously published release assets (v4.3.0 and earlier) remain under MIT; all future releases are GPL-3.0-or-later.
+
 ## [v4.3.0] - 2026-08-10
 
 ### ✨ Added

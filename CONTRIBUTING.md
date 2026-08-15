@@ -38,7 +38,7 @@ UMO is written in **POSIX sh** - no bashisms.
 
 ```sh
 #!/bin/sh
-# UMO - <module name> (MIT License)
+# UMO - <module name> (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 ```
 

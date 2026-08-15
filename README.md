@@ -13,8 +13,8 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.3.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
-[![License](https://img.shields.io/badge/license-MIT-dc2626?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-4.4.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
 [![Stars](https://img.shields.io/github/stars/shadow-x78/ubuntu-modded-optimized?style=flat-square&color=eab308&logo=github)](https://github.com/shadow-x78/ubuntu-modded-optimized/stargazers)
@@ -192,7 +192,7 @@ UMO/
 │   └── TROUBLESHOOTING.md   # Common issues and fixes
 ├── install.sh               # Quick-start entry point
 ├── CHANGELOG.md             # Release history
-├── LICENSE                  # MIT License
+├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # This file
 ```
 
@@ -222,7 +222,7 @@ UMO/
 <a id="license"></a>
 ## 📜 License
 
-Distributed under the [MIT License](LICENSE).
+Distributed under the [GPL-3.0 License](LICENSE).
 
 ---
 

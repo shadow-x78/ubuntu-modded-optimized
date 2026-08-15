@@ -1,5 +1,5 @@
 #!/bin/sh
-# UMO - Desktop Theme Engine (MIT License)
+# UMO - Desktop Theme Engine (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_THEME_LOADED:-}" ] || return 0

@@ -12,6 +12,6 @@ Reference the `CHANGELOG.md` entry or issue this PR belongs to.
 
 ### Checklist
 
-- [ ] File headers match UMO style (`# UMO - <module> (MIT License)` + GitHub URL).
+- [ ] File headers match UMO style (`# UMO - <module> (GPL-3.0-or-later)` + GitHub URL).
 - [ ] `CHANGELOG.md` updated with a new versioned entry.
 - [ ] Version bump in `bin/umo-install` if this is a release PR.
