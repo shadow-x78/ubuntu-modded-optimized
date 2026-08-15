@@ -23,5 +23,5 @@ case "$DE" in
     *)
         [ -x "$(command -v startxfce4)" ] && exec dbus-launch --exit-with-session startxfce4
         [ -x "$(command -v startlxde)" ]  && exec dbus-launch --exit-with-session startlxde
-        xterm & exec twm ;;
+        exec xterm ;;
 esac

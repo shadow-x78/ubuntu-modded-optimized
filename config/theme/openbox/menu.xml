@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="UMO">
+    <item label="Terminal">
+      <action name="Execute"><command>lxterminal</command></action>
+    </item>
+    <item label="File Manager">
+      <action name="Execute"><command>pcmanfm</command></action>
+    </item>
+    <item label="Web Browser">
+      <action name="Execute"><command>sh -c "exo-open --launch WebBrowser || firefox-esr || midori || true"</command></action>
+    </item>
+    <separator/>
+    <item label="Reconfigure Openbox">
+      <action name="Execute"><command>openbox --reconfigure</command></action>
+    </item>
+    <separator/>
+    <item label="Logout">
+      <action name="Exit"><prompt>yes</prompt></action>
+    </item>
+  </menu>
+</openbox_menu>

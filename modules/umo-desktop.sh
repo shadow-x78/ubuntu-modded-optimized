@@ -75,7 +75,7 @@ umo_de_xfce4() {
 umo_de_openbox() {
     umo_log_step "Install Openbox (minimal)"
     _umo_de_build 'timeout 600 apt-get install -y --no-install-recommends \
-    openbox obconf lxterminal pcmanfm tint2 feh 2>&1 | _apt_filter || true'
+    openbox obconf lxterminal pcmanfm tint2 feh exo-utils 2>&1 | _apt_filter || true'
     _run_de_installer "Openbox"
 }
 

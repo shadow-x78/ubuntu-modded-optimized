@@ -97,7 +97,7 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 
 | Area | Risk | Mitigation |
 |------|------|------------|
-| Rootfs download | Supply-chain / MITM | Only HTTPS mirrors; checksums verified where available |
+| Rootfs download | Supply-chain / MITM | HTTPS mirrors only; releases verified via SHA-256 checksums |
 | Proot execution | Container escape to Termux host | User-space proot - no root required; mounts limited to `dev`, `proc`, `sys`, `sdcard`, `termux` |
 | VNC password | Weak default (`ubuntu`) | User must change via `vncpasswd` after first login |
 | Sudo inside Ubuntu | `ubuntu` user has passwordless sudo | By design - local single-user Termux environment |
@@ -110,9 +110,9 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
    vncpasswd
    ```
 
-2. **Only install from the official repository:**
+2. **Install via the official one-liner (release verified):**
    ```bash
-   git clone https://github.com/shadow-x78/ubuntu-modded-optimized.git
+   curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
    ```
 
 3. **Keep Termux updated** via F-Droid or GitHub - not Play Store.
