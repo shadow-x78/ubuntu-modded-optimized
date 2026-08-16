@@ -19,6 +19,16 @@ All notable changes to this project will be documented in this file.
 - **Dead Theme Mode:** `--theme=umo-light` previously applied the exact same files as `umo-dark` with no visual difference.
 - **xstartup Fallback:** the VNC session fallback ended with `exec twm`, which is not installed anywhere — replaced with `exec xterm`.
 - **Docs Inaccuracies:** install docs showed a wrong VNC password and missing `umo start` step; both READMEs' theme descriptions now match reality.
+- **Installer Aborts Mid-VNC (`set -e` kills):** the installer exited entirely at the very start of the VNC phase. Root cause: `umo_log_debug` was written as `[ test ] && printf ...` and returned exit code 1 when `UMO_DEBUG` was unset, which under `set -e` terminated the whole installer. Rewritten as `if`/`return 0`.
+- **Fatal `cmd; _rc=$?` pattern under `set -e`:** the desktop, apps, theme and download paths captured exit codes with an unguarded trailing `$?`; any non-zero return aborted the installer before the capture. All converted to `cmd || _rc=$?`.
+- **`umo_run_quiet` destroyed the global cleanup trap:** it set and later cleared `trap - EXIT INT TERM`, silently disabling the installer's proot/apt/dpkg cleanup after the first spinner run. It now saves and restores the previous INT/TERM traps and never touches EXIT.
+- **Hard `umo_die` in filesystem helpers:** `umo_fs_mkdir`, `umo_fs_write`, `umo_fs_render` and `umo_fs_patch` called `umo_die` (un-catchable `exit 1`) on any write failure; they now log a warning and return an error code, letting the install continue.
+- **xstartup fallback rewritten:** the VNC session startup now falls back to a complete script (dbus-launch if available, then xfce4 → lxde → openbox → xterm → keep-alive shell) when `config/xstartup` is missing, and sets `XDG_RUNTIME_DIR`; `chmod +x` and user copies are guarded.
+- **VNC phase made non-fatal:** `umo_vnc_install` no longer returns 1 when `umo-login.sh` is absent; every VNC step degrades to a warning (missing template, missing `/usr/local/bin`, `vncpasswd` unavailable) and the phase always completes, matching the other phases.
+- **Proot prepare touched the HOST `/usr/sbin`:** the `invoke-rc.d`/`service`/`systemctl` divert loop used absolute `/usr/sbin` paths — a no-op on Termux but would corrupt a GNU/Linux host's service binaries if ever run as root; it now operates on `$UMO_PROOT_DIR/usr/sbin` and is fully guarded.
+- **Exit-trap bug:** `_umo_sigint_cleanup` invoked the undefined `umo_cursor_show` inside `sh -c`; replaced with a raw cursor escape sequence.
+- **Empty-arithmetic crash:** `umo_sys_disk_free_mb` now guards against non-numeric `df` output before arithmetic.
+- **Guarded finalize:** `umo` CLI wrapper install, start/stop script copies, cache creation and all finalize sub-steps can no longer abort the installer when Termux's `usr/bin` or a target directory is unavailable.
 
 ### 🔧 Changed
 - **Theme Engine Rewrite:** `modules/umo-theme.sh` rebuilt around a mode map (dark/light) with template rendering (`umo_fs_render`) instead of static config files; `config/theme/` reorganized into `gtk-2.0/`, `gtk-3.0/`, `xfce4/`, `lxde/`, `openbox/`, `fontconfig/`, `wallpaper/`.

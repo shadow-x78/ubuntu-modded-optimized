@@ -113,7 +113,13 @@ umo_log_ok()    { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK"   "
 umo_log_err()   { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_DANGER"  "$UMO_G_ERR"  "$UMO_NC" "$(umo_log__time)" "$*" >&2; }
 umo_log_warn()  { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_WARN"    "$UMO_G_WARN" "$UMO_NC" "$(umo_log__time)" "$*" >&2; }
 umo_log_info()  { printf "  %b%s%b  %s%s\n" "$UMO_COLOR_INFO"    "$UMO_G_INFO" "$UMO_NC" "$(umo_log__time)" "$*"; }
-umo_log_debug() { [ "${UMO_DEBUG:-0}" = "1" ] && printf "  %b%s%b  %s%s\n" "$UMO_COLOR_MUTED" "$UMO_G_DBG" "$UMO_NC" "$(umo_log__time)" "$*"; }
+umo_log_debug() {
+    if [ "${UMO_DEBUG:-0}" = "1" ]; then
+        printf "  %b%s%b  %s%s\n" "$UMO_COLOR_MUTED" "$UMO_G_DBG" "$UMO_NC" "$(umo_log__time)" "$*"
+    fi
+    return 0
+}
+
 umo_die()       { umo_log_err "$*"; exit 1; }
 
 umo_log_step()  {
@@ -163,11 +169,15 @@ umo_run_quiet() {
 
     _spin_pid=""
     _umo_spinner_cleanup() {
-        [ -n "$_spin_pid" ] && kill -KILL "$_spin_pid" 2>/dev/null
-        wait "$_spin_pid" 2>/dev/null || true
-        umo_cursor_show 2>/dev/null
+        if [ -n "$_spin_pid" ]; then
+            kill -KILL "$_spin_pid" 2>/dev/null || true
+            wait "$_spin_pid" 2>/dev/null || true
+        fi
+        umo_cursor_show 2>/dev/null || true
     }
-    trap _umo_spinner_cleanup EXIT INT TERM
+    _umo_prev_int=$(trap -p INT)
+    _umo_prev_term=$(trap -p TERM)
+    trap '_umo_spinner_cleanup; exit 130' INT TERM
 
     umo_spinner "$_label" &
     _spin_pid=$!
@@ -175,9 +185,12 @@ umo_run_quiet() {
     _rc=0
     "$@" </dev/null > "$_logfile" 2>&1 || _rc=$?
 
-    kill -KILL "$_spin_pid" 2>/dev/null
+    kill -KILL "$_spin_pid" 2>/dev/null || true
     wait "$_spin_pid" 2>/dev/null || true
     _spin_pid=""
+    trap - INT TERM
+    [ -n "$_umo_prev_int" ] && eval "$_umo_prev_int" || true
+    [ -n "$_umo_prev_term" ] && eval "$_umo_prev_term" || true
     umo_line_clear
     umo_cursor_show
 
@@ -185,7 +198,6 @@ umo_run_quiet() {
         printf "  %b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
         umo_log_file "$_label"
         rm -f "$_logfile"
-        trap - EXIT INT TERM
         return 0
     else
         printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
@@ -195,7 +207,6 @@ umo_run_quiet() {
                 printf "    %s\n" "$_line"
             done
         fi
-        trap - EXIT INT TERM
         return 1
     fi
 }

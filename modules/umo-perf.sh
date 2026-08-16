@@ -14,6 +14,8 @@ umo_perf_apt() {
     umo_log_step "Optimize APT configuration"
 
     _apt_conf="/etc/apt/apt.conf.d/99umo-speed"
+    mkdir -p "${UMO_INSTALL_DIR:?}/etc/apt/apt.conf.d" 2>/dev/null || true
+    mkdir -p "${UMO_INSTALL_DIR:?}/etc/dpkg/dpkg.cfg.d" 2>/dev/null || true
     _template="$SCRIPT_DIR/config/templates/apt-umo-speed.conf"
     if [ -f "$_template" ]; then
         cp -f "$_template" "${UMO_INSTALL_DIR:?}$_apt_conf" 2>/dev/null || true
@@ -71,8 +73,10 @@ apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
-    umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh"
-    rm -f "$UMO_INSTALL_DIR/root/debloat.sh"
+    umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh" || \
+        umo_log_warn "Debloat finished with warnings"
+    rm -f "$UMO_INSTALL_DIR/root/debloat.sh" 2>/dev/null || true
+    return 0
 }
 
 umo_perf_dns() {
@@ -102,8 +106,9 @@ rm -rf /var/lib/apt/lists/* || true
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
-    umo_run_quiet "Running APT cleanup..." "$HOME/umo-login.sh" -c "bash /root/cleanup.sh"
-    rm -f "$UMO_INSTALL_DIR/root/cleanup.sh"
+    umo_run_quiet "Running APT cleanup..." "$HOME/umo-login.sh" -c "bash /root/cleanup.sh" || \
+        umo_log_warn "APT cleanup finished with warnings"
+    rm -f "$UMO_INSTALL_DIR/root/cleanup.sh" 2>/dev/null || true
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
         umo_log_step "Remove documentation and locale data (--lean)"
@@ -164,8 +169,9 @@ xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
-    umo_run_quiet "Applying desktop tweaks..." "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh"
-    rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh"
+    umo_run_quiet "Applying desktop tweaks..." "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh" || \
+        umo_log_warn "Desktop tweaks finished with warnings"
+    rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh" 2>/dev/null || true
 
     umo_log_ok "Desktop optimizations applied"
 }
@@ -179,10 +185,11 @@ umo_perf_setup() {
     umo_perf_cleanup
 
     if [ "$UMO_DE" != "minimal" ]; then
-        umo_perf_gpu
-        umo_perf_vnc
-        umo_perf_desktop
+        umo_perf_gpu || true
+        umo_perf_vnc || true
+        umo_perf_desktop || true
     fi
 
     umo_log_ok "Performance optimizations complete"
+    return 0
 }

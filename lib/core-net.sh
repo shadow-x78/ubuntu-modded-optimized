@@ -60,14 +60,14 @@ umo_net_download() {
     umo_log_step "Download: $(basename "$_url")"
 
     if umo_sys_has_cmd wget; then
-        wget --quiet --timeout=60 --tries=3 -O "$_output" "$_url" 2>/dev/null
-        _rc=$?
+        _rc=0
+        wget --quiet --timeout=60 --tries=3 -O "$_output" "$_url" 2>/dev/null || _rc=$?
         [ "$_rc" -eq 0 ] || return 1
         umo_net__validate_file "$_output" || return 1
         return 0
     elif umo_sys_has_cmd curl; then
-        curl -L -s --max-time 300 -o "$_output" "$_url" 2>/dev/null
-        _rc=$?
+        _rc=0
+        curl -L -s --max-time 300 -o "$_output" "$_url" 2>/dev/null || _rc=$?
         [ "$_rc" -eq 0 ] || return 1
         umo_net__validate_file "$_output" || return 1
         return 0

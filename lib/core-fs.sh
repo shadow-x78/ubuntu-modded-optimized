@@ -8,11 +8,16 @@ _UMO_FS_LOADED=1
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
 umo_fs_mkdir() {
+    _fs_rc=0
     for _dir in "$@"; do
         if [ ! -d "$_dir" ]; then
-            mkdir -p "$_dir" || umo_die "Cannot create directory: $_dir"
+            if ! mkdir -p "$_dir" 2>/dev/null; then
+                umo_log_warn "Cannot create directory: $_dir"
+                _fs_rc=1
+            fi
         fi
     done
+    return $_fs_rc
 }
 
 umo_fs_write() {
@@ -20,8 +25,16 @@ umo_fs_write() {
     _content="$2"
     _tmp="${_file}.tmp.$$"
 
-    printf '%s' "$_content" > "$_tmp" || umo_die "Cannot write: $_tmp"
-    mv -f "$_tmp" "$_file" || umo_die "Cannot finalize: $_file"
+    if ! printf '%s' "$_content" > "$_tmp" 2>/dev/null; then
+        umo_log_warn "Cannot write: $_tmp"
+        return 1
+    fi
+    if ! mv -f "$_tmp" "$_file" 2>/dev/null; then
+        umo_log_warn "Cannot finalize: $_file"
+        rm -f "$_tmp" 2>/dev/null || true
+        return 1
+    fi
+    return 0
 }
 
 umo_fs_backup() {
@@ -41,7 +54,10 @@ umo_fs_patch() {
     _content="$3"
 
     if [ ! -f "$_file" ]; then
-        touch "$_file"
+        touch "$_file" 2>/dev/null || {
+            umo_log_warn "Cannot create patch target: $_file"
+            return 0
+        }
     fi
 
     if grep -q "$_marker" "$_file" 2>/dev/null; then
@@ -50,8 +66,12 @@ umo_fs_patch() {
     fi
 
     umo_fs_backup "$_file"
-    printf '\n%s\n%s\n' "$_marker" "$_content" >> "$_file"
-    umo_log_ok "Patched: $_file"
+    if printf '\n%s\n%s\n' "$_marker" "$_content" >> "$_file" 2>/dev/null; then
+        umo_log_ok "Patched: $_file"
+    else
+        umo_log_warn "Could not patch: $_file"
+    fi
+    return 0
 }
 
 umo_fs_render() {
@@ -60,7 +80,8 @@ umo_fs_render() {
     shift 2
 
     if [ ! -f "$_template" ]; then
-        umo_die "Template not found: $_template"
+        umo_log_warn "Template not found: $_template"
+        return 1
     fi
 
     _content=$(cat "$_template")
@@ -77,5 +98,6 @@ umo_fs_render() {
         umo_log_warn "Unreplaced placeholders in $_output: $_remaining"
     fi
 
-    umo_fs_write "$_output" "$_content"
+    umo_fs_write "$_output" "$_content" || return 1
+    return 0
 }

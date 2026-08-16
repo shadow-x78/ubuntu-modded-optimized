@@ -90,9 +90,9 @@ BODY
     fi
     printf "  %b>%b  Installing TigerVNC...\n" "$UMO_B_CYAN" "$UMO_NC"
     if [ ! -x "$HOME/umo-login.sh" ]; then
-        umo_log_err "umo-login.sh not executable - VNC install skipped"
-        rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
-        return 1
+        umo_log_warn "umo-login.sh not found/executable - VNC install skipped"
+        rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
+        return 0
     fi
     _rc=0
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
@@ -103,14 +103,18 @@ BODY
     else
         printf "  %b%s%b  TigerVNC installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
     fi
-    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh"
+    rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
+    return 0
 }
 
 umo_vnc_configure() {
     umo_log_step "Configure VNC"
 
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
-    umo_fs_mkdir "$_vnc_dir"
+    if ! mkdir -p "$_vnc_dir" 2>/dev/null; then
+        umo_log_warn "Cannot create $_vnc_dir - VNC configuration skipped"
+        return 0
+    fi
 
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
@@ -118,28 +122,59 @@ umo_vnc_configure() {
             "UMO_VERSION" "${UMO_VERSION:-4.6.0}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
+    else
+        umo_log_warn "config/xstartup template missing - writing fallback session"
+        cat > "$_vnc_dir/xstartup" << 'XFALL'
+#!/bin/sh
+export PULSE_SERVER=127.0.0.1
+export DISPLAY=:1
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp/runtime-$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null || true
+chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+_start_session() {
+    if command -v dbus-launch >/dev/null 2>&1; then
+        exec dbus-launch --exit-with-session "$@"
     fi
-    chmod +x "$_vnc_dir/xstartup"
+    exec "$@"
+}
+command -v startxfce4 >/dev/null 2>&1 && _start_session startxfce4
+command -v startlxde  >/dev/null 2>&1 && _start_session startlxde
+command -v openbox-session >/dev/null 2>&1 && _start_session openbox-session
+command -v xterm >/dev/null 2>&1 && exec xterm
+exec /bin/sh -c "while :; do sleep 3600; done"
+XFALL
+    fi
+    [ -f "$_vnc_dir/xstartup" ] && chmod +x "$_vnc_dir/xstartup" 2>/dev/null || true
 
     if [ -d "${UMO_INSTALL_DIR}/home/umo" ]; then
         _user_vnc="${UMO_INSTALL_DIR}/home/umo/.vnc"
-        umo_fs_mkdir "$_user_vnc"
-        cp "$_vnc_dir/xstartup" "$_user_vnc/xstartup"
-        chmod +x "$_user_vnc/xstartup"
-        chown -R 1000:1000 "$_user_vnc" 2>/dev/null || true
+        if mkdir -p "$_user_vnc" 2>/dev/null && [ -f "$_vnc_dir/xstartup" ]; then
+            cp -f "$_vnc_dir/xstartup" "$_user_vnc/xstartup" 2>/dev/null || true
+            chmod +x "$_user_vnc/xstartup" 2>/dev/null || true
+            chown -R 1000:1000 "$_user_vnc" 2>/dev/null || true
+        fi
     fi
 
     _vnc_pass="${UMO_VNC_PASSWORD:-ubuntu}"
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null || true
+        if [ -x "$HOME/umo-login.sh" ]; then
+            "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null </dev/null || \
+                umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+        fi
     fi
 
     umo_log_ok "VNC configured"
+    return 0
 }
 
 umo_vnc_create_scripts() {
     umo_log_step "Create VNC scripts"
+
+    if ! mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
+        umo_log_warn "Cannot create /usr/local/bin - VNC helper scripts skipped"
+        return 0
+    fi
 
     cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc" << 'EOF'
 #!/bin/sh

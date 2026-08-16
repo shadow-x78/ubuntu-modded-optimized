@@ -79,9 +79,9 @@ force-unsafe-io
 DPCFG
 
     for _f in invoke-rc.d service systemctl; do
-        if [ -x "/usr/sbin/$_f" ] && [ ! -L "/usr/sbin/$_f" ]; then
-            mv "/usr/sbin/$_f" "/usr/sbin/$_f.real" 2>/dev/null || true
-            ln -sf /bin/true "/usr/sbin/$_f"
+        if [ -x "$UMO_PROOT_DIR/usr/sbin/$_f" ] && [ ! -L "$UMO_PROOT_DIR/usr/sbin/$_f" ]; then
+            mv "$UMO_PROOT_DIR/usr/sbin/$_f" "$UMO_PROOT_DIR/usr/sbin/$_f.real" 2>/dev/null || true
+            ln -sf /bin/true "$UMO_PROOT_DIR/usr/sbin/$_f" 2>/dev/null || true
         fi
     done
 
