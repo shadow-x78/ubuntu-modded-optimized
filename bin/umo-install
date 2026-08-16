@@ -52,8 +52,11 @@ umo_phase_deps() {
         command -v pkg >/dev/null 2>&1 && _pkg_cmd="pkg install -y"
         $_pkg_cmd proot-distro wget tar pulseaudio x11-repo tur-repo git curl unzip >/dev/null 2>&1 || true
         $_pkg_cmd virglrenderer-android termux-x11-nightly >/dev/null 2>&1 || true
+        return 0
     }
-    umo_run_quiet "Installing dependencies" _install_deps
+    umo_run_quiet "Installing dependencies" _install_deps || \
+        umo_log_warn "Some dependencies could not be installed yet"
+    return 0
 }
 
 umo_phase_config() {
@@ -112,7 +115,9 @@ umo_phase_config() {
 umo_phase_download() {
     umo_ui_header "Ubuntu RootFS"
     export UMO_CACHE_DIR="$HOME/.umo/cache"
-    umo_fs_mkdir "$UMO_CACHE_DIR"
+    if ! mkdir -p "$UMO_CACHE_DIR" 2>/dev/null; then
+        umo_die "Cannot create cache directory: $UMO_CACHE_DIR"
+    fi
 
     _arch=$(uname -m)
     case "$_arch" in
@@ -135,35 +140,45 @@ umo_phase_download() {
 
 umo_phase_proot() {
     umo_ui_header "Proot Container"
-    umo_run_quiet "Configuring Proot Container..." umo_proot_setup
-    umo_run_quiet "Setting up Container User..." umo_proot_create_user
+    umo_run_quiet "Configuring Proot Container..." umo_proot_setup || \
+        umo_die "Proot container setup failed - check ~/.umo/logs/ for details"
+    umo_run_quiet "Setting up Container User..." umo_proot_create_user || \
+        umo_log_warn "Container user setup finished with warnings"
+    return 0
 }
 
 umo_phase_vnc() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping VNC (minimal mode)."; return 0; }
     umo_ui_header "VNC Server"
-    umo_vnc_setup
+    umo_vnc_setup || umo_log_warn "VNC setup finished with warnings (installation continues)"
+    return 0
 }
 
 umo_phase_audio() {
     umo_ui_header "Audio Bridge"
-    umo_run_quiet "Configuring Audio Bridge..." umo_audio_setup
+    umo_run_quiet "Configuring Audio Bridge..." umo_audio_setup || \
+        umo_log_warn "Audio bridge setup finished with warnings"
+    return 0
 }
 
 umo_phase_systemctl() {
     umo_ui_header "Systemctl Emulator"
-    umo_run_quiet "Configuring Systemctl Emulator..." umo_systemctl_setup
+    umo_run_quiet "Configuring Systemctl Emulator..." umo_systemctl_setup || \
+        umo_log_warn "Systemctl emulator setup finished with warnings"
+    return 0
 }
 
 umo_phase_desktop() {
     [ "$UMO_DE" = "minimal" ] && { umo_log_info "Skipping desktop (minimal mode)."; return 0; }
     umo_ui_header "Desktop Environment"
-    umo_de_install
+    umo_de_install || umo_log_warn "Desktop installation finished with warnings"
+    return 0
 }
 
 umo_phase_apps() {
     umo_ui_header "Applications"
-    umo_apps_install
+    umo_apps_install || umo_log_warn "Application installation finished with warnings"
+    return 0
 }
 
 umo_phase_finalize() {
@@ -176,18 +191,20 @@ umo_phase_finalize() {
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-updates main restricted universe multiverse' \
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-backports main restricted universe multiverse' \
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-security main restricted universe multiverse' \
-        > \"$UMO_INSTALL_DIR/etc/apt/sources.list\""
-    umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo"
-    umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a"
-    umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo"
-    umo_run_quiet "Restoring service binaries..." "$HOME/umo-login.sh" -c "
-        for _f in invoke-rc.d service systemctl; do
-            if [ -L \"/usr/sbin/\$_f\" ] && [ -f \"/usr/sbin/\$_f.real\" ]; then
-                rm -f \"/usr/sbin/\$_f\"
-                mv \"/usr/sbin/\$_f.real\" \"/usr/sbin/\$_f\"
-            fi
-        done
-    "
+        > \"$UMO_INSTALL_DIR/etc/apt/sources.list\"" || true
+    if [ -x "$HOME/umo-login.sh" ]; then
+        umo_run_quiet "Installing dependencies..." "$HOME/umo-login.sh" -c "apt-get install -y sudo" || true
+        umo_run_quiet "Configuring packages..." "$HOME/umo-login.sh" -c "dpkg --configure -a" || true
+        umo_run_quiet "Setting up users..." "$HOME/umo-login.sh" -c "usermod -aG sudo umo" || true
+        umo_run_quiet "Restoring service binaries..." "$HOME/umo-login.sh" -c "
+            for _f in invoke-rc.d service systemctl; do
+                if [ -L \"/usr/sbin/\$_f\" ] && [ -f \"/usr/sbin/\$_f.real\" ]; then
+                    rm -f \"/usr/sbin/\$_f\"
+                    mv \"/usr/sbin/\$_f.real\" \"/usr/sbin/\$_f\"
+                fi
+            done
+        " || true
+    fi
 
     _cplt_body='export DEBIAN_FRONTEND=noninteractive
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
@@ -217,17 +234,28 @@ fi'
         _src="$SCRIPT_DIR/bin/umo-$_script"
         _dst="$HOME/umo-$_script.sh"
         if [ -f "$_src" ]; then
-            cp -f "$_src" "$_dst"
-            chmod +x "$_dst"
+            cp -f "$_src" "$_dst" 2>/dev/null || {
+                umo_log_warn "Could not install umo-$_script.sh"
+                continue
+            }
+            chmod +x "$_dst" 2>/dev/null || true
         fi
     done
 
-    cat > "$HOME/../usr/bin/umo" << UMOCMD
+    _umo_cli_dir="$(cd "$HOME/.." 2>/dev/null && pwd)/usr/bin"
+    _umo_cli_target="$_umo_cli_dir/umo"
+    if [ ! -d "$_umo_cli_dir" ] && ! mkdir -p "$_umo_cli_dir" 2>/dev/null; then
+        umo_log_warn "Termux bin directory not found, 'umo' command wrapper skipped"
+        _umo_cli_target=""
+    fi
+
+    if [ -n "$_umo_cli_target" ]; then
+    cat > "$_umo_cli_target" << UMOCMD
 #!/bin/sh
 _UMO_VERSION="${UMO_VERSION}"
 _UMO_REPO_DIR="${SCRIPT_DIR}"
 UMOCMD
-    cat >> "$HOME/../usr/bin/umo" << 'UMOCMD'
+    cat >> "$_umo_cli_target" << 'UMOCMD'
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
 _UMO_DIM='\033[2m'
@@ -619,9 +647,11 @@ case "$1" in
         ;;
 esac
 UMOCMD
-    chmod +x "$HOME/../usr/bin/umo"
+    chmod +x "$_umo_cli_target" 2>/dev/null || true
+    fi
 
     umo_log_ok "Finalized"
+    return 0
 }
 
 umo_phase_summary() {
@@ -629,7 +659,7 @@ umo_phase_summary() {
     [ -z "$_ip" ] && _ip="127.0.0.1"
 
     umo_screen_clear
-    umo_banner
+    umo_banner || true
     umo_rule
 
     printf "\n  %b%bInstallation Complete%b\n" "$UMO_BOLD" "$UMO_COLOR_SUCCESS" "$UMO_NC"
@@ -734,11 +764,12 @@ umo_phase_perf() {
     [ "$UMO_PERF_MODE" = "off" ] && { umo_log_info "Performance tuning disabled."; return 0; }
     umo_ui_header "Performance Tuning"
     if command -v umo_perf_setup >/dev/null 2>&1; then
-        umo_perf_setup
+        umo_perf_setup || umo_log_warn "Performance tuning finished with warnings"
         umo_log_ok "Performance optimizations applied (mode: $UMO_PERF_MODE)"
     else
         umo_log_warn "Performance module not available, skipping"
     fi
+    return 0
 }
 
 . "$UMO_MOD_DIR/umo-theme.sh" 2>/dev/null || true
@@ -748,11 +779,12 @@ umo_phase_theme() {
     umo_ui_header "Desktop Theme"
     export SCRIPT_DIR
     if command -v umo_theme_setup >/dev/null 2>&1; then
-        umo_theme_setup
+        umo_theme_setup || umo_log_warn "Theme setup finished with warnings"
         umo_log_ok "Desktop theme applied ($UMO_THEME)"
     else
         umo_log_warn "Theme module not available, skipping"
     fi
+    return 0
 }
 
 umo_main() {
@@ -778,8 +810,8 @@ umo_main() {
             pkill -KILL -f 'divert-triggers.sh'         2>/dev/null || true
             pkill -KILL -f 'apt-get'                     2>/dev/null || true
             pkill -KILL -f 'dpkg'                        2>/dev/null || true
-            umo_cursor_show 2>/dev/null
-        " 2>/dev/null
+        " 2>/dev/null || true
+        printf '\033[?25h' 2>/dev/null || true
         exit "$_umo_exit_code"
     }
     trap _umo_sigint_cleanup EXIT INT TERM HUP

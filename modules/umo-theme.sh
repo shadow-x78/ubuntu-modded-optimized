@@ -53,8 +53,8 @@ dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
     printf "  %b>%b  Installing theme packages...\n" "$UMO_B_CYAN" "$UMO_NC"
-    "$HOME/umo-login.sh" -c "bash /root/install-theme.sh"
-    _rc=$?
+    _rc=0
+    "$HOME/umo-login.sh" -c "bash /root/install-theme.sh" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  Theme packages installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
     else
@@ -105,11 +105,14 @@ umo_theme_apply_wallpaper() {
     _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-wallpaper.jpg"
 
     if [ -f "$_wp_src" ]; then
-        umo_fs_mkdir "$UMO_INSTALL_DIR/usr/share/wallpapers"
-        cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg"
+        if mkdir -p "$UMO_INSTALL_DIR/usr/share/wallpapers" 2>/dev/null; then
+            cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg" 2>/dev/null || \
+                umo_log_warn "Could not copy wallpaper"
+        fi
     else
         umo_log_info "No wallpaper file found, continuing without wallpaper"
     fi
+    return 0
 }
 
 umo_theme_apply_xfce() {
@@ -228,21 +231,22 @@ umo_theme_setup() {
 
     _umo_theme_mode_setup
 
-    umo_theme_packages
-    umo_theme_apply_fonts
-    umo_theme_apply_wallpaper
+    umo_theme_packages || true
+    umo_theme_apply_fonts || true
+    umo_theme_apply_wallpaper || true
 
     if [ "$UMO_DE" != "minimal" ]; then
-        umo_theme_apply_gtk
+        umo_theme_apply_gtk || true
     fi
 
     case "$UMO_DE" in
-        xfce4|xfce) umo_theme_apply_xfce ;;
-        lxde)       umo_theme_apply_lxde ;;
-        openbox)    umo_theme_apply_openbox ;;
+        xfce4|xfce) umo_theme_apply_xfce || true ;;
+        lxde)       umo_theme_apply_lxde || true ;;
+        openbox)    umo_theme_apply_openbox || true ;;
     esac
 
-    umo_theme_fix_ownership
+    umo_theme_fix_ownership || true
 
     umo_log_ok "Desktop theme applied"
+    return 0
 }

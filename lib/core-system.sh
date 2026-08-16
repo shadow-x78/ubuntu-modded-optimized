@@ -65,6 +65,9 @@ umo_sys_disk_free_mb() {
     _path="${1:-$HOME}"
     _kb=$(df -k "$_path" 2>/dev/null | awk 'NR==2 {print $4}')
     [ -z "$_kb" ] && _kb=$(df "$_path" 2>/dev/null | awk 'NR==2 {print $4}')
+    case "$_kb" in
+        ''|*[!0-9]*) _kb=0 ;;
+    esac
     echo "$((_kb / 1024))"
 }
 

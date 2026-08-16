@@ -24,7 +24,10 @@ umo_audio_install_termux() {
 umo_audio_configure() {
     umo_log_step "Configure PulseAudio bridge"
 
-    mkdir -p "$UMO_TERMUX_PREFIX/etc/pulse"
+    if ! mkdir -p "$UMO_TERMUX_PREFIX/etc/pulse" 2>/dev/null; then
+        umo_log_warn "Cannot write PulseAudio config dir"
+        return 0
+    fi
     _pa_config="$UMO_TERMUX_PREFIX/etc/pulse/default.pa"
 
     if [ -f "$_pa_config" ] && ! grep -q "UMO Audio" "$_pa_config" 2>/dev/null; then
@@ -34,12 +37,14 @@ load-module module-native-protocol-tcp auth-anonymous=1
 EOF
     fi
 
-    mkdir -p "$UMO_TERMUX_PREFIX/root/pulse-runtime"
+    mkdir -p "$UMO_TERMUX_PREFIX/root/pulse-runtime" 2>/dev/null || true
 
     umo_log_ok "PulseAudio bridge configured"
+    return 0
 }
 
 umo_audio_setup() {
-    umo_audio_install_termux
-    umo_audio_configure
+    umo_audio_install_termux || true
+    umo_audio_configure || true
+    return 0
 }

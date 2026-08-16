@@ -71,8 +71,8 @@ _run_installer() {
     printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
     printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
-    "$HOME/umo-login.sh" -c "bash /root/install-apps.sh"
-    _rc=$?
+    _rc=0
+    "$HOME/umo-login.sh" -c "bash /root/install-apps.sh" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
     else
