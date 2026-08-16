@@ -144,7 +144,9 @@ command -v xterm >/dev/null 2>&1 && exec xterm
 exec /bin/sh -c "while :; do sleep 3600; done"
 XFALL
     fi
-    [ -f "$_vnc_dir/xstartup" ] && chmod +x "$_vnc_dir/xstartup" 2>/dev/null || true
+    if [ -f "$_vnc_dir/xstartup" ]; then
+        chmod +x "$_vnc_dir/xstartup" 2>/dev/null || true
+    fi
 
     if [ -d "${UMO_INSTALL_DIR}/home/umo" ]; then
         _user_vnc="${UMO_INSTALL_DIR}/home/umo/.vnc"

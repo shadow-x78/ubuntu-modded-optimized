@@ -60,6 +60,7 @@ else
 fi
 
 UMO_GLYPH_SUPPORT=0
+_UMO_SPINNER_PID=""
 if [ -z "${UMO_ASCII:-}" ]; then
     case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
         *UTF-8*|*utf8*) [ -t 1 ] && UMO_GLYPH_SUPPORT=1 ;;
@@ -164,40 +165,21 @@ umo_run_quiet() {
     _label="$1"
     shift
     _logdir="${UMO_LOG_DIR:-$HOME/.umo/logs}"
-    mkdir -p "$_logdir"
+    mkdir -p "$_logdir" 2>/dev/null || true
     _logfile="$_logdir/umo-quiet-$$.log"
 
-    _spin_pid=""
-    _umo_spinner_cleanup() {
-        if [ -n "$_spin_pid" ]; then
-            kill -KILL "$_spin_pid" 2>/dev/null || true
-            wait "$_spin_pid" 2>/dev/null || true
-        fi
-        umo_cursor_show 2>/dev/null || true
-    }
-    _umo_prev_int=$(trap -p INT)
-    _umo_prev_term=$(trap -p TERM)
-    trap '_umo_spinner_cleanup; exit 130' INT TERM
-
     umo_spinner "$_label" &
-    _spin_pid=$!
+    _UMO_SPINNER_PID=$!
 
     _rc=0
     "$@" </dev/null > "$_logfile" 2>&1 || _rc=$?
 
-    kill -KILL "$_spin_pid" 2>/dev/null || true
-    wait "$_spin_pid" 2>/dev/null || true
-    _spin_pid=""
-    trap - INT TERM
-    [ -n "$_umo_prev_int" ] && eval "$_umo_prev_int" || true
-    [ -n "$_umo_prev_term" ] && eval "$_umo_prev_term" || true
-    umo_line_clear
-    umo_cursor_show
+    umo_spinner_stop
 
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  %s\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
         umo_log_file "$_label"
-        rm -f "$_logfile"
+        rm -f "$_logfile" 2>/dev/null || true
         return 0
     else
         printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
@@ -209,6 +191,16 @@ umo_run_quiet() {
         fi
         return 1
     fi
+}
+
+umo_spinner_stop() {
+    if [ -n "${_UMO_SPINNER_PID:-}" ]; then
+        kill -KILL "$_UMO_SPINNER_PID" 2>/dev/null || true
+        wait "$_UMO_SPINNER_PID" 2>/dev/null || true
+        _UMO_SPINNER_PID=""
+    fi
+    umo_line_clear
+    umo_cursor_show 2>/dev/null || true
 }
 
 umo_term_cols() {
