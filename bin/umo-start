@@ -3,6 +3,10 @@
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
+[ -d "$UMO_SCRIPT_HOME" ] || UMO_SCRIPT_HOME="$TERMUX_HOME"
+UMO_LOGIN="$UMO_SCRIPT_HOME/umo-login.sh"
+[ -x "$UMO_LOGIN" ] || UMO_LOGIN="$TERMUX_HOME/umo-login.sh"
 
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
@@ -49,7 +53,7 @@ if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then
     printf "\n"
     printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
     printf "\n"
-    exec "$TERMUX_HOME/umo-login.sh" -c "export DISPLAY=:0; export XDG_RUNTIME_DIR=${TMPDIR:-/tmp}; bash"
+    exec "$UMO_LOGIN" -c "export DISPLAY=:0; export XDG_RUNTIME_DIR=${TMPDIR:-/tmp}; bash"
 else
     printf "\n${_UMO_PRI}"
     printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
@@ -62,7 +66,7 @@ else
 
     printf "  %b[ ⚙ ] Initializing UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
-    nohup "$TERMUX_HOME/umo-login.sh" -c "umo-startvnc" >/dev/null 2>&1 &
+    nohup "$UMO_LOGIN" -c "umo-startvnc" >/dev/null 2>&1 &
     sleep 3
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')

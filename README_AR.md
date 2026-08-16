@@ -93,13 +93,13 @@
 ## 🚀 البدء السريع
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
 ```
 
 يقوم بتنزيل آخر إصدار من GitHub (مع تحقق SHA-256) وتشغيل المثبّت. للتثبيت الصامت:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh -o get.sh && sh get.sh --no-gui --de=xfce4 --apps=full
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh -o bash.sh && bash bash.sh --no-gui --de=xfce4 --apps=full
 ```
 
 ### من الكود المصدري (للمساهمين)
@@ -131,8 +131,13 @@ umo login
 | `umo status` | عرض حالة الخدمات |
 | `umo login` | الدخول كـ root |
 | `umo user` | الدخول كمستخدم افتراضي |
+| `umo run "<cmd>"` | تنفيذ أمر واحد داخل الحاوية |
+| `umo backup [dir]` | أرشفة جذر نظام Ubuntu |
 | `umo update` | جلب آخر إصدار (تثبيت الإصدار) أو الالتزامات (git clone)، وتحديث سكربتات الهوست وتطبيق hooks الحاوية |
+| `umo uninstall` | إزالة UMO بالكامل (الجذر، سكربتات الهوست، أمر `umo`، والـ aliases) |
 | `umo version` | عرض إصدار UMO الحالي |
+
+> سكربتات الهوست (`umo-login.sh`، `umo-start.sh`، `umo-stop.sh`، `umo-vnc-*.sh`، `aliases.sh`) تُثبَّت في `~/.umo/` — فيبقى مجلد Termux الرئيسي نظيفًا. يضيف المثبّت سطرًا في ملف الـ shell rc يستدعي `~/.umo/aliases.sh`، فتصبح `umo-start` و`umo-stop` و`umo-startvnc` و`umo-stopvnc` و`umo-login` و`umo-user` أوامر مباشرة.
 ### داخل Ubuntu
 
 | الأمر | الوصف |
@@ -204,7 +209,7 @@ UMO/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
 ├── install.sh               # نقطة الدخول السريعة
-├── get.sh                   # مثبِّت سطر واحد (curl | sh)
+├── bash.sh                  # مثبِّت سطر واحد (curl | bash)
 ├── CHANGELOG.md             # سجل التغييرات
 ├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # الملف الرئيسي
