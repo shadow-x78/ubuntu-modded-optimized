@@ -48,7 +48,7 @@
 ## 🚀 Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh | bash
 ```
 
 Downloads the latest GitHub release (SHA-256 verified) and launches the installer. For contributors, install from source instead:

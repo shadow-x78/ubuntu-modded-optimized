@@ -93,13 +93,13 @@ All graphical desktops get the full design system: Materi GTK theme, Papirus ico
 ## 🚀 Quick Start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh | bash
 ```
 
 Downloads the latest release from GitHub (SHA-256 verified) and launches the installer. For a non-interactive install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh -o bash.sh && bash bash.sh --no-gui --de=xfce4 --apps=full
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh -o umo.sh && bash umo.sh --no-gui --de=xfce4 --apps=full
 ```
 
 ### From source (contributors)
@@ -209,7 +209,7 @@ UMO/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes
 ├── install.sh               # Quick-start entry point
-├── bash.sh                  # One-liner release installer (curl | bash)
+├── umo.sh                   # One-liner release installer (curl | bash)
 ├── CHANGELOG.md             # Release history
 ├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # This file

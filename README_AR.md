@@ -93,13 +93,13 @@
 ## 🚀 البدء السريع
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh | bash
 ```
 
 يقوم بتنزيل آخر إصدار من GitHub (مع تحقق SHA-256) وتشغيل المثبّت. للتثبيت الصامت:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh -o bash.sh && bash bash.sh --no-gui --de=xfce4 --apps=full
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh -o umo.sh && bash umo.sh --no-gui --de=xfce4 --apps=full
 ```
 
 ### من الكود المصدري (للمساهمين)
@@ -209,7 +209,7 @@ UMO/
 │   ├── INSTALL.md           # دليل التثبيت التفصيلي
 │   └── TROUBLESHOOTING.md   # المشاكل الشائعة وحلولها
 ├── install.sh               # نقطة الدخول السريعة
-├── bash.sh                  # مثبِّت سطر واحد (curl | bash)
+├── umo.sh                   # مثبِّت سطر واحد (curl | bash)
 ├── CHANGELOG.md             # سجل التغييرات
 ├── LICENSE                  # GPL-3.0-or-later
 └── README.md                # الملف الرئيسي
