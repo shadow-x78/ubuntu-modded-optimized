@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.7.0] - 2026-08-16
+
+### ✨ Added
+- **`umo uninstall`:** full removal — Ubuntu rootfs, `~/.umo` host scripts/cache/logs, the `umo` command in `$PREFIX/usr/bin`, and the aliases block in `.bashrc`/`.zshrc`. Shows exactly what will be removed and asks for confirmation (`UMO_UNINSTALL_YES=1` skips the prompt). `umo-uninstall` is also listed in `umo --help`.
+- **Host aliases file:** the installer writes `~/.umo/aliases.sh` (`umo-start`, `umo-stop`, `umo-startvnc`, `umo-stopvnc`, `umo-login`, `umo-user`) and sources it from `.bashrc`/`.zshrc`, so the shell exposes plain commands instead of loose files.
+- **`umo run` / `umo backup` documented** in both READMEs' command tables.
+
+### 🔧 Changed
+- **Clean Termux home:** all host-side scripts (`umo-login.sh`, `umo-user.sh`, `umo-start.sh`, `umo-stop.sh`, `umo-vnc-start.sh`, `umo-vnc-stop.sh`, `aliases.sh`) now live in `~/.umo/` instead of `$HOME`. Legacy home copies are removed automatically on install and by `umo update`. The `umo` CLI, session controllers (`umo start/stop/vnc/login/user`) and all modules locate scripts in `~/.umo/` with a fallback to `$HOME` for pre-4.7 installs.
+- **Rename `get.sh` → `bash.sh`:** the one-liner release installer is now fetched from `main/bash.sh` (`curl ... main/bash.sh | bash`); READMEs, INSTALL docs, SECURITY.md, CI, release workflow and the tarball contents all follow.
+- **Finalizing phase can no longer hang:** every in-container finalize step (`apt-get install sudo`, `dpkg --configure -a`, `usermod`, service restore, VNC password) now runs with `DEBIAN_FRONTEND=noninteractive`, stdin from `/dev/null`, and a hard `timeout` (120–900s per step), so a stuck dpkg/proot session is killed instead of spinning forever.
+- **Installer config is exported before modules load:** `--dir=`, `--de=`, `--apps=`, `--perf=`, `--theme=` now propagate reliably to every module (they were previously read by modules before CLI parsing could override them).
+- **`umo-login.sh` audio socket detection** now also checks `$PREFIX/tmp/pulse-<uid>/native` (Termux's default socket location) in addition to `$PREFIX/root/...`.
+
+### 🐛 Fixed
+- **Finalizing spinner hang:** `Installing dependencies...` / `Configuring packages...` could spin forever waiting on interactive dpkg prompts inside proot; all such calls are now timed and non-interactive.
+- **`umo user`/`umo vnc` resilience:** subcommands fall back to the legacy `$HOME` locations when `~/.umo` scripts are missing (pre-4.7 installs keep working until reinstalled).
+
 ## [v4.6.0] - 2026-08-16
 
 ### ✨ Added
