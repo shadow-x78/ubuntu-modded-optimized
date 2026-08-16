@@ -3,6 +3,10 @@
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
+[ -d "$UMO_SCRIPT_HOME" ] || UMO_SCRIPT_HOME="$TERMUX_HOME"
+UMO_LOGIN="$UMO_SCRIPT_HOME/umo-login.sh"
+[ -x "$UMO_LOGIN" ] || UMO_LOGIN="$TERMUX_HOME/umo-login.sh"
 
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
@@ -21,7 +25,7 @@ printf "${_UMO_NC}\n"
 
 printf "  %b[ ⚙ ] Stopping UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
-"$TERMUX_HOME/umo-login.sh" -c "umo-stopvnc" >/dev/null 2>&1 || true
+"$UMO_LOGIN" -c "umo-stopvnc" >/dev/null 2>&1 || true
 
 for _proc in Xvnc Xtigervnc termux-x11 dbus-daemon pulseaudio dconf-service xfce4-session proot; do
     pkill -9 -f "$_proc" 2>/dev/null || true

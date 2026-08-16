@@ -48,7 +48,7 @@
 ## 🚀 التثبيت
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/get.sh | sh
+curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
 ```
 
 تنزيل آخر إصدار من GitHub (مع تحقق SHA-256) ثم تشغيل المثبِّت. للمساهمين يمكن التثبيت من الكود المصدري:

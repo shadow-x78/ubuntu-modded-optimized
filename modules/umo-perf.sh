@@ -52,7 +52,7 @@ EOD
     fi
 
     umo_log_step "Update package lists (Global)"
-    "$HOME/umo-login.sh" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
+    "$UMO_LOGIN_SH" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
 
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)"
 }
@@ -73,7 +73,7 @@ apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
-    umo_run_quiet "Purging bloat packages..." "$HOME/umo-login.sh" -c "bash /root/debloat.sh" || \
+    umo_run_quiet "Purging bloat packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
         umo_log_warn "Debloat finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh" 2>/dev/null || true
     return 0
@@ -106,7 +106,7 @@ rm -rf /var/lib/apt/lists/* || true
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
-    umo_run_quiet "Running APT cleanup..." "$HOME/umo-login.sh" -c "bash /root/cleanup.sh" || \
+    umo_run_quiet "Running APT cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
         umo_log_warn "APT cleanup finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh" 2>/dev/null || true
 
@@ -169,7 +169,7 @@ xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
-    umo_run_quiet "Applying desktop tweaks..." "$HOME/umo-login.sh" -c "bash /root/perf-desktop.sh" || \
+    umo_run_quiet "Applying desktop tweaks..." "$UMO_LOGIN_SH" -c "bash /root/perf-desktop.sh" || \
         umo_log_warn "Desktop tweaks finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh" 2>/dev/null || true
 

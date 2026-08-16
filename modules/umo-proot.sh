@@ -12,6 +12,8 @@ _UMO_MOD_PROOT_LOADED=1
 UMO_PROOT_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_TERMUX_PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+UMO_SCRIPT_HOME="${UMO_SCRIPT_DIR:-$UMO_TERMUX_HOME/.umo}"
+UMO_LOGIN_SH="${UMO_LOGIN_SH:-$UMO_SCRIPT_HOME/umo-login.sh}"
 
 umo_proot_prepare() {
     umo_log_step "Prepare proot container"
@@ -115,7 +117,13 @@ umo_proot_create_scripts() {
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
     rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
 
-    cat > "$UMO_TERMUX_HOME/umo-login.sh" << EOF
+    if ! mkdir -p "$UMO_SCRIPT_HOME" 2>/dev/null; then
+        umo_log_warn "Cannot create $UMO_SCRIPT_HOME - falling back to \$HOME"
+        UMO_SCRIPT_HOME="$UMO_TERMUX_HOME"
+        UMO_LOGIN_SH="$UMO_SCRIPT_HOME/umo-login.sh"
+    fi
+
+    cat > "$UMO_SCRIPT_HOME/umo-login.sh" << EOF
 #!/bin/sh
 # UMO - Ubuntu Login Wrapper
 INSTALL_DIR="$UMO_PROOT_DIR"
@@ -127,24 +135,25 @@ unset LD_PRELOAD
 unset LD_LIBRARY_PATH
 
 AUDIO_SOCK=""
-[ -S "\$PREFIX/root/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-\$(id -u)/native:/root/pulse-native"
-[ -S "\$PREFIX/root/pulse-native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-native:/root/pulse-native"
+[ -S "\$PREFIX/tmp/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/tmp/pulse-\$(id -u)/native:/tmp/pulse-native"
+[ -S "\$PREFIX/root/pulse-\$(id -u)/native" ] && AUDIO_SOCK="-b \$PREFIX/root/pulse-\$(id -u)/native:/tmp/pulse-native"
+[ -S "\$PREFIX/tmp/pulse-native" ] && AUDIO_SOCK="-b \$PREFIX/tmp/pulse-native:/tmp/pulse-native"
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    -b /dev -b /proc -b /sys \
-    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
-    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
-    \$AUDIO_SOCK \
-    -w / \
-    /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \\
+    -b /dev -b /proc -b /sys \\
+    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \\
+    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \\
+    \$AUDIO_SOCK \\
+    -w / \\
+    /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \\
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
     /bin/bash --login "\$@"
 EOF
-    chmod +x "$UMO_TERMUX_HOME/umo-login.sh"
+    chmod +x "$UMO_SCRIPT_HOME/umo-login.sh"
 
-    cat > "$UMO_TERMUX_HOME/umo-user.sh" << EOF
+    cat > "$UMO_SCRIPT_HOME/umo-user.sh" << EOF
 #!/bin/sh
 # UMO - Ubuntu User Login
 INSTALL_DIR="$UMO_PROOT_DIR"
@@ -155,29 +164,35 @@ unset LD_LIBRARY_PATH
 
 cd "\$INSTALL_DIR" || exit 1
 
-exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \
-    -b /dev -b /proc -b /sys \
-    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \
-    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \
-    -w / \
-    /usr/bin/env -i PWD=/ HOME=/home/umo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
+exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \\
+    -b /dev -b /proc -b /sys \\
+    -b "\$HOME:/sdcard" -b "\$HOME:/termux" \\
+    -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \\
+    -w / \\
+    /usr/bin/env -i PWD=/ HOME=/home/umo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \\
+    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
     /bin/su - umo "\$@"
 EOF
-    chmod +x "$UMO_TERMUX_HOME/umo-user.sh"
+    chmod +x "$UMO_SCRIPT_HOME/umo-user.sh"
 
-    cat > "$UMO_TERMUX_HOME/umo-start.sh" << 'EOF'
+    cat > "$UMO_SCRIPT_HOME/umo-start.sh" << EOF
 #!/bin/sh
-# UMO - Quick Start
+# UMO - Quick Start (console login)
 echo "[==>] Starting UMO environment..."
 termux-wake-lock 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true
 sleep 1
-exec "$HOME/umo-login.sh"
+exec "$UMO_SCRIPT_HOME/umo-login.sh"
 EOF
-    chmod +x "$UMO_TERMUX_HOME/umo-start.sh"
+    chmod +x "$UMO_SCRIPT_HOME/umo-start.sh"
 
-    umo_log_ok "Login scripts ready"
+    if [ "$UMO_SCRIPT_HOME" != "$UMO_TERMUX_HOME" ]; then
+        for _legacy in umo-login.sh umo-user.sh umo-start.sh umo-stop.sh umo-vnc-start.sh umo-vnc-stop.sh; do
+            rm -f "$UMO_TERMUX_HOME/$_legacy" 2>/dev/null || true
+        done
+    fi
+
+    umo_log_ok "Login scripts ready ($UMO_SCRIPT_HOME)"
 }
 
 umo_proot_patch_bashrc() {
@@ -263,9 +278,11 @@ SRCLIST
     done
 
     umo_fs_mkdir "$_etc/sudoers.d"
-    "$UMO_TERMUX_HOME/umo-login.sh" -c \
-        "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
-        2>/dev/null || true
+    if [ -x "$UMO_LOGIN_SH" ]; then
+        "$UMO_LOGIN_SH" -c \
+            "chmod 755 /etc/sudoers.d && printf 'umo ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/umo && chmod 440 /etc/sudoers.d/umo" \
+            </dev/null 2>/dev/null || true
+    fi
 
     umo_log_ok "User 'umo' created (password: umo)"
 }
@@ -273,8 +290,8 @@ SRCLIST
 umo_proot_setup() {
     umo_proot_prepare
     umo_proot_create_scripts
-    if [ -x "$UMO_TERMUX_HOME/umo-login.sh" ]; then
-        "$UMO_TERMUX_HOME/umo-login.sh" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
+    if [ -x "$UMO_LOGIN_SH" ]; then
+        "$UMO_LOGIN_SH" -c "bash /root/divert-triggers.sh" </dev/null >/dev/null 2>&1 || true
         rm -f "$UMO_PROOT_DIR/root/divert-triggers.sh" 2>/dev/null || true
     fi
     umo_proot_patch_bashrc

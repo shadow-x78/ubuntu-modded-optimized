@@ -89,14 +89,14 @@ BODY
         umo_log_warn "install-vnc.sh has syntax issues"
     fi
     printf "  %b>%b  Installing TigerVNC...\n" "$UMO_B_CYAN" "$UMO_NC"
-    if [ ! -x "$HOME/umo-login.sh" ]; then
+    if [ ! -x "$UMO_LOGIN_SH" ]; then
         umo_log_warn "umo-login.sh not found/executable - VNC install skipped"
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
         return 0
     fi
     _rc=0
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
-        "$HOME/umo-login.sh" -c "bash /root/install-vnc.sh" || _rc=$?
+        "$UMO_LOGIN_SH" -c "bash /root/install-vnc.sh" || _rc=$?
     fi
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
@@ -160,9 +160,15 @@ XFALL
     _vnc_pass="${UMO_VNC_PASSWORD:-ubuntu}"
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
-        if [ -x "$HOME/umo-login.sh" ]; then
-            "$HOME/umo-login.sh" -c "mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd" 2>/dev/null </dev/null || \
-                umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+        if [ -x "$UMO_LOGIN_SH" ]; then
+            _pw_cmd="mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd"
+            if command -v timeout >/dev/null 2>&1; then
+                timeout 120 "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
+                    umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+            else
+                "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
+                    umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+            fi
         fi
     fi
 
@@ -271,21 +277,25 @@ printf "  \033[38;5;34m✔\033[0m  VNC stopped.\n"
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc"
 
-    cat > "$HOME/umo-vnc-start.sh" << 'EOF'
+    _vnc_home="${UMO_SCRIPT_DIR:-$HOME/.umo}"
+    mkdir -p "$_vnc_home" 2>/dev/null || _vnc_home="$HOME"
+    _umo_login="${UMO_LOGIN_SH:-$_vnc_home/umo-login.sh}"
+
+    cat > "$_vnc_home/umo-vnc-start.sh" << EOF
 #!/bin/sh
 pulseaudio --start 2>/dev/null || true
 sleep 1
-exec "$HOME/umo-login.sh" -c "umo-startvnc"
+exec "$_umo_login" -c "umo-startvnc"
 EOF
-    chmod +x "$HOME/umo-vnc-start.sh"
+    chmod +x "$_vnc_home/umo-vnc-start.sh"
 
-    cat > "$HOME/umo-vnc-stop.sh" << 'EOF'
+    cat > "$_vnc_home/umo-vnc-stop.sh" << EOF
 #!/bin/sh
-exec "$HOME/umo-login.sh" -c "umo-stopvnc"
+exec "$_umo_login" -c "umo-stopvnc"
 EOF
-    chmod +x "$HOME/umo-vnc-stop.sh"
+    chmod +x "$_vnc_home/umo-vnc-stop.sh"
 
-    umo_log_ok "VNC scripts created"
+    umo_log_ok "VNC scripts created ($_vnc_home)"
 }
 
 umo_vnc_setup() {

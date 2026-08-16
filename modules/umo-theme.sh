@@ -54,7 +54,7 @@ INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
     printf "  %b>%b  Installing theme packages...\n" "$UMO_B_CYAN" "$UMO_NC"
     _rc=0
-    "$HOME/umo-login.sh" -c "bash /root/install-theme.sh" || _rc=$?
+    "$UMO_LOGIN_SH" -c "bash /root/install-theme.sh" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  Theme packages installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
     else

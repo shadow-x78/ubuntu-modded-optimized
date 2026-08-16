@@ -91,7 +91,7 @@ _run_de_installer() {
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
     printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
     _rc=0
-    "$HOME/umo-login.sh" -c "bash /root/install-de.sh" || _rc=$?
+    "$UMO_LOGIN_SH" -c "bash /root/install-de.sh" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
     else
