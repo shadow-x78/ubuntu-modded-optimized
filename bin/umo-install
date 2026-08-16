@@ -795,6 +795,9 @@ umo_main() {
         _umo_exit_code=${_umo_exit_code:-130}
         trap - EXIT INT TERM HUP
         for _sig in INT TERM HUP; do trap "" "$_sig"; done
+        if [ -n "${_UMO_SPINNER_PID:-}" ]; then
+            kill -KILL "$_UMO_SPINNER_PID" 2>/dev/null || true
+        fi
         _inst_dir="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
         _inst_re=$(printf '%s' "$_inst_dir" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
         _login_re=$(printf '%s' "$HOME/umo-login.sh" | sed 's/[][\\.*^$()+?{|/]/\\&/g')
