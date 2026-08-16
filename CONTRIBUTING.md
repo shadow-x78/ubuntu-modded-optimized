@@ -18,15 +18,15 @@ Example: `feature/lxqt-support`
 Commit messages follow this format:
 
 ```text
-UMO | <type>: <description>
-UMO | vX.Y.Z | <type>: <description>
+umo | <type>: <description>
+umo | vX.Y.Z | <type>: <description>
 ```
 
 - `<type>` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `release`.
 - `vX.Y.Z` is the current version, used on release commits.
 - A `release:` type marks the version bump commit.
 
-Example: `UMO | v4.0.9 | fix: correct dpkg lock cleanup on exit trap`
+Example: `umo | v4.0.9 | fix: correct dpkg lock cleanup on exit trap`
 
 ## 💅 Code Style
 
