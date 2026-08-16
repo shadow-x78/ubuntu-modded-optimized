@@ -91,8 +91,8 @@ git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh get.sh
 _md_new=$(grep -rl --exclude-dir=.kilo --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
 [ -n "$_md_new" ] && echo "$_md_new" | xargs git add
 
-git commit -m "UMO | v$NEW_VER | release: version bump and docs sync to $NEW_VER"
-git tag -a "v$NEW_VER" -m "UMO v$NEW_VER"
+git commit -m "umo | v$NEW_VER | release: version bump and docs sync to $NEW_VER"
+git tag -a "v$NEW_VER" -m "umo v$NEW_VER"
 
 echo
 echo "[OK] Released v$NEW_VER"
