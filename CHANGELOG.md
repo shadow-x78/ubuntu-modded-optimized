@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.8.0] - 2026-08-16
+
+### 🔧 Changed
+- **Rename `bash.sh` → `umo.sh`:** the one-liner release installer is now fetched from `main/umo.sh`, giving the project a single recognizable entry-point name:
+  ```
+  curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh | bash
+  ```
+  READMEs (EN/AR), `docs/INSTALL.md`, `docs/INSTALL_AR.md`, `SECURITY.md`, the tarball layout, `scripts/release.sh`, and both GitHub workflows updated accordingly.
+- **SECURITY.md version badge** now synced to 4.7.0 (the badge was missed in the v4.7.0 docs pass).
+- **Commit convention enforced retroactively:** the v4.7.0 feature commit was reworded to the documented `umo | v4.7.0 | feat: ...` style (it had shipped as `umo | feat: ...` without the version segment); the v4.7.0 tag/release was republished from the corrected history with identical contents.
+
+### ⚠️ Migration
+- Switch any saved one-liner to `main/umo.sh` (`get.sh` / `bash.sh` URLs served older releases only).
+- Existing installs need no action: `umo update` downloads the new tarball wholesale, and the one-liner is only used for fresh installs.
+
 ## [v4.7.0] - 2026-08-16
 
 ### ✨ Added
