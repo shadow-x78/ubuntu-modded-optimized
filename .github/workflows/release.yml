@@ -29,7 +29,7 @@ jobs:
 
       - name: Syntax check before release
         run: |
-          for f in install.sh bash.sh bin/umo-install bin/umo-start bin/umo-stop \
+          for f in install.sh umo.sh bin/umo-install bin/umo-start bin/umo-stop \
                    lib/*.sh modules/*.sh config/xstartup config/templates/*.sh; do
             sh -n "$f" || exit 1
           done
@@ -39,7 +39,7 @@ jobs:
           tar --exclude='.git' \
               --exclude='assets' --exclude-vcs \
               -czf "umo-${{ steps.ver.outputs.version }}.tar.gz" \
-              install.sh bash.sh bin lib modules config docs scripts README.md README_AR.md \
+              install.sh umo.sh bin lib modules config docs scripts README.md README_AR.md \
               LICENSE SECURITY.md CHANGELOG.md CONTRIBUTING.md \
               .editorconfig .gitattributes
 

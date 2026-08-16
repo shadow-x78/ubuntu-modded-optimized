@@ -87,7 +87,7 @@ grep -q "UMO_VERSION=\"$NEW_VER\"" bin/umo-install || {
     exit 1
 }
 
-git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh bash.sh
+git add bin/umo-install CHANGELOG.md lib/core-ansi.sh modules/umo-vnc.sh umo.sh
 _md_new=$(grep -rl --exclude-dir=.kilo --include='*.md' "version-$NEW_VER\|الإصدار-$NEW_VER" .)
 [ -n "$_md_new" ] && echo "$_md_new" | xargs git add
 

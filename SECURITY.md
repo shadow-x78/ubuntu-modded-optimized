@@ -112,7 +112,7 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 
 2. **Install via the official one-liner (release verified):**
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/bash.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh | bash
    ```
 
 3. **Keep Termux updated** via F-Droid or GitHub - not Play Store.
