@@ -117,7 +117,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.9.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.9.3}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -210,6 +210,10 @@ VNC_LOCALHOST="yes"
 
 for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
 sleep 1
+
+_vnc_num="${VNC_DISPLAY#:}"
+rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
+rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
 
 pulseaudio --start 2>/dev/null || true
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.3] - 2026-08-23
+
+### 🐛 Fixed
+- **`umo start` reported "Session Active" even when VNC died instantly:** the launch output was discarded to `/dev/null` and success was never verified. `umo start` now waits, checks the Xvnc process for real, and on failure prints the last log lines plus the fix hint instead of a false-positive banner.
+- **Stale X locks blocked VNC relaunch:** after an unclean stop (`pkill -9`), leftover `/tmp/.X1-lock` / `.X1` sockets could make TigerVNC refuse to start. The in-container start script now clears stale locks and pid files for its display before launching.
+- **VNC start output is now kept** at `~/.umo/logs/vnc-start.log` instead of being thrown away, so failures are diagnosable after the fact.
+
 ## [v4.9.2] - 2026-08-23
 
 ### 🐛 Fixed
