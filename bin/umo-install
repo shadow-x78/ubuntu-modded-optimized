@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.0"
+export UMO_VERSION="4.9.1"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -475,6 +475,10 @@ _umo_refresh_container() {
     "$_UMO_LOGIN" -c "
         [ -f /etc/apt/apt.conf.d/99-umo-speed ] && true
         rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
+        for _g in \$(id -G 2>/dev/null); do
+            grep -q ':x:'\$_g':' /etc/group 2>/dev/null || echo \"android_\$_g:x:\$_g:\" >> /etc/group 2>/dev/null || true
+        done
+        true
     " </dev/null >/dev/null 2>&1 || true
     _umo_ok "Container hooks applied"
 }

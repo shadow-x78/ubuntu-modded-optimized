@@ -62,7 +62,7 @@ umo_de_lxde() {
 umo_de_xfce4() {
     umo_log_step "Install XFCE4 (professional set)"
     _pkgs='timeout 600 apt-get install -y --no-install-recommends \
-    xfce4-panel xfce4-session xfce4-settings xfwm4 \
+    xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
     xfce4-whiskermenu-plugin 2>&1 | _apt_filter || true'

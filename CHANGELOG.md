@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.1] - 2026-08-23
+
+### 🐛 Fixed
+- **Black desktop - real root cause:** `xfdesktop` itself was never installed; the XFCE package set shipped panel/session/wm but no desktop renderer, so no wallpaper configuration could ever draw anything. Added `xfdesktop` to the XFCE install set - combined with the v4.9.0 backdrop fix and `umo-desktop-init`, the wallpaper now actually renders on VNC sessions.
+- **`groups: cannot find name for group ID …` after `umo login`:** container `/etc/group` seeded a hardcoded Android GID list, but supplemental GIDs differ per device (e.g. 20510, 50510, 99909997). Seeding now merges every GID of the live Termux session (`id -G`) at install time, and the `umo update` in-container hook syncs still-missing groups onto existing installs without reinstalling.
+- **Finalizing spinner:** heavy finalize/perf steps now stream live apt/dpkg output instead of hiding behind an animated spinner that looked frozen for minutes.
+
+### 🔧 Changed
+- xfwm4 decorations switched from `Greybird` to `Greybird-dark` to match the dark GTK/icon set.
+
 ## [v4.9.0] - 2026-08-23
 
 ### ✨ Added

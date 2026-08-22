@@ -270,7 +270,8 @@ SRCLIST
     chmod 644 "$_etc/passwd" "$_etc/group"
     chmod 640 "$_etc/shadow" "$_etc/gshadow"
 
-    for _gid in 3003 9997 20488 50488 1000 1015 1023 1024 1028 1065 3001 3002 3006 3009 3011 3012; do
+    for _gid in 3003 9997 20488 50488 1015 1023 1024 1028 1065 3001 3002 3006 3009 3011 3012 $(id -G 2>/dev/null); do
+        [ -n "$_gid" ] || continue
         if ! grep -q ":x:$_gid:" "$_etc/group" 2>/dev/null; then
             echo "android_$_gid:x:$_gid:" >> "$_etc/group"
         fi
