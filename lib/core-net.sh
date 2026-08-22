@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Network & Download Engine (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_NET_LOADED:-}" ] || return 0
 _UMO_NET_LOADED=1
@@ -26,14 +24,59 @@ umo_net_mirror_list() {
             echo "https://cdimage.ubuntu.com/ubuntu-base/jammy/daily/current/jammy-base-${_uarch}.tar.gz"
             ;;
         24.04|noble)
-            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.1-base-${_uarch}.tar.gz"
-            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04.1/release/ubuntu-base-24.04.1-base-${_uarch}.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.4-base-${_uarch}.tar.gz"
+            echo "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.3-base-${_uarch}.tar.gz"
             echo "https://cdimage.ubuntu.com/ubuntu-base/noble/daily/current/noble-base-${_uarch}.tar.gz"
             ;;
         *)
             echo "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04.5-base-${_uarch}.tar.gz"
             ;;
     esac
+}
+
+umo_net_checksums() {
+    case "$1" in
+        *ubuntu-base-22.04.5-base-arm64.tar.gz) echo "075d4abd2817a5023ab0a82f5cb314c5ec0aa64a9c0b40fd3154ca3bfdae979f" ;;
+        *ubuntu-base-22.04.5-base-armhf.tar.gz) echo "fd77cb0659326b75c08ce06b6b8649d2e13ef9a704a8e9212fec32cb97d42add" ;;
+        *ubuntu-base-24.04.4-base-arm64.tar.gz) echo "04207713ece899c3740823d33690441ad3a7f0ded1101aca744e2b0f37ac7ff2" ;;
+        *ubuntu-base-24.04.4-base-armhf.tar.gz) echo "991520b47f6586f38a78505cf016e300b6191bb8ff86a0723481ec23a37ab7f4" ;;
+        *ubuntu-base-24.04.3-base-arm64.tar.gz) echo "7b2dced6dd56ad5e4a813fa25c8de307b655fdabc6ea9213175a92c48dabb048" ;;
+        *ubuntu-base-24.04.3-base-armhf.tar.gz) echo "747909a2f81d816fc6252f076757fcf6bd75a55f848a1c049ee79c0e88c0b9a0" ;;
+        *) echo "" ;;
+    esac
+}
+
+umo_net__verify_sha256() {
+    _f="$1"
+    _want="$2"
+    _got=""
+    if command -v sha256sum >/dev/null 2>&1; then
+        _got="$(sha256sum "$_f" 2>/dev/null | awk '{print $1}')"
+    elif command -v shasum >/dev/null 2>&1; then
+        _got="$(shasum -a 256 "$_f" 2>/dev/null | awk '{print $1}')"
+    else
+        umo_log_warn "No sha256sum/shasum available, cannot verify checksum"
+        return 0
+    fi
+    [ "$_got" = "$_want" ]
+}
+
+umo_net__post_check() {
+    _f="$1"
+    _url="$2"
+    umo_net__validate_file "$_f" || return 1
+    _want="$(umo_net_checksums "$_url")"
+    if [ -n "$_want" ]; then
+        if umo_net__verify_sha256 "$_f" "$_want"; then
+            umo_log_ok "[OK] SHA-256 verified: $(basename "$_url")"
+        else
+            umo_log_warn "SHA-256 mismatch for $(basename "$_url"), discarding download"
+            return 1
+        fi
+    else
+        umo_log_info "SKIP checksum (mirror has none): $(basename "$_url")"
+    fi
+    return 0
 }
 
 umo_net__file_size() {
@@ -63,13 +106,13 @@ umo_net_download() {
         _rc=0
         wget --quiet --timeout=60 --tries=3 -O "$_output" "$_url" 2>/dev/null || _rc=$?
         [ "$_rc" -eq 0 ] || return 1
-        umo_net__validate_file "$_output" || return 1
+        umo_net__post_check "$_output" "$_url" || { rm -f "$_output"; return 1; }
         return 0
     elif umo_sys_has_cmd curl; then
         _rc=0
         curl -L -s --max-time 300 -o "$_output" "$_url" 2>/dev/null || _rc=$?
         [ "$_rc" -eq 0 ] || return 1
-        umo_net__validate_file "$_output" || return 1
+        umo_net__post_check "$_output" "$_url" || { rm -f "$_output"; return 1; }
         return 0
     else
         umo_die "No download tool available. Install wget or curl"

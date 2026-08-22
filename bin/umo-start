@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Session Controller [start] (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
@@ -66,7 +64,7 @@ else
 
     printf "  %b[ ⚙ ] Initializing UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
 
-    nohup "$UMO_LOGIN" -c "umo-startvnc" >/dev/null 2>&1 &
+    nohup "$UMO_LOGIN" -c "UMO_VNC_PUBLIC=${UMO_VNC_PUBLIC:-0} umo-startvnc" >/dev/null 2>&1 &
     sleep 3
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')

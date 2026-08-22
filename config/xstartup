@@ -1,5 +1,4 @@
 #!/bin/sh
-# UMO VNC Session - {{UMO_VERSION}}
 export PULSE_SERVER=127.0.0.1
 export PULSE_LATENCY_MSEC=30
 export DISPLAY={{DISPLAY}}
@@ -15,6 +14,9 @@ case "$DE" in
         [ -x "$(command -v startlxde)" ] && \
             exec dbus-launch --exit-with-session startlxde ;;
     xfce4|xfce)
+        if [ -x /usr/local/bin/umo-desktop-init ]; then
+            ( sleep 4; /usr/local/bin/umo-desktop-init >/dev/null 2>&1 & )
+        fi
         [ -x "$(command -v startxfce4)" ] && \
             exec dbus-launch --exit-with-session startxfce4 ;;
     openbox)

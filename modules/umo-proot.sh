@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Proot Container Manager (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_PROOT_LOADED:-}" ] || return 0
 _UMO_MOD_PROOT_LOADED=1
@@ -64,11 +62,11 @@ Dpkg::Options:: "--force-confdef";
 Dpkg::Options:: "--force-confold";
 Dpkg::Options:: "--force-unsafe-io";
 Dpkg::Use-Pty "0";
-DPKg::FlushSTDIN "false";
+DPkg::FlushSTDIN "false";
 DPkg::Run-Directory "/";
-DPKg::DropPrivileges "false";
-DPKg::NoTriggers "true";
-DPKg::TriggersPending "false";
+DPkg::DropPrivileges "false";
+DPkg::NoTriggers "true";
+DPkg::TriggersPending "false";
 Dpkg::Post-Invoke {};
 Dpkg::Pre-Invoke {};
 Debug::NoLocking "1";
@@ -125,7 +123,6 @@ umo_proot_create_scripts() {
 
     cat > "$UMO_SCRIPT_HOME/umo-login.sh" << EOF
 #!/bin/sh
-# UMO - Ubuntu Login Wrapper
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -155,7 +152,6 @@ EOF
 
     cat > "$UMO_SCRIPT_HOME/umo-user.sh" << EOF
 #!/bin/sh
-# UMO - Ubuntu User Login
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
@@ -177,7 +173,6 @@ EOF
 
     cat > "$UMO_SCRIPT_HOME/umo-start.sh" << EOF
 #!/bin/sh
-# UMO - Quick Start (console login)
 echo "[==>] Starting UMO environment..."
 termux-wake-lock 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true
@@ -224,7 +219,11 @@ if [ -n "$PS1" ]; then
     printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
     printf "\033[0m\n"
     printf "\033[38;5;208m  ────────────────────────────────────────────────────────\033[0m\n\n"
-    command -v neofetch >/dev/null 2>&1 && neofetch
+    if command -v fastfetch >/dev/null 2>&1; then
+        fastfetch --logo none
+    elif command -v neofetch >/dev/null 2>&1; then
+        neofetch
+    fi
 fi
 '
 }

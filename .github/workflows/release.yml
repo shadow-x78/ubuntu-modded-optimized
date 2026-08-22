@@ -39,7 +39,7 @@ jobs:
           tar --exclude='.git' \
               --exclude='assets' --exclude-vcs \
               -czf "umo-${{ steps.ver.outputs.version }}.tar.gz" \
-              install.sh umo.sh bin lib modules config docs scripts README.md README_AR.md \
+              install.sh umo.sh bin lib modules config docs README.md README_AR.md \
               LICENSE SECURITY.md CHANGELOG.md CONTRIBUTING.md \
               .editorconfig .gitattributes
 

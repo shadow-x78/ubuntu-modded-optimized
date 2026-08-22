@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - PulseAudio Audio Bridge (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_AUDIO_LOADED:-}" ] || return 0
 _UMO_MOD_AUDIO_LOADED=1
@@ -33,7 +31,8 @@ umo_audio_configure() {
     if [ -f "$_pa_config" ] && ! grep -q "UMO Audio" "$_pa_config" 2>/dev/null; then
         cat >> "$_pa_config" << 'EOF'
 
-load-module module-native-protocol-tcp auth-anonymous=1
+# UMO Audio bridge (localhost only)
+load-module module-native-protocol-tcp listen=127.0.0.1 auth-anonymous=1
 EOF
     fi
 

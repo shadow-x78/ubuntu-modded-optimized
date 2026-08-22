@@ -1,5 +1,4 @@
 #!/bin/sh
-# UMO - Ubuntu Login Wrapper (template)
 INSTALL_DIR="{{INSTALL_DIR}}"
 PREFIX="{{TERMUX_PREFIX}}"
 

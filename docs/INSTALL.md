@@ -2,7 +2,7 @@
 
 # Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.8.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.9.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -102,7 +102,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | Flag | Group | Includes |
 |------|-------|----------|
-| `--apps=basic` | Basic | Core utilities only |
+| `--apps=basic` | Basic | Core utilities + Firefox ESR browser |
 | `--apps=dev` | Developer | git, vim, python3, nodejs, build-essential |
 | `--apps=media` | Media | ffmpeg, vlc, gimp |
 | `--apps=full` | Full | All of the above |
@@ -132,9 +132,12 @@ umo login
 
 # Connect via VNC viewer
 # Address: localhost:5901
-# Password: ubuntu  (change this immediately!)
+# Password: shown at the end of install (stored in ~/.umo/vnc-pass)
 ```
 
+> **VNC is localhost-only by default.** Connect from a viewer on the same device,
+> or start the session with `UMO_VNC_PUBLIC=1 umo start` to allow LAN clients.
+>
 > **Change the VNC password right after first login:**
 > ```bash
 > vncpasswd

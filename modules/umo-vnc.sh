@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - VNC Server Manager (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_VNC_LOADED:-}" ] || return 0
 _UMO_MOD_VNC_LOADED=1
@@ -119,7 +117,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.8.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.9.0}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -157,7 +155,24 @@ XFALL
         fi
     fi
 
-    _vnc_pass="${UMO_VNC_PASSWORD:-ubuntu}"
+    _vnc_pass_file="${UMO_RUNTIME_DIR:-$HOME/.umo}/vnc-pass"
+    _vnc_pass=""
+    if [ -s "$_vnc_pass_file" ]; then
+        _vnc_pass="$(tr -d '\r\n' < "$_vnc_pass_file" 2>/dev/null || true)"
+    fi
+    if [ -z "$_vnc_pass" ]; then
+        _vnc_pass="${UMO_VNC_PASSWORD:-}"
+    fi
+    if [ -z "$_vnc_pass" ]; then
+        _vnc_pass="$(tr -dc A-Za-z0-9 < /dev/urandom 2>/dev/null | head -c 8 || true)"
+    fi
+    if [ -z "$_vnc_pass" ]; then
+        _vnc_pass="umo$(date +%s | tr -dc '0-9' | tail -c 5)"
+    fi
+    mkdir -p "$(dirname "$_vnc_pass_file")" 2>/dev/null || true
+    printf '%s\n' "$_vnc_pass" > "$_vnc_pass_file" 2>/dev/null || true
+    chmod 600 "$_vnc_pass_file" 2>/dev/null || true
+
     _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
     if [ ! -f "$_passwd" ]; then
         if [ -x "$UMO_LOGIN_SH" ]; then
@@ -190,6 +205,8 @@ VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
+VNC_LOCALHOST="yes"
+[ "${UMO_VNC_PUBLIC:-0}" = "1" ] && VNC_LOCALHOST="no"
 
 for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
 sleep 1
@@ -213,7 +230,7 @@ export LIBGL_ALWAYS_SOFTWARE=1
 if ! $_vnc_cmd "$VNC_DISPLAY" \
     -geometry "$VNC_GEOMETRY" \
     -depth "$VNC_DEPTH" \
-    -localhost no \
+    -localhost "$VNC_LOCALHOST" \
     -name "UMO Desktop" \
     -alwaysshared \
     -Log "*:stderr:100"; then
@@ -225,6 +242,8 @@ sleep 2
 
 _IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
 [ -z "$_IP" ] && _IP="127.0.0.1"
+_VNC_ADDR="127.0.0.1"
+[ "$VNC_LOCALHOST" = "no" ] && _VNC_ADDR="$_IP"
 
 _NC='\033[0m'
 _PRI='\033[38;5;208m'
@@ -247,8 +266,13 @@ printf "  ${_BOLD}${_GRN}▸ UMO VNC Server${_NC}\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
 printf "  ${_BOLD}Display:${_NC}    ${_CYN}%s${_NC}\n" "$VNC_DISPLAY"
-printf "  ${_BOLD}Address:${_NC}    ${_CYN}%s:%s${_NC}\n" "$_IP" "$VNC_PORT"
+printf "  ${_BOLD}Address:${_NC}    ${_CYN}%s:%s${_NC}\n" "$_VNC_ADDR" "$VNC_PORT"
 printf "  ${_BOLD}Resolution:${_NC} ${_DIM}%s${_NC}\n" "$VNC_GEOMETRY"
+if [ "$VNC_LOCALHOST" = "yes" ]; then
+    printf "\n"
+    printf "  ${_DIM}Localhost-only: connect from this device.${_NC}\n"
+    printf "  ${_DIM}Set UMO_VNC_PUBLIC=1 before starting to allow LAN clients.${_NC}\n"
+fi
 printf "\n"
 printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
 printf "\n"
@@ -285,7 +309,7 @@ EOF
 #!/bin/sh
 pulseaudio --start 2>/dev/null || true
 sleep 1
-exec "$_umo_login" -c "umo-startvnc"
+exec "$_umo_login" -c "UMO_VNC_PUBLIC=\${UMO_VNC_PUBLIC:-0} umo-startvnc"
 EOF
     chmod +x "$_vnc_home/umo-vnc-start.sh"
 

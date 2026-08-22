@@ -22,9 +22,10 @@ umo | <type>: <description>
 umo | vX.Y.Z | <type>: <description>
 ```
 
-- `<type>` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `release`.
-- `vX.Y.Z` is the current version, used on release commits.
-- A `release:` type marks the version bump commit.
+- `<type>` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
+- `vX.Y.Z` is the current version. Release commits use it.
+- A release ships as ONE commit: the pending feature work plus the version bump,
+  tagged `vX.Y.Z` (there is no separate `release:` bump commit).
 
 Example: `umo | v4.0.9 | fix: correct dpkg lock cleanup on exit trap`
 
@@ -46,25 +47,26 @@ UMO is written in **POSIX sh** - no bashisms.
 
 1. Fork the repo and create a branch from `main`.
 2. Make sure `sh -n` and `shellcheck` pass on all changed scripts.
-3. Describe your change in `CHANGELOG.md` (the release script rotates it into a versioned block).
+3. Describe your change in `CHANGELOG.md` (rotated into a versioned block at release time).
 4. Fill in the PR template checklist.
 5. Target the `main` branch.
 
 ## 🚀 Release Process (maintainers)
 
-Releases are cut with the helper script, which keeps the version in
-`bin/umo-install`, the README badges, and `CHANGELOG.md` in sync:
+A release is ONE commit containing the pending work plus the version bump:
+
+1. Bump `UMO_VERSION` in `bin/umo-install` and the `UMO_VERSION:-` defaults in
+   `lib/core-ansi.sh` and `modules/umo-vnc.sh`.
+2. Rotate the version badges in `README.md`, `README_AR.md` and `SECURITY.md`
+   (`version-X.Y.Z` / `الإصدار-X.Y.Z`).
+3. Move the `CHANGELOG.md` `[Unreleased]` section into a `## [X.Y.Z]` block dated today.
+4. Commit everything as one release commit and tag it:
 
 ```bash
-./scripts/release.sh <new-version>      # e.g. ./scripts/release.sh 4.0.9
+git add -A
+git commit -m "umo | vX.Y.Z | feat: one-line summary of the release"
+git tag -a vX.Y.Z -m "umo vX.Y.Z"
 ```
-
-The script will:
-
-1. Bump `UMO_VERSION` in `bin/umo-install`.
-2. Update the version badge in `README.md` and `README_AR.md`.
-3. Move the `CHANGELOG.md` `[Unreleased]` section into a new `## [X.Y.Z]` block.
-4. Commit the bump and create an annotated tag `vX.Y.Z`.
 
 Then push the result:
 

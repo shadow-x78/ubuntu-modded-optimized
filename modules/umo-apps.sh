@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Application Suite Installer (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_APPS_LOADED:-}" ] || return 0
 _UMO_MOD_APPS_LOADED=1
@@ -12,13 +10,17 @@ UMO_APP_SET="${UMO_APP_SET:-basic}"
 umo_apps_basic() {
     umo_log_step "Install base utilities"
     _run_installer "Base utilities" "
-apt-get install -y nano wget curl git htop neofetch man-db ca-certificates || true
+apt-get install -y nano wget curl git htop man-db ca-certificates || true
+dpkg --configure -a || true
+apt-get install -y fastfetch || apt-get install -y neofetch || true
 dpkg --configure -a || true
 apt-get install -y zip unzip tar xz-utils || true
 dpkg --configure -a || true
 apt-get install -y locales tzdata || true
 dpkg --configure -a || true
 locale-gen en_US.UTF-8 || true
+apt-get install -y firefox-esr || true
+dpkg --configure -a || true
 "
 }
 

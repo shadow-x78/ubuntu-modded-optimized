@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.0] - 2026-08-23
+
+### ✨ Added
+- **Firefox ESR in the `basic` app set:** every app set (basic/dev/media/full) now ships a full browser; `umo_apps_browsers` remains for backward compatibility with the full set.
+- **Rootfs SHA-256 verification:** downloads from release mirrors are now verified against known Ubuntu cdimage SHA-256 checksums (22.04.5 + 24.04.3/24.04.4, arm64/armhf); a mismatch deletes the archive and fails over to the next mirror. Mirrors without a published checksum (daily-current) log `SKIP checksum`.
+- **Random VNC password:** first install generates a random 8-character VNC password (`UMO_VNC_PASSWORD` overrides), persists it to `~/.umo/vnc-pass` (chmod 600) and shows the real password in the install summary and the in-container README.txt.
+
+### 🔧 Changed
+- **Install summary:** removed the duplicate `umo --help` row from "Get Started" (the bottom hint stays); added `umo start`, `umo stop`, `umo vnc`, `umo status`, `umo run "<cmd>"`, `umo backup`, `umo uninstall`; widened the label column to fit `umo --user <name>`; embedded README.txt updated to the same command set.
+- **XFCE wallpaper root-cause fix:** `xfce4-desktop.xml` now stores backdrop properties under `monitor0/workspace0` (previously directly under `monitor0`, which XFCE ignores → black desktop) with `image-show=true` and zoomed `image-style=5` plus a dark fallback color. New in-container helper `/usr/local/bin/umo-desktop-init` (launched ~4s into each XFCE session by xstartup) re-applies wallpaper to *every* monitor xfconf discovers (VNC monitors are not always named `monitor0`) and hides desktop icons for a clean professional look.
+- **Window decorations:** `greybird-gtk-theme` added to theme packages; xfwm4 theme pinned to `Greybird` (Materia ships no xfwm4 style, so titlebars previously fell back to stock).
+- **neofetch → fastfetch:** basic set installs `fastfetch` (falls back to `neofetch` on jammy); the login banner prefers fastfetch (`--logo none`) then neofetch. Fixes noble installs where neofetch no longer exists.
+- **Wallpaper size:** shipped JPEG downscaled 3840x2160 → 1920x1080 (~6.4 MB → ~330 KB per release tarball/install).
+
+### 🔒 Security
+- **PulseAudio bridge is localhost-only:** `module-native-protocol-tcp` now binds `listen=127.0.0.1` instead of all interfaces (anonymous auth stays enabled for the container socket only). The appended block is also marked so re-runs no longer duplicate it.
+- **VNC binds localhost by default:** TigerVNC starts with `-localhost yes`; set `UMO_VNC_PUBLIC=1` (host or in-container scripts honor it, including through proot via the start wrapper) to expose the server to LAN clients. Banner/docs wording updated accordingly.
+- **Username validation:** `umo --user <name>` validates against `^[a-z_][a-z0-9_-]{0,31}$` before it is interpolated into any shell command run inside the container.
+- **APT config typo fixed:** five `DPKg::`/mixed-case directives in `99-umo-sandbox` corrected to `DPkg::` — they were silently ignored by apt before.
+
+### 🐛 Fixed
+- **Dead 24.04 mirror URLs:** Ubuntu removed the `ubuntu-base-24.04.1-*` archives from cdimage (HTTP 404), so noble installs silently fell through to the unverified daily-current build; the mirror list now uses the currently published 24.04.4/24.04.3 release archives (checksummed).
+- **README.txt alignment:** fixed misaligned `umo user` entry and missing commands in the generated in-container README.
+- **Rootfs cache keyed by Ubuntu version:** the download cache ignored `--ubuntu=`, so a cached 22.04 archive could be extracted for a 24.04 install (and vice versa); cache filenames now include the version (`umo-rootfs-<version>-<arch>.tar.gz`).
+- **`umo start` honors `UMO_VNC_PUBLIC`:** the session controller now forwards the flag into the container like `umo vnc` does.
+- **Wallpaper monitor detection widened:** `umo-desktop-init` also enumerates connected monitors via `xrandr` (when present) in addition to xfconf discovery, covering TigerVNC builds that report non-`monitor0` names before any backdrop property exists.
+
 ## [v4.8.0] - 2026-08-16
 
 ### 🔧 Changed

@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Desktop Theme Engine (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_THEME_LOADED:-}" ] || return 0
 _UMO_MOD_THEME_LOADED=1
@@ -37,7 +35,7 @@ _umo_theme_mode_setup() {
 umo_theme_packages() {
     umo_log_step "Install theme packages"
 
-    _theme_pkgs="materia-gtk-theme dmz-cursor-theme \
+    _theme_pkgs="materia-gtk-theme greybird-gtk-theme dmz-cursor-theme \
                  papirus-icon-theme gnome-icon-theme \
                  fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
 
@@ -143,6 +141,13 @@ umo_theme_apply_xfce() {
         fi
         rm -f "$_home/.config/xfce4/panel/panels.xml" 2>/dev/null || true
     done
+
+    if [ -d "${UMO_INSTALL_DIR}/usr/local/bin" ] || mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
+        if [ -f "$_theme_dir/umo-desktop-init" ]; then
+            cp -f "$_theme_dir/umo-desktop-init" "${UMO_INSTALL_DIR}/usr/local/bin/umo-desktop-init" 2>/dev/null || true
+            chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-desktop-init" 2>/dev/null || true
+        fi
+    fi
 
     umo_log_ok "XFCE4 design applied"
 }

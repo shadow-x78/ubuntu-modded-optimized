@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Filesystem & Path Utilities (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_FS_LOADED:-}" ] || return 0
 _UMO_FS_LOADED=1

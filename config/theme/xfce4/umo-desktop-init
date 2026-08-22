@@ -1,0 +1,44 @@
+#!/bin/sh
+
+command -v xfconf-query >/dev/null 2>&1 || exit 0
+
+WP="/usr/share/wallpapers/umo-wallpaper.jpg"
+[ -f "$WP" ] || WP="/usr/local/share/wallpapers/umo-wallpaper.jpg"
+[ -f "$WP" ] || exit 0
+
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    for _bus_file in "$HOME/.dbus/session-bus/"*; do
+        [ -f "$_bus_file" ] || continue
+        . "$_bus_file" 2>/dev/null || true
+        [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && break
+    done
+    export DBUS_SESSION_BUS_ADDRESS
+fi
+command -v xfconf-query >/dev/null 2>&1 || exit 0
+
+_monitors="$(xfconf-query -c xfce4-desktop -l 2>/dev/null \
+    | grep '/backdrop/screen0/' \
+    | sed -n 's|.*/backdrop/screen0/\([^/]*\)/.*|/backdrop/screen0/\1|p')"
+if command -v xrandr >/dev/null 2>&1; then
+    for _m in $(xrandr --query 2>/dev/null | awk '/ connected/{print $1}'); do
+        [ -n "$_m" ] && _monitors="$_monitors
+/backdrop/screen0/$_m"
+    done
+fi
+_monitors="$_monitors
+/backdrop/screen0/monitor0"
+_monitors="$(printf '%s\n' "$_monitors" | sed '/^$/d' | sort -u)"
+
+for _mon in $_monitors; do
+    _base="$_mon/workspace0"
+    xfconf-query -c xfce4-desktop -p "$_base/image-path" -n -t string -s "$WP" >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-desktop -p "$_base/last-image" -n -t string -s "$WP" >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-desktop -p "$_base/image-show" -n -t bool -s true >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-desktop -p "$_base/image-style" -n -t int -s 5 >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-desktop -p "$_base/color-style" -n -t int -s 0 >/dev/null 2>&1 || true
+done
+
+xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0 >/dev/null 2>&1 || true
+xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons -n -t int -s 0 >/dev/null 2>&1 || true
+
+exit 0

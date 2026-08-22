@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - TUI Engine (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_UI_LOADED:-}" ] || return 0
 _UMO_UI_LOADED=1
@@ -81,7 +79,6 @@ umo_ui_menu() {
         for _opt in "$@"; do
             _idx=$((_idx + 1))
             if [ "$_idx" -eq "$_choice" ]; then
-                UMO_MENU_RESULT="$_opt"
                 UMO_MENU_IDX="$_choice"
                 printf "\n%b  %s Selected:%b %s\n\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_opt"
                 return 0

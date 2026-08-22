@@ -1,3 +1,7 @@
+# ─────────────────────────────────────────────
+# UMO - LXPanel Bottom Panel Layout
+# ─────────────────────────────────────────────
+
 Global {
     edge=bottom
     allign=left

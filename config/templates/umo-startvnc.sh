@@ -1,50 +1,13 @@
 #!/bin/sh
-# UMO - Start VNC (template)
-VNC_DISPLAY="${VNC_DISPLAY:-{{DISPLAY}}}"
-VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
-VNC_DEPTH="${VNC_DEPTH:-{{VNC_DEPTH}}}"
-VNC_PORT="${VNC_PORT:-{{VNC_PORT}}}"
-
-for _pid in $(pgrep -f Xvnc) $(pgrep -f Xtigervnc); do kill "$_pid" 2>/dev/null || true; done
-sleep 1
+_umo_login="${HOME:-/data/data/com.termux/files/home}/.umo/umo-login.sh"
+[ -x "$_umo_login" ] || _umo_login="${HOME:-/data/data/com.termux/files/home}/umo-login.sh"
 
 pulseaudio --start 2>/dev/null || true
+sleep 1
 
-export MESA_NO_SHM=1
-export GALLIUM_DRIVER=llvmpipe
-export LIBGL_ALWAYS_SOFTWARE=1
-
-_vnc_cmd=""
-if command -v tigervncserver >/dev/null 2>&1; then
-    _vnc_cmd="tigervncserver"
-elif command -v vncserver >/dev/null 2>&1; then
-    _vnc_cmd="vncserver"
-else
-    echo "  [!] VNC server not found. Install with: apt install tigervnc-standalone-server"
-    exit 1
+if [ -x "$_umo_login" ]; then
+    exec "$_umo_login" -c "UMO_VNC_PUBLIC=${UMO_VNC_PUBLIC:-0} umo-startvnc"
 fi
 
-if ! "$_vnc_cmd" "$VNC_DISPLAY" \
-    -geometry "$VNC_GEOMETRY" \
-    -depth "$VNC_DEPTH" \
-    -localhost no \
-    -name "UMO Desktop" \
-    -alwaysshared \
-    -Log "*:stderr:100"; then
-    echo ""
-    echo "  [!] Failed to start VNC server"
-    exit 1
-fi
-
-sleep 2
-
-_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
-[ -z "$_IP" ] && _IP="127.0.0.1"
-
-echo ""
-echo "============================================"
-echo "  UMO VNC Server Started"
-echo "  Display: $VNC_DISPLAY"
-echo "  Address: $_IP:$VNC_PORT"
-echo "============================================"
-echo ""
+echo "  [!] UMO not installed ($_umo_login missing). Run the UMO installer first."
+exit 1

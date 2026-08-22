@@ -1,5 +1,4 @@
 #!/bin/sh
-# UMO - Stop VNC (template)
 echo "[==>] Stopping VNC..."
 _vnc_cmd=""
 command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"

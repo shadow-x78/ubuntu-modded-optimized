@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.8.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.9.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -102,7 +102,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | الـ Flag | المجموعة | تشمل |
 |----------|---------|------|
-| `--apps=basic` | أساسية | الأدوات الأساسية فقط |
+| `--apps=basic` | أساسية | الأدوات الأساسية + متصفح Firefox ESR |
 | `--apps=dev` | تطوير | git, vim, python3, nodejs, build-essential |
 | `--apps=media` | وسائط | ffmpeg, vlc, gimp |
 | `--apps=full` | كاملة | جميع ما سبق |
@@ -132,9 +132,12 @@ umo login
 
 # الاتصال عبر تطبيق VNC
 # العنوان    : localhost:5901
-# كلمة المرور: ubuntu  (غيِّرها فورا!)
+# كلمة المرور: تُعرض في نهاية التثبيت (محفوظة في ~/.umo/vnc-pass)
 ```
 
+> **VNC يعمل على localhost فقط افتراضياً.** اتصل من تطبيق على نفس الجهاز،
+> أو شغّل الجلسة بـ `UMO_VNC_PUBLIC=1 umo start` للسماح بالاتصال من الشبكة المحلية.
+>
 > **غيِّر كلمة مرور VNC مباشرة بعد أول دخول:**
 > ```bash
 > vncpasswd
