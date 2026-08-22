@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.2] - 2026-08-23
+
+### 🐛 Fixed
+- **`umo update` skipped in-container hooks** ("Container is not running, skipping in-container hooks"): the guard required an already-running proot session, but `umo-login.sh` starts its own proot instance per invocation. Hooks (dpkg-lock cleanup + group sync) now always run during update.
+- **Group sync never reached existing installs:** it lived only in the installer and the update hook - neither of which runs on a device that just updated. `umo-login.sh` itself now syncs missing Android GIDs into `/etc/group` on every login/session start, so any install self-heals after one host-script refresh (`umo update`) plus the next `umo login` / `umo start`.
+- **Stale version banner:** `umo update` refreshed everything except the `$PREFIX/usr/bin/umo` wrapper, so the banner kept showing the old version (e.g. "UMO v4.9.0" after updating to 4.9.1). The update flow now patches the wrapper's `_UMO_VERSION=` line to match the installed release.
+
 ## [v4.9.1] - 2026-08-23
 
 ### 🐛 Fixed

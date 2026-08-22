@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.1"
+export UMO_VERSION="4.9.2"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -467,10 +467,6 @@ EOF
 
 _umo_refresh_container() {
     [ -f "$_UMO_LOGIN" ] || return 0
-    if ! pgrep -f "proot.*umo" >/dev/null 2>&1; then
-        _umo_warn "Container is not running, skipping in-container hooks"
-        return 0
-    fi
     _umo_info "Applying in-container update hooks..."
     "$_UMO_LOGIN" -c "
         [ -f /etc/apt/apt.conf.d/99-umo-speed ] && true
@@ -622,6 +618,11 @@ _umo_run_update() {
 
     _umo_refresh_host
     _umo_refresh_container
+
+    _umo_cli_file="${_UMO_TERMUX_HOME}/../usr/bin/umo"
+    if [ -f "$_umo_cli_file" ] && grep -q '^_UMO_VERSION=' "$_umo_cli_file" 2>/dev/null; then
+        sed -i "s/^_UMO_VERSION=.*/_UMO_VERSION=\"$_UMO_VERSION\"/" "$_umo_cli_file" 2>/dev/null || true
+    fi
 
     printf "\n"
     _umo_ok "UMO updated to v$_UMO_VERSION"

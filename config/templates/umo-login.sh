@@ -11,6 +11,10 @@ AUDIO_SOCK=""
 [ -S "$PREFIX/tmp/pulse-$(id -u)/native" ] && AUDIO_SOCK="-b $PREFIX/tmp/pulse-$(id -u)/native:/tmp/pulse-native"
 [ -S "$PREFIX/tmp/pulse-native" ] && AUDIO_SOCK="-b $PREFIX/tmp/pulse-native:/tmp/pulse-native"
 
+for _g in $(id -G 2>/dev/null); do
+    grep -q ":x:$_g:" "$INSTALL_DIR/etc/group" 2>/dev/null || echo "android_$_g:x:$_g:" >> "$INSTALL_DIR/etc/group" 2>/dev/null || true
+done
+
 cd "$INSTALL_DIR" || exit 1
 
 exec proot --link2symlink --sysvipc -0 -r "$INSTALL_DIR" \
