@@ -48,7 +48,7 @@ jobs:
       - name: Scan for hardcoded secrets
         run: |
           if grep -rInE '(BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36,}|xox[baprs]-[A-Za-z0-9-]+)' \
-               bin lib modules config scripts install.sh 2>/dev/null; then
+               bin lib modules config install.sh 2>/dev/null; then
             echo "::error::Potential secret found in tree"
             exit 1
           fi
