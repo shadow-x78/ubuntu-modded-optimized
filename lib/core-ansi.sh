@@ -191,6 +191,33 @@ umo_run_quiet() {
     fi
 }
 
+_umo_stream_filter() {
+    grep -vE "^(Get:[0-9]|Ign:|Hit:[0-9]|Reading package|Building dependency|debconf:)" || true
+}
+
+umo_run_stream() {
+    _label="$1"
+    shift
+
+    umo_log_step "$_label"
+
+    _stamp="${TMPDIR:-/tmp}/umo-stream-rc.$$"
+    {
+        "$@" </dev/null 2>&1
+        printf '%s' "$?" > "$_stamp" 2>/dev/null || true
+    } | _umo_stream_filter
+
+    _rc="$(cat "$_stamp" 2>/dev/null || echo 0)"
+    rm -f "$_stamp" 2>/dev/null || true
+
+    if [ "$_rc" = "0" ]; then
+        umo_log_ok "$_label"
+    else
+        umo_log_warn "$_label finished with warnings (code $_rc)"
+    fi
+    return 0
+}
+
 umo_spinner_stop() {
     if [ -n "${_UMO_SPINNER_PID:-}" ]; then
         kill -KILL "$_UMO_SPINNER_PID" 2>/dev/null || true

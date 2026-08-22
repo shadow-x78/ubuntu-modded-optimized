@@ -71,7 +71,7 @@ apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
-    umo_run_quiet "Purging bloat packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
+    umo_run_stream "Purging bloat packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
         umo_log_warn "Debloat finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh" 2>/dev/null || true
     return 0
@@ -104,7 +104,7 @@ rm -rf /var/lib/apt/lists/* || true
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
-    umo_run_quiet "Running APT cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
+    umo_run_stream "Running APT cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
         umo_log_warn "APT cleanup finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh" 2>/dev/null || true
 

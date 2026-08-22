@@ -229,9 +229,9 @@ umo_phase_finalize() {
                 "$(umo_login_sh)" "$@" </dev/null
             fi
         }
-        umo_run_quiet "Installing dependencies..." _umo_login_timeout 600 -c \
+        umo_run_stream "Installing dependencies..." _umo_login_timeout 600 -c \
             "export DEBIAN_FRONTEND=noninteractive; apt-get install -y --no-install-recommends sudo || true" || true
-        umo_run_quiet "Configuring packages..." _umo_login_timeout 900 -c \
+        umo_run_stream "Configuring packages..." _umo_login_timeout 900 -c \
             "export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a || true" || true
         umo_run_quiet "Setting up users..." _umo_login_timeout 120 -c "usermod -aG sudo umo" || true
         umo_run_quiet "Restoring service binaries..." _umo_login_timeout 120 -c '
@@ -257,7 +257,7 @@ if [ -n "$_broken" ]; then
     timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
 fi'
     if [ -x "$_umo_cli_login" ]; then
-        umo_run_quiet "Configuring any remaining packages..." "$_umo_cli_login" -c "$_cplt_body" || true
+        umo_run_stream "Configuring any remaining packages..." "$_umo_cli_login" -c "$_cplt_body" || true
         umo_run_quiet "Cleaning dpkg locks..." "$_umo_cli_login" -c "rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true" || true
     fi
 
