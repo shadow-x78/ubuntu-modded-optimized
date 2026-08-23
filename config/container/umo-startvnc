@@ -4,7 +4,6 @@ VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 _vnc_num="${VNC_DISPLAY#:}"
-_xauth="/root/.Xauthority"
 
 _cleanup_locks() {
     rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
@@ -39,12 +38,6 @@ export LIBGL_ALWAYS_SOFTWARE=1
 _xpid=""
 _session_pid=""
 _start_server() {
-    : > "$_xauth" 2>/dev/null || return 1
-    chmod 600 "$_xauth" 2>/dev/null || true
-    _cookie="$(head -c 16 /dev/urandom 2>/dev/null | od -An -tx1 | tr -d ' \n')"
-    [ -n "$_cookie" ] || return 1
-    xauth -f "$_xauth" add ":${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
-    xauth -f "$_xauth" add "$(uname -n 2>/dev/null || echo localhost)/unix:${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
     Xtigervnc "$VNC_DISPLAY" \
         -geometry "$VNC_GEOMETRY" \
         -depth "$VNC_DEPTH" \
@@ -53,15 +46,14 @@ _start_server() {
         -SecurityTypes VncAuth \
         -PasswordFile "$HOME/.vnc/passwd" \
         -alwaysshared \
-        -auth "$_xauth" \
         -Log "*:stderr:100" </dev/null >> "$HOME/.vnc/xvnc.log" 2>&1 &
     _xpid="$!"
 }
 
 _start_session() {
     (
+        unset XAUTHORITY
         export DISPLAY="$VNC_DISPLAY"
-        export XAUTHORITY="$_xauth"
         exec /root/.vnc/xstartup
     ) >> "$HOME/.vnc/session.log" 2>&1 &
     _session_pid="$!"

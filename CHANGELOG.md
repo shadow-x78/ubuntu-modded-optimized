@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.8] - 2026-08-23
+
+### 🐛 Fixed
+- **Black screen with a movable cursor:** the generated X cookie did not match how local clients resolve the display, so `startxfce4` (and every X client) failed to connect and only the server-side cursor remained. Since the server is hardcoded to `127.0.0.1` and protected by VncAuth, internal X auth is now disabled entirely: no `-auth`, no cookie generation, clients connect freely on the loopback-only socket.
+
+### ✨ Added
+- **`umo update` auto-installs `xfdesktop`:** existing containers predate the v4.9.1 package-set fix, so the desktop renderer was missing; the in-container hook now detects its absence and installs it (non-interactive, 300s cap), restoring wallpaper/icons without a reinstall.
+
 ## [v4.9.7] - 2026-08-23
 
 ### 🐛 Fixed
