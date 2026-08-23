@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.4] - 2026-08-24
+
+### 📖 Changed
+- One-liner install command switched from `curl … | bash` to `bash <(curl -fsSL …)` across both READMEs, install docs and SECURITY.md.
+
+### 📖 Diagnostics
+- The VNC supervisor now logs a component availability line (startxfce4 / dbus-launch / xfwm4 / panel / xfdesktop / xset + machine-id files) into `~/.umo/logs/vnc-start.log` 12 s after every session start, so a black desktop immediately names its own missing pieces.
+
 ## [v4.10.3] - 2026-08-23
 
 ### 🐛 Fixed

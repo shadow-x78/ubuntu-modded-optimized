@@ -78,6 +78,8 @@ echo "============================================"
 echo ""
 
 sleep 12
+echo "[i] components: $(command -v startxfce4 >/dev/null 2>&1 && echo ok || echo 'startxfce4=MISSING') $(command -v dbus-launch >/dev/null 2>&1 && echo ok || echo 'dbus-launch=MISSING') $(command -v xfwm4 >/dev/null 2>&1 && echo ok || echo 'xfwm4=MISSING') $(command -v xfce4-panel >/dev/null 2>&1 && echo ok || echo 'panel=MISSING') $(command -v xfdesktop >/dev/null 2>&1 && echo ok || echo 'xfdesktop=MISSING') $(command -v xset >/dev/null 2>&1 && echo ok || echo 'xset=MISSING')"
+ls /var/lib/dbus/machine-id /etc/machine-id >/dev/null 2>&1 || echo "[i] machine-id files missing (breaks dbus-launch)"
 if ! pgrep -f xfce4-panel >/dev/null 2>&1 && ! pgrep -f lxpanel >/dev/null 2>&1; then
     echo "[!] WARNING: no panel process detected - desktop may look empty."
     echo "[!] Last session.log lines:"
