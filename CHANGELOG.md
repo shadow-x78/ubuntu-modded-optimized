@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.5] - 2026-08-23
+
+### 🐛 Fixed
+- **VNC died every ~5 seconds, permanently:** the `tigervncserver` wrapper exits after spawning Xtigervnc, leaving it an orphan - and Android's phantom process killer terminates orphans on its ~5s scan. The start script now launches the `Xtigervnc` binary **directly as a child of its own live supervisor**, so it always has a living parent and is never an orphan; no ADB required.
+- **Session lifecycle decoupled from server:** xstartup/desktop now runs as a supervised sibling process with per-process restarts (server up to 5 times, desktop session relaunches independently), so a crashed XFCE session no longer takes the VNC server down.
+- **Precise liveness checks:** supervisor uses `kill -0` on exact PIDs instead of name-based `pgrep`, eliminating false dead/alive detections.
+- **Real X authority handling:** the start script generates its own MIT-MAGIC-COOKIE `.Xauthority` (the previous `/usr/bin/xauth: file /root/.Xauthority does not exist` warning) and passes `-auth` to the server; xstartup failures are captured in `/root/.vnc/session.log`, server output in `/root/.vnc/xvnc.log`.
+
 ## [v4.9.4] - 2026-08-23
 
 ### 🐛 Fixed
