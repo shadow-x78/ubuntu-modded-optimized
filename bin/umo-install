@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.11.2"
+export UMO_VERSION="4.12.0"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -209,6 +209,17 @@ umo_phase_apps() {
 
 umo_phase_finalize() {
     umo_ui_header "Finalizing"
+
+    if [ "$UMO_DE" != "minimal" ] && [ -x "$(umo_login_sh)" ]; then
+        _fin_probe="startxfce4"
+        [ "$UMO_DE" = "lxde" ] && _fin_probe="startlxde"
+        [ "$UMO_DE" = "openbox" ] && _fin_probe="openbox-session"
+        [ "$UMO_DE" = "minimal" ] && _fin_probe="xterm"
+        if ! "$(umo_login_sh)" -c "command -v $_fin_probe >/dev/null 2>&1"; then
+            umo_log_warn "Desktop component '$_fin_probe' missing - retrying desktop install..."
+            umo_de_install || true
+        fi
+    fi
 
     _umo_finalize_codename="jammy"
     [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _umo_finalize_codename="noble"

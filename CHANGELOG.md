@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.12.0] - 2026-08-24
+
+### 🐛 Fixed
+- **Desktop install is now self-verifying inside the installer itself:** the generated `install-de.sh` refreshes package lists first, then runs the desktop apt install in up to 3 passes (each pass re-checks its core component and stops as soon as it exists), and on final failure prints the unfiltered `/var/log/apt/term.log` errors directly instead of dying quietly behind `|| true`.
+- **Installer-level safety net:** `umo_phase_finalize` now verifies the DE core component (`startxfce4`/`startlxde`/`openbox-session`/`xterm`) before finishing; if the desktop phase silently failed earlier, finalize retries the whole desktop install automatically.
+
+### ✨ Added
+- `umo install` subcommand (v4.11.0) + session-start auto-heal (v4.11.2) + installer retry/safety-net (this release) form three independent layers so a missing desktop can no longer survive silently.
+
 ## [v4.11.2] - 2026-08-24
 
 ### 🐛 Fixed

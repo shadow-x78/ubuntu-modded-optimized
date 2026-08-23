@@ -50,19 +50,38 @@ FTR
 
 _umo_de_build() {
     _pkgs_block="$1"
+    _probe="$2"
     {
         _umo_de_header
-        printf '\n_um_apt_repair\n\n'
-        printf '%s\n' "$_pkgs_block"
-        printf '\n'
-        _umo_de_footer
+        cat << EOF
+
+_um_apt_repair
+
+echo "[..] Refreshing package lists..."
+apt-get update 2>&1 | _apt_filter || true
+
+_attempt=0
+until command -v $_probe >/dev/null 2>&1 || [ "\$_attempt" -ge 3 ]; do
+    _attempt=\$((_attempt + 1))
+    echo "[..] Desktop install pass \$_attempt/3..."
+$_pkgs_block
+    dpkg --configure -a 2>&1 | _apt_filter || true
+done
+
+if ! command -v $_probe >/dev/null 2>&1; then
+    echo "=== DESKTOP INSTALL FAILED AFTER 3 PASSES - real apt errors: ==="
+    tail -n 30 /var/log/apt/term.log 2>/dev/null || true
+fi
+
+_um_apt_repair
+EOF
     } > "${UMO_INSTALL_DIR:?}/root/install-de.sh"
 }
 
 umo_de_lxde() {
     umo_log_step "Install LXDE (ultra-lightweight)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf 2>&1 | _apt_filter || true'
+    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf 2>&1 | _apt_filter || true' startlxde
     _run_de_installer "LXDE" startlxde \
         "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf"
 }
@@ -74,7 +93,7 @@ umo_de_xfce4() {
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
     xfce4-whiskermenu-plugin 2>&1 | _apt_filter || true'
-    _umo_de_build "$_pkgs"
+    _umo_de_build "$_pkgs" startxfce4
     _run_de_installer "XFCE4" startxfce4 \
         "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop xfce4-terminal thunar dbus-x11 x11-xserver-utils"
 }
@@ -82,7 +101,7 @@ umo_de_xfce4() {
 umo_de_openbox() {
     umo_log_step "Install Openbox (minimal)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    openbox obconf lxterminal pcmanfm tint2 feh exo-utils 2>&1 | _apt_filter || true'
+    openbox obconf lxterminal pcmanfm tint2 feh exo-utils 2>&1 | _apt_filter || true' openbox-session
     _run_de_installer "Openbox" openbox-session \
         "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils"
 }
@@ -90,7 +109,7 @@ umo_de_openbox() {
 umo_de_minimal() {
     umo_log_step "Install minimal X11"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    xterm xfonts-base 2>&1 | _apt_filter || true'
+    xterm xfonts-base 2>&1 | _apt_filter || true' xterm
     _run_de_installer "minimal X11" xterm \
         "apt-get update && apt-get install -y --no-install-recommends xterm xfonts-base"
 }
