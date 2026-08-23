@@ -102,22 +102,26 @@ _run_de_installer() {
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
     printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
     _rc=0
-    "$UMO_LOGIN_SH" -c "bash /root/install-de.sh" || _rc=$?
+    "$UMO_LOGIN_SH" -c "bash /root/install-de.sh 2>&1 | tee /root/install-de.log; exit \${PIPESTATUS[0]}" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$_label" "$UMO_NC"
+        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
     else
-        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$_label" "$UMO_NC" "$_rc"
+        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_rc"
     fi
     if [ -n "$_probe" ] && ! "$UMO_LOGIN_SH" -c "command -v $_probe >/dev/null 2>&1"; then
         printf "\n"
         printf "  %b%s%b  CRITICAL: %s core component '%s' is MISSING - desktop would be EMPTY.\n" \
             "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_probe"
+        printf "         Evidence kept in-container:\n"
+        printf "           /root/install-de.log  /root/install-de.last.sh\n"
+        printf "         Real apt errors:\n"
+        printf "           umo login -c \"tail -n 30 /var/log/apt/term.log\"\n"
         printf "         Repair inside the container:\n"
         printf "           umo login\n"
         printf "           %s\n" "$_repair"
-        printf "         Then restart VNC with: umo stop && umo start\n\n"
+        printf "         Then: umo stop && umo start\n\n"
     fi
-    rm -f "${UMO_INSTALL_DIR}/root/install-de.sh" 2>/dev/null || true
+    mv -f "${UMO_INSTALL_DIR}/root/install-de.sh" "${UMO_INSTALL_DIR}/root/install-de.last.sh" 2>/dev/null || true
 }
 
 umo_de_install() {

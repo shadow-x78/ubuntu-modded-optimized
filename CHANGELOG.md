@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.11.1] - 2026-08-24
+
+### 📖 Diagnostics
+- **DE install evidence is no longer destroyed:** the generated `install-de.sh` was deleted after every run and its output discarded, making repeated empty-desktop installs undiagnosable. The full run output is now kept at `/root/install-de.log`, the script itself preserved as `/root/install-de.last.sh` (with its real exit code via `PIPESTATUS`), and when the post-install probe finds the core component missing it prints the tails of both the run log and apt's own `/var/log/apt/term.log` (which holds the unfiltered dpkg/apt errors) alongside the repair command.
+
 ## [v4.11.0] - 2026-08-24
 
 ### ✨ Added
