@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.12.1] - 2026-08-24
+
+### 🐛 Fixed
+- **ROOT CAUSE of every empty-desktop install: wrong package name.** The XFCE set referenced `xfdesktop`, which does not exist in Ubuntu (the package is `xfdesktop4`) - and apt aborts the ENTIRE command when any named package is missing. Since v4.9.1 this single bad name instantly killed the whole desktop apt run on every fresh install (panel, session and window manager were in the same command), producing the silent empty desktop while everything else installed fine. All install lists now use `xfdesktop4`.
+- **Removed debug clutter from the install/session output:** the per-pass "Desktop install pass N/3", component-probe and panel-warning lines are gone; the retry logic stays but runs quietly, and the real apt errors still print only on genuine failure.
+
 ## [v4.12.0] - 2026-08-24
 
 ### 🐛 Fixed

@@ -57,19 +57,17 @@ _umo_de_build() {
 
 _um_apt_repair
 
-echo "[..] Refreshing package lists..."
 apt-get update 2>&1 | _apt_filter || true
 
 _attempt=0
 until command -v $_probe >/dev/null 2>&1 || [ "\$_attempt" -ge 3 ]; do
     _attempt=\$((_attempt + 1))
-    echo "[..] Desktop install pass \$_attempt/3..."
 $_pkgs_block
     dpkg --configure -a 2>&1 | _apt_filter || true
 done
 
 if ! command -v $_probe >/dev/null 2>&1; then
-    echo "=== DESKTOP INSTALL FAILED AFTER 3 PASSES - real apt errors: ==="
+    echo "=== DESKTOP INSTALL FAILED - real apt errors: ==="
     tail -n 30 /var/log/apt/term.log 2>/dev/null || true
 fi
 
@@ -89,13 +87,13 @@ umo_de_lxde() {
 umo_de_xfce4() {
     umo_log_step "Install XFCE4 (professional set)"
     _pkgs='timeout 1800 apt-get install -y --no-install-recommends \
-    xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop \
+    xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
     xfce4-whiskermenu-plugin 2>&1 | _apt_filter || true'
     _umo_de_build "$_pkgs" startxfce4
     _run_de_installer "XFCE4" startxfce4 \
-        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop xfce4-terminal thunar dbus-x11 x11-xserver-utils"
+        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils"
 }
 
 umo_de_openbox() {

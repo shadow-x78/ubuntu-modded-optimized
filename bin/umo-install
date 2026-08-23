@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.12.0"
+export UMO_VERSION="4.12.1"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -534,7 +534,7 @@ _umo_refresh_container() {
         if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
             export DEBIAN_FRONTEND=noninteractive
             echo '[..] XFCE components missing - installing (up to 30 minutes, please wait)...'
-            timeout 1800 apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop xfce4-terminal thunar dbus-x11 x11-xserver-utils 2>&1 | tail -n 8
+            timeout 1800 apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils 2>&1 | tail -n 8
             dpkg --configure -a >/dev/null 2>&1 || true
             command -v startxfce4 >/dev/null 2>&1 && echo '[OK] XFCE desktop installed' || echo '[!!] XFCE install failed - see above'
         fi

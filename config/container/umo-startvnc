@@ -81,7 +81,7 @@ if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1
     export DEBIAN_FRONTEND=noninteractive
     apt-get update 2>&1 | tail -n 3 || true
     timeout 1800 apt-get install -y --no-install-recommends \
-        xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop \
+        xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
         xfce4-terminal thunar dbus-x11 x11-xserver-utils \
         gnome-icon-theme xfce4-whiskermenu-plugin mousepad 2>&1 | tail -n 5 || true
     dpkg --configure -a >/dev/null 2>&1 || true
@@ -119,15 +119,6 @@ echo "  Address: 127.0.0.1:$VNC_PORT"
 echo "  Resolution: $VNC_GEOMETRY"
 echo "============================================"
 echo ""
-
-sleep 12
-echo "[i] components: $(command -v startxfce4 >/dev/null 2>&1 && echo ok || echo 'startxfce4=MISSING') $(command -v dbus-launch >/dev/null 2>&1 && echo ok || echo 'dbus-launch=MISSING') $(command -v xfwm4 >/dev/null 2>&1 && echo ok || echo 'xfwm4=MISSING') $(command -v xfce4-panel >/dev/null 2>&1 && echo ok || echo 'panel=MISSING') $(command -v xfdesktop >/dev/null 2>&1 && echo ok || echo 'xfdesktop=MISSING') $(command -v xset >/dev/null 2>&1 && echo ok || echo 'xset=MISSING')"
-ls /var/lib/dbus/machine-id /etc/machine-id >/dev/null 2>&1 || echo "[i] machine-id files missing (breaks dbus-launch)"
-if ! pgrep -f xfce4-panel >/dev/null 2>&1 && ! pgrep -f lxpanel >/dev/null 2>&1; then
-    echo "[!] WARNING: no panel process detected - desktop may look empty."
-    echo "[!] Last session.log lines:"
-    tail -n 15 "$HOME/.vnc/session.log" 2>/dev/null
-fi
 
 _server_fails=0
 _session_fails=0
