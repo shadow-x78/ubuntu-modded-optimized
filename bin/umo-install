@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.5"
+export UMO_VERSION="4.9.6"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -465,6 +465,36 @@ EOF
 
 _umo_refresh_container() {
     [ -f "$_UMO_LOGIN" ] || return 0
+    _umo_info "Updating in-container helper scripts..."
+
+    _bin_dir="${UMO_INSTALL_DIR}/usr/local/bin"
+    if mkdir -p "$_bin_dir" 2>/dev/null; then
+        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init; do
+            _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
+            [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
+            if [ -f "$_csrc" ]; then
+                cp -f "$_csrc" "$_bin_dir/$_cscript" 2>/dev/null || true
+                chmod +x "$_bin_dir/$_cscript" 2>/dev/null || true
+            fi
+        done
+        _umo_ok "Helper scripts updated"
+    fi
+
+    _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
+    if [ -f "$_xs_tpl" ]; then
+        for _xsf in "${UMO_INSTALL_DIR}/root/.vnc/xstartup" "${UMO_INSTALL_DIR}/home/umo/.vnc/xstartup"; do
+            [ -f "$_xsf" ] || continue
+            _umo_de=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_xsf" | head -1)
+            [ -n "$_umo_de" ] || _umo_de="xfce4"
+            sed -e "s|{{UMO_VERSION}}|${_new_ver:-$_UMO_VERSION}|g" \
+                -e "s|{{UMO_DE}}|$_umo_de|g" \
+                -e "s|{{DISPLAY}}|:1|g" \
+                "$_xs_tpl" > "$_xsf" 2>/dev/null || true
+            chmod +x "$_xsf" 2>/dev/null || true
+        done
+        chown -R 1000:1000 "${UMO_INSTALL_DIR}/home/umo/.vnc" 2>/dev/null || true
+    fi
+
     _umo_info "Applying in-container update hooks..."
     "$_UMO_LOGIN" -c "
         [ -f /etc/apt/apt.conf.d/99-umo-speed ] && true

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.6] - 2026-08-23
+
+### 🐛 Fixed
+- **`umo update` never updated the in-container VNC scripts - the reason everything since v4.8.0 seemed broken on existing installs:** `/usr/local/bin/umo-startvnc` and `umo-stopvnc` were written only during the first install, so every VNC fix shipped in v4.9.0-v4.9.5 (lock cleanup, supervisor, direct Xtigervnc launch) never reached an already-installed device. This is why v4.7.0-and-below "just worked": the install-time script was fine and the container never changed. The scripts now live in `config/container/` and `umo update` redeploys them into the container on every run, together with a re-rendered `xstartup` (root and `umo` user) that carries the wallpaper/desktop-init fix to old installs.
+
+### 🔧 Changed
+- `umo-stopvnc` simplified to direct process termination + lock cleanup (no dependency on the tigervncserver wrapper).
+- CI now syntax-checks `config/container/*`.
+
 ## [v4.9.5] - 2026-08-23
 
 ### 🐛 Fixed

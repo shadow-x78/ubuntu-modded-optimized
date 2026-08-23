@@ -35,7 +35,7 @@ jobs:
         run: |
           for f in install.sh umo.sh bin/umo-install bin/umo-start bin/umo-stop \
                    lib/*.sh modules/*.sh config/xstartup \
-                   config/templates/*.sh; do
+                   config/templates/*.sh config/container/*; do
             sh -n "$f" || exit 1
           done
           echo "All scripts parse cleanly"

@@ -117,7 +117,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.9.5}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.9.6}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -199,132 +199,15 @@ umo_vnc_create_scripts() {
         return 0
     fi
 
-    cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc" << 'EOF'
-#!/bin/sh
-VNC_DISPLAY="${VNC_DISPLAY:-:1}"
-VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
-VNC_DEPTH="${VNC_DEPTH:-24}"
-VNC_PORT="${VNC_PORT:-5901}"
-_vnc_num="${VNC_DISPLAY#:}"
-_xauth="/root/.Xauthority"
-
-_cleanup_locks() {
-    rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
-    rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
-}
-
-for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
-sleep 1
-_cleanup_locks
-mkdir -p /tmp/.X11-unix 2>/dev/null || true
-chmod 1777 /tmp/.X11-unix 2>/dev/null || true
-
-pulseaudio --start 2>/dev/null || true
-
-if ! command -v Xtigervnc >/dev/null 2>&1; then
-    echo "[!] Xtigervnc not found. Install with: apt install tigervnc-standalone-server"
-    exit 1
-fi
-if [ ! -f "$HOME/.vnc/passwd" ]; then
-    echo "[!] Missing $HOME/.vnc/passwd - re-run the UMO installer or set it with vncpasswd."
-    exit 1
-fi
-if [ ! -x /root/.vnc/xstartup ]; then
-    printf '#!/bin/sh\nexec xterm\n' > /root/.vnc/xstartup
-    chmod +x /root/.vnc/xstartup
-fi
-
-export MESA_NO_SHM=1
-export GALLIUM_DRIVER=llvmpipe
-export LIBGL_ALWAYS_SOFTWARE=1
-
-_xpid=""
-_session_pid=""
-_start_server() {
-    : > "$_xauth" 2>/dev/null || return 1
-    chmod 600 "$_xauth" 2>/dev/null || true
-    _cookie="$(head -c 16 /dev/urandom 2>/dev/null | od -An -tx1 | tr -d ' \n')"
-    [ -n "$_cookie" ] || return 1
-    xauth -f "$_xauth" add ":${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
-    xauth -f "$_xauth" add "$(uname -n 2>/dev/null || echo localhost)/unix:${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
-    Xtigervnc "$VNC_DISPLAY" \
-        -geometry "$VNC_GEOMETRY" \
-        -depth "$VNC_DEPTH" \
-        -rfbport "$VNC_PORT" \
-        -localhost yes \
-        -SecurityTypes VncAuth \
-        -PasswordFile "$HOME/.vnc/passwd" \
-        -alwaysshared \
-        -auth "$_xauth" \
-        -Log "*:stderr:100" </dev/null >> "$HOME/.vnc/xvnc.log" 2>&1 &
-    _xpid="$!"
-}
-
-_start_session() {
-    (
-        export DISPLAY="$VNC_DISPLAY"
-        export XAUTHORITY="$_xauth"
-        exec /root/.vnc/xstartup
-    ) >> "$HOME/.vnc/session.log" 2>&1 &
-    _session_pid="$!"
-}
-
-_start_server || { echo "[!] Failed to prepare X authority"; exit 1; }
-sleep 2
-if ! kill -0 "$_xpid" 2>/dev/null; then
-    echo "[!] Xtigervnc exited immediately. Last log lines:"
-    tail -n 8 "$HOME/.vnc/xvnc.log" 2>/dev/null
-    exit 1
-fi
-_start_session
-
-echo ""
-echo "============================================"
-echo "  UMO VNC Server Started"
-echo "  Display: $VNC_DISPLAY"
-echo "  Address: 127.0.0.1:$VNC_PORT"
-echo "  Resolution: $VNC_GEOMETRY"
-echo "============================================"
-echo ""
-
-_server_fails=0
-while [ "$_server_fails" -lt 5 ]; do
-    sleep 5
-    if ! kill -0 "$_xpid" 2>/dev/null; then
-        _server_fails=$((_server_fails + 1))
-        echo "[!] Xtigervnc died, restarting ($_server_fails/5)..."
-        kill "$_session_pid" 2>/dev/null || true
-        _cleanup_locks
-        _start_server || continue
-        sleep 2
-        kill -0 "$_xpid" 2>/dev/null || continue
-    fi
-    if [ -n "$_session_pid" ] && ! kill -0 "$_session_pid" 2>/dev/null; then
-        echo "[!] Desktop session exited, relaunching..."
-        _start_session
-    fi
-done
-echo "[!] Xtigervnc kept dying. See $HOME/.vnc/xvnc.log and the Android phantom-process note."
-EOF
-    chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
-
-    cat > "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc" << 'EOF'
-#!/bin/sh
-_vnc_cmd=""
-if command -v tigervncserver >/dev/null 2>&1; then
-    _vnc_cmd="tigervncserver"
-elif command -v vncserver >/dev/null 2>&1; then
-    _vnc_cmd="vncserver"
-fi
-
-if [ -n "$_vnc_cmd" ]; then
-    $_vnc_cmd -kill :1 2>/dev/null || true
-    $_vnc_cmd -kill :2 2>/dev/null || true
-fi
-for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill -9 "$_pid" 2>/dev/null || true; done
-printf "  \033[38;5;34m✔\033[0m  VNC stopped.\n"
-EOF
-    chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-stopvnc"
+    for _cscript in umo-startvnc umo-stopvnc; do
+        _src="$SCRIPT_DIR/config/container/$_cscript"
+        if [ -f "$_src" ]; then
+            cp -f "$_src" "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
+            chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
+        else
+            umo_log_warn "container script missing: $_src"
+        fi
+    done
 
     _vnc_home="${UMO_SCRIPT_DIR:-$HOME/.umo}"
     mkdir -p "$_vnc_home" 2>/dev/null || _vnc_home="$HOME"

@@ -1,0 +1,105 @@
+#!/bin/sh
+VNC_DISPLAY="${VNC_DISPLAY:-:1}"
+VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
+VNC_DEPTH="${VNC_DEPTH:-24}"
+VNC_PORT="${VNC_PORT:-5901}"
+_vnc_num="${VNC_DISPLAY#:}"
+_xauth="/root/.Xauthority"
+
+_cleanup_locks() {
+    rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
+    rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
+}
+
+for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
+sleep 1
+_cleanup_locks
+mkdir -p /tmp/.X11-unix 2>/dev/null || true
+chmod 1777 /tmp/.X11-unix 2>/dev/null || true
+
+pulseaudio --start 2>/dev/null || true
+
+if ! command -v Xtigervnc >/dev/null 2>&1; then
+    echo "[!] Xtigervnc not found. Install with: apt install tigervnc-standalone-server"
+    exit 1
+fi
+if [ ! -f "$HOME/.vnc/passwd" ]; then
+    echo "[!] Missing $HOME/.vnc/passwd - re-run the UMO installer or set it with vncpasswd."
+    exit 1
+fi
+if [ ! -x /root/.vnc/xstartup ]; then
+    printf '#!/bin/sh\nexec xterm\n' > /root/.vnc/xstartup
+    chmod +x /root/.vnc/xstartup
+fi
+
+export MESA_NO_SHM=1
+export GALLIUM_DRIVER=llvmpipe
+export LIBGL_ALWAYS_SOFTWARE=1
+
+_xpid=""
+_session_pid=""
+_start_server() {
+    : > "$_xauth" 2>/dev/null || return 1
+    chmod 600 "$_xauth" 2>/dev/null || true
+    _cookie="$(head -c 16 /dev/urandom 2>/dev/null | od -An -tx1 | tr -d ' \n')"
+    [ -n "$_cookie" ] || return 1
+    xauth -f "$_xauth" add ":${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
+    xauth -f "$_xauth" add "$(uname -n 2>/dev/null || echo localhost)/unix:${_vnc_num}" MIT-MAGIC-COOKIE-1 "${_cookie}" >/dev/null 2>&1 || true
+    Xtigervnc "$VNC_DISPLAY" \
+        -geometry "$VNC_GEOMETRY" \
+        -depth "$VNC_DEPTH" \
+        -rfbport "$VNC_PORT" \
+        -localhost yes \
+        -SecurityTypes VncAuth \
+        -PasswordFile "$HOME/.vnc/passwd" \
+        -alwaysshared \
+        -auth "$_xauth" \
+        -Log "*:stderr:100" </dev/null >> "$HOME/.vnc/xvnc.log" 2>&1 &
+    _xpid="$!"
+}
+
+_start_session() {
+    (
+        export DISPLAY="$VNC_DISPLAY"
+        export XAUTHORITY="$_xauth"
+        exec /root/.vnc/xstartup
+    ) >> "$HOME/.vnc/session.log" 2>&1 &
+    _session_pid="$!"
+}
+
+_start_server || { echo "[!] Failed to prepare X authority"; exit 1; }
+sleep 2
+if ! kill -0 "$_xpid" 2>/dev/null; then
+    echo "[!] Xtigervnc exited immediately. Last log lines:"
+    tail -n 8 "$HOME/.vnc/xvnc.log" 2>/dev/null
+    exit 1
+fi
+_start_session
+
+echo ""
+echo "============================================"
+echo "  UMO VNC Server Started"
+echo "  Display: $VNC_DISPLAY"
+echo "  Address: 127.0.0.1:$VNC_PORT"
+echo "  Resolution: $VNC_GEOMETRY"
+echo "============================================"
+echo ""
+
+_server_fails=0
+while [ "$_server_fails" -lt 5 ]; do
+    sleep 5
+    if ! kill -0 "$_xpid" 2>/dev/null; then
+        _server_fails=$((_server_fails + 1))
+        echo "[!] Xtigervnc died, restarting ($_server_fails/5)..."
+        kill "$_session_pid" 2>/dev/null || true
+        _cleanup_locks
+        _start_server || continue
+        sleep 2
+        kill -0 "$_xpid" 2>/dev/null || continue
+    fi
+    if [ -n "$_session_pid" ] && ! kill -0 "$_session_pid" 2>/dev/null; then
+        echo "[!] Desktop session exited, relaunching..."
+        _start_session
+    fi
+done
+echo "[!] Xtigervnc kept dying. See $HOME/.vnc/xvnc.log and $HOME/.vnc/session.log"
