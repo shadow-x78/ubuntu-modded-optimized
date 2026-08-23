@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.11.2] - 2026-08-24
+
+### 🐛 Fixed
+- **Zero-manual-action desktop healing:** if the XFCE components are missing at session start (the state every install on some devices kept producing), the VNC start script itself now runs `apt-get update` + installs the full desktop set automatically BEFORE launching the session - streamed live into the same terminal as `umo start` - and only then starts the desktop. A broken container repairs itself on the first `umo start`; nothing manual, no reinstall needed. If automatic installation still fails, the unfiltered apt errors are printed directly.
+
 ## [v4.11.1] - 2026-08-24
 
 ### 📖 Diagnostics

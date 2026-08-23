@@ -76,6 +76,23 @@ _start_session() {
     _session_pid="$!"
 }
 
+if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+    echo "[..] Desktop components missing - installing automatically (up to 30 minutes)..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update 2>&1 | tail -n 3 || true
+    timeout 1800 apt-get install -y --no-install-recommends \
+        xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop \
+        xfce4-terminal thunar dbus-x11 x11-xserver-utils \
+        gnome-icon-theme xfce4-whiskermenu-plugin mousepad 2>&1 | tail -n 5 || true
+    dpkg --configure -a >/dev/null 2>&1 || true
+    if command -v startxfce4 >/dev/null 2>&1; then
+        echo "[OK] Desktop components installed automatically."
+    else
+        echo "[!!] Automatic desktop installation FAILED. Real apt errors:"
+        tail -n 25 /var/log/apt/term.log 2>/dev/null
+    fi
+fi
+
 _start_server || { echo "[!] Failed to start Xtigervnc"; exit 1; }
 sleep 2
 if ! kill -0 "$_xpid" 2>/dev/null; then
