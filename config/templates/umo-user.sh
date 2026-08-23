@@ -15,4 +15,4 @@ exec proot --link2symlink --sysvipc -0 -r "$INSTALL_DIR" \
     -w / \
     /usr/bin/env -i PWD=/ HOME=/home/$UMO_USER PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     TERM="$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \
-    /bin/su - "$UMO_USER" "$@"
+    /bin/su - $UMO_USER "$@"

@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.9"
+export UMO_VERSION="4.10.0"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -407,8 +407,11 @@ _umo_refresh_host() {
     _umo_user_sh="$_sh_dir/umo-user.sh"
     [ -f "$_umo_user_sh" ] || _umo_user_sh="$_UMO_TERMUX_HOME/umo-user.sh"
     if [ -f "$_umo_user_sh" ]; then
-        _cur_user=$(sed -n 's/.*\/bin\/su - \([^ ]*\).*/\1/p' "$_umo_user_sh" | head -1)
-        [ -n "$_cur_user" ] && _umo_user="$_cur_user"
+        _cur_user=$(sed -n 's/.*\/bin\/su - \([^ ]*\).*/\1/p' "$_umo_user_sh" 2>/dev/null | head -1 | tr -d '"')
+        case "$_cur_user" in
+            ""|'$'*|"{{"*) _umo_user="umo" ;;
+            *) _umo_user="$_cur_user" ;;
+        esac
     fi
 
     if [ -f "$_tpl/umo-login.sh" ]; then
@@ -479,24 +482,38 @@ _umo_refresh_container() {
             _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
             [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
             if [ -f "$_csrc" ]; then
-                cp -f "$_csrc" "$_bin_dir/$_cscript" 2>/dev/null || true
-                chmod +x "$_bin_dir/$_cscript" 2>/dev/null || true
+                if cp -f "$_csrc" "$_bin_dir/$_cscript.tmp" 2>/dev/null && mv -f "$_bin_dir/$_cscript.tmp" "$_bin_dir/$_cscript" 2>/dev/null; then
+                    chmod +x "$_bin_dir/$_cscript" 2>/dev/null || true
+                    _umo_ok "deployed: /usr/local/bin/$_cscript"
+                else
+                    _umo_warn "FAILED to deploy: /usr/local/bin/$_cscript"
+                fi
             fi
         done
-        _umo_ok "Helper scripts updated"
     fi
 
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
     if [ -f "$_xs_tpl" ]; then
         for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do
-            [ -f "$_xsf" ] || continue
-            _umo_de=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_xsf" | head -1)
-            [ -n "$_umo_de" ] || _umo_de="xfce4"
-            sed -e "s|{{UMO_VERSION}}|${_new_ver:-$_UMO_VERSION}|g" \
+            _xsf_dir=$(dirname "$_xsf")
+            mkdir -p "$_xsf_dir" 2>/dev/null || true
+            _umo_de="xfce4"
+            [ -f "$_xsf" ] && _parsed=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_xsf" 2>/dev/null | head -1 | tr -d '"')
+            [ -n "$_parsed" ] && _umo_de="$_parsed"
+            if sed -e "s|{{UMO_VERSION}}|${_new_ver:-$_UMO_VERSION}|g" \
                 -e "s|{{UMO_DE}}|$_umo_de|g" \
                 -e "s|{{DISPLAY}}|:1|g" \
-                "$_xs_tpl" > "$_xsf" 2>/dev/null || true
-            chmod +x "$_xsf" 2>/dev/null || true
+                "$_xs_tpl" > "$_xsf.tmp" 2>/dev/null && [ -s "$_xsf.tmp" ]; then
+                mv -f "$_xsf.tmp" "$_xsf" 2>/dev/null || true
+                chmod +x "$_xsf" 2>/dev/null || true
+                if grep -q "XDG_RUNTIME_DIR" "$_xsf" 2>/dev/null; then
+                    _umo_ok "xstartup updated: $_xsf"
+                else
+                    _umo_warn "xstartup content check failed: $_xsf"
+                fi
+            else
+                _umo_warn "FAILED to render xstartup: $_xsf"
+            fi
         done
         chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
     fi

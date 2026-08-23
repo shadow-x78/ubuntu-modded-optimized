@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.0] - 2026-08-23
+
+### 🐛 Fixed
+- **`user: "$UMO_USER"` garbage in update output:** the current-user extractor captured the shell variable form `"$UMO_USER"` (quotes included) from `umo-user.sh` and fed it back into re-renders. Extraction now strips quotes and falls back to `umo` for variable/placeholder forms; the template also uses an unquoted variable so it can never be misparsed again.
+- **Silent deployment failures masked as success:** helper-script copies and xstartup renders used `|| true` fire-and-forget writes - a failed deploy looked identical to a successful one (the exact reason stale xstartup survived "successful" updates). Deployment is now atomic (tmp + mv) with explicit per-file `deployed:` / `FAILED:` lines, and every rendered xstartup is verified to contain the new-format marker (`XDG_RUNTIME_DIR`) before being reported as updated.
+- **xstartup now created even when absent** (previously skipped), so containers missing it get the full modern session file on first refresh.
+
 ## [v4.9.9] - 2026-08-23
 
 ### 🐛 Fixed
