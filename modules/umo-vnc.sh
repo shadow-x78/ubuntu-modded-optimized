@@ -52,7 +52,7 @@ _um_apt_repair
 timeout 600 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
     libpng16-16 libbrotli1 fonts-dejavu-core ucf \
-    x11-common x11-xkb-utils xauth xkb-data \
+    x11-common x11-xkb-utils x11-xserver-utils xauth xkb-data \
     libx11-6 libx11-data libxau6 libxcb1 libxdmcp6 \
     libbsd0 libmd0 libxfont2 libfontenc1 libxcursor1 libxext6 \
     libxfixes3 libxft2 libxinerama1 libxrender1 libxi6 libxrandr2 \
@@ -117,7 +117,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.9.8}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.9.9}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else

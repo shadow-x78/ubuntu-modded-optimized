@@ -1,29 +1,45 @@
 #!/bin/sh
+# UMO VNC Session - {{UMO_VERSION}}
 export PULSE_SERVER=127.0.0.1
 export PULSE_LATENCY_MSEC=30
 export DISPLAY={{DISPLAY}}
-export XAUTHORITY="$HOME/.Xauthority"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp/runtime-$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null || true
+chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
-xset s off
-xset -dpms
-xset s noblank
+if command -v xset >/dev/null 2>&1; then
+    xset s off
+    xset -dpms
+    xset s noblank
+fi
 
 DE="{{UMO_DE}}"
+
+_start_with_dbus() {
+    if command -v dbus-launch >/dev/null 2>&1; then
+        exec dbus-launch --exit-with-session "$@"
+    fi
+    exec "$@"
+}
+
 case "$DE" in
     lxde)
-        [ -x "$(command -v startlxde)" ] && \
-            exec dbus-launch --exit-with-session startlxde ;;
-    xfce4|xfce)
-        if [ -x /usr/local/bin/umo-desktop-init ]; then
-            ( sleep 4; /usr/local/bin/umo-desktop-init >/dev/null 2>&1 & )
-        fi
-        [ -x "$(command -v startxfce4)" ] && \
-            exec dbus-launch --exit-with-session startxfce4 ;;
+        [ -x "$(command -v startlxde)" ] && _start_with_dbus startlxde ;;
     openbox)
-        [ -x "$(command -v openbox-session)" ] && \
-            exec dbus-launch --exit-with-session openbox-session ;;
-    *)
-        [ -x "$(command -v startxfce4)" ] && exec dbus-launch --exit-with-session startxfce4
-        [ -x "$(command -v startlxde)" ]  && exec dbus-launch --exit-with-session startlxde
-        exec xterm ;;
+        [ -x "$(command -v openbox-session)" ] && _start_with_dbus openbox-session ;;
 esac
+
+if command -v startxfce4 >/dev/null 2>&1; then
+    if [ -x /usr/local/bin/umo-desktop-init ]; then
+        ( sleep 4; /usr/local/bin/umo-desktop-init >/dev/null 2>&1 & )
+    fi
+    _start_with_dbus startxfce4
+fi
+
+command -v xfdesktop >/dev/null 2>&1 && xfdesktop &
+command -v xfce4-panel >/dev/null 2>&1 && xfce4-panel &
+command -v lxpanel >/dev/null 2>&1 && lxpanel --profile LXDE &
+command -v pcmanfm >/dev/null 2>&1 && pcmanfm --desktop &
+command -v xfwm4 >/dev/null 2>&1 && xfwm4 &
+command -v xterm >/dev/null 2>&1 && xterm &
+exec tail -f /dev/null

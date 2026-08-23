@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.9] - 2026-08-23
+
+### 🐛 Fixed
+- **Black desktop, cursor-only (old containers):** `xset` was missing because `x11-xserver-utils` was never in the VNC dependency list; xstartup now guards every optional tool, exports `XDG_RUNTIME_DIR` (required by xfce4-session/dbus and previously missing from the main template), and falls back gracefully.
+- **Session resilience:** if the full DE launcher is unavailable, xstartup assembles whatever exists manually (xfdesktop + panel + wm + terminal) and keeps the session alive with `tail -f /dev/null`, so partial installs still render something instead of a bare black root window.
+
+### 🔧 Changed
+- `x11-xserver-utils` added to the VNC install set for fresh installs; the `umo update` in-container hook now installs both `xfdesktop` and `x11-xserver-utils` when missing on existing ones.
+
 ## [v4.9.8] - 2026-08-23
 
 ### 🐛 Fixed

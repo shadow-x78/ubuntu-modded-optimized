@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.8"
+export UMO_VERSION="4.9.9"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -508,9 +508,12 @@ _umo_refresh_container() {
         for _g in \$(id -G 2>/dev/null); do
             grep -q ':x:'\$_g':' /etc/group 2>/dev/null || echo \"android_\$_g:x:\$_g:\" >> /etc/group 2>/dev/null || true
         done
-        if ! command -v xfdesktop >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+        if ! command -v xfdesktop >/dev/null 2>&1 || ! command -v xset >/dev/null 2>&1; then
             export DEBIAN_FRONTEND=noninteractive
-            timeout 300 apt-get install -y --no-install-recommends xfdesktop 2>&1 | tail -3 || true
+            _miss=""
+            command -v xfdesktop >/dev/null 2>&1 || _miss="$_miss xfdesktop"
+            command -v xset >/dev/null 2>&1 || _miss="$_miss x11-xserver-utils"
+            timeout 300 apt-get install -y --no-install-recommends $_miss 2>&1 | tail -3 || true
             dpkg --configure -a >/dev/null 2>&1 || true
         fi
         true
