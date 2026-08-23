@@ -77,7 +77,15 @@ echo "  Resolution: $VNC_GEOMETRY"
 echo "============================================"
 echo ""
 
+sleep 12
+if ! pgrep -f xfce4-panel >/dev/null 2>&1 && ! pgrep -f lxpanel >/dev/null 2>&1; then
+    echo "[!] WARNING: no panel process detected - desktop may look empty."
+    echo "[!] Last session.log lines:"
+    tail -n 15 "$HOME/.vnc/session.log" 2>/dev/null
+fi
+
 _server_fails=0
+_session_fails=0
 while [ "$_server_fails" -lt 5 ]; do
     sleep 5
     if ! kill -0 "$_xpid" 2>/dev/null; then
@@ -88,10 +96,16 @@ while [ "$_server_fails" -lt 5 ]; do
         _start_server || continue
         sleep 2
         kill -0 "$_xpid" 2>/dev/null || continue
+        _start_session
+        continue
     fi
     if [ -n "$_session_pid" ] && ! kill -0 "$_session_pid" 2>/dev/null; then
-        echo "[!] Desktop session exited, relaunching..."
-        _start_session
+        _session_fails=$((_session_fails + 1))
+        echo "[!] Desktop session exited ($_session_fails). Last session.log lines:"
+        tail -n 10 "$HOME/.vnc/session.log" 2>/dev/null
+        if [ "$_session_fails" -le 3 ]; then
+            _start_session
+        fi
     fi
 done
 echo "[!] Xtigervnc kept dying. See $HOME/.vnc/xvnc.log and $HOME/.vnc/session.log"

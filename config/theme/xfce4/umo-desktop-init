@@ -2,6 +2,13 @@
 
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 
+_i=0
+until xfconf-query -c xfce4-desktop -l >/dev/null 2>&1; do
+    _i=$((_i + 1))
+    [ "$_i" -ge 20 ] && exit 0
+    sleep 1
+done
+
 WP="/usr/share/wallpapers/umo-wallpaper.jpg"
 [ -f "$WP" ] || WP="/usr/local/share/wallpapers/umo-wallpaper.jpg"
 [ -f "$WP" ] || exit 0

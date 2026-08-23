@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.1] - 2026-08-23
+
+### 🐛 Fixed
+- **Wallpaper timing race:** `umo-desktop-init` now waits up to 20 s for `xfconfd` to accept queries before applying the backdrop (it previously fired once at ~4 s, before xfconfd was necessarily ready in slow proot sessions).
+
+### 📖 Diagnostics
+- **Desktop-death visibility:** the VNC supervisor now checks for a panel process 12 s after session start and, whenever the desktop session dies, dumps the last lines of `session.log` straight into `~/.umo/logs/vnc-start.log` - so `umo start` output alone reveals which XFCE component is crashing and why.
+
 ## [v4.10.0] - 2026-08-23
 
 ### 🐛 Fixed
