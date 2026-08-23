@@ -56,7 +56,8 @@ umo_de_lxde() {
     umo_log_step "Install LXDE (ultra-lightweight)"
     _umo_de_build 'timeout 600 apt-get install -y --no-install-recommends \
     lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf 2>&1 | _apt_filter || true'
-    _run_de_installer "LXDE"
+    _run_de_installer "LXDE" startlxde \
+        "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf"
 }
 
 umo_de_xfce4() {
@@ -67,33 +68,47 @@ umo_de_xfce4() {
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
     xfce4-whiskermenu-plugin 2>&1 | _apt_filter || true'
     _umo_de_build "$_pkgs"
-    _run_de_installer "XFCE4"
+    _run_de_installer "XFCE4" startxfce4 \
+        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop xfce4-terminal thunar dbus-x11 x11-xserver-utils"
 }
 
 umo_de_openbox() {
     umo_log_step "Install Openbox (minimal)"
     _umo_de_build 'timeout 600 apt-get install -y --no-install-recommends \
     openbox obconf lxterminal pcmanfm tint2 feh exo-utils 2>&1 | _apt_filter || true'
-    _run_de_installer "Openbox"
+    _run_de_installer "Openbox" openbox-session \
+        "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils"
 }
 
 umo_de_minimal() {
     umo_log_step "Install minimal X11"
     _umo_de_build 'timeout 600 apt-get install -y --no-install-recommends \
     xterm xfonts-base 2>&1 | _apt_filter || true'
-    _run_de_installer "minimal X11"
+    _run_de_installer "minimal X11" xterm \
+        "apt-get update && apt-get install -y --no-install-recommends xterm xfonts-base"
 }
 
 _run_de_installer() {
     _label="$1"
+    _probe="$2"
+    _repair="$3"
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
     printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-de.sh" || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
+        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$_label" "$UMO_NC"
     else
-        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_rc"
+        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$_label" "$UMO_NC" "$_rc"
+    fi
+    if [ -n "$_probe" ] && ! "$UMO_LOGIN_SH" -c "command -v $_probe >/dev/null 2>&1"; then
+        printf "\n"
+        printf "  %b%s%b  CRITICAL: %s core component '%s' is MISSING - desktop would be EMPTY.\n" \
+            "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_probe"
+        printf "         Repair inside the container:\n"
+        printf "           umo login\n"
+        printf "           %s\n" "$_repair"
+        printf "         Then restart VNC with: umo stop && umo start\n\n"
     fi
     rm -f "${UMO_INSTALL_DIR}/root/install-de.sh" 2>/dev/null || true
 }

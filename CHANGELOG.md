@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.2] - 2026-08-23
+
+### 🐛 Fixed
+- **Desktop installs could fail silently, leaving an empty desktop:** the DE installer tolerated any apt error and never verified the result - a fresh install with only 295 packages shipped no `startxfce4`, no panel and a permanently black VNC screen while claiming success. Each DE install now verifies its core component (`startxfce4` / `startlxde` / `openbox-session` / `xterm`) inside the container and prints a CRITICAL banner with the exact repair command when missing.
+- **Silent audio failure on start:** `umo start` now checks that the Termux-side PulseAudio daemon is actually alive after `pulseaudio --start` and prints the fix command when it is not.
+
 ## [v4.10.1] - 2026-08-23
 
 ### 🐛 Fixed
