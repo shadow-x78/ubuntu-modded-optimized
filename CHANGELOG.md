@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.11.0] - 2026-08-24
+
+### ✨ Added
+- **`umo install`:** re-runs the full installer from the installed tree (`umo install`, extra installer flags pass through, e.g. `umo install --de=xfce4`). The recommended repair path for existing installs whose wrapper predates newer update-flow logic; fresh one-liner installs remain the canonical path: `bash <(curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh)`.
+- `umo --help` now lists `install` under Maintenance.
+
 ## [v4.10.6] - 2026-08-24
 
 ### 🐛 Fixed

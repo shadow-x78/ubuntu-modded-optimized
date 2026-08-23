@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.10.6"
+export UMO_VERSION="4.11.0"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -850,6 +850,7 @@ _umo_help() {
 
     printf "  ${_UMO_PRI}Maintenance${_UMO_NC} ${_UMO_DIM}(keep UMO current and safe)${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start the VNC server manually"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "install"            "Re-run the installer (repair/reinstall)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Fetch and apply the latest UMO version"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Archive the rootfs to <dir>"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "uninstall"          "Remove UMO completely (rootfs, scripts, aliases)"
@@ -888,6 +889,17 @@ case "$1" in
         exec "$_s" ;;
     status)                 _umo_status ;;
     update)                 _umo_run_update ;;
+    install)
+        if [ -f "$_UMO_REPO_DIR/bin/umo-install" ]; then
+            shift
+            _umo_info "Re-running the UMO installer..."
+            exec sh "$_UMO_REPO_DIR/bin/umo-install" "$@"
+        else
+            _umo_err "Installer not found at $_UMO_REPO_DIR/bin/umo-install"
+            printf "  Run the one-liner instead:\n"
+            printf "    bash <(curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh)\n\n"
+            exit 1
+        fi ;;
     uninstall|remove)       _umo_uninstall ;;
     run)                    shift; _umo_run_cmd "$@" ;;
     backup)                 shift; _umo_backup "$@" ;;
