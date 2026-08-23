@@ -2,7 +2,7 @@
 _umo_login="${HOME:-/data/data/com.termux/files/home}/.umo/umo-login.sh"
 [ -x "$_umo_login" ] || _umo_login="${HOME:-/data/data/com.termux/files/home}/umo-login.sh"
 
-pulseaudio --start 2>/dev/null || true
+pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
 sleep 1
 
 if [ -x "$_umo_login" ]; then

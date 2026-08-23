@@ -17,12 +17,14 @@ export DEBIAN_FRONTEND=noninteractive
 _apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 _um_apt_repair() {
     dpkg --configure -a 2>&1 | _apt_filter || true
+    timeout 900 apt-get -f install -y 2>&1 | _apt_filter || true
+    dpkg --configure -a 2>&1 | _apt_filter || true
     _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
     if [ -n "$_broken" ]; then
         for _pkg in $_broken; do
             dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
         done
-        timeout 600 apt-get -f install -y 2>&1 | _apt_filter || true
+        timeout 900 apt-get -f install -y 2>&1 | _apt_filter || true
         dpkg --configure -a 2>&1 | _apt_filter || true
     fi
 }
@@ -117,7 +119,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.10.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.10.3}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -215,7 +217,7 @@ umo_vnc_create_scripts() {
 
     cat > "$_vnc_home/umo-vnc-start.sh" << EOF
 #!/bin/sh
-pulseaudio --start 2>/dev/null || true
+pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
 sleep 1
 exec "$_umo_login" -c "umo-startvnc"
 EOF

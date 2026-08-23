@@ -17,10 +17,10 @@ _UMO_YEL='\033[38;5;220m'
 
 termux-wake-lock 2>/dev/null || true
 
-pulseaudio --start 2>/dev/null || true
+pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
 sleep 1
 if ! pgrep -f pulseaudio >/dev/null 2>&1; then
-    printf "  %b[!]%b Audio daemon is not running. Fix: pkg install -y pulseaudio && pulseaudio --start\n" "$_UMO_YEL" "$_UMO_NC"
+    printf "  %b[!]%b Audio daemon is not running. Fix: pkg install -y pulseaudio && pulseaudio --start --exit-idle-time=-1\n" "$_UMO_YEL" "$_UMO_NC"
 fi
 
 if [ "$1" = "--x11" ] || [ "$1" = "x11" ]; then

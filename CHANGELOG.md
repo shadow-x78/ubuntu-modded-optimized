@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.3] - 2026-08-23
+
+### 🐛 Fixed
+- **Desktop installs time out on slow devices (the recurring empty-desktop cause):** the XFCE/LXDE/Openbox apt runs were capped at 600 s - a ~300-package install through proot regularly exceeds that, apt gets killed mid-run, and the old "repair" then force-removed every half-installed package, leaving a silent empty desktop on fresh installs while small sets (VNC deps) succeeded. DE timeouts are now 1800 s.
+- **Repair no longer destroys half-installed desktops:** `_um_apt_repair` now tries configure → `apt-get -f` → configure first, then reinstalls broken packages by name, and only force-removes as an absolute last resort (applied to both the desktop and VNC repair bodies).
+- **PulseAudio exited after ~20 s of silence:** Termux PulseAudio defaults to `--exit-idle-time=20`, so audio showed "stopped" minutes after start and containers had nothing to connect to. Every launch site (`umo start`, both VNC host wrappers) now uses `--exit-idle-time=-1`.
+
 ## [v4.10.2] - 2026-08-23
 
 ### 🐛 Fixed
