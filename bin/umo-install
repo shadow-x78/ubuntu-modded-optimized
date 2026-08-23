@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.6"
+export UMO_VERSION="4.9.7"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -465,9 +465,15 @@ EOF
 
 _umo_refresh_container() {
     [ -f "$_UMO_LOGIN" ] || return 0
+    _ct_inst_dir=$(grep '^INSTALL_DIR=' "$_UMO_LOGIN" 2>/dev/null | head -1 | cut -d'"' -f2)
+    [ -z "$_ct_inst_dir" ] && _ct_inst_dir="${UMO_INSTALL_DIR:-$_UMO_TERMUX_HOME/umo-ubuntu}"
+    if [ ! -d "$_ct_inst_dir" ]; then
+        _umo_warn "Install directory not found ($_ct_inst_dir), skipping container refresh"
+        return 0
+    fi
     _umo_info "Updating in-container helper scripts..."
 
-    _bin_dir="${UMO_INSTALL_DIR}/usr/local/bin"
+    _bin_dir="$_ct_inst_dir/usr/local/bin"
     if mkdir -p "$_bin_dir" 2>/dev/null; then
         for _cscript in umo-startvnc umo-stopvnc umo-desktop-init; do
             _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
@@ -482,7 +488,7 @@ _umo_refresh_container() {
 
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
     if [ -f "$_xs_tpl" ]; then
-        for _xsf in "${UMO_INSTALL_DIR}/root/.vnc/xstartup" "${UMO_INSTALL_DIR}/home/umo/.vnc/xstartup"; do
+        for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do
             [ -f "$_xsf" ] || continue
             _umo_de=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_xsf" | head -1)
             [ -n "$_umo_de" ] || _umo_de="xfce4"
@@ -492,7 +498,7 @@ _umo_refresh_container() {
                 "$_xs_tpl" > "$_xsf" 2>/dev/null || true
             chmod +x "$_xsf" 2>/dev/null || true
         done
-        chown -R 1000:1000 "${UMO_INSTALL_DIR}/home/umo/.vnc" 2>/dev/null || true
+        chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
     fi
 
     _umo_info "Applying in-container update hooks..."
@@ -952,6 +958,7 @@ umo_cli_parse() {
     for _arg in "$@"; do
         case "$_arg" in
             --no-gui|--non-interactive) UMO_NON_INTERACTIVE=1 ;;
+            --refresh) UMO_REFRESH=1 ;;
             --de=*)      UMO_DE="${_arg#*=}" ;;
             --apps=*)    UMO_APP_SET="${_arg#*=}" ;;
             --dir=*)     UMO_INSTALL_DIR="${_arg#*=}" ;;
@@ -1020,6 +1027,24 @@ umo_phase_theme() {
 
 umo_main() {
     umo_cli_parse "$@"
+
+    if [ "${UMO_REFRESH:-0}" = "1" ]; then
+        umo_ui_header "Refresh Tools"
+        export SCRIPT_DIR
+        _UMO_REPO_DIR="$SCRIPT_DIR"
+        _UMO_TERMUX_HOME="${HOME}"
+        _new_ver="$UMO_VERSION"
+        if [ ! -x "$(umo_login_sh)" ]; then
+            umo_log_err "UMO is not installed yet - run the installer first."
+            exit 1
+        fi
+        _umo_refresh_host
+        _umo_refresh_container
+        printf "\n"
+        umo_log_ok "Host and container tools refreshed to v$UMO_VERSION"
+        printf "  ${_UMO_DIM}Start a session with ${_UMO_CYN}umo start${_UMO_NC}\n\n"
+        return 0
+    fi
 
     _umo_exit_code=0
     _umo_sigint_cleanup() {
