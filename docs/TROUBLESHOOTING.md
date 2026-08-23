@@ -2,7 +2,7 @@
 
 # Troubleshooting - UMO
 
-[![Version](https://img.shields.io/badge/version-4.9.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.9.4-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -20,6 +20,7 @@
 ## 📋 Table of Contents
 
 - [VNC Disconnects on Screen Lock](#vnc-lock)
+- [VNC Stops By Itself (Android 12+)](#phantom-process)
 - [No Audio in Proot](#no-audio)
 - [systemctl Fails](#systemctl)
 - [Black Screen / VNC Not Connecting](#black-screen)
@@ -42,6 +43,24 @@ umo login
 ```
 
 > Keep Termux open in the foreground or use a persistent notification to prevent Android from killing it.
+
+---
+
+<a id="phantom-process"></a>
+## 🛑 VNC Stops By Itself (Android 12+)
+
+**Cause:** Android's **phantom process killer** terminates deep background process chains (proot → bash → Xtigervnc) a few seconds/minutes after launch, even with a wake lock. Direct daemons (PulseAudio) survive, which is why `umo status` shows Audio running but VNC stopped.
+
+**Fix (one-time, from a PC with USB debugging):**
+
+```bash
+adb shell device_config put activity_manager max_phantom_processes 2147483647
+adb shell settings put global settings_enable_monitor_phantom_procs false
+```
+
+> The `settings` command is rejected on some Android 14+ builds - the `device_config` line alone is usually enough. UMO also auto-restarts the VNC server up to 3 times if it dies.
+
+**Check:** `umo start`, wait a minute, then run `umo status`. If VNC still stops, inspect `~/.umo/logs/vnc-start.log`.
 
 ---
 

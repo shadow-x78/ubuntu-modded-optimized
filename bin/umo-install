@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.9.3"
+export UMO_VERSION="4.9.4"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -365,9 +365,7 @@ _umo_status() {
     _vnc_pid=$(pgrep -f "Xvnc" 2>/dev/null | head -1)
     [ -z "$_vnc_pid" ] && _vnc_pid=$(pgrep -f "Xtigervnc" 2>/dev/null | head -1)
     if [ -n "$_vnc_pid" ]; then
-        _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
-        [ -z "$_ip" ] && _ip="127.0.0.1"
-        _umo_kv "VNC" "${_UMO_GRN}active${_UMO_NC} ${_UMO_CYN}${_ip}:5901${_UMO_NC}"
+        _umo_kv "VNC" "${_UMO_GRN}active${_UMO_NC} ${_UMO_CYN}127.0.0.1:5901${_UMO_NC}"
     else
         _umo_kv "VNC" "${_UMO_DIM}stopped${_UMO_NC}"
     fi
@@ -847,9 +845,6 @@ UMOCMD
 }
 
 umo_phase_summary() {
-    _ip=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
-    [ -z "$_ip" ] && _ip="127.0.0.1"
-
     umo_screen_clear
     umo_banner || true
     umo_rule
@@ -869,9 +864,9 @@ umo_phase_summary() {
         _vnc_pass="$(tr -d '\r\n' < "$UMO_RUNTIME_DIR/vnc-pass" 2>/dev/null || true)"
     fi
     if [ -n "$_vnc_pass" ]; then
-        umo_kv "VNC"     "$_ip:5901 (pass: $_vnc_pass)"
+        umo_kv "VNC"     "127.0.0.1:5901 (pass: $_vnc_pass)"
     else
-        umo_kv "VNC"     "$_ip:5901 (pass: see $UMO_RUNTIME_DIR/vnc-pass)"
+        umo_kv "VNC"     "127.0.0.1:5901 (pass: see $UMO_RUNTIME_DIR/vnc-pass)"
     fi
     umo_kv "User"    "umo (login pass: umo)"
 
@@ -914,8 +909,7 @@ Commands (run from Termux):
   umo update          Update UMO tool
   umo uninstall       Remove UMO completely
 
-VNC: $_ip:5901 (localhost-only by default; connect from this device,
-     or start with UMO_VNC_PUBLIC=1 to expose to your LAN)
+VNC: 127.0.0.1:5901 (connect with a VNC viewer on this device)
 User: umo (Login pass: umo, VNC pass: ${_vnc_pass:-see $UMO_RUNTIME_DIR/vnc-pass})
 
 ========================================

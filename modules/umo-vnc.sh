@@ -117,7 +117,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.9.3}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.9.4}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -205,25 +205,24 @@ VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
-VNC_LOCALHOST="yes"
-[ "${UMO_VNC_PUBLIC:-0}" = "1" ] && VNC_LOCALHOST="no"
-
-for _pid in $(pgrep -f Xvnc 2>/dev/null) $(pgrep -f Xtigervnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
-sleep 1
 
 _vnc_num="${VNC_DISPLAY#:}"
-rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
-rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
+_cleanup_locks() {
+    rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
+    rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
+}
+
+for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
+sleep 1
+_cleanup_locks
 
 pulseaudio --start 2>/dev/null || true
 
 _vnc_cmd=""
-if command -v tigervncserver >/dev/null 2>&1; then
-    _vnc_cmd="tigervncserver"
-elif command -v vncserver >/dev/null 2>&1; then
-    _vnc_cmd="vncserver"
-else
-    echo "  [!] VNC server not found. Install with: apt install tigervnc-standalone-server"
+command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"
+[ -z "$_vnc_cmd" ] && command -v vncserver >/dev/null 2>&1 && _vnc_cmd="vncserver"
+if [ -z "$_vnc_cmd" ]; then
+    echo "[!] VNC server not found. Install with: apt install tigervnc-standalone-server"
     exit 1
 fi
 
@@ -231,59 +230,45 @@ export MESA_NO_SHM=1
 export GALLIUM_DRIVER=llvmpipe
 export LIBGL_ALWAYS_SOFTWARE=1
 
-if ! $_vnc_cmd "$VNC_DISPLAY" \
-    -geometry "$VNC_GEOMETRY" \
-    -depth "$VNC_DEPTH" \
-    -localhost "$VNC_LOCALHOST" \
-    -name "UMO Desktop" \
-    -alwaysshared \
-    -Log "*:stderr:100"; then
-    echo "  [!] Failed to start VNC server"
+_start_server() {
+    $_vnc_cmd "$VNC_DISPLAY" \
+        -geometry "$VNC_GEOMETRY" \
+        -depth "$VNC_DEPTH" \
+        -localhost yes \
+        -name "UMO Desktop" \
+        -alwaysshared \
+        -Log "*:stderr:100"
+}
+
+if ! _start_server; then
+    echo "[!] Failed to start VNC server"
     exit 1
 fi
 
 sleep 2
 
-_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
-[ -z "$_IP" ] && _IP="127.0.0.1"
-_VNC_ADDR="127.0.0.1"
-[ "$VNC_LOCALHOST" = "no" ] && _VNC_ADDR="$_IP"
+echo ""
+echo "============================================"
+echo "  UMO VNC Server Started"
+echo "  Display: $VNC_DISPLAY"
+echo "  Address: 127.0.0.1:$VNC_PORT"
+echo "  Resolution: $VNC_GEOMETRY"
+echo "============================================"
+echo ""
 
-_NC='\033[0m'
-_PRI='\033[38;5;208m'
-_GRN='\033[38;5;34m'
-_CYN='\033[38;5;39m'
-_BOLD='\033[1m'
-_DIM='\033[2m'
-
-printf "\n${_PRI}"
-printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
-printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
-printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
-printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
-printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
-printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
-printf "${_NC}\n"
-
-printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
-printf "  ${_BOLD}${_GRN}▸ UMO VNC Server${_NC}\n"
-printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
-printf "\n"
-printf "  ${_BOLD}Display:${_NC}    ${_CYN}%s${_NC}\n" "$VNC_DISPLAY"
-printf "  ${_BOLD}Address:${_NC}    ${_CYN}%s:%s${_NC}\n" "$_VNC_ADDR" "$VNC_PORT"
-printf "  ${_BOLD}Resolution:${_NC} ${_DIM}%s${_NC}\n" "$VNC_GEOMETRY"
-if [ "$VNC_LOCALHOST" = "yes" ]; then
-    printf "\n"
-    printf "  ${_DIM}Localhost-only: connect from this device.${_NC}\n"
-    printf "  ${_DIM}Set UMO_VNC_PUBLIC=1 before starting to allow LAN clients.${_NC}\n"
-fi
-printf "\n"
-printf "  ${_PRI}────────────────────────────────────────${_NC}\n"
-printf "\n"
-
-while pgrep -f "Xvnc" >/dev/null 2>&1 || pgrep -f "Xtigervnc" >/dev/null 2>&1; do
-    sleep 3
+_supervisor_fails=0
+while [ "$_supervisor_fails" -lt 3 ]; do
+    sleep 5
+    if pgrep -f Xtigervnc >/dev/null 2>&1 || pgrep -f Xvnc >/dev/null 2>&1; then
+        continue
+    fi
+    _supervisor_fails=$((_supervisor_fails + 1))
+    echo "[!] VNC server exited, restarting ($_supervisor_fails/3)..."
+    for _pid in $(pgrep -f Xtigervnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
+    _cleanup_locks
+    _start_server || true
 done
+echo "[!] VNC kept stopping. See ~/.umo/logs/vnc-start.log and the Android phantom-process note."
 EOF
     chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-startvnc"
 
@@ -313,7 +298,7 @@ EOF
 #!/bin/sh
 pulseaudio --start 2>/dev/null || true
 sleep 1
-exec "$_umo_login" -c "UMO_VNC_PUBLIC=\${UMO_VNC_PUBLIC:-0} umo-startvnc"
+exec "$_umo_login" -c "umo-startvnc"
 EOF
     chmod +x "$_vnc_home/umo-vnc-start.sh"
 

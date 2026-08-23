@@ -2,7 +2,7 @@
 
 # استكشاف الأخطاء وإصلاحها - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.9.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.9.4-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -20,6 +20,7 @@
 ## 📋 فهرس المحتويات
 
 - [VNC ينقطع عند قفل الشاشة](#vnc-lock)
+- [VNC يتوقف من تلقاء نفسه (أندرويد 12+)](#phantom-process)
 - [لا يوجد صوت داخل proot](#no-audio)
 - [systemctl يفشل](#systemctl)
 - [شاشة سوداء أو VNC لا يتصل](#black-screen)
@@ -42,6 +43,24 @@ umo login
 ```
 
 > أبقِ Termux مفتوحاً في المقدمة أو استخدم إشعاراً دائماً لمنع Android من إيقافه.
+
+---
+
+<a id="phantom-process"></a>
+## 🛑 VNC يتوقف من تلقاء نفسه (أندرويد 12+)
+
+**السبب:** «قاتل العمليات الوهمية» في أندرويد يُنهي سلاسل العمليات الخلفية العميقة (proot ← bash ← Xtigervnc) بعد ثوانٍ/دقائق من التشغيل حتى مع wake-lock. الخدمات المباشرة (PulseAudio) تنجو - ولهذا يُظهر `umo status` أن الصوت يعمل بينما VNC متوقف.
+
+**الحل (مرة واحدة، من حاسوب عبر USB):**
+
+```bash
+adb shell device_config put activity_manager max_phantom_processes 2147483647
+adb shell settings put global settings_enable_monitor_phantom_procs false
+```
+
+> أمر `settings` يُرفض على بعض إصدارات أندرويد 14+ - سطر `device_config` وحده كافٍ عادةً. كما أن UMO يعيد تشغيل خادم VNC تلقائياً حتى 3 مرات إذا مات.
+
+**التحقق:** `umo start`، انتظر دقيقة، ثم `umo status`. إذا استمر التوقف، افحص `~/.umo/logs/vnc-start.log`.
 
 ---
 

@@ -2,7 +2,7 @@
 
 # Security Policy - UMO
 
-[![Version](https://img.shields.io/badge/version-4.9.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.9.4-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -99,7 +99,7 @@ UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
 |------|------|------------|
 | Rootfs download | Supply-chain / MITM | HTTPS mirrors only; release tarballs and Ubuntu rootfs archives verified via SHA-256 checksums |
 | Proot execution | Container escape to Termux host | User-space proot - no root required; mounts limited to `dev`, `proc`, `sys`, `sdcard`, `termux` |
-| VNC exposure | Remote access to the desktop session | Server binds localhost only by default; random per-install password stored at `~/.umo/vnc-pass` (0600); set `UMO_VNC_PUBLIC=1` explicitly to allow LAN clients |
+| VNC exposure | Remote access to the desktop session | Server always binds `127.0.0.1` (hardcoded, no LAN opt-out); random per-install password stored at `~/.umo/vnc-pass` (0600) |
 | Sudo inside Ubuntu | `ubuntu` user has passwordless sudo | By design - local single-user Termux environment |
 | `$HOME` scripts | Overwritten on re-install | Scripts use `#!/bin/sh` minimal logic; no prompt before overwrite |
 

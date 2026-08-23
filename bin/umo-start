@@ -68,7 +68,7 @@ else
     _vnc_log="$UMO_SCRIPT_HOME/logs/vnc-start.log"
     mkdir -p "$UMO_SCRIPT_HOME/logs" 2>/dev/null || true
     : > "$_vnc_log" 2>/dev/null || true
-    nohup "$UMO_LOGIN" -c "UMO_VNC_PUBLIC=${UMO_VNC_PUBLIC:-0} umo-startvnc" > "$_vnc_log" 2>&1 &
+    nohup "$UMO_LOGIN" -c "umo-startvnc" > "$_vnc_log" 2>&1 &
     sleep 5
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
@@ -87,6 +87,11 @@ else
         printf "\n"
         printf "  %bHint:%b      %bumo login -c \"apt install -y tigervnc-standalone-server\"%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_UMO_NC"
         printf "  %bLog:%b       %b%s%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_vnc_log" "$_UMO_NC"
+        printf "\n"
+        printf "  %bAndroid 12+ note:%b\n" "$_UMO_BOLD" "$_UMO_NC"
+        printf "  %bAndroid kills background sessions (phantom processes). One-time fix from a PC:%b\n" "$_UMO_DIM" "$_UMO_NC"
+        printf "  %badb shell device_config put activity_manager max_phantom_processes 2147483647%b\n" "$_UMO_CYN" "$_UMO_NC"
+        printf "  %badb shell settings put global settings_enable_monitor_phantom_procs false%b\n" "$_UMO_CYN" "$_UMO_NC"
         printf "\n"
         exit 1
     fi

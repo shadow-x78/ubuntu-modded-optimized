@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.9.4] - 2026-08-23
+
+### 🐛 Fixed
+- **VNC auto-close:** the in-container start script is now a supervisor that relaunches the VNC server up to 3 times if it dies, clearing stale X locks before each restart, instead of passively watching it exit.
+
+### 🗑️ Removed
+- **The VNC public/LAN exposure option (`UMO_VNC_PUBLIC`) was deleted outright:** the server now always binds `127.0.0.1` with no opt-out; the flag, its forwarding through every wrapper, and all "localhost-only / public" banner wording were removed from scripts, install summary, in-container README and docs. Security posture simplified to same-device-only access.
+
+### 📖 Docs
+- New troubleshooting section for Android 12+ phantom process killing (the real cause of sessions dying on their own) with the one-time ADB fix; `umo start` failures print the same guidance.
+
 ## [v4.9.3] - 2026-08-23
 
 ### 🐛 Fixed

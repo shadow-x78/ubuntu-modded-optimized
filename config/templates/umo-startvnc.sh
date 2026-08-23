@@ -6,7 +6,7 @@ pulseaudio --start 2>/dev/null || true
 sleep 1
 
 if [ -x "$_umo_login" ]; then
-    exec "$_umo_login" -c "UMO_VNC_PUBLIC=${UMO_VNC_PUBLIC:-0} umo-startvnc"
+    exec "$_umo_login" -c "umo-startvnc"
 fi
 
 echo "  [!] UMO not installed ($_umo_login missing). Run the UMO installer first."
