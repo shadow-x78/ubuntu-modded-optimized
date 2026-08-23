@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.10.5"
+export UMO_VERSION="4.10.6"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -518,6 +518,22 @@ _umo_refresh_container() {
         chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
     fi
 
+    _umo_info "Checking desktop components..."
+    "$_UMO_LOGIN" -c "
+        if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            echo '[..] XFCE components missing - installing (up to 30 minutes, please wait)...'
+            timeout 1800 apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop xfce4-terminal thunar dbus-x11 x11-xserver-utils 2>&1 | tail -n 8
+            dpkg --configure -a >/dev/null 2>&1 || true
+            command -v startxfce4 >/dev/null 2>&1 && echo '[OK] XFCE desktop installed' || echo '[!!] XFCE install failed - see above'
+        fi
+        if ! command -v xset >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+            export DEBIAN_FRONTEND=noninteractive
+            timeout 300 apt-get install -y --no-install-recommends x11-xserver-utils >/dev/null 2>&1 || true
+        fi
+        true
+    " </dev/null || true
+
     _umo_info "Applying in-container update hooks..."
     "$_UMO_LOGIN" -c "
         [ -f /etc/apt/apt.conf.d/99-umo-speed ] && true
@@ -525,14 +541,6 @@ _umo_refresh_container() {
         for _g in \$(id -G 2>/dev/null); do
             grep -q ':x:'\$_g':' /etc/group 2>/dev/null || echo \"android_\$_g:x:\$_g:\" >> /etc/group 2>/dev/null || true
         done
-        if ! command -v xfdesktop >/dev/null 2>&1 || ! command -v xset >/dev/null 2>&1; then
-            export DEBIAN_FRONTEND=noninteractive
-            _miss=""
-            command -v xfdesktop >/dev/null 2>&1 || _miss="$_miss xfdesktop"
-            command -v xset >/dev/null 2>&1 || _miss="$_miss x11-xserver-utils"
-            timeout 300 apt-get install -y --no-install-recommends $_miss 2>&1 | tail -3 || true
-            dpkg --configure -a >/dev/null 2>&1 || true
-        fi
         true
     " </dev/null >/dev/null 2>&1 || true
     _umo_ok "Container hooks applied"

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.6] - 2026-08-24
+
+### 🐛 Fixed
+- **Empty desktop self-heal:** the component probe confirmed existing containers can lack the ENTIRE XFCE set (startxfce4/xfwm4/panel/xfdesktop all missing). `umo update` now detects the missing desktop launcher and installs the full XFCE core set in-container as a visible streamed step (up to 30 min, progress echoed, success/failure stated explicitly) instead of only patching two individual packages.
+
 ## [v4.10.5] - 2026-08-24
 
 ### 🐛 Fixed
