@@ -5,13 +5,30 @@ VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 _vnc_num="${VNC_DISPLAY#:}"
 
+for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
+    [ "$_spid" = "$$" ] || kill -9 "$_spid" 2>/dev/null || true
+done
+
+_stop_old_servers() {
+    _rounds=0
+    while pgrep -f Xtigervnc >/dev/null 2>&1 && [ "$_rounds" -lt 6 ]; do
+        pkill -TERM -f Xtigervnc 2>/dev/null || true
+        sleep 1
+        _rounds=$((_rounds + 1))
+        if [ "$_rounds" -ge 3 ]; then
+            pkill -KILL -f Xtigervnc 2>/dev/null || true
+        fi
+    done
+    pkill -KILL -f "Xvnc" 2>/dev/null || true
+    sleep 1
+}
+
 _cleanup_locks() {
     rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
     rm -f "$HOME/.vnc/"*":${_vnc_num}.pid" 2>/dev/null || true
 }
 
-for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do kill "$_pid" 2>/dev/null || true; done
-sleep 1
+_stop_old_servers
 _cleanup_locks
 mkdir -p /tmp/.X11-unix 2>/dev/null || true
 chmod 1777 /tmp/.X11-unix 2>/dev/null || true
@@ -59,8 +76,17 @@ _start_session() {
     _session_pid="$!"
 }
 
-_start_server || { echo "[!] Failed to prepare X authority"; exit 1; }
+_start_server || { echo "[!] Failed to start Xtigervnc"; exit 1; }
 sleep 2
+if ! kill -0 "$_xpid" 2>/dev/null; then
+    if tail -n 5 "$HOME/.vnc/xvnc.log" 2>/dev/null | grep -q "already running"; then
+        echo "[i] Another X server was still holding the display - stopping it and retrying..."
+        _stop_old_servers
+        _cleanup_locks
+        _start_server || { echo "[!] Failed to start Xtigervnc after cleanup"; exit 1; }
+        sleep 2
+    fi
+fi
 if ! kill -0 "$_xpid" 2>/dev/null; then
     echo "[!] Xtigervnc exited immediately. Last log lines:"
     tail -n 8 "$HOME/.vnc/xvnc.log" 2>/dev/null
@@ -94,6 +120,7 @@ while [ "$_server_fails" -lt 5 ]; do
         _server_fails=$((_server_fails + 1))
         echo "[!] Xtigervnc died, restarting ($_server_fails/5)..."
         kill "$_session_pid" 2>/dev/null || true
+        _stop_old_servers
         _cleanup_locks
         _start_server || continue
         sleep 2

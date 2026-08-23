@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.10.5] - 2026-08-24
+
+### 🐛 Fixed
+- **"Cannot establish any listening sockets - server already running":** repeated `umo start` invocations spawned competing VNC supervisors that kept killing and re-spawning each other's servers, so every new Xtigervnc lost the bind race against a live predecessor and exited instantly (black screen with cursor). The start script now enforces a single supervisor (kills older instances of itself), shuts down old servers with escalating TERM→KILL rounds and verifies they are gone, detects the "already running" bind failure specifically, cleans up and retries once instead of counting it as a crash.
+
 ## [v4.10.4] - 2026-08-24
 
 ### 📖 Changed
