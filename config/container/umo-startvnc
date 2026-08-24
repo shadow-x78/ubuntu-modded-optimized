@@ -6,7 +6,18 @@ VNC_PORT="${VNC_PORT:-5901}"
 _vnc_num="${VNC_DISPLAY#:}"
 
 for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
-    [ "$_spid" = "$$" ] || kill -9 "$_spid" 2>/dev/null || true
+    [ "$_spid" = "$$" ] && continue
+    _skip=0
+    _p="$_spid"
+    while [ -n "$_p" ] && [ "$_p" != "1" ]; do
+        if [ "$_p" = "$$" ]; then
+            _skip=1
+            break
+        fi
+        _p=$(awk '/^PPid:/{print $2}' "/proc/$_p/status" 2>/dev/null)
+    done
+    [ "$_skip" = "1" ] && continue
+    kill -9 "$_spid" 2>/dev/null || true
 done
 
 _stop_old_servers() {

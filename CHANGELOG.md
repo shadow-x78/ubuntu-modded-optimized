@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.13.3] - 2026-08-24
+
+### 🐛 Fixed
+- **VNC died instantly with an empty log on fresh installs:** the single-supervisor check killed every process whose command line contained "umo-startvnc" with SIGKILL - which matched the script's own ancestor chain (nohup wrapper, proot, container bash). Killing the proot ancestor destroys the whole traced tree, so the script died before printing anything (empty "Last log lines"). The check now walks `/proc` ancestry and only kills genuinely foreign supervisors.
+- **Long installs no longer look frozen:** the desktop, VNC and theme apt runs stream their full output (downloads, unpacking, setup) instead of filtering it into silence; the designer-extras script announces every stage (fetch/install Orchis, Tela, font) and only suppresses the font-cache noise.
+
 ## [v4.13.2] - 2026-08-24
 
 ### 🔧 Changed

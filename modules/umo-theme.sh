@@ -45,8 +45,8 @@ export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
-timeout 600 apt-get install -y -q --no-install-recommends $_theme_pkgs 2>/dev/null || true
-timeout 120 apt-get install -y -q exo-utils 2>/dev/null || true
+timeout 600 apt-get install -y --no-install-recommends $_theme_pkgs || true
+timeout 120 apt-get install -y exo-utils 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"

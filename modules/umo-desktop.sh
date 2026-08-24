@@ -20,23 +20,22 @@ echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null |
 
 HDR
     cat << 'REPAIR'
-_apt_filter() { grep -v "^Ign\|^Get:\|^Preparing\|^Unpacking\|^Selecting\|^Setting up\|^Processing\|^Reading\|^Building\|^Creating\|^debconf:" || true; }
 _um_apt_repair() {
-    dpkg --configure -a 2>&1 | _apt_filter || true
-    timeout 900 apt-get -f install -y 2>&1 | _apt_filter || true
-    dpkg --configure -a 2>&1 | _apt_filter || true
+    dpkg --configure -a || true
+    timeout 900 apt-get -f install -y || true
+    dpkg --configure -a || true
     _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
     if [ -n "$_broken" ]; then
-        timeout 900 apt-get install -y --reinstall $_broken 2>&1 | _apt_filter || true
-        dpkg --configure -a 2>&1 | _apt_filter || true
+        timeout 900 apt-get install -y --reinstall $_broken || true
+        dpkg --configure -a || true
     fi
     _broken=$(dpkg -l 2>/dev/null | awk '/^iU|^iF|^hF/{print $2}')
     if [ -n "$_broken" ]; then
         for _pkg in $_broken; do
-            dpkg --remove --force-depends "$_pkg" 2>&1 | _apt_filter || true
+            dpkg --remove --force-depends "$_pkg" || true
         done
-        timeout 900 apt-get -f install -y 2>&1 | _apt_filter || true
-        dpkg --configure -a 2>&1 | _apt_filter || true
+        timeout 900 apt-get -f install -y || true
+        dpkg --configure -a || true
     fi
 }
 REPAIR
@@ -51,13 +50,13 @@ _umo_de_build() {
 
 _um_apt_repair
 
-apt-get update 2>&1 | _apt_filter || true
+apt-get update || true
 
 _attempt=0
 until command -v $_probe >/dev/null 2>&1 || [ "\$_attempt" -ge 3 ]; do
     _attempt=\$((_attempt + 1))
 $_pkgs_block
-    dpkg --configure -a 2>&1 | _apt_filter || true
+    dpkg --configure -a || true
 done
 
 if ! command -v $_probe >/dev/null 2>&1; then
@@ -73,7 +72,7 @@ EOF
 umo_de_lxde() {
     umo_log_step "Install LXDE (ultra-lightweight)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf 2>&1 | _apt_filter || true' startlxde
+    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true' startlxde
     _run_de_installer "LXDE" startlxde \
         "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf"
 }
@@ -84,7 +83,7 @@ umo_de_xfce4() {
     xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
-    xfce4-whiskermenu-plugin 2>&1 | _apt_filter || true'
+    xfce4-whiskermenu-plugin || true'
     _umo_de_build "$_pkgs" startxfce4
     _run_de_installer "XFCE4" startxfce4 \
         "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils"
@@ -93,7 +92,7 @@ umo_de_xfce4() {
 umo_de_openbox() {
     umo_log_step "Install Openbox (minimal)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    openbox obconf lxterminal pcmanfm tint2 feh exo-utils 2>&1 | _apt_filter || true' openbox-session
+    openbox obconf lxterminal pcmanfm tint2 feh exo-utils || true' openbox-session
     _run_de_installer "Openbox" openbox-session \
         "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils"
 }
@@ -101,7 +100,7 @@ umo_de_openbox() {
 umo_de_minimal() {
     umo_log_step "Install minimal X11"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    xterm xfonts-base 2>&1 | _apt_filter || true' xterm
+    xterm xfonts-base || true' xterm
     _run_de_installer "minimal X11" xterm \
         "apt-get update && apt-get install -y --no-install-recommends xterm xfonts-base"
 }
