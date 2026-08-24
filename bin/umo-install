@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.13.3"
+export UMO_VERSION="4.14.0"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -538,6 +538,18 @@ _umo_refresh_container() {
         done
         true
     " </dev/null >/dev/null 2>&1 || true
+
+    _umo_info "Upgrading the Ubuntu system (this may take a while)..."
+    "$_UMO_LOGIN" -c "
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        timeout 1800 apt-get upgrade -y
+        timeout 900 apt-get full-upgrade -y || true
+        dpkg --configure -a >/dev/null 2>&1 || true
+        apt-get autoremove -y >/dev/null 2>&1 || true
+        apt-get clean
+    " </dev/null || true
+    _umo_ok "System packages upgraded"
     _umo_ok "Container hooks applied"
 }
 

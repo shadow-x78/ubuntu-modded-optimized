@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.14.0] - 2026-08-24
+
+### ✨ Added
+- **`umo update` now upgrades the entire Ubuntu system:** after the script refresh, the container runs `apt-get update` + full `upgrade` + `full-upgrade` + `autoremove`, streamed live so progress is always visible. Long-installation progress streaming remains part of the installer phases (desktop/theme/extras) where those installs belong.
+
 ## [v4.13.3] - 2026-08-24
 
 ### 🐛 Fixed
