@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.13.1"
+export UMO_VERSION="4.13.2"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -503,12 +503,6 @@ _umo_refresh_container() {
         done
     fi
 
-    if [ -f "$_bin_dir/umo-install-extras" ] && ! "$_UMO_LOGIN" -c "test -d /usr/share/themes/Orchis-Dark-Compact" 2>/dev/null; then
-        _umo_info "Installing designer extras (Orchis / Tela / FiraCode Nerd)..."
-        "$_UMO_LOGIN" -c "bash /usr/local/bin/umo-install-extras" </dev/null || true
-        _umo_ok "Designer extras processed"
-    fi
-
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
     if [ -f "$_xs_tpl" ]; then
         for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do
@@ -534,22 +528,6 @@ _umo_refresh_container() {
         done
         chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
     fi
-
-    _umo_info "Checking desktop components..."
-    "$_UMO_LOGIN" -c "
-        if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-            export DEBIAN_FRONTEND=noninteractive
-            echo '[..] XFCE components missing - installing (up to 30 minutes, please wait)...'
-            timeout 1800 apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils 2>&1 | tail -n 8
-            dpkg --configure -a >/dev/null 2>&1 || true
-            command -v startxfce4 >/dev/null 2>&1 && echo '[OK] XFCE desktop installed' || echo '[!!] XFCE install failed - see above'
-        fi
-        if ! command -v xset >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-            export DEBIAN_FRONTEND=noninteractive
-            timeout 300 apt-get install -y --no-install-recommends x11-xserver-utils >/dev/null 2>&1 || true
-        fi
-        true
-    " </dev/null || true
 
     _umo_info "Applying in-container update hooks..."
     "$_UMO_LOGIN" -c "

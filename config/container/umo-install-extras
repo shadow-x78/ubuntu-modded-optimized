@@ -15,13 +15,15 @@ if [ -d /root/.tela-icons ]; then
 fi
 
 if [ -d /usr/share/themes/Orchis-Dark-Compact ]; then
-    for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
+        for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
               /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
               /root/.config/gtk-3.0/settings.ini \
               /home/umo/.config/gtk-3.0/settings.ini \
               /root/.gtkrc-2.0 \
               /home/umo/.gtkrc-2.0; do
-        [ -f "$_f" ] && sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g' "$_f" 2>/dev/null || true
+        if [ -f "$_f" ]; then
+            sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g' "$_f" 2>/dev/null || true
+        fi
     done
 fi
 

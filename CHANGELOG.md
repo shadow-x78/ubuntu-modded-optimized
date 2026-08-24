@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.13.2] - 2026-08-24
+
+### 🔧 Changed
+- **Clean separation of update vs install:** `umo update` is now a fast scripts-only operation (deploys helper scripts, re-renders xstartup, applies silent hooks) and no longer installs desktop packages or designer themes - those belong to `umo install` / fresh installs, with the session-start self-heal still covering both automatically.
+
+### 🧹 Cleanup
+- Full-project audit pass: removed the now-dead `_umo_de_footer`, a stray version comment in xstartup, and an `A && B || C` lint pattern; shellcheck, sh -n, xmllint, CLI heredoc, secrets, comment policy and dead-code matrix all clean.
+
 ## [v4.13.1] - 2026-08-24
 
 ### 🐛 Fixed

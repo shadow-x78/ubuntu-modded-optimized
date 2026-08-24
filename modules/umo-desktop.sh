@@ -42,12 +42,6 @@ _um_apt_repair() {
 REPAIR
 }
 
-_umo_de_footer() {
-    cat << 'FTR'
-_um_apt_repair
-FTR
-}
-
 _umo_de_build() {
     _pkgs_block="$1"
     _probe="$2"
