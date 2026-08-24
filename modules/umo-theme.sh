@@ -36,7 +36,7 @@ umo_theme_packages() {
     umo_log_step "Install theme packages"
 
     _theme_pkgs="materia-gtk-theme greybird-gtk-theme dmz-cursor-theme \
-                 papirus-icon-theme gnome-icon-theme \
+                 papirus-icon-theme gnome-icon-theme unzip \
                  fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
@@ -60,6 +60,42 @@ INNER
     fi
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"
     umo_log_ok "Theme packages installed"
+}
+
+umo_theme_extras() {
+    umo_log_step "Install designer extras (Orchis / Tela / FiraCode Nerd)"
+
+    cat > "${UMO_INSTALL_DIR:?}/root/install-extras.sh" << 'INNER'
+#!/bin/sh
+export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
+timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
+[ -d /root/.orchis-theme ] && ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark >/dev/null 2>&1 ) || true
+[ -d /root/.orchis-theme ] && ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact >/dev/null 2>&1 ) || true
+timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
+[ -d /root/.tela-icons ] && ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons >/dev/null 2>&1 ) || true
+mkdir -p /usr/local/share/fonts/firacode-nerd
+timeout 300 curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip 2>/dev/null || true
+if [ -s /tmp/firamono.zip ]; then
+    unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd 2>/dev/null || true
+    rm -f /tmp/firamono.zip
+fi
+fc-cache -f >/dev/null 2>&1 || true
+INNER
+    chmod +x "$UMO_INSTALL_DIR/root/install-extras.sh"
+    _rc=0
+    "$UMO_LOGIN_SH" -c "bash /root/install-extras.sh" || _rc=$?
+    rm -f "$UMO_INSTALL_DIR/root/install-extras.sh"
+
+    _has_orchis=0
+    "$UMO_LOGIN_SH" -c "test -d /usr/share/themes/Orchis-Dark-Compact" 2>/dev/null && _has_orchis=1
+    if [ "$_has_orchis" = "1" ]; then
+        _GTK_THEME="Orchis-Dark-Compact"
+        _ICON_THEME="Tela-Black-Dark"
+        umo_log_ok "Designer extras applied (Orchis-Dark-Compact + Tela-Black-Dark)"
+    else
+        umo_log_warn "Designer extras unavailable (offline?) - keeping Materia-dark + Papirus-Dark"
+    fi
+    return 0
 }
 
 umo_theme_apply_gtk() {
@@ -107,6 +143,20 @@ umo_theme_apply_wallpaper() {
             cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg" 2>/dev/null || \
                 umo_log_warn "Could not copy wallpaper"
         fi
+
+        _xdg_dir="$UMO_INSTALL_DIR/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
+        if mkdir -p "$_xdg_dir" 2>/dev/null && [ -f "$SCRIPT_DIR/config/theme/xfce4/xfce4-desktop.xml" ]; then
+            cp -f "$SCRIPT_DIR/config/theme/xfce4/xfce4-desktop.xml" "$_xdg_dir/xfce4-desktop.xml" 2>/dev/null || true
+        fi
+
+        _bd_dir="$UMO_INSTALL_DIR/usr/share/xfce4/backdrops"
+        if [ -d "$_bd_dir" ]; then
+            for _bd in "$_bd_dir"/*.jpg "$_bd_dir"/*.jpeg "$_bd_dir"/*.png "$_bd_dir"/*.svg; do
+                if [ -f "$_bd" ]; then
+                    cp -f "$_wp_src" "$_bd" 2>/dev/null || true
+                fi
+            done
+        fi
     else
         umo_log_info "No wallpaper file found, continuing without wallpaper"
     fi
@@ -138,6 +188,10 @@ umo_theme_apply_xfce() {
         fi
         if [ -f "$_theme_dir/xfce4-desktop.xml" ]; then
             cp -f "$_theme_dir/xfce4-desktop.xml" "$_xf_conf/"
+        fi
+        if [ -f "$_theme_dir/terminalrc" ]; then
+            mkdir -p "$_home/.config/xfce4/terminal"
+            cp -f "$_theme_dir/terminalrc" "$_home/.config/xfce4/terminal/terminalrc"
         fi
         rm -f "$_home/.config/xfce4/panel/panels.xml" 2>/dev/null || true
     done
@@ -237,6 +291,9 @@ umo_theme_setup() {
     _umo_theme_mode_setup
 
     umo_theme_packages || true
+    if [ "$UMO_THEME" != "umo-light" ]; then
+        umo_theme_extras || true
+    fi
     umo_theme_apply_fonts || true
     umo_theme_apply_wallpaper || true
 

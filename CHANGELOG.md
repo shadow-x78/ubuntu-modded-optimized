@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.13.0] - 2026-08-24
+
+### 🐛 Fixed
+- **Wallpaper fell back to distro default:** xfdesktop resolves backdrops per monitor name and distro defaults won whenever our user config missed the active monitor. Our desktop XML is now installed as SYSTEM-wide xfconf defaults (`/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/`), every distro backdrop image in `/usr/share/xfce4/backdrops/` is overwritten with the UMO wallpaper, and per-user/desktop-init behavior is unchanged.
+
+### 🎨 Changed
+- Dark theme now matches the designer reference: **Orchis-Dark-Compact** (GTK), **Tela-Black-Dark** (icons), **FiraCode Nerd Font Mono** (terminal/monospace). Orchis + Tela install from their upstream repos during the theme phase (best-effort; offline falls back to Materia-dark + Papirus-Dark); FiraCode Nerd Mono ships via the nerd-fonts release zip with `unzip` added to theme packages.
+
 ## [v4.12.1] - 2026-08-24
 
 ### 🐛 Fixed
