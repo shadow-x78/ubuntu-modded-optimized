@@ -85,6 +85,9 @@ else
         printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
         printf "\n"
         printf "  %bLast log lines:%b\n" "$_UMO_DIM" "$_UMO_NC"
+        if [ ! -s "$_vnc_log" ]; then
+            printf "    (no output captured - the starter was killed before it could run)\n"
+        fi
         tail -n 8 "$_vnc_log" 2>/dev/null | while IFS= read -r _line; do
             printf "    %s\n" "$_line"
         done

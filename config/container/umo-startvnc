@@ -8,9 +8,9 @@ _vnc_num="${VNC_DISPLAY#:}"
 for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
     [ "$_spid" = "$$" ] && continue
     _skip=0
-    _p="$_spid"
+    _p=$$
     while [ -n "$_p" ] && [ "$_p" != "1" ]; do
-        if [ "$_p" = "$$" ]; then
+        if [ "$_p" = "$_spid" ]; then
             _skip=1
             break
         fi

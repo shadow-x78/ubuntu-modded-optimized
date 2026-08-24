@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.14.1] - 2026-08-24
+
+### 🐛 Fixed
+- **VNC still died instantly with an EMPTY log after fresh installs:** the v4.13.3 single-supervisor check skipped descendants but still SIGKILLed ANCESTORS - `pgrep -f umo-startvnc` matches the nohup wrapper, proot and the container bash (all carry the string in argv), and killing proot destroys the entire traced tree before the script prints anything. The check now walks upward from the script's own PID: any candidate found in that ancestry chain is spared; only genuinely foreign supervisors are killed. Verified with real parent/foreign process tests.
+- `umo start` failure screen now says "(no output captured...)" when the starter was killed before producing any log output, instead of a silently empty section.
+
 ## [v4.14.0] - 2026-08-24
 
 ### ✨ Added
