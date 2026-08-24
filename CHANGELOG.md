@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.13.1] - 2026-08-24
+
+### 🐛 Fixed
+- **Designer extras never installed on existing containers:** Orchis/Tela/FiraCode only ran during the theme phase of a FULL install, so updated containers kept the old Materia look. The extras installer now lives in `config/container/umo-install-extras` and is deployed with every `umo update`, executed automatically by the update flow when Orchis is missing, AND self-healed at session start - with the theme config swap (Materia-dark→Orchis-Dark-Compact, Papirus-Dark→Tela-Black-Dark) applied to existing user configs.
+
+### ✨ Added
+- **Plank dock** (the bottom icon dock from the reference design): auto-installed at session start when available and launched by xstartup.
+
 ## [v4.13.0] - 2026-08-24
 
 ### 🐛 Fixed

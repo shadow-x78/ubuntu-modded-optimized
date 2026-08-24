@@ -65,26 +65,14 @@ INNER
 umo_theme_extras() {
     umo_log_step "Install designer extras (Orchis / Tela / FiraCode Nerd)"
 
-    cat > "${UMO_INSTALL_DIR:?}/root/install-extras.sh" << 'INNER'
-#!/bin/sh
-export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
-timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
-[ -d /root/.orchis-theme ] && ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark >/dev/null 2>&1 ) || true
-[ -d /root/.orchis-theme ] && ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact >/dev/null 2>&1 ) || true
-timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
-[ -d /root/.tela-icons ] && ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons >/dev/null 2>&1 ) || true
-mkdir -p /usr/local/share/fonts/firacode-nerd
-timeout 300 curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip 2>/dev/null || true
-if [ -s /tmp/firamono.zip ]; then
-    unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd 2>/dev/null || true
-    rm -f /tmp/firamono.zip
-fi
-fc-cache -f >/dev/null 2>&1 || true
-INNER
-    chmod +x "$UMO_INSTALL_DIR/root/install-extras.sh"
-    _rc=0
-    "$UMO_LOGIN_SH" -c "bash /root/install-extras.sh" || _rc=$?
-    rm -f "$UMO_INSTALL_DIR/root/install-extras.sh"
+    _extras_src="$SCRIPT_DIR/config/container/umo-install-extras"
+    if [ -f "$_extras_src" ]; then
+        cp -f "$_extras_src" "${UMO_INSTALL_DIR:?}/root/install-extras.sh" 2>/dev/null || true
+        chmod +x "${UMO_INSTALL_DIR}/root/install-extras.sh" 2>/dev/null || true
+        _rc=0
+        "$UMO_LOGIN_SH" -c "bash /root/install-extras.sh" || _rc=$?
+        rm -f "${UMO_INSTALL_DIR}/root/install-extras.sh" 2>/dev/null || true
+    fi
 
     _has_orchis=0
     "$UMO_LOGIN_SH" -c "test -d /usr/share/themes/Orchis-Dark-Compact" 2>/dev/null && _has_orchis=1

@@ -93,6 +93,15 @@ if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1
     fi
 fi
 
+if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] && [ -x /usr/local/bin/umo-install-extras ]; then
+    echo "[..] Installing designer extras (Orchis / Tela / FiraCode Nerd)..."
+    bash /usr/local/bin/umo-install-extras || true
+fi
+
+if ! command -v plank >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+    timeout 300 apt-get install -y --no-install-recommends plank >/dev/null 2>&1 || true
+fi
+
 _start_server || { echo "[!] Failed to start Xtigervnc"; exit 1; }
 sleep 2
 if ! kill -0 "$_xpid" 2>/dev/null; then

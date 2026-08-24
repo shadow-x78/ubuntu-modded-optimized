@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.13.0"
+export UMO_VERSION="4.13.1"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -489,7 +489,7 @@ _umo_refresh_container() {
 
     _bin_dir="$_ct_inst_dir/usr/local/bin"
     if mkdir -p "$_bin_dir" 2>/dev/null; then
-        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init; do
+        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras; do
             _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
             [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
             if [ -f "$_csrc" ]; then
@@ -501,6 +501,12 @@ _umo_refresh_container() {
                 fi
             fi
         done
+    fi
+
+    if [ -f "$_bin_dir/umo-install-extras" ] && ! "$_UMO_LOGIN" -c "test -d /usr/share/themes/Orchis-Dark-Compact" 2>/dev/null; then
+        _umo_info "Installing designer extras (Orchis / Tela / FiraCode Nerd)..."
+        "$_UMO_LOGIN" -c "bash /usr/local/bin/umo-install-extras" </dev/null || true
+        _umo_ok "Designer extras processed"
     fi
 
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"

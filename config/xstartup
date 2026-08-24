@@ -41,5 +41,6 @@ command -v xfce4-panel >/dev/null 2>&1 && xfce4-panel &
 command -v lxpanel >/dev/null 2>&1 && lxpanel --profile LXDE &
 command -v pcmanfm >/dev/null 2>&1 && pcmanfm --desktop &
 command -v xfwm4 >/dev/null 2>&1 && xfwm4 &
+command -v plank >/dev/null 2>&1 && plank &
 command -v xterm >/dev/null 2>&1 && xterm &
 exec tail -f /dev/null
