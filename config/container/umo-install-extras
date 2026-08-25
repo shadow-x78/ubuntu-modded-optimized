@@ -1,14 +1,24 @@
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
 
+_GRN='\033[38;5;34m'
+_RED='\033[38;5;196m'
+_CYN='\033[38;5;39m'
+_NC='\033[0m'
+
+_step() { printf "  %b>%b  %s\n" "$_CYN" "$_NC" "$1"; }
+_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
+_fail() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
+_apt_progress() { grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" | sed 's/^/    /' || true; }
+
 if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
-    echo "[..] Fetching Orchis theme..."
-    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme 2>&1 | tail -n 2 || true
+    _step "Fetching Orchis theme..."
+    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
     if [ -d /root/.orchis-theme ]; then
-        echo "[..] Installing Orchis (dark + compact)..."
-        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark 2>&1 | tail -n 4 ) || true
-        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | tail -n 4 ) || true
-        echo "[OK] Orchis installed"
+        _step "Installing Orchis (dark + compact)..."
+        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
+        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
+        _ok "Orchis installed"
         for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
                   /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
                   /root/.config/gtk-3.0/settings.ini \
@@ -19,28 +29,34 @@ if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
                 sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g' "$_f" 2>/dev/null || true
             fi
         done
+    else
+        _fail "Orchis theme could not be fetched"
     fi
 fi
 
 if [ ! -d /usr/share/icons/Tela-Black-Dark ]; then
-    echo "[..] Fetching Tela icons..."
-    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons 2>&1 | tail -n 2 || true
+    _step "Fetching Tela icons..."
+    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
     if [ -d /root/.tela-icons ]; then
-        echo "[..] Installing Tela icons (black + dark variants)..."
-        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | tail -n 4 ) || true
-        echo "[OK] Tela icons installed"
+        _step "Installing Tela icons (black + dark variants)..."
+        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
+        _ok "Tela icons installed"
+    else
+        _fail "Tela icons could not be fetched"
     fi
 fi
 
 if ! fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
-    echo "[..] Downloading FiraCode Nerd Font..."
+    _step "Downloading FiraCode Nerd Font..."
     mkdir -p /usr/local/share/fonts/firacode-nerd
     timeout 300 curl -fL --progress-bar https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip || true
     if [ -s /tmp/firamono.zip ]; then
-        echo "[..] Installing FiraCode Nerd Font..."
+        _step "Installing FiraCode Nerd Font..."
         unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd 2>/dev/null || true
         rm -f /tmp/firamono.zip
         fc-cache -f >/dev/null 2>&1 || true
-        echo "[OK] FiraCode Nerd Font installed"
+        _ok "FiraCode Nerd Font installed"
+    else
+        _fail "FiraCode Nerd Font could not be downloaded"
     fi
 fi

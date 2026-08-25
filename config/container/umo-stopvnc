@@ -3,4 +3,4 @@ for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do
     kill "$_pid" 2>/dev/null || true
 done
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1 /tmp/.X2-lock /tmp/.X11-unix/X2 2>/dev/null || true
-printf "  \033[38;5;34mOK\033[0m  VNC stopped.\n"
+printf "  \033[38;5;34m✔\033[0m  VNC stopped.\n"

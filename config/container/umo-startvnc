@@ -5,6 +5,20 @@ VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
 _vnc_num="${VNC_DISPLAY#:}"
 
+_GRN='\033[38;5;34m'
+_RED='\033[38;5;196m'
+_CYN='\033[38;5;39m'
+_ORG='\033[38;5;208m'
+_YEL='\033[38;5;220m'
+_NC='\033[0m'
+
+_step() { printf "  %b>%b  %s\n" "$_CYN" "$_NC" "$1"; }
+_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
+_warn() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
+_note() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
+_hint() { printf "  %b%s%b  %s\n" "$_YEL" "⚠" "$_NC" "$1"; }
+_apt_progress() { grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" | sed 's/^/    /' || true; }
+
 for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
     [ "$_spid" = "$$" ] && continue
     _skip=0
@@ -47,11 +61,11 @@ chmod 1777 /tmp/.X11-unix 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true
 
 if ! command -v Xtigervnc >/dev/null 2>&1; then
-    echo "[!] Xtigervnc not found. Install with: apt install tigervnc-standalone-server"
+    _warn "Xtigervnc not found. Install with: apt install tigervnc-standalone-server"
     exit 1
 fi
 if [ ! -f "$HOME/.vnc/passwd" ]; then
-    echo "[!] Missing $HOME/.vnc/passwd - re-run the UMO installer or set it with vncpasswd."
+    _warn "Missing $HOME/.vnc/passwd - re-run the UMO installer or set it with vncpasswd."
     exit 1
 fi
 if [ ! -x /root/.vnc/xstartup ]; then
@@ -88,24 +102,23 @@ _start_session() {
 }
 
 if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-    echo "[..] Desktop components missing - installing automatically (up to 30 minutes)..."
+    _note "Desktop components missing - installing automatically (up to 30 minutes)"
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update 2>&1 | tail -n 3 || true
+    apt-get update 2>&1 | _apt_progress || true
     timeout 1800 apt-get install -y --no-install-recommends \
         xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
         xfce4-terminal thunar dbus-x11 x11-xserver-utils \
-        gnome-icon-theme xfce4-whiskermenu-plugin mousepad 2>&1 | tail -n 5 || true
+        gnome-icon-theme xfce4-whiskermenu-plugin mousepad 2>&1 | _apt_progress || true
     dpkg --configure -a >/dev/null 2>&1 || true
     if command -v startxfce4 >/dev/null 2>&1; then
-        echo "[OK] Desktop components installed automatically."
+        _ok "Desktop components installed automatically"
     else
-        echo "[!!] Automatic desktop installation FAILED. Real apt errors:"
+        _warn "Automatic desktop installation failed - real apt errors:"
         tail -n 25 /var/log/apt/term.log 2>/dev/null
     fi
 fi
 
 if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] && [ -x /usr/local/bin/umo-install-extras ]; then
-    echo "[..] Installing designer extras (Orchis / Tela / FiraCode Nerd)..."
     bash /usr/local/bin/umo-install-extras || true
 fi
 
@@ -113,32 +126,33 @@ if ! command -v plank >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; the
     timeout 300 apt-get install -y --no-install-recommends plank >/dev/null 2>&1 || true
 fi
 
-_start_server || { echo "[!] Failed to start Xtigervnc"; exit 1; }
+_start_server || { _warn "Failed to start Xtigervnc"; exit 1; }
 sleep 2
 if ! kill -0 "$_xpid" 2>/dev/null; then
     if tail -n 5 "$HOME/.vnc/xvnc.log" 2>/dev/null | grep -q "already running"; then
-        echo "[i] Another X server was still holding the display - stopping it and retrying..."
+        _note "Another X server was still holding the display - stopping it and retrying"
         _stop_old_servers
         _cleanup_locks
-        _start_server || { echo "[!] Failed to start Xtigervnc after cleanup"; exit 1; }
+        _start_server || { _warn "Failed to start Xtigervnc after cleanup"; exit 1; }
         sleep 2
     fi
 fi
 if ! kill -0 "$_xpid" 2>/dev/null; then
-    echo "[!] Xtigervnc exited immediately. Last log lines:"
+    _warn "Xtigervnc exited immediately. Last log lines:"
     tail -n 8 "$HOME/.vnc/xvnc.log" 2>/dev/null
     exit 1
 fi
 _start_session
 
-echo ""
-echo "============================================"
-echo "  UMO VNC Server Started"
-echo "  Display: $VNC_DISPLAY"
-echo "  Address: 127.0.0.1:$VNC_PORT"
-echo "  Resolution: $VNC_GEOMETRY"
-echo "============================================"
-echo ""
+printf "\n"
+printf "  %b────────────────────────────────────────%b\n" "$_ORG" "$_NC"
+printf "  %b%s▸ UMO VNC Server Active%s\n" "$_ORG" "" "$_NC"
+printf "  %b────────────────────────────────────────%b\n" "$_ORG" "$_NC"
+printf "\n"
+printf "  %bDisplay:%b    %b%s%b\n" "" "$_NC" "$_CYN" "$VNC_DISPLAY" "$_NC"
+printf "  %bAddress:%b    %b%s:%s%b\n" "" "$_NC" "$_CYN" "127.0.0.1" "$VNC_PORT" "$_NC"
+printf "  %bResolution:%b %b%s%b\n" "" "$_NC" "$_DIM" "$VNC_GEOMETRY" "$_NC"
+printf "\n"
 
 _server_fails=0
 _session_fails=0
@@ -146,7 +160,7 @@ while [ "$_server_fails" -lt 5 ]; do
     sleep 5
     if ! kill -0 "$_xpid" 2>/dev/null; then
         _server_fails=$((_server_fails + 1))
-        echo "[!] Xtigervnc died, restarting ($_server_fails/5)..."
+        _hint "Xtigervnc died, restarting ($_server_fails/5)"
         kill "$_session_pid" 2>/dev/null || true
         _stop_old_servers
         _cleanup_locks
@@ -158,11 +172,11 @@ while [ "$_server_fails" -lt 5 ]; do
     fi
     if [ -n "$_session_pid" ] && ! kill -0 "$_session_pid" 2>/dev/null; then
         _session_fails=$((_session_fails + 1))
-        echo "[!] Desktop session exited ($_session_fails). Last session.log lines:"
+        _hint "Desktop session exited ($_session_fails) - last session.log lines:"
         tail -n 10 "$HOME/.vnc/session.log" 2>/dev/null
         if [ "$_session_fails" -le 3 ]; then
             _start_session
         fi
     fi
 done
-echo "[!] Xtigervnc kept dying. See $HOME/.vnc/xvnc.log and $HOME/.vnc/session.log"
+_warn "Xtigervnc kept dying. See $HOME/.vnc/xvnc.log and $HOME/.vnc/session.log"

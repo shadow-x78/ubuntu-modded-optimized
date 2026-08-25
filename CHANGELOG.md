@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.14.2] - 2026-08-24
+
+### 🎨 Changed
+- **One unified terminal design language across install, update and session flows:** every in-container message now uses the same UMO vocabulary as the installer (`›` steps, `✔` success, `✖` failure, `⚠` warnings, `▌` notes, orange `─` rules) instead of each script inventing its own `[..]`/`[OK]`/`====` styles. The VNC server banner matches the `umo start` panel, and long apt runs stream through a single progress filter that keeps moving lines (downloads/unpacking/setup) indented under their step while hiding static headers.
+
 ## [v4.14.1] - 2026-08-24
 
 ### 🐛 Fixed
