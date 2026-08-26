@@ -37,6 +37,8 @@ for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
     kill -9 "$_spid" 2>/dev/null || true
 done
 
+_step "Starting UMO VNC Server..."
+
 _stop_old_servers() {
     _rounds=0
     while pgrep -f Xtigervnc >/dev/null 2>&1 && [ "$_rounds" -lt 6 ]; do

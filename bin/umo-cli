@@ -46,6 +46,15 @@ else
     _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_NOTE='|'; _G_LINE='-'
 fi
 
+# Shorten Termux host paths for display (/data/data/com.termux/files/... -> /home/...)
+_umo_dp() {
+    _dp_base="${PREFIX:-/data/data/com.termux/files}"
+    case "$1" in
+        "$_dp_base"/*) printf '%s' "${1#"$_dp_base"}" ;;
+        *)             printf '%s' "$1" ;;
+    esac
+}
+
 _umo_header() {
     printf "\n${_UMO_PRI}"
     printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
@@ -267,14 +276,14 @@ _umo_refresh_host() {
     fi
     _umo_write_aliases "$_sh_dir"
     _UMO_SCRIPT_DIR="$_sh_dir"
-    _umo_ok "Host scripts updated in $_sh_dir (user: $_umo_user)"
+    _umo_ok "Host scripts updated in $(_umo_dp "$_sh_dir") (user: $_umo_user)"
 }
 
 _umo_refresh_container() {
     [ -f "$_UMO_LOGIN" ] || return 0
     _ct_inst_dir="$(_umo_install_dir)"
     if [ ! -d "$_ct_inst_dir" ]; then
-        _umo_warn "Install directory not found ($_ct_inst_dir), skipping container refresh"
+        _umo_warn "Install directory not found ($(_umo_dp "$_ct_inst_dir")), skipping container refresh"
         return 0
     fi
     _umo_step "Refreshing Container Scripts"
@@ -487,7 +496,7 @@ _umo_update_release() {
     if [ ! -d "$_UMO_REPO_DIR" ] && [ -d "$_UMO_REPO_DIR.old" ]; then
         _umo_warn "Tool directory missing (interrupted update?), restoring backup copy..."
         if ! mv "$_UMO_REPO_DIR.old" "$_UMO_REPO_DIR" 2>/dev/null; then
-            _umo_err "Could not restore $_UMO_REPO_DIR.old"
+            _umo_err "Could not restore $(_umo_dp "$_UMO_REPO_DIR.old")"
             exit 1
         fi
         _umo_ok "Tool directory restored"
@@ -578,7 +587,7 @@ _umo_refresh_tools() {
     _umo_plate "Refresh Tools"
 
     if [ ! -d "$_UMO_REPO_DIR" ]; then
-        _umo_err "UMO tool directory not found ($_UMO_REPO_DIR)"
+        _umo_err "UMO tool directory not found ($(_umo_dp "$_UMO_REPO_DIR"))"
         exit 1
     fi
 
@@ -743,17 +752,19 @@ _umo_uninstall() {
     for _f in umo-login.sh umo-user.sh umo-start.sh umo-stop.sh umo-vnc-start.sh umo-vnc-stop.sh; do
         [ -e "$_UMO_TERMUX_HOME/$_f" ] && _legacy="$_legacy $_UMO_TERMUX_HOME/$_f"
     done
-    _cli="$_UMO_TERMUX_HOME/../usr/bin/umo"
+    _cli="${_UMO_TERMUX_HOME%/*}/usr/bin/umo"
     [ -e "$_cli" ] || _cli=""
 
     printf "  ${_UMO_BOLD}The following items will be removed:${_UMO_NC}\n"
-    [ -n "$_will_delete" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (Ubuntu rootfs)\n" "$_inst_dir" && printf "    ${_UMO_RED}- %s${_UMO_NC} (host scripts, cache, logs, settings)\n" "$_UMO_SCRIPT_DIR"
-    [ -n "$_legacy" ] && printf "    ${_UMO_RED}-%s${_UMO_NC} (legacy host scripts)\n" "$_legacy"
+    [ -n "$_will_delete" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (Ubuntu rootfs)\n" "$(_umo_dp "$_inst_dir")" && printf "    ${_UMO_RED}- %s${_UMO_NC} (host scripts, cache, logs, settings)\n" "$(_umo_dp "$_UMO_SCRIPT_DIR")"
+    for _f in $_legacy; do
+        printf "    ${_UMO_RED}- %s${_UMO_NC} (legacy host script)\n" "$(_umo_dp "$_f")"
+    done
     [ -n "$_cli" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (umo command)\n" "$_cli"
     printf "    ${_UMO_DIM}- UMO aliases in .bashrc/.zshrc${_UMO_NC}\n"
     case "$_UMO_REPO_DIR" in
         "$HOME/.local/share/umo"*)
-            [ -d "$_UMO_REPO_DIR" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (UMO tool files)\n" "$_UMO_REPO_DIR" ;;
+            [ -d "$_UMO_REPO_DIR" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (UMO tool files)\n" "$(_umo_dp "$_UMO_REPO_DIR")" ;;
         *)
             [ -d "$_UMO_REPO_DIR" ] && printf "    ${_UMO_DIM}  (UMO tool source stays at %s - remove manually if wanted)${_UMO_NC}\n" "$_UMO_REPO_DIR" ;;
     esac
@@ -775,11 +786,11 @@ _umo_uninstall() {
     sleep 1
 
     if [ -d "$_inst_dir" ]; then
-        _umo_run "Removing Ubuntu RootFS: $_inst_dir"
+        _umo_run "Removing Ubuntu RootFS: $(_umo_dp "$_inst_dir")"
         rm -rf "$_inst_dir" 2>/dev/null || _umo_warn "Could not fully remove $_inst_dir (check permissions)"
     fi
     if [ -d "$_UMO_SCRIPT_DIR" ]; then
-        _umo_run "Removing Host Scripts, Cache And Settings: $_UMO_SCRIPT_DIR"
+        _umo_run "Removing Host Scripts, Cache And Settings: $(_umo_dp "$_UMO_SCRIPT_DIR")"
         rm -rf "$_UMO_SCRIPT_DIR" 2>/dev/null || true
     fi
     if [ -n "$_legacy" ]; then
@@ -802,7 +813,7 @@ _umo_uninstall() {
     case "$_UMO_REPO_DIR" in
         "$HOME/.local/share/umo"*)
             if [ -d "$_UMO_REPO_DIR" ]; then
-                _umo_run "Removing UMO Tool Files: $_UMO_REPO_DIR"
+                _umo_run "Removing UMO Tool Files: $(_umo_dp "$_UMO_REPO_DIR")"
                 rm -rf "$_UMO_REPO_DIR" 2>/dev/null || true
             fi ;;
     esac
@@ -821,18 +832,18 @@ _umo_backup() {
         exit 1
     fi
     mkdir -p "$_bak_dir"
-    _umo_run "Backing Up To: $_bak_file"
+    _umo_run "Backing Up To: $(_umo_dp "$_bak_file")"
     tar -czf "$_bak_file" -C "$(dirname "$_install_dir")" "$(basename "$_install_dir")" 2>/dev/null
     _sz=$(du -sh "$_bak_file" 2>/dev/null | cut -f1)
     _umo_ok "Backup complete (size: $_sz)"
-    printf "  ${_UMO_DIM}%s${_UMO_NC}\n\n" "$_bak_file"
+    printf "  ${_UMO_DIM}%s${_UMO_NC}\n\n" "$(_umo_dp "$_bak_file")"
 }
 
 _umo_status() {
     _umo_plate "Service Status"
     [ -f "$_UMO_LOGIN" ] && _installed="${_UMO_GRN}installed${_UMO_NC}" || _installed="${_UMO_RED}not installed${_UMO_NC}"
     _umo_kv "Container" "$_installed"
-    _umo_kv "Scripts" "${_UMO_DIM}$(dirname "$_UMO_LOGIN")${_UMO_NC}"
+    _umo_kv "Scripts" "${_UMO_DIM}$(_umo_dp "$(dirname "$_UMO_LOGIN")")${_UMO_NC}"
     [ -f "$_UMO_CONF" ] && _umo_kv "Settings" "${_UMO_DIM}theme ${UMO_THEME:-umo-dark} · apps ${UMO_APP_SET:-basic} · de ${UMO_DE:-xfce4}${_UMO_NC}"
 
     _proot_pids=$(pgrep -f "proot.*umo" 2>/dev/null | tr '\n' ' ')
@@ -946,7 +957,7 @@ case "$1" in
             _umo_run "Re-running The UMO Installer..."
             exec sh "$_UMO_REPO_DIR/bin/umo-install" "$@"
         else
-            _umo_err "Installer not found at $_UMO_REPO_DIR/bin/umo-install"
+            _umo_err "Installer not found at $(_umo_dp "$_UMO_REPO_DIR")/bin/umo-install"
             printf "  Run the one-liner instead:\n"
             printf "    bash <(curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh)\n\n"
             exit 1

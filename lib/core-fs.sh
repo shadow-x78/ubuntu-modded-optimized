@@ -74,6 +74,18 @@ umo_fs_patch() {
     return 0
 }
 
+# Shorten a Termux host path for display: the Termux base prefix
+# (/data/data/com.termux/files) is stripped so $HOME/umo-ubuntu prints
+# as /home/umo-ubuntu. Paths outside the base are returned unchanged.
+umo_fs_display_path() {
+    _mdp="$1"
+    _mdp_base="${PREFIX:-/data/data/com.termux/files}"
+    case "$_mdp" in
+        "$_mdp_base"/*) printf '%s' "${_mdp#"$_mdp_base"}" ;;
+        *)              printf '%s' "$_mdp" ;;
+    esac
+}
+
 umo_fs_render() {
     _template="$1"
     _output="$2"

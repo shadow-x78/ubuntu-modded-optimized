@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.2] - 2026-08-27
+
+### 🐛 Fixed
+- **`umo start` reported "VNC Failed To Start" on slow first boots:** the launcher waited a fixed 5 seconds and checked once for the X server, but a first boot after a fresh install (cold proot startup + pulseaudio + Xtigervnc) legitimately takes longer - so it declared failure while the starter was still working. It now polls up to 90 seconds for the X server to appear and stops early when the starter process exits.
+- **Misleading empty-log message:** the failure panel claimed "the starter was killed before it could run" whenever the log was empty. It now distinguishes the real cases: starter still running but no X server in time, vs. starter exited with no output (the Android 12+ phantom-process-killer case, with the one-time adb fix pointed out).
+- **In-container VNC starter printed nothing until success or error**, so the host log stayed empty during every slow boot; it now announces "Starting UMO VNC Server..." before the pre-flight cleanup, keeping the log useful for diagnosis.
+
+### 🎨 Changed
+- **Short host paths in every user-facing message:** the Termux base prefix (`/data/data/com.termux/files`) is no longer displayed - `Path: /home/umo-ubuntu` instead of `Path: /data/data/com.termux/files/home/umo-ubuntu`. Applied across the installation summary, `umo status` (Scripts path), `umo start` (failure log path), the uninstall list + progress lines, `umo backup`, `umo refresh` messages, the "UMO not installed" host-wrapper errors and the installer's missing-binary error - via a new `umo_fs_display_path()` helper in `core-fs.sh` and matching `_umo_dp()` helpers in the standalone scripts. Paths inside copy-pasteable commands (git stash pop, manual removal hints) stay absolute.
+
+### 🧹 Cleanup
+- The uninstall confirmation's `umo` command path is built without the `home/../usr` detour, and the legacy host-scripts list prints one entry per file with shortened paths.
+
 ## [v4.15.1] - 2026-08-27
 
 ### 🎨 Changed

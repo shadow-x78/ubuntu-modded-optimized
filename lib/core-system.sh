@@ -142,5 +142,5 @@ umo_sys_summary() {
     umo_kv "Arch"     "$_arch"
     umo_kv "Storage"  "${_store}MB free"
     umo_kv "RAM"      "${_ram}MB available"
-    umo_kv "Path"     "$_dir"
+    umo_kv "Path"     "$(umo_fs_display_path "$_dir")"
 }

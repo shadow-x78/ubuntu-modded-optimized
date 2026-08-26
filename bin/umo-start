@@ -36,6 +36,15 @@ else
     _G_ERR='ERR'; _G_WARN='!'; _G_RUN='|'
 fi
 
+# Shorten Termux host paths for display (/data/data/com.termux/files/... -> /home/...)
+_umo_dp() {
+    _dp_base="${PREFIX:-/data/data/com.termux/files}"
+    case "$1" in
+        "$_dp_base"/*) printf '%s' "${1#"$_dp_base"}" ;;
+        *)             printf '%s' "$1" ;;
+    esac
+}
+
 _umo_refresh_cli() {
     _conf="$UMO_SCRIPT_HOME/umo.conf"
     [ -f "$_conf" ] || _conf="$TERMUX_HOME/.umo/umo.conf"
@@ -137,7 +146,20 @@ else
     mkdir -p "$UMO_SCRIPT_HOME/logs" 2>/dev/null || true
     : > "$_vnc_log" 2>/dev/null || true
     nohup "$UMO_LOGIN" -c "umo-startvnc" > "$_vnc_log" 2>&1 &
-    sleep 5
+    _vnc_starter=$!
+
+    # Wait up to 90s for the X server to appear: a first boot after a fresh
+    # install (cold proot + pulseaudio + Xtigervnc startup) takes longer than
+    # any fixed sleep. Stop waiting early if the starter process exits.
+    _vnc_wait=0
+    while [ "$_vnc_wait" -lt 90 ]; do
+        if pgrep -f Xvnc >/dev/null 2>&1 || pgrep -f Xtigervnc >/dev/null 2>&1; then
+            break
+        fi
+        kill -0 "$_vnc_starter" 2>/dev/null || break
+        sleep 1
+        _vnc_wait=$((_vnc_wait + 1))
+    done
 
     IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
     [ -z "$IP" ] && IP="127.0.0.1"
@@ -150,14 +172,20 @@ else
         printf "\n"
         printf "  %bLast log lines:%b\n" "$_UMO_DIM" "$_UMO_NC"
         if [ ! -s "$_vnc_log" ]; then
-            printf "    (no output captured - the starter was killed before it could run)\n"
+            if kill -0 "$_vnc_starter" 2>/dev/null; then
+                printf "    (the starter is running but no X server appeared in %ss)\n" "$_vnc_wait"
+            else
+                printf "    (the starter exited without producing any output -\n"
+                printf "     on Android 12+ this is usually the phantom process killer;\n"
+                printf "     apply the one-time adb fix below, then re-run: umo start)\n"
+            fi
         fi
         tail -n 8 "$_vnc_log" 2>/dev/null | while IFS= read -r _line; do
             printf "    %s\n" "$_line"
         done
         printf "\n"
         printf "  %bHint:%b      %bumo login -c \"apt install -y tigervnc-standalone-server\"%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_UMO_NC"
-        printf "  %bLog:%b       %b%s%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$_vnc_log" "$_UMO_NC"
+        printf "  %bLog:%b       %b%s%b\n" "$_UMO_BOLD" "$_UMO_NC" "$_UMO_CYN" "$(_umo_dp "$_vnc_log")" "$_UMO_NC"
         printf "\n"
         printf "  %bAndroid 12+ note:%b\n" "$_UMO_BOLD" "$_UMO_NC"
         printf "  %bAndroid kills background sessions (phantom processes). One-time fix from a PC:%b\n" "$_UMO_DIM" "$_UMO_NC"
