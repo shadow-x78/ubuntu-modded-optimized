@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Session Launcher (audio + VNC, host-side) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
@@ -14,6 +16,49 @@ _UMO_GRN='\033[38;5;34m'
 _UMO_CYN='\033[38;5;39m'
 _UMO_RED='\033[38;5;196m'
 _UMO_YEL='\033[38;5;220m'
+
+_umo_refresh_cli() {
+    _conf="$UMO_SCRIPT_HOME/umo.conf"
+    [ -f "$_conf" ] || _conf="$TERMUX_HOME/.umo/umo.conf"
+    _repo=""
+    if [ -f "$_conf" ]; then
+        _repo=$(sed -n 's/^REPO_DIR="\(.*\)"$/\1/p' "$_conf" 2>/dev/null | head -1)
+    fi
+    _cli="${TERMUX_PREFIX:-/data/data/com.termux/files/usr}/bin/umo"
+    if [ -z "$_repo" ] && [ -f "$_cli" ]; then
+        _repo=$(sed -n 's/^_UMO_REPO_DIR="\(.*\)"$/\1/p' "$_cli" 2>/dev/null | head -1)
+    fi
+    [ -n "$_repo" ] && [ -f "$_repo/bin/umo-cli" ] || return 0
+    case "$_repo" in
+        *@*@*) return 0 ;;
+    esac
+    [ -f "$_cli" ] || return 0
+    _ver=$(sed -n 's/^export UMO_VERSION="\([^"]*\)"/\1/p' "$_repo/bin/umo-install" 2>/dev/null | head -1)
+    [ -n "$_ver" ] || _ver=$(sed -n 's/^_UMO_VERSION="\(.*\)"$/\1/p' "$_cli" 2>/dev/null | head -1)
+    case "$_ver" in
+        *@*@*) _ver="" ;;
+    esac
+    _rt=$(sed -n 's/^_UMO_RUNTIME_DIR="\(.*\)"$/\1/p' "$_cli" 2>/dev/null | head -1)
+    case "$_rt" in
+        ''|*@*@*) _rt="$UMO_SCRIPT_HOME" ;;
+    esac
+    _ph='@@'
+    _esc() { printf '%s' "$1" | sed -e 's/[\\&|"]/\\&/g'; }
+    _v_esc=$(_esc "$_ver"); _repo_esc=$(_esc "$_repo"); _rt_esc=$(_esc "$_rt")
+    sed -e "s|${_ph}UMO_VERSION${_ph}|$_v_esc|g" \
+        -e "s|${_ph}UMO_REPO_DIR${_ph}|$_repo_esc|g" \
+        -e "s|${_ph}UMO_RUNTIME_DIR${_ph}|$_rt_esc|g" \
+        "$_repo/bin/umo-cli" > "$_cli.new" 2>/dev/null || return 0
+    if [ -s "$_cli.new" ] && ! cmp -s "$_cli.new" "$_cli"; then
+        if mv -f "$_cli.new" "$_cli" 2>/dev/null; then
+            chmod +x "$_cli" 2>/dev/null || true
+        fi
+    else
+        rm -f "$_cli.new" 2>/dev/null || true
+    fi
+    return 0
+}
+_umo_refresh_cli
 
 termux-wake-lock 2>/dev/null || true
 

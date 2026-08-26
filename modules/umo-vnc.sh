@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Module: TigerVNC Server Setup (sourced) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_VNC_LOADED:-}" ] || return 0
 _UMO_MOD_VNC_LOADED=1
@@ -118,7 +120,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.14.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.15.0}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else

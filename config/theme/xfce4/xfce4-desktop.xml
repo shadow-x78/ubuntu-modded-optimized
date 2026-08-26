@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ─────────────────────────────────────────────
- UMO - XFCE Desktop Wallpaper Backdrop
- ─────────────────────────────────────────────
--->
+<!-- UMO - XFCE Desktop Wallpaper Backdrop (GPL-3.0-or-later)
+     https://github.com/shadow-x78/ubuntu-modded-optimized -->
 
 <channel name="xfce4-desktop" version="1.0">
   <property name="backdrop" type="empty">

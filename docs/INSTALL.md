@@ -2,7 +2,7 @@
 
 # Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.14.2-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.15.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -154,7 +154,8 @@ umo login
 | `umo status` | Show running status of services |
 | `umo login` | Login as root |
 | `umo user` | Login as default user |
-| `umo update` | Pull latest commits, refresh host scripts, apply container hooks |
+| `umo update` | Full update: pull latest UMO, re-apply saved settings (theme, apps, desktop), upgrade Ubuntu packages. `--scripts-only` for a fast refresh |
+| `umo refresh` | Re-render the `umo` CLI, host and container scripts from the local tool copy (no git pull) |
 | `umo version` | Display current UMO version |
 
 ### Inside Ubuntu

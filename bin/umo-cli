@@ -1,0 +1,970 @@
+#!/bin/sh
+# UMO - CLI Wrapper Template (rendered into Termux bin/umo) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
+_UMO_VERSION="@@UMO_VERSION@@"
+_UMO_REPO_DIR="@@UMO_REPO_DIR@@"
+_UMO_RUNTIME_DIR="@@UMO_RUNTIME_DIR@@"
+
+_UMO_TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
+_UMO_SCRIPT_DIR="${_UMO_RUNTIME_DIR:-$_UMO_TERMUX_HOME/.umo}"
+_UMO_LOGIN="$_UMO_SCRIPT_DIR/umo-login.sh"
+if [ ! -f "$_UMO_LOGIN" ] && [ -f "$_UMO_TERMUX_HOME/umo-login.sh" ]; then
+    _UMO_LOGIN="$_UMO_TERMUX_HOME/umo-login.sh"
+fi
+_UMO_CONF="$_UMO_SCRIPT_DIR/umo.conf"
+[ -f "$_UMO_CONF" ] || _UMO_CONF="$_UMO_TERMUX_HOME/.umo/umo.conf"
+[ -f "$_UMO_CONF" ] && . "$_UMO_CONF"
+
+_UMO_NC='\033[0m'
+_UMO_BOLD='\033[1m'
+_UMO_DIM='\033[2m'
+_UMO_PRI='\033[38;5;208m'
+_UMO_CYN='\033[38;5;39m'
+_UMO_GRN='\033[38;5;34m'
+_UMO_RED='\033[38;5;196m'
+_UMO_YEL='\033[38;5;220m'
+_UMO_MUT='\033[38;5;245m'
+if [ -z "${NO_COLOR:-}" ] && [ -t 1 ]; then
+    :
+else
+    _UMO_NC=''; _UMO_BOLD=''; _UMO_DIM=''; _UMO_PRI=''; _UMO_CYN=''
+    _UMO_GRN=''; _UMO_RED=''; _UMO_YEL=''; _UMO_MUT=''
+fi
+
+_UMO_GLYPH=0
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) [ -t 1 ] && _UMO_GLYPH=1 ;;
+esac
+if [ "$_UMO_GLYPH" -eq 0 ] && command -v locale >/dev/null 2>&1; then
+    case "$(locale charmap 2>/dev/null)" in
+        UTF-8*|utf-8*) [ -t 1 ] && _UMO_GLYPH=1 ;;
+    esac
+fi
+if [ "$_UMO_GLYPH" -eq 1 ]; then
+    _G_OK='✔'; _G_ERR='✖'; _G_WARN='⚠'; _G_INFO='ℹ'; _G_NOTE='▌'; _G_LINE='─'
+else
+    _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_INFO='i'; _G_NOTE='|'; _G_LINE='-'
+fi
+
+_umo_header() {
+    printf "\n${_UMO_PRI}"
+    printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
+    printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
+    printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
+    printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
+    printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
+    printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+    printf "${_UMO_NC}\n"
+    printf "  ${_UMO_DIM}Ubuntu Modded Optimized · v${_UMO_VERSION}${_UMO_NC}\n"
+    printf "  ${_UMO_PRI}────────────────────────────────────────${_UMO_NC}\n\n"
+}
+
+_umo_plate() {
+    _t="$1"
+    _len=$(printf '%s' "$_t" | wc -m)
+    printf "\n"
+    printf "  %b%b%b\n" "$_UMO_BOLD" "$_t" "$_UMO_NC"
+    printf "  %b" "$_UMO_PRI"
+    _i=0
+    while [ "$_i" -lt "$_len" ]; do printf '%b' "$_G_LINE"; _i=$((_i + 1)); done
+    printf "%b\n\n" "$_UMO_NC"
+}
+
+_umo_step()  { printf "\n  %b%s%b  %b%s%b\n" "$_UMO_PRI" "$_G_NOTE" "$_UMO_NC" "$_UMO_BOLD" "$1" "$_UMO_NC"; }
+_umo_ok()    { printf "  %b%s%b  %s\n" "$_UMO_GRN" "$_G_OK" "$_UMO_NC" "$1"; }
+_umo_err()   { printf "  %b%s%b  %s\n" "$_UMO_RED" "$_G_ERR" "$_UMO_NC" "$1" >&2; }
+_umo_warn()  { printf "  %b%s%b  %s\n" "$_UMO_YEL" "$_G_WARN" "$_UMO_NC" "$1"; }
+_umo_info()  { printf "  %b%s%b  %s\n" "$_UMO_CYN" "$_G_INFO" "$_UMO_NC" "$1"; }
+_umo_kv()    { printf "  %b%-14s%b %b\n" "$_UMO_BOLD" "$1" "$_UMO_NC" "$2"; }
+
+_umo_esc_sed() {
+    printf '%s' "$1" | sed -e 's/[\\&|"]/\\&/g'
+}
+
+_umo_install_dir() {
+    _d=""
+    if [ -f "$_UMO_CONF" ]; then
+        _d=$(sed -n 's/^INSTALL_DIR="\(.*\)"$/\1/p' "$_UMO_CONF" 2>/dev/null | head -1)
+    fi
+    if [ -z "$_d" ] && [ -f "$_UMO_LOGIN" ]; then
+        _d=$(grep '^INSTALL_DIR=' "$_UMO_LOGIN" 2>/dev/null | head -1 | cut -d'"' -f2)
+    fi
+    [ -z "$_d" ] && _d="${UMO_INSTALL_DIR:-$_UMO_TERMUX_HOME/umo-ubuntu}"
+    printf '%s' "$_d"
+}
+
+_umo_detect_de() {
+    _xs="$_UMO_TERMUX_HOME/.umo"
+    _d=""
+    for _f in "$_xs/xstartup" "$_UMO_TERMUX_HOME/.umo/xstartup"; do
+        [ -f "$_f" ] || continue
+        _d=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_f" 2>/dev/null | head -1)
+        [ -n "$_d" ] && break
+    done
+    if [ -z "$_d" ] && [ -f "$_UMO_LOGIN" ]; then
+        _ct="$(_umo_install_dir)"
+        for _f in "$_ct/root/.vnc/xstartup" "$_ct/home/umo/.vnc/xstartup"; do
+            [ -f "$_f" ] || continue
+            _d=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_f" 2>/dev/null | head -1)
+            [ -n "$_d" ] && break
+        done
+    fi
+    [ -z "$_d" ] && _d="xfce4"
+    printf '%s' "$_d"
+}
+
+_umo_detect_theme() {
+    _ct="$(_umo_install_dir)"
+    _t=""
+    for _f in "$_ct/root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" \
+              "$_ct/home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"; do
+        [ -f "$_f" ] || continue
+        _t=$(sed -n 's/.*name="ThemeName" type="string" value="\([^"]*\)".*/\1/p' "$_f" 2>/dev/null | head -1)
+        [ -n "$_t" ] && break
+    done
+    if [ -z "$_t" ] && [ -f "$_ct/etc/umo/umo-theme-mode" ]; then
+        case "$(tr -d '[:space:]' < "$_ct/etc/umo/umo-theme-mode" 2>/dev/null)" in
+            light) _t="Orchis-Light-Compact" ;;
+            dark)  _t="Orchis-Dark-Compact" ;;
+        esac
+    fi
+    case "$_t" in
+        *Light*|*light*) printf '%s' "umo-light" ;;
+        *) printf '%s' "umo-dark" ;;
+    esac
+}
+
+_umo_detect_ubuntu_version() {
+    _ct="$(_umo_install_dir)"
+    _v=""
+    if [ -f "$_ct/etc/os-release" ]; then
+        _v=$(sed -n 's/^VERSION_ID="\(.*\)"$/\1/p' "$_ct/etc/os-release" 2>/dev/null | head -1)
+    fi
+    [ -z "$_v" ] && _v="22.04"
+    printf '%s' "$_v"
+}
+
+_umo_detect_saved_settings() {
+    UMO_DE="$(printf '%s' "${UMO_DE:-$(_umo_detect_de)}" | tr -d '"')"
+    UMO_THEME="${UMO_THEME:-$(_umo_detect_theme)}"
+    UMO_UBUNTU_VERSION="${UMO_UBUNTU_VERSION:-$(_umo_detect_ubuntu_version)}"
+    UMO_APP_SET="${UMO_APP_SET:-basic}"
+    export UMO_DE UMO_THEME UMO_UBUNTU_VERSION UMO_APP_SET
+}
+
+_umo_conf_write() {
+    _conf_dir="$_UMO_SCRIPT_DIR"
+    mkdir -p "$_conf_dir" 2>/dev/null || _conf_dir="$_UMO_TERMUX_HOME/.umo"
+    mkdir -p "$_conf_dir" 2>/dev/null || return 0
+    {
+        printf 'UMO_UBUNTU_VERSION="%s"\n' "${UMO_UBUNTU_VERSION:-22.04}"
+        printf 'UMO_DE="%s"\n' "${UMO_DE:-xfce4}"
+        printf 'UMO_APP_SET="%s"\n' "${UMO_APP_SET:-basic}"
+        printf 'UMO_THEME="%s"\n' "${UMO_THEME:-umo-dark}"
+        printf 'UMO_PERF_MODE="%s"\n' "${UMO_PERF_MODE:-balanced}"
+        printf 'UMO_LEAN="%s"\n' "${UMO_LEAN:-0}"
+        printf 'INSTALL_DIR="%s"\n' "$(_umo_install_dir)"
+        printf 'UMO_USER="%s"\n' "${UMO_USER:-umo}"
+        printf 'REPO_DIR="%s"\n' "$_UMO_REPO_DIR"
+    } > "$_conf_dir/umo.conf"
+    _UMO_CONF="$_conf_dir/umo.conf"
+}
+
+_umo_write_aliases() {
+    _sh_dir="${1:-$_UMO_SCRIPT_DIR}"
+    cat > "$_sh_dir/aliases.sh" << EOF
+alias umo-start='$_sh_dir/umo-start.sh'
+alias umo-stop='$_sh_dir/umo-stop.sh'
+alias umo-startvnc='$_sh_dir/umo-vnc-start.sh'
+alias umo-stopvnc='$_sh_dir/umo-vnc-stop.sh'
+alias umo-login='$_sh_dir/umo-login.sh'
+alias umo-user='$_sh_dir/umo-user.sh'
+EOF
+    for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        [ -f "$_rc" ] || continue
+        sed -i -e '/# ===== UMO =====/,+1d' "$_rc" 2>/dev/null || true
+        printf '\n# ===== UMO =====\n[ -f "%s/aliases.sh" ] && . "%s/aliases.sh"\n' "$_sh_dir" "$_sh_dir" >> "$_rc" 2>/dev/null || true
+    done
+}
+
+_umo_self_update() {
+    _cli_src="$_UMO_REPO_DIR/bin/umo-cli"
+    [ -f "$_cli_src" ] || { _umo_warn "Wrapper template missing (bin/umo-cli), keeping current CLI"; return 0; }
+    _cli_dst="${_UMO_TERMUX_HOME}/../usr/bin/umo"
+    _cli_dir=$(dirname "$_cli_dst")
+    if [ ! -d "$_cli_dir" ] && ! mkdir -p "$_cli_dir" 2>/dev/null; then
+        _umo_warn "Termux bin directory not found, CLI wrapper not refreshed"
+        return 0
+    fi
+    _ph='@@'
+    _v_esc=$(_umo_esc_sed "${_new_ver:-$_UMO_VERSION}")
+    _repo_esc=$(_umo_esc_sed "$_UMO_REPO_DIR")
+    _rt_esc=$(_umo_esc_sed "$_UMO_RUNTIME_DIR")
+    if sed -e "s|${_ph}UMO_VERSION${_ph}|$_v_esc|g" \
+        -e "s|${_ph}UMO_REPO_DIR${_ph}|$_repo_esc|g" \
+        -e "s|${_ph}UMO_RUNTIME_DIR${_ph}|$_rt_esc|g" \
+        "$_cli_src" > "$_cli_dst.new" 2>/dev/null && [ -s "$_cli_dst.new" ]; then
+        if mv -f "$_cli_dst.new" "$_cli_dst" 2>/dev/null; then
+            chmod +x "$_cli_dst" 2>/dev/null || true
+            _umo_ok "CLI wrapper updated ($_UMO_TERMUX_HOME/../usr/bin/umo)"
+        else
+            _umo_warn "CLI wrapper refresh failed, keeping current CLI"
+        fi
+    else
+        rm -f "$_cli_dst.new" 2>/dev/null || true
+        _umo_warn "CLI wrapper refresh failed, keeping current CLI"
+    fi
+    return 0
+}
+
+_umo_refresh_host() {
+    _umo_step "Refreshing host scripts"
+    _tpl="$_UMO_REPO_DIR/config/templates"
+    _sh_dir="$_UMO_SCRIPT_DIR"
+    mkdir -p "$_sh_dir" 2>/dev/null || _sh_dir="$_UMO_TERMUX_HOME"
+    _inst_dir="$(_umo_install_dir)"
+
+    _umo_user="${UMO_USER:-umo}"
+    _umo_user_sh="$_sh_dir/umo-user.sh"
+    [ -f "$_umo_user_sh" ] || _umo_user_sh="$_UMO_TERMUX_HOME/umo-user.sh"
+    if [ -f "$_umo_user_sh" ]; then
+        _cur_user=$(sed -n 's/.*\/bin\/su - \([^ ]*\).*/\1/p' "$_umo_user_sh" 2>/dev/null | head -1 | tr -d '"')
+        case "$_cur_user" in
+            ""|'$'*|"{{"*) _umo_user="umo" ;;
+            *) _umo_user="$_cur_user" ;;
+        esac
+    fi
+
+    if [ -f "$_tpl/umo-login.sh" ]; then
+        sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
+            -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
+            "$_tpl/umo-login.sh" > "$_sh_dir/umo-login.sh"
+        chmod +x "$_sh_dir/umo-login.sh"
+    fi
+    for _pair in umo-user.sh:umo-user.sh umo-startvnc.sh:umo-vnc-start.sh umo-stopvnc.sh:umo-vnc-stop.sh; do
+        _src="$_tpl/${_pair%%:*}"
+        _dst="$_sh_dir/${_pair##*:}"
+        if [ -f "$_src" ]; then
+            sed -e "s|{{INSTALL_DIR}}|$_inst_dir|g" \
+                -e "s|{{TERMUX_PREFIX}}|$PREFIX|g" \
+                -e "s|{{UMO_USER}}|$_umo_user|g" \
+                -e "s|{{DISPLAY}}|:1|g" \
+                -e "s|{{VNC_DEPTH}}|24|g" \
+                -e "s|{{VNC_PORT}}|5901|g" \
+                "$_src" > "$_dst"
+            chmod +x "$_dst"
+        fi
+    done
+    for _script in start stop; do
+        [ -f "$_UMO_REPO_DIR/bin/umo-$_script" ] || continue
+        cp -f "$_UMO_REPO_DIR/bin/umo-$_script" "$_sh_dir/umo-$_script.sh"
+        chmod +x "$_sh_dir/umo-$_script.sh"
+    done
+    if [ "$_sh_dir" != "$_UMO_TERMUX_HOME" ]; then
+        for _legacy in umo-login.sh umo-user.sh umo-start.sh umo-stop.sh umo-vnc-start.sh umo-vnc-stop.sh; do
+            rm -f "$_UMO_TERMUX_HOME/$_legacy" 2>/dev/null || true
+        done
+    fi
+    _umo_write_aliases "$_sh_dir"
+    _UMO_SCRIPT_DIR="$_sh_dir"
+    _umo_ok "Host scripts updated in $_sh_dir (user: $_umo_user)"
+}
+
+_umo_refresh_container() {
+    [ -f "$_UMO_LOGIN" ] || return 0
+    _ct_inst_dir="$(_umo_install_dir)"
+    if [ ! -d "$_ct_inst_dir" ]; then
+        _umo_warn "Install directory not found ($_ct_inst_dir), skipping container refresh"
+        return 0
+    fi
+    _umo_step "Refreshing container scripts"
+
+    _bin_dir="$_ct_inst_dir/usr/local/bin"
+    if mkdir -p "$_bin_dir" 2>/dev/null; then
+        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras; do
+            _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
+            [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
+            if [ -f "$_csrc" ]; then
+                if cp -f "$_csrc" "$_bin_dir/$_cscript.tmp" 2>/dev/null && mv -f "$_bin_dir/$_cscript.tmp" "$_bin_dir/$_cscript" 2>/dev/null; then
+                    chmod +x "$_bin_dir/$_cscript" 2>/dev/null || true
+                    _umo_ok "deployed: /usr/local/bin/$_cscript"
+                else
+                    _umo_warn "FAILED to deploy: /usr/local/bin/$_cscript"
+                fi
+            fi
+        done
+    fi
+
+    _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
+    if [ -f "$_xs_tpl" ]; then
+        for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do
+            _xsf_dir=$(dirname "$_xsf")
+            mkdir -p "$_xsf_dir" 2>/dev/null || true
+            _umo_de="$(printf '%s' "${UMO_DE:-}" | tr -d '"')"
+            if [ -z "$_umo_de" ] && [ -f "$_xsf" ]; then
+                _parsed=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_xsf" 2>/dev/null | head -1)
+                [ -n "$_parsed" ] && _umo_de="$_parsed"
+            fi
+            if [ -z "$_umo_de" ]; then
+                _umo_de="$(_umo_detect_de)"
+            fi
+            [ -z "$_umo_de" ] && _umo_de="xfce4"
+            if sed -e "s|{{UMO_VERSION}}|${_new_ver:-$_UMO_VERSION}|g" \
+                -e "s|{{UMO_DE}}|$_umo_de|g" \
+                -e "s|{{DISPLAY}}|:1|g" \
+                "$_xs_tpl" > "$_xsf.tmp" 2>/dev/null && [ -s "$_xsf.tmp" ]; then
+                mv -f "$_xsf.tmp" "$_xsf" 2>/dev/null || true
+                chmod +x "$_xsf" 2>/dev/null || true
+                if grep -q "XDG_RUNTIME_DIR" "$_xsf" 2>/dev/null; then
+                    _umo_ok "xstartup updated: $_xsf"
+                else
+                    _umo_warn "xstartup content check failed: $_xsf"
+                fi
+            else
+                _umo_warn "FAILED to render xstartup: $_xsf"
+            fi
+        done
+        chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
+    fi
+
+    "$_UMO_LOGIN" -c "
+        rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
+        for _g in \$(id -G 2>/dev/null); do
+            grep -q ':x:'\$_g':' /etc/group 2>/dev/null || echo \"android_\$_g:x:\$_g:\" >> /etc/group 2>/dev/null || true
+        done
+        true
+    " </dev/null >/dev/null 2>&1 || true
+    _umo_ok "Container hooks applied"
+}
+
+_umo_theme_satisfied() {
+    case "$UMO_THEME" in
+        umo-light) _wg="Orchis-Light-Compact"; _wi="Tela" ;;
+        *)         _wg="Orchis-Dark-Compact";  _wi="Tela-Black-Dark" ;;
+    esac
+    [ -d "$UMO_INSTALL_DIR/usr/share/themes/$_wg" ] || return 1
+    [ -d "$UMO_INSTALL_DIR/usr/share/icons/$_wi" ] || return 1
+    [ -d "$UMO_INSTALL_DIR/usr/local/share/fonts/firacode-nerd" ] || return 1
+    return 0
+}
+
+_umo_apps_satisfied() {
+    _probes=""
+    case "$UMO_APP_SET" in
+        basic)   _probes="nano git firefox-esr" ;;
+        dev)     _probes="nano git firefox-esr python3 node gcc make cmake vim" ;;
+        media)   _probes="nano git firefox-esr vlc ffmpeg mpv audacity gimp" ;;
+        office)  _probes="nano git firefox-esr libreoffice atril" ;;
+        browser) _probes="nano git firefox-esr epiphany" ;;
+        full)    _probes="nano git firefox-esr python3 node gcc make cmake vim \
+                          vlc ffmpeg mpv audacity gimp libreoffice atril" ;;
+        *) return 1 ;;
+    esac
+    for _b in $_probes; do
+        [ -x "$UMO_INSTALL_DIR/usr/bin/$_b" ] || [ -x "$UMO_INSTALL_DIR/usr/local/bin/$_b" ] || return 1
+    done
+    return 0
+}
+
+_umo_reapply_settings() {
+    [ -f "$_UMO_LOGIN" ] || return 0
+    _ct_inst_dir="$(_umo_install_dir)"
+    [ -d "$_ct_inst_dir" ] || { _umo_warn "Install directory missing, skipping settings re-apply"; return 0; }
+
+    UMO_INSTALL_DIR="$_ct_inst_dir"
+    UMO_LOGIN_SH="$_UMO_LOGIN"
+    SCRIPT_DIR="$_UMO_REPO_DIR"
+    _umo_detect_saved_settings
+    UMO_LIB_DIR="$_UMO_REPO_DIR/lib"
+    UMO_MOD_DIR="$_UMO_REPO_DIR/modules"
+    export UMO_INSTALL_DIR UMO_LOGIN_SH SCRIPT_DIR UMO_LIB_DIR UMO_MOD_DIR
+
+    if [ ! -f "$UMO_LIB_DIR/core-ansi.sh" ] || [ ! -f "$UMO_LIB_DIR/core-fs.sh" ] || \
+       [ ! -f "$UMO_MOD_DIR/umo-theme.sh" ] || [ ! -f "$UMO_MOD_DIR/umo-apps.sh" ]; then
+        _umo_warn "Tool files missing (lib/modules), skipping settings re-apply"
+        return 0
+    fi
+
+    _umo_step "Re-applying saved settings (theme: $UMO_THEME, apps: $UMO_APP_SET, de: $UMO_DE)"
+
+    . "$UMO_LIB_DIR/core-ansi.sh"
+    . "$UMO_LIB_DIR/core-fs.sh"
+    . "$UMO_MOD_DIR/umo-theme.sh"
+    . "$UMO_MOD_DIR/umo-apps.sh"
+
+    if [ "$UMO_DE" != "minimal" ] && [ "$UMO_THEME" != "none" ]; then
+        if _umo_theme_satisfied; then
+            _umo_ok "Theme already applied ($UMO_THEME) - verifying designer extras only"
+            umo_theme_extras </dev/null || _umo_warn "Designer extras check finished with warnings"
+            umo_theme_write_mode_marker || true
+        else
+            umo_theme_setup </dev/null || _umo_warn "Theme re-apply finished with warnings"
+        fi
+    fi
+    if [ "$UMO_APP_SET" != "none" ]; then
+        if _umo_apps_satisfied; then
+            _umo_ok "Application set already installed ($UMO_APP_SET) - skipping reinstall"
+        else
+            umo_apps_install </dev/null || _umo_warn "Application re-apply finished with warnings"
+        fi
+    fi
+
+    _umo_probe="startxfce4"
+    _umo_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
+        xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
+        mousepad dbus-x11 x11-xserver-utils \
+        gnome-icon-theme xfce4-whiskermenu-plugin"
+    case "$UMO_DE" in
+        lxde)
+            _umo_probe="startlxde"
+            _umo_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf" ;;
+        openbox)
+            _umo_probe="openbox-session"
+            _umo_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils" ;;
+        minimal)
+            _umo_probe="xterm"
+            _umo_pkgs="xterm xfonts-base" ;;
+    esac
+    if "$_UMO_LOGIN" -c "command -v $_umo_probe >/dev/null 2>&1" </dev/null 2>/dev/null; then
+        _umo_ok "Desktop verified ($_umo_probe present)"
+    else
+        _umo_step "Desktop components missing - installing ($_umo_probe)"
+        "$_UMO_LOGIN" -c "
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update 2>&1 | grep -E '^(Get:[0-9]|Unpacking |Setting up |E: )' || true
+            timeout 1800 apt-get install -y --no-install-recommends $_umo_pkgs 2>&1 | grep -E '^(Get:[0-9]|Unpacking |Setting up |E: )' || true
+            dpkg --configure -a >/dev/null 2>&1 || true
+        " </dev/null || true
+        if "$_UMO_LOGIN" -c "command -v $_umo_probe >/dev/null 2>&1" </dev/null 2>/dev/null; then
+            _umo_ok "Desktop components installed"
+        else
+            _umo_warn "Desktop still missing - run: umo login -c 'apt-get install -y $_umo_pkgs'"
+        fi
+    fi
+    return 0
+}
+
+_umo_upgrade_system() {
+    [ -f "$_UMO_LOGIN" ] || return 0
+    _ct_inst_dir="$(_umo_install_dir)"
+    [ -d "$_ct_inst_dir" ] || return 0
+    _umo_step "Upgrading the Ubuntu system (this may take a while)"
+    "$_UMO_LOGIN" -c "
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        timeout 1800 apt-get upgrade -y
+        timeout 900 apt-get full-upgrade -y || true
+        dpkg --configure -a >/dev/null 2>&1 || true
+        apt-get autoremove -y >/dev/null 2>&1 || true
+        apt-get clean
+    " </dev/null || true
+    if "$_UMO_LOGIN" -c "dpkg --audit >/dev/null 2>&1 && apt-get check >/dev/null 2>&1" </dev/null >/dev/null 2>&1; then
+        _umo_ok "System packages upgraded"
+    else
+        _umo_warn "Upgrade finished but the package system needs attention"
+        _umo_warn "Fix with: umo login -c 'dpkg --configure -a && apt-get -f install -y'"
+    fi
+    return 0
+}
+
+_umo_check_latest_release() {
+    _rel_json="$_UMO_TERMUX_HOME/.umo/cache/latest-release.json"
+    mkdir -p "$(dirname "$_rel_json")" || return 1
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL --max-time 60 -o "$_rel_json" \
+            "https://api.github.com/repos/shadow-x78/ubuntu-modded-optimized/releases/latest" 2>/dev/null || return 1
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -T 60 -O "$_rel_json" \
+            "https://api.github.com/repos/shadow-x78/ubuntu-modded-optimized/releases/latest" 2>/dev/null || return 1
+    else
+        return 1
+    fi
+    _latest_tag=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\{0,1\}\([^"]*\)".*/\1/p' "$_rel_json" | head -1)
+    [ -n "$_latest_tag" ]
+}
+
+_umo_update_release() {
+    if [ ! -d "$_UMO_REPO_DIR" ] && [ -d "$_UMO_REPO_DIR.old" ]; then
+        _umo_warn "Tool directory missing (interrupted update?), restoring backup copy..."
+        if ! mv "$_UMO_REPO_DIR.old" "$_UMO_REPO_DIR" 2>/dev/null; then
+            _umo_err "Could not restore $_UMO_REPO_DIR.old"
+            exit 1
+        fi
+        _umo_ok "Tool directory restored"
+    fi
+    _umo_info "Checking for new release on GitHub..."
+    if ! _umo_check_latest_release; then
+        _umo_err "Could not reach GitHub Releases API. Check your connection and retry."
+        exit 1
+    fi
+    if [ "$_latest_tag" = "$_UMO_VERSION" ]; then
+        _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+        exit 0
+    fi
+    printf "  ${_UMO_DIM}v%s -> v%s${_UMO_NC}\n" "$_UMO_VERSION" "$_latest_tag"
+
+    _tb_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\(.*\.tar\.gz\)".*/\1/p' "$_rel_json" | head -1)
+    _sh_url=$(sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\(.*\.sha256\)".*/\1/p' "$_rel_json" | head -1)
+    if [ -z "$_tb_url" ] || [ -z "$_sh_url" ]; then
+        _umo_err "Release v$_latest_tag has no downloadable tarball"
+        exit 1
+    fi
+
+    _cache="$(dirname "$_rel_json")"
+    _tb_file="$_cache/$(basename "$_tb_url")"
+    _sh_file="$_cache/$(basename "$_sh_url")"
+
+    _umo_info "Downloading release v$_latest_tag..."
+    if command -v curl >/dev/null 2>&1; then
+        if ! curl -fsSL --max-time 300 -o "$_tb_file" "$_tb_url" || ! curl -fsSL --max-time 60 -o "$_sh_file" "$_sh_url"; then
+            _umo_err "Download failed"
+            exit 1
+        fi
+    else
+        if ! wget -q -T 300 -O "$_tb_file" "$_tb_url" || ! wget -q -T 60 -O "$_sh_file" "$_sh_url"; then
+            _umo_err "Download failed"
+            exit 1
+        fi
+    fi
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        _actual=$(sha256sum "$_tb_file" | awk '{print $1}')
+    else
+        _actual=$(shasum -a 256 "$_tb_file" 2>/dev/null | awk '{print $1}')
+    fi
+    _expected=$(awk '{print $1}' "$_sh_file")
+    if [ -z "$_actual" ] || [ "$_actual" != "$_expected" ]; then
+        _umo_err "SHA-256 verification failed, aborting update"
+        rm -f "$_tb_file" "$_sh_file"
+        exit 1
+    fi
+    _umo_ok "SHA-256 verified"
+
+    _tmp_dir="$_UMO_REPO_DIR.new.tmp.$$"
+    rm -rf "$_tmp_dir"
+    mkdir -p "$_tmp_dir"
+    if ! tar -xzf "$_tb_file" -C "$_tmp_dir" 2>/dev/null; then
+        _umo_err "Extraction failed"
+        rm -rf "$_tmp_dir"
+        exit 1
+    fi
+    if [ ! -f "$_tmp_dir/bin/umo-install" ]; then
+        _umo_err "Release tarball is malformed, aborting update"
+        rm -rf "$_tmp_dir"
+        exit 1
+    fi
+
+    rm -rf "$_UMO_REPO_DIR.old"
+    mv "$_UMO_REPO_DIR" "$_UMO_REPO_DIR.old"
+    if ! mv "$_tmp_dir" "$_UMO_REPO_DIR" 2>/dev/null || [ ! -f "$_UMO_REPO_DIR/bin/umo-install" ]; then
+        _umo_err "Failed to install the new release"
+        rm -rf "$_UMO_REPO_DIR" 2>/dev/null || true
+        if [ -d "$_UMO_REPO_DIR.old" ]; then
+            mv "$_UMO_REPO_DIR.old" "$_UMO_REPO_DIR" 2>/dev/null || true
+            _umo_warn "Previous version restored from backup"
+        fi
+        exit 1
+    fi
+    rm -rf "$_UMO_REPO_DIR.old"
+    rm -f "$_tb_file" "$_sh_file" "$_rel_json" 2>/dev/null
+    for _bin in umo-install umo-cli umo-start umo-stop; do
+        chmod +x "$_UMO_REPO_DIR/bin/$_bin" 2>/dev/null || true
+    done
+
+    _umo_ok "Release v$_latest_tag installed"
+}
+
+_umo_refresh_tools() {
+    _umo_plate "Refresh Tools"
+
+    if [ ! -d "$_UMO_REPO_DIR" ]; then
+        _umo_err "UMO tool directory not found ($_UMO_REPO_DIR)"
+        exit 1
+    fi
+
+    _new_ver=$(sed -n 's/^export UMO_VERSION="\([^"]*\)"/\1/p' "$_UMO_REPO_DIR/bin/umo-install" 2>/dev/null)
+    [ -n "$_new_ver" ] && _UMO_VERSION="$_new_ver"
+
+    _umo_self_update
+    _umo_refresh_host
+    _umo_refresh_container
+    _umo_detect_saved_settings
+    _umo_conf_write
+
+    printf "\n"
+    _umo_ok "Host and container tools refreshed (v$_UMO_VERSION)"
+    printf "  ${_UMO_DIM}Settings: theme ${UMO_THEME:-umo-dark} · apps ${UMO_APP_SET:-basic} · de ${UMO_DE:-xfce4}${_UMO_NC}\n\n"
+}
+
+_umo_run_update() {
+    _umo_scripts_only=0
+    for _a in "$@"; do
+        case "$_a" in
+            --scripts-only|--fast) _umo_scripts_only=1 ;;
+        esac
+    done
+
+    _umo_plate "Update"
+
+    if [ -d "$_UMO_REPO_DIR/.git" ]; then
+        _umo_info "Fetching latest changes from origin/main..."
+        if ! git -C "$_UMO_REPO_DIR" fetch origin main 2>/dev/null; then
+            _umo_err "Could not reach GitHub. Check your connection and retry."
+            exit 1
+        fi
+
+        _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
+        if [ "$_behind" -eq 0 ] 2>/dev/null; then
+            _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+            exit 0
+        fi
+
+        printf "  ${_UMO_DIM}%s new commits on main:${_UMO_NC}\n" "$_behind"
+        git -C "$_UMO_REPO_DIR" log --oneline --no-decorate HEAD..origin/main 2>/dev/null | head -10 | while IFS= read -r _line; do
+            printf "  ${_UMO_CYN}  ➜${_UMO_NC} %s\n" "$_line"
+        done
+        printf "\n"
+
+        _stashed=0
+        if [ -n "$(git -C "$_UMO_REPO_DIR" status --porcelain 2>/dev/null)" ]; then
+            _umo_warn "Local modifications detected, stashing them first"
+            _stash_before=$(git -C "$_UMO_REPO_DIR" rev-parse -q --verify refs/stash 2>/dev/null || true)
+            if git -C "$_UMO_REPO_DIR" stash push -u -m "umo auto-stash $(date +%Y%m%d-%H%M%S)" >/dev/null 2>&1; then
+                _stash_after=$(git -C "$_UMO_REPO_DIR" rev-parse -q --verify refs/stash 2>/dev/null || true)
+                if [ -n "$_stash_after" ] && [ "$_stash_after" != "$_stash_before" ]; then
+                    _stashed=1
+                else
+                    _umo_warn "Nothing was stashed, keeping your changes in place"
+                fi
+            else
+                _umo_err "Could not stash your local changes - update aborted (nothing was reset)"
+                _umo_err "Commit or stash them manually, then run: umo update"
+                exit 1
+            fi
+        fi
+
+        if ! git -C "$_UMO_REPO_DIR" reset --hard origin/main >/dev/null 2>&1; then
+            _umo_err "Failed to apply updates"
+            if [ "$_stashed" = 1 ]; then
+                git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1 || true
+            fi
+            exit 1
+        fi
+
+        if [ "$_stashed" = 1 ]; then
+            if git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1; then
+                _umo_ok "Your local changes were preserved"
+            else
+                _umo_warn "Stash kept (conflict), resolve with: git -C $_UMO_REPO_DIR stash pop"
+            fi
+        fi
+    else
+        _umo_update_release
+    fi
+
+    _new_ver=$(sed -n 's/^export UMO_VERSION="\([^"]*\)"/\1/p' "$_UMO_REPO_DIR/bin/umo-install" 2>/dev/null)
+    [ -n "$_new_ver" ] && _UMO_VERSION="$_new_ver"
+
+    _umo_self_update
+    _umo_refresh_host
+    _umo_refresh_container
+    _umo_detect_saved_settings
+
+    if [ "$_umo_scripts_only" = 1 ]; then
+        _umo_conf_write
+        printf "\n"
+        _umo_ok "Scripts refreshed (v$_UMO_VERSION), settings recorded"
+        printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo update${_UMO_NC} ${_UMO_DIM}(without --scripts-only) for a full update.${_UMO_NC}\n\n"
+        exit 0
+    fi
+
+    _umo_reapply_settings
+    _umo_upgrade_system
+    _umo_conf_write
+
+    printf "\n"
+    _umo_plate "Update Summary"
+    _umo_kv "Version" "${_UMO_CYN}v$_UMO_VERSION${_UMO_NC}"
+    _umo_kv "Theme"   "${_UMO_CYN}${UMO_THEME:-umo-dark}${_UMO_NC}"
+    _umo_kv "Apps"    "${_UMO_CYN}${UMO_APP_SET:-basic}${_UMO_NC}"
+    _umo_kv "Desktop" "${_UMO_CYN}${UMO_DE:-xfce4}${_UMO_NC}"
+    printf "\n"
+    _umo_ok "UMO fully updated (scripts, settings, apps, theme and system packages)"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo status${_UMO_DIM} to verify the environment.${_UMO_NC}\n\n"
+}
+
+_umo_run_cmd() {
+    if [ -z "$1" ]; then
+        _umo_err "No command provided. Usage: umo run \"<command>\""
+        exit 1
+    fi
+    "$_UMO_LOGIN" -c "$*"
+}
+
+_umo_set_user() {
+    _umo_plate "User"
+    _new_user="$1"
+    if [ -z "$_new_user" ]; then
+        _umo_err "Usage: umo --user <username>"
+        exit 1
+    fi
+    if ! printf '%s' "$_new_user" | grep -Eq '^[a-z_][a-z0-9_-]{0,31}$'; then
+        _umo_err "Invalid username '$_new_user'"
+        printf "  Allowed: a-z, 0-9, '_', '-'; must start with a letter or '_'; max 32 chars.\n\n"
+        exit 1
+    fi
+    _login="$_UMO_LOGIN"
+    _user_sh="$_UMO_SCRIPT_DIR/umo-user.sh"
+    [ -f "$_user_sh" ] || _user_sh="$_UMO_TERMUX_HOME/umo-user.sh"
+    if [ ! -f "$_login" ]; then
+        _umo_err "UMO not installed"
+        exit 1
+    fi
+    _umo_info "Switching default user to: $_new_user"
+    "$_login" -c "id $_new_user >/dev/null 2>&1 || { useradd -m -s /bin/bash $_new_user && echo '${_new_user}:${_new_user}' | chpasswd; }" </dev/null >/dev/null 2>&1
+    sed -i "s|/bin/su - [^ ]*|/bin/su - $_new_user|g" "$_user_sh" 2>/dev/null || true
+    sed -i "s|HOME=/home/[^ ]*|HOME=/home/$_new_user|g" "$_user_sh" 2>/dev/null || true
+    UMO_USER="$_new_user"
+    _umo_detect_saved_settings
+    _umo_conf_write
+    _umo_ok "Default user is now: $_new_user"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo user${_UMO_DIM} to login as ${_new_user}.${_UMO_NC}\n\n"
+}
+
+_umo_uninstall() {
+    _umo_plate "Uninstall"
+
+    _inst_dir="$(_umo_install_dir)"
+
+    _will_delete=""
+    [ -d "$_inst_dir" ] && _will_delete="$_inst_dir"
+    [ -d "$_UMO_SCRIPT_DIR" ] && _will_delete="$_will_delete $_UMO_SCRIPT_DIR"
+    _legacy=""
+    for _f in umo-login.sh umo-user.sh umo-start.sh umo-stop.sh umo-vnc-start.sh umo-vnc-stop.sh; do
+        [ -e "$_UMO_TERMUX_HOME/$_f" ] && _legacy="$_legacy $_UMO_TERMUX_HOME/$_f"
+    done
+    _cli="$_UMO_TERMUX_HOME/../usr/bin/umo"
+    [ -e "$_cli" ] || _cli=""
+
+    printf "  ${_UMO_BOLD}The following items will be removed:${_UMO_NC}\n"
+    [ -n "$_will_delete" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (Ubuntu rootfs)\n" "$_inst_dir" && printf "    ${_UMO_RED}- %s${_UMO_NC} (host scripts, cache, logs, settings)\n" "$_UMO_SCRIPT_DIR"
+    [ -n "$_legacy" ] && printf "    ${_UMO_RED}-%s${_UMO_NC} (legacy host scripts)\n" "$_legacy"
+    [ -n "$_cli" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (umo command)\n" "$_cli"
+    printf "    ${_UMO_DIM}- UMO aliases in .bashrc/.zshrc${_UMO_NC}\n"
+    case "$_UMO_REPO_DIR" in
+        "$HOME/.local/share/umo"*)
+            [ -d "$_UMO_REPO_DIR" ] && printf "    ${_UMO_RED}- %s${_UMO_NC} (UMO tool files)\n" "$_UMO_REPO_DIR" ;;
+        *)
+            [ -d "$_UMO_REPO_DIR" ] && printf "    ${_UMO_DIM}  (UMO tool source stays at %s - remove manually if wanted)${_UMO_NC}\n" "$_UMO_REPO_DIR" ;;
+    esac
+    printf "\n"
+
+    if [ "${UMO_UNINSTALL_YES:-}" != "1" ]; then
+        printf "  %bPermanently remove everything listed above? [y/N]%b: " "$_UMO_YEL" "$_UMO_NC"
+        read -r _ans || _ans=""
+        case "$(printf '%s' "$_ans" | tr '[:upper:]' '[:lower:]')" in
+            y|yes) ;;
+            *) _umo_warn "Uninstall cancelled"; return 0 ;;
+        esac
+    fi
+
+    _umo_info "Stopping all UMO services..."
+    for _proc in proot Xtigervnc Xvnc dbus-daemon pulseaudio termux-x11 dconf-service xfce4-session; do
+        pkill -9 -f "$_proc" 2>/dev/null || true
+    done
+    sleep 1
+
+    if [ -d "$_inst_dir" ]; then
+        _umo_info "Removing Ubuntu rootfs: $_inst_dir"
+        rm -rf "$_inst_dir" 2>/dev/null || _umo_warn "Could not fully remove $_inst_dir (check permissions)"
+    fi
+    if [ -d "$_UMO_SCRIPT_DIR" ]; then
+        _umo_info "Removing host scripts, cache and settings: $_UMO_SCRIPT_DIR"
+        rm -rf "$_UMO_SCRIPT_DIR" 2>/dev/null || true
+    fi
+    if [ -n "$_legacy" ]; then
+        for _f in $_legacy; do
+            rm -f "$_f" 2>/dev/null || true
+        done
+    fi
+    if [ -n "$_cli" ]; then
+        rm -f "$_cli" 2>/dev/null || true
+    fi
+
+    _umo_info "Removing UMO aliases from shell configs..."
+    for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        [ -f "$_rc" ] || continue
+        sed -i -e '/# ===== UMO =====/,+1d' -e '/\.umo\/aliases\.sh/d' \
+            -e '/alias umo=/d' -e '/alias umo-start=/d' -e '/alias umo-stop=/d' \
+            -e '/alias umo-startvnc=/d' -e '/alias umo-stopvnc=/d' "$_rc" 2>/dev/null || true
+    done
+
+    case "$_UMO_REPO_DIR" in
+        "$HOME/.local/share/umo"*)
+            if [ -d "$_UMO_REPO_DIR" ]; then
+                _umo_info "Removing UMO tool files: $_UMO_REPO_DIR"
+                rm -rf "$_UMO_REPO_DIR" 2>/dev/null || true
+            fi ;;
+    esac
+
+    _umo_ok "UMO fully uninstalled"
+    printf "  ${_UMO_DIM}Restart your shell (or run: source ~/.bashrc) to drop the aliases.${_UMO_NC}\n\n"
+}
+
+_umo_backup() {
+    _umo_plate "Backup"
+    _bak_dir="${1:-$_UMO_TERMUX_HOME/umo-backup}"
+    _bak_file="$_bak_dir/umo-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+    _install_dir="$(_umo_install_dir)"
+    if [ -z "$_install_dir" ] || [ ! -d "$_install_dir" ]; then
+        _umo_err "Cannot find UMO install directory"
+        exit 1
+    fi
+    mkdir -p "$_bak_dir"
+    _umo_info "Backing up to: $_bak_file"
+    tar -czf "$_bak_file" -C "$(dirname "$_install_dir")" "$(basename "$_install_dir")" 2>/dev/null
+    _sz=$(du -sh "$_bak_file" 2>/dev/null | cut -f1)
+    _umo_ok "Backup complete (size: $_sz)"
+    printf "  ${_UMO_DIM}%s${_UMO_NC}\n\n" "$_bak_file"
+}
+
+_umo_status() {
+    _umo_plate "Service Status"
+    [ -f "$_UMO_LOGIN" ] && _installed="${_UMO_GRN}installed${_UMO_NC}" || _installed="${_UMO_RED}not installed${_UMO_NC}"
+    _umo_kv "Container" "$_installed"
+    _umo_kv "Scripts" "${_UMO_DIM}$(dirname "$_UMO_LOGIN")${_UMO_NC}"
+    [ -f "$_UMO_CONF" ] && _umo_kv "Settings" "${_UMO_DIM}theme ${UMO_THEME:-umo-dark} · apps ${UMO_APP_SET:-basic} · de ${UMO_DE:-xfce4}${_UMO_NC}"
+
+    _proot_pids=$(pgrep -f "proot.*umo" 2>/dev/null | tr '\n' ' ')
+    if [ -n "$_proot_pids" ]; then
+        _umo_kv "Session" "${_UMO_GRN}running${_UMO_NC} ${_UMO_DIM}(pid $_proot_pids)${_UMO_NC}"
+    else
+        _umo_kv "Session" "${_UMO_DIM}stopped${_UMO_NC}"
+    fi
+
+    _vnc_pid=$(pgrep -f "Xvnc" 2>/dev/null | head -1)
+    [ -z "$_vnc_pid" ] && _vnc_pid=$(pgrep -f "Xtigervnc" 2>/dev/null | head -1)
+    if [ -n "$_vnc_pid" ]; then
+        _umo_kv "VNC" "${_UMO_GRN}active${_UMO_NC} ${_UMO_CYN}127.0.0.1:5901${_UMO_NC}"
+    else
+        _umo_kv "VNC" "${_UMO_DIM}stopped${_UMO_NC}"
+    fi
+
+    _pulse=$(pgrep -f "pulseaudio" 2>/dev/null | head -1)
+    if [ -n "$_pulse" ]; then
+        _umo_kv "Audio" "${_UMO_GRN}running${_UMO_NC}"
+    else
+        _umo_kv "Audio" "${_UMO_DIM}stopped${_UMO_NC}"
+    fi
+
+    if [ -d "$_UMO_REPO_DIR/.git" ] && [ "${UMO_CHECK_UPDATES:-0}" = "1" ]; then
+        _fh="$_UMO_REPO_DIR/.git/FETCH_HEAD"
+        _stale=1
+        if [ -f "$_fh" ]; then
+            _fh_age=$(( $(date +%s) - $(stat -c %Y "$_fh" 2>/dev/null || echo 0) ))
+            [ "$_fh_age" -lt 600 ] && _stale=0
+        fi
+        if [ "$_stale" = 1 ]; then
+            git -C "$_UMO_REPO_DIR" fetch origin main >/dev/null 2>&1 || true
+        fi
+        _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
+        if [ "$_behind" -gt 0 ] 2>/dev/null; then
+            _umo_kv "Updates" "${_UMO_YEL}$_behind new commits on main${_UMO_NC} (umo update)"
+        else
+            _umo_kv "Updates" "${_UMO_DIM}up to date${_UMO_NC}"
+        fi
+    fi
+    printf "\n"
+}
+
+_umo_help() {
+    _umo_plate "Command Reference"
+
+    printf "  ${_UMO_BOLD}USAGE${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}umo${_UMO_NC} <command> [options]\n\n"
+
+    printf "  ${_UMO_PRI}Session Lifecycle${_UMO_NC} ${_UMO_DIM}(control the running environment)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "start"              "Boot Ubuntu with VNC and audio servers"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "stop"               "Terminate all running UMO services"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "status"             "Live service status and update check"
+    printf "\n"
+
+    printf "  ${_UMO_PRI}Terminal Access${_UMO_NC} ${_UMO_DIM}(work inside the container)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "login"              "Root shell inside Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "user"               "Shell as the default user"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "run <cmd>"          "Execute one command inside Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "--user <name>"      "Switch the default login user"
+    printf "\n"
+
+    printf "  ${_UMO_PRI}Maintenance${_UMO_NC} ${_UMO_DIM}(keep UMO current and safe)${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "vnc"                "Start the VNC server manually"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "install"            "Re-run the installer (repair/reinstall)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Full update: tool, scripts, theme, apps and Ubuntu"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update --scripts-only"  "Refresh scripts only (fast)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "refresh"            "Re-render CLI, host and container scripts (no git)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Archive the rootfs to <dir>"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "uninstall"          "Remove UMO completely (rootfs, scripts, aliases)"
+    printf "\n"
+
+    printf "  ${_UMO_PRI}General${_UMO_NC}\n"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "version"            "Print version banner"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "help"               "This reference"
+    printf "\n"
+
+    printf "  ${_UMO_PRI}Common Tasks${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}\$${_UMO_NC} ${_UMO_CYN}umo login${_UMO_NC}                  shell into the container\n"
+    printf "    ${_UMO_DIM}\$${_UMO_NC} ${_UMO_CYN}umo start${_UMO_NC}                  launch desktop, connect at :5901\n"
+    printf "    ${_UMO_DIM}\$${_UMO_NC} ${_UMO_CYN}umo backup && umo update${_UMO_NC} backup first, then full upgrade\n"
+    printf "    ${_UMO_DIM}\$${_UMO_NC} ${_UMO_CYN}umo run \"fastfetch\"${_UMO_NC}        inspect the container\n"
+    printf "\n"
+}
+
+case "$1" in
+    start)
+        _s="$_UMO_SCRIPT_DIR/umo-start.sh"
+        [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-start.sh"
+        exec "$_s" "$2" ;;
+    stop)
+        _s="$_UMO_SCRIPT_DIR/umo-stop.sh"
+        [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-stop.sh"
+        exec "$_s" ;;
+    login)                  exec "$_UMO_LOGIN" ;;
+    user)
+        _s="$_UMO_SCRIPT_DIR/umo-user.sh"
+        [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-user.sh"
+        exec "$_s" ;;
+    vnc)
+        _s="$_UMO_SCRIPT_DIR/umo-vnc-start.sh"
+        [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-vnc-start.sh"
+        exec "$_s" ;;
+    status)                 _umo_status ;;
+    update)                 shift; _umo_run_update "$@" ;;
+    refresh)                _umo_refresh_tools ;;
+    install)
+        if [ -f "$_UMO_REPO_DIR/bin/umo-install" ]; then
+            shift
+            _umo_info "Re-running the UMO installer..."
+            exec sh "$_UMO_REPO_DIR/bin/umo-install" "$@"
+        else
+            _umo_err "Installer not found at $_UMO_REPO_DIR/bin/umo-install"
+            printf "  Run the one-liner instead:\n"
+            printf "    bash <(curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh)\n\n"
+            exit 1
+        fi ;;
+    uninstall|remove)       _umo_uninstall ;;
+    run)                    shift; _umo_run_cmd "$@" ;;
+    backup)                 shift; _umo_backup "$@" ;;
+    --user|-u)              shift; _umo_set_user "$1" ;;
+    --version|-v|version)   _umo_header ;;
+    help|--help|-h)         _umo_help ;;
+    "")
+        _umo_err "No command provided"
+        printf "  Run '${_UMO_CYN}umo --help${_UMO_NC}' for usage.\n\n"
+        exit 1
+        ;;
+    *)
+        _umo_err "Unknown command: $1"
+        printf "  Run '${_UMO_CYN}umo --help${_UMO_NC}' for usage.\n\n"
+        exit 1
+        ;;
+esac

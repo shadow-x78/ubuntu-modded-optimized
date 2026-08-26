@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - In-Container XFCE Desktop First-Boot Init (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 

@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.14.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.15.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -82,7 +82,7 @@
 | **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة | نوافذ Clearlooks، بانر tint2، قائمة root |
 | **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة | طرفية فقط - بدون سمة |
 
-جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة GTK من Materia، أيقونات Papirus، مؤشر DMZ، خطا Inter + JetBrains Mono، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً، بالوضع الداكن أو الفاتح.
+جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة Orchis (المضغوطة)، أيقونات Tela، مؤشر DMZ، خطا Ubuntu SemiBold + FiraCode Nerd Mono، إعدادات Fastfetch جاهزة، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً. اختر **الوضع الليلي** (Orchis-Dark-Compact + Tela-Black-Dark) أو **الوضع النهاري** (Orchis-Light-Compact + Tela) من قائمة المثبّت، أو عبر `--theme=umo-dark|umo-light`.
 
 **يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl عام · التحكم بالجلسات
 
@@ -132,7 +132,8 @@ umo login
 | `umo user` | الدخول كمستخدم افتراضي |
 | `umo run "<cmd>"` | تنفيذ أمر واحد داخل الحاوية |
 | `umo backup [dir]` | أرشفة جذر نظام Ubuntu |
-| `umo update` | جلب آخر إصدار (تثبيت الإصدار) أو الالتزامات (git clone)، وتحديث سكربتات الهوست وتطبيق hooks الحاوية |
+| `umo update` | تحديث كامل: جلب آخر نسخة من UMO، إعادة تطبيق إعداداتك المحفوظة (وضع الثيم، فئة التطبيقات، سطح المكتب)، وترقية كل حزم أوبونتو. استخدم `--scripts-only` للتحديث السريع للسكربتات فقط |
+| `umo refresh` | إعادة توليد واجهة `umo` وسكربتات الهوست والحاوية من النسخة المحلية للأداة (بدون سحب git) |
 | `umo uninstall` | إزالة UMO بالكامل (الجذر، سكربتات الهوست، أمر `umo`، والـ aliases) |
 | `umo version` | عرض إصدار UMO الحالي |
 
@@ -163,6 +164,7 @@ bash install.sh [OPTIONS]
   --perf=balanced|aggressive|off اختيار مستوى الأداء
   --theme=umo-dark|umo-light|none
                                  اختيار مظهر سطح المكتب (الافتراضي: umo-dark)
+  --mode=dark|light              بديل مختصر لـ --theme (داكن/فاتح)
   --lean                         حذف ملفات التوثيق واللغات لتوفير المساحة
 ```
 

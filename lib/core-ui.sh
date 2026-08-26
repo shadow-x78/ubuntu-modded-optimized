@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Core Library: Interactive Menus and Prompts (sourced) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_UI_LOADED:-}" ] || return 0
 _UMO_UI_LOADED=1

@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Host VNC Start Template (rendered per install) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 _umo_login="${HOME:-/data/data/com.termux/files/home}/.umo/umo-login.sh"
 [ -x "$_umo_login" ] || _umo_login="${HOME:-/data/data/com.termux/files/home}/umo-login.sh"
 

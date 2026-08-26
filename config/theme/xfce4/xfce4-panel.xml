@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ─────────────────────────────────────────────
- UMO - XFCE Panel Layout
- ─────────────────────────────────────────────
--->
+<!-- UMO - XFCE Panel Layout (GPL-3.0-or-later)
+     https://github.com/shadow-x78/ubuntu-modded-optimized -->
 
 <channel name="xfce4-panel" version="1.0">
   <property name="panels" type="array">

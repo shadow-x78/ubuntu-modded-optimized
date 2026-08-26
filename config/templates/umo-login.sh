@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Proot Login Script Template (rendered per install) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 INSTALL_DIR="{{INSTALL_DIR}}"
 PREFIX="{{TERMUX_PREFIX}}"
 

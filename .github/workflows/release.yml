@@ -29,8 +29,9 @@ jobs:
 
       - name: Syntax check before release
         run: |
-          for f in install.sh umo.sh bin/umo-install bin/umo-start bin/umo-stop \
-                   lib/*.sh modules/*.sh config/xstartup config/templates/*.sh; do
+          for f in install.sh umo.sh bin/umo-install bin/umo-cli bin/umo-start bin/umo-stop \
+                   lib/*.sh modules/*.sh config/xstartup \
+                   config/templates/*.sh config/container/*; do
             sh -n "$f" || exit 1
           done
 

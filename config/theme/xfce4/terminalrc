@@ -1,7 +1,0 @@
-# ─────────────────────────────────────────────
-# UMO - XFCE Terminal
-# ─────────────────────────────────────────────
-
-[Configuration]
-FontName=FiraCode Nerd Font Mono 10
-ScrollingBar=TERMINAL_SCROLLBAR_ON

@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.14.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.15.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -82,7 +82,7 @@ Full Ubuntu on your Android device - one command, zero hassle
 | **Openbox** | Window Manager | Advanced users, minimal footprint | Clearlooks windows, tint2 panel, root menu |
 | **Minimal** | CLI only | Servers and headless usage | Terminal only - no theme applied |
 
-All graphical desktops get the full design system: Materi GTK theme, Papirus icons, DMZ cursors, Inter + JetBrains Mono fonts, and the UMO wallpaper - applied to **both** root and the `umo` user, in dark or light mode.
+All graphical desktops get the full design system: Orchis GTK theme (compact), Tela icons, DMZ cursors, Ubuntu SemiBold + FiraCode Nerd Mono fonts, a matching Fastfetch config, and the UMO wallpaper - applied to **both** root and the `umo` user. Pick **Night Mode** (Orchis-Dark-Compact + Tela-Black-Dark) or **Day Mode** (Orchis-Light-Compact + Tela) in the installer, or with `--theme=umo-dark|umo-light`.
 
 **Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Generic systemctl emulator · Session Control
 
@@ -132,7 +132,8 @@ umo login
 | `umo user` | Login as default user |
 | `umo run "<cmd>"` | Run one command inside the container |
 | `umo backup [dir]` | Archive the Ubuntu rootfs |
-| `umo update` | Pull latest release (release install) or commits (git clone), refresh host scripts, apply container hooks |
+| `umo update` | Full update: pulls the latest UMO, re-applies your saved settings (theme mode, app set, desktop), and upgrades every Ubuntu package. Use `--scripts-only` for a fast scripts-only refresh |
+| `umo refresh` | Re-render the `umo` CLI, host scripts and container scripts from the local tool copy (no git pull) |
 | `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
 | `umo version` | Display current UMO version |
 
@@ -163,6 +164,7 @@ bash install.sh [OPTIONS]
   --perf=balanced|aggressive|off Choose performance tuning level
   --theme=umo-dark|umo-light|none
                                  Choose desktop theme (default: umo-dark)
+  --mode=dark|light              Theme mode alias for --theme
   --lean                         Remove docs/man/locales to save space
 ```
 

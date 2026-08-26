@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - One-liner Release Installer (fetches latest release) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 

@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Core Library: RootFS Download Mirrors (sourced) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_NET_LOADED:-}" ] || return 0
 _UMO_NET_LOADED=1

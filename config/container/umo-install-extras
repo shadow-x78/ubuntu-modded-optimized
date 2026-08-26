@@ -1,5 +1,20 @@
 #!/bin/sh
+# UMO - In-Container Designer Extras (Orchis/Tela/FiraCode Nerd) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
+
+_MODE="${1:-dark}"
+case "$_MODE" in
+    light) _WANT_GTK="Orchis-Light-Compact" ; _WANT_ICONS="Tela" ;;
+    *)     _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-Black-Dark" ;;
+esac
+if [ -f /etc/umo/umo-theme-mode ]; then
+    _marker=$(tr -d '[:space:]' < /etc/umo/umo-theme-mode 2>/dev/null)
+    case "$_marker" in
+        light) _MODE="light" ; _WANT_GTK="Orchis-Light-Compact" ; _WANT_ICONS="Tela" ;;
+        dark)  _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-Black-Dark" ;;
+    esac
+fi
 
 _GRN='\033[38;5;34m'
 _RED='\033[38;5;196m'
@@ -9,38 +24,52 @@ _NC='\033[0m'
 _step() { printf "  %b>%b  %s\n" "$_CYN" "$_NC" "$1"; }
 _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
 _fail() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
-_apt_progress() { grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" | sed 's/^/    /' || true; }
 
-if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
-    _step "Fetching Orchis theme..."
-    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
-    if [ -d /root/.orchis-theme ]; then
-        _step "Installing Orchis (dark + compact)..."
-        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
-        ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
-        _ok "Orchis installed"
-        for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
-                  /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
-                  /root/.config/gtk-3.0/settings.ini \
-                  /home/umo/.config/gtk-3.0/settings.ini \
-                  /root/.gtkrc-2.0 \
-                  /home/umo/.gtkrc-2.0; do
-            if [ -f "$_f" ]; then
-                sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g' "$_f" 2>/dev/null || true
-            fi
-        done
+if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
+    if [ ! -d /root/.orchis-theme/.git ]; then
+        _step "Fetching Orchis theme..."
+        rm -rf /root/.orchis-theme 2>/dev/null || true
+        timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
+    else
+        _step "Reusing cached Orchis theme clone..."
+    fi
+    if [ -d /root/.orchis-theme/.git ]; then
+        if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
+            _step "Installing Orchis dark compact..."
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | tail -n 3 ) || true
+        fi
+        if [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
+            _step "Installing Orchis light compact..."
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light --tweaks compact 2>&1 | tail -n 3 ) || true
+        fi
+        if [ -d /usr/share/themes/Orchis-Dark-Compact ] && [ -d /usr/share/themes/Orchis-Light-Compact ]; then
+            _ok "Orchis installed"
+            rm -rf /root/.orchis-theme 2>/dev/null || true
+        else
+            _fail "Orchis install incomplete - keeping the clone for the next run"
+        fi
     else
         _fail "Orchis theme could not be fetched"
     fi
 fi
 
-if [ ! -d /usr/share/icons/Tela-Black-Dark ]; then
-    _step "Fetching Tela icons..."
-    timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
-    if [ -d /root/.tela-icons ]; then
-        _step "Installing Tela icons (black + dark variants)..."
-        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | sed 's/^/    /' | tail -n 4 ) || true
-        _ok "Tela icons installed"
+if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; then
+    if [ ! -d /root/.tela-icons/.git ]; then
+        _step "Fetching Tela icons..."
+        rm -rf /root/.tela-icons 2>/dev/null || true
+        timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
+    else
+        _step "Reusing cached Tela icon clone..."
+    fi
+    if [ -d /root/.tela-icons/.git ]; then
+        _step "Installing Tela icons (all variants)..."
+        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | tail -n 3 ) || true
+        if [ -d /usr/share/icons/Tela-Black-Dark ] && [ -d /usr/share/icons/Tela ]; then
+            _ok "Tela icons installed"
+            rm -rf /root/.tela-icons 2>/dev/null || true
+        else
+            _fail "Tela install incomplete - keeping the clone for the next run"
+        fi
     else
         _fail "Tela icons could not be fetched"
     fi
@@ -59,4 +88,23 @@ if ! fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
     else
         _fail "FiraCode Nerd Font could not be downloaded"
     fi
+fi
+
+if [ -d "/usr/share/themes/$_WANT_GTK" ] && [ -d "/usr/share/icons/$_WANT_ICONS" ]; then
+    _step "Aligning existing configs with $_MODE mode ($_WANT_GTK + $_WANT_ICONS)..."
+    for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
+              /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
+              /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml \
+              /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml \
+              /root/.config/gtk-3.0/settings.ini \
+              /home/umo/.config/gtk-3.0/settings.ini \
+              /root/.gtkrc-2.0 \
+              /home/umo/.gtkrc-2.0; do
+        if [ -f "$_f" ]; then
+            sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Materia-light/Orchis-Light-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g; s/Papirus-Light/Tela/g' "$_f" 2>/dev/null || true
+        fi
+    done
+    _ok "Designer theme ready ($_WANT_GTK + $_WANT_ICONS)"
+else
+    _fail "Designer theme $_WANT_GTK + $_WANT_ICONS unavailable"
 fi

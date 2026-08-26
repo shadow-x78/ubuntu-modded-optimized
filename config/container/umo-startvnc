@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - In-Container VNC Launcher (self-healing startup) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
@@ -118,8 +120,13 @@ if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1
     fi
 fi
 
-if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] && [ -x /usr/local/bin/umo-install-extras ]; then
-    bash /usr/local/bin/umo-install-extras || true
+_um_theme_mode=$(cat /etc/umo/umo-theme-mode 2>/dev/null || true)
+case "$_um_theme_mode" in
+    light) _um_theme_dir="/usr/share/themes/Orchis-Light-Compact" ;;
+    *)     _um_theme_dir="/usr/share/themes/Orchis-Dark-Compact" ;;
+esac
+if [ ! -d "$_um_theme_dir" ] && [ -x /usr/local/bin/umo-install-extras ]; then
+    bash /usr/local/bin/umo-install-extras "$_um_theme_mode" || true
 fi
 
 if ! command -v plank >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then

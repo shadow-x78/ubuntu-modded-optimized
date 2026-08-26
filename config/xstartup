@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - VNC Session Startup Template (rendered per install) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 export PULSE_SERVER=127.0.0.1
 export PULSE_LATENCY_MSEC=30
 export DISPLAY={{DISPLAY}}

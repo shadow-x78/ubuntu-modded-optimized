@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ─────────────────────────────────────────────
- UMO - XFWM4 Window Manager (rendered)
- ─────────────────────────────────────────────
--->
+<!-- UMO - XFWM4 Window Manager (rendered) (GPL-3.0-or-later)
+     https://github.com/shadow-x78/ubuntu-modded-optimized -->
 
 <channel name="xfwm4" version="1.0">
   <property name="general" type="empty">
     <property name="button_layout" type="string" value="|HMC"/>
-    <property name="theme" type="string" value="Greybird-dark"/>
-    <property name="title_font" type="string" value="Inter 10"/>
+    <property name="theme" type="string" value="{{GTK_THEME}}"/>
+    <property name="title_font" type="string" value="{{UI_FONT}}"/>
     <property name="title_alignment" type="string" value="center"/>
     <property name="use_compositing" type="bool" value="false"/>
     <property name="theme_animation" type="bool" value="false"/>

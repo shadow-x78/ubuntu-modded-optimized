@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ─────────────────────────────────────────────
- UMO - Openbox Root Menu
- ─────────────────────────────────────────────
--->
+<!-- UMO - Openbox Root Menu (GPL-3.0-or-later)
+     https://github.com/shadow-x78/ubuntu-modded-optimized -->
 
 <openbox_menu xmlns="http://openbox.org/3.4/menu">
   <menu id="root-menu" label="UMO">

@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Host VNC Stop Template (rendered per install) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 echo "[==>] Stopping VNC..."
 _vnc_cmd=""
 command -v tigervncserver >/dev/null 2>&1 && _vnc_cmd="tigervncserver"

@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.0] - 2026-08-26
+
+### ✨ Added
+- **Day/Night theme choice in the installer:** a new "Choose Theme Mode" menu picks **Night Mode** (Orchis-Dark-Compact + Tela-Black-Dark) or **Day Mode** (Orchis-Light-Compact + Tela); the whole design system (GTK, xfwm4, icons, terminal) is rendered from that choice. `--mode=dark|light` is a new alias for `--theme`, and `dark`/`light`/`day`/`night` values are accepted.
+- **Saved install settings (`~/.umo/umo.conf`):** the installer now records the chosen Ubuntu version, DE, app set, theme mode, perf mode and install dir; `umo --user` keeps it current. Legacy installs get their settings detected from the existing container (xstartup DE, xsettings theme) and the conf is written on the first update.
+- **A themed Fastfetch config matching the reference screenshot:** the builtin Ubuntu logo, the exact module sections (OS, Host, Kernel, Uptime, Packages, Shell, Display, DE, WM, WM Theme, Theme, Icons, Font, Terminal, Terminal Font, CPU, GPU, Memory, Swap, Disk, Locale, colors) and orange UMO keys - deployed system-wide (`/etc/xdg/fastfetch`) plus per-user, so `fastfetch` inside the container looks like the reference out of the box.
+- **Application sets per category are now complete:** Basic (utilities + editor + image viewer + archiver + Firefox + Fastfetch), Developer (Python/Node/GCC toolchain + vim/tmux/ssh/sqlite), Media (VLC/FFmpeg/mpv/Audacity/GIMP), Office (LibreOffice Writer/Calc/Impress + atril), Browser, and Full Suite - and the installer menu now offers all six categories instead of four.
+- **`umo refresh` command:** re-renders the `umo` CLI wrapper, host scripts and container scripts from the local tool copy without touching git - the same tooling `umo update` uses, exposed for instant local repair. `umo-install --refresh` now delegates to it.
+
+### 🎨 Changed
+- **`umo update` is now a complete update system:** after pulling the new version it re-renders the CLI wrapper, refreshes host + container scripts, then **re-applies the saved settings** (theme re-rendered for the saved mode, designer extras verified, chosen app category reinstalled idempotently, desktop components verified and self-installed if missing) and finally upgrades the entire Ubuntu system - nothing is skipped because it already exists. `--scripts-only` keeps the old fast behavior.
+- **The `umo` CLI now uses the unified v4.14 design language:** the wrapper was extracted from a giant heredoc into `bin/umo-cli` and every command (status, update, backup, uninstall, help...) now prints the same `▌` steps, `✔`/`✖`/`⚠`/`ℹ` marks, orange rules and panels as `umo-install` - and `umo update` re-renders the wrapper itself so the style can never go stale again. `umo start` also self-heals an outdated wrapper on launch.
+- **Theme matches the reference design exactly:** UI font is **Ubuntu SemiBold 10**, monospace is **FiraCode Nerd Font Mono 9**, the xfce4-terminal font is **FiraCode Nerd Font Mono Bold 9**, the XFCE window-manager theme now follows the selected GTK theme (it was hardcoded to Greybird-dark), and the Ubuntu font family ships in the theme packages. LXDE/Openbox templates render the same fonts.
+- **Every source file now carries a documented header in the project style** (`UMO - <role> (GPL-3.0-or-later)` + repository link): all installer/CLI/lib/module scripts, container helpers, rendered templates (sh, conf, XML, JSONC), theme configs and entry points are identified on sight, matching the documentation convention used across the project family.
+
+### 🐛 Fixed
+- **Light mode never got the designer theme:** extras (Orchis/Tela/FiraCode) were skipped entirely for `umo-light`; they now run for both modes, install BOTH Orchis compact variants plus the Tela set, and the session-start self-heal reads the container's theme-mode marker (`/etc/umo/umo-theme-mode`) so light installs stop re-pulling the dark theme on every start.
+- **`umo-install --refresh` called functions that moved out with the CLI wrapper** and crashed with "command not found". It now renders `bin/umo-cli` and delegates to the new `umo refresh` command, so install/update/refresh share one code path.
+- **`umo update` settings re-apply sourced the theme/apps modules without the shared libs**, so `umo_log_step` / `umo_fs_render` were undefined mid-run. The update flow now loads `core-ansi.sh` + `core-fs.sh` first and guards against a missing tool tree.
+- **Desktop self-heal during update now matches the installed DE** (LXDE/Openbox/minimal get their own package sets instead of always installing XFCE, and the XFCE repair set matches the installer exactly), and the saved Ubuntu version for legacy installs is detected from the container's `os-release` rather than assumed 22.04.
+- **Fast repeat updates:** `umo update` now probes the container before re-applying settings - when the designer theme (GTK + icons + Nerd fonts) and the chosen application set are already installed, the minutes-long apt re-runs are skipped and only verified, while anything missing still triggers the full self-heal.
+- **`umo update` no longer endangers local git changes:** the auto-stash includes untracked files (`stash push -u`), only pops a stash it actually created (verified via `refs/stash` before/after), and the update aborts instead of `reset --hard` when stashing fails (e.g. git identity not configured).
+- **Release install survives interruptions:** the tarball swap rolls back to the previous version if the new tree is invalid, and a tool directory left missing by an interrupted update is restored from its `.old` backup on the next run.
+- **The `umo` wrapper is rendered atomically everywhere** (`.new` + non-empty check + `mv`, with `mktemp` for the refresh wrapper) so a failed render can never clobber a working CLI, and all placeholder substitutions are sed-escaped against `&`/`\`/`|`/`"` in paths.
+- **`umo --user` records detected settings** (DE/theme/apps/Ubuntu version) instead of stamping defaults into `umo.conf` on legacy installs, and the aliases hook in `.bashrc`/`.zshrc` now points at the actual aliases file location.
+- **Designer extras install is interruption-tolerant:** an incomplete Orchis/Tela install keeps its cloned repo, so the next run installs only the missing variants from the local copy instead of re-cloning and retrying from scratch.
+- **`umo update` reports real upgrade results:** after the system upgrade it checks `dpkg --audit` + `apt-get check` inside the container and warns with a repair command instead of always claiming success.
+
 ## [v4.14.2] - 2026-08-24
 
 ### 🎨 Changed

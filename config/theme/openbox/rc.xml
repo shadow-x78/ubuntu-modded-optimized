@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ─────────────────────────────────────────────
- UMO - Openbox Configuration
- ─────────────────────────────────────────────
--->
+<!-- UMO - Openbox Configuration (GPL-3.0-or-later)
+     https://github.com/shadow-x78/ubuntu-modded-optimized -->
 
 <openbox_config xmlns="http://openbox.org/3.4/rc" xmlns:xi="http://www.w3.org/2001/XInclude">
   <resistance>
@@ -29,19 +26,19 @@
     <keepBorder>yes</keepBorder>
     <animateIconify>no</animateIconify>
     <font place="ActiveWindow">
-      <name>Inter</name>
+      <name>Ubuntu</name>
       <size>10</size>
       <weight>bold</weight>
       <slant>normal</slant>
     </font>
     <font place="InactiveWindow">
-      <name>Inter</name>
+      <name>Ubuntu</name>
       <size>10</size>
       <weight>normal</weight>
       <slant>normal</slant>
     </font>
     <font place="MenuItem">
-      <name>Inter</name>
+      <name>Ubuntu</name>
       <size>10</size>
       <weight>normal</weight>
       <slant>normal</slant>

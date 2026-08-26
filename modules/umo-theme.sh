@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Module: Design System and Theme Modes (sourced) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_THEME_LOADED:-}" ] || return 0
 _UMO_MOD_THEME_LOADED=1
@@ -11,8 +13,8 @@ UMO_THEME="${UMO_THEME:-umo-dark}"
 _umo_theme_mode_setup() {
     case "$UMO_THEME" in
         umo-light)
-            _GTK_THEME="Materia-light"
-            _ICON_THEME="Papirus-Light"
+            _GTK_THEME="Orchis-Light-Compact"
+            _ICON_THEME="Tela"
             _CURSOR_THEME="DMZ-White"
             _DESKTOP_BG="#e8e8e8"
             _DESKTOP_FG="#222222"
@@ -20,8 +22,8 @@ _umo_theme_mode_setup() {
             _TINT_ACTIVE_BG="#d6d6d6"
             ;;
         *)
-            _GTK_THEME="Materia-dark"
-            _ICON_THEME="Papirus-Dark"
+            _GTK_THEME="Orchis-Dark-Compact"
+            _ICON_THEME="Tela-Black-Dark"
             _CURSOR_THEME="DMZ-White"
             _DESKTOP_BG="#1e1e1e"
             _DESKTOP_FG="#ffffff"
@@ -32,12 +34,24 @@ _umo_theme_mode_setup() {
     _ACCENT="#f97316"
 }
 
+_umo_theme_ui_font() {
+    printf '%s' "Ubuntu SemiBold 10"
+}
+
+_umo_theme_mono_font() {
+    printf '%s' "FiraCode Nerd Font Mono 9"
+}
+
+_umo_theme_terminal_font() {
+    printf '%s' "FiraCode Nerd Font Mono Bold 9"
+}
+
 umo_theme_packages() {
     umo_log_step "Install theme packages"
 
     _theme_pkgs="materia-gtk-theme greybird-gtk-theme dmz-cursor-theme \
                  papirus-icon-theme gnome-icon-theme unzip \
-                 fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
+                 fonts-ubuntu fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
 #!/bin/sh
@@ -50,38 +64,55 @@ timeout 120 apt-get install -y exo-utils 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
-    printf "  %b>%b  Installing theme packages...\n" "$UMO_B_CYAN" "$UMO_NC"
     _rc=0
-    "$UMO_LOGIN_SH" -c "bash /root/install-theme.sh" || _rc=$?
+    "$UMO_LOGIN_SH" -c "bash /root/install-theme.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        printf "  %b%s%b  Theme packages installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
+        umo_log_ok "Theme packages installed"
     else
-        printf "  %b%s%b  Theme packages installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
+        umo_log_warn "Theme packages installation finished with warnings (code $_rc)"
     fi
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"
-    umo_log_ok "Theme packages installed"
+}
+
+umo_theme_write_mode_marker() {
+    _mode="dark"
+    [ "$UMO_THEME" = "umo-light" ] && _mode="light"
+    _marker_dir="${UMO_INSTALL_DIR:?}/etc/umo"
+    if mkdir -p "$_marker_dir" 2>/dev/null; then
+        printf '%s\n' "$_mode" > "$_marker_dir/umo-theme-mode" 2>/dev/null || true
+    fi
 }
 
 umo_theme_extras() {
-    umo_log_step "Install designer extras (Orchis / Tela / FiraCode Nerd)"
+    _mode="dark"
+    [ "$UMO_THEME" = "umo-light" ] && _mode="light"
+    umo_log_step "Install designer extras (Orchis / Tela / FiraCode Nerd, mode: $_mode)"
 
     _extras_src="$SCRIPT_DIR/config/container/umo-install-extras"
     if [ -f "$_extras_src" ]; then
         cp -f "$_extras_src" "${UMO_INSTALL_DIR:?}/root/install-extras.sh" 2>/dev/null || true
         chmod +x "${UMO_INSTALL_DIR}/root/install-extras.sh" 2>/dev/null || true
         _rc=0
-        "$UMO_LOGIN_SH" -c "bash /root/install-extras.sh" || _rc=$?
+        "$UMO_LOGIN_SH" -c "bash /root/install-extras.sh $_mode" </dev/null || _rc=$?
         rm -f "${UMO_INSTALL_DIR}/root/install-extras.sh" 2>/dev/null || true
     fi
 
-    _has_orchis=0
-    "$UMO_LOGIN_SH" -c "test -d /usr/share/themes/Orchis-Dark-Compact" 2>/dev/null && _has_orchis=1
-    if [ "$_has_orchis" = "1" ]; then
-        _GTK_THEME="Orchis-Dark-Compact"
-        _ICON_THEME="Tela-Black-Dark"
-        umo_log_ok "Designer extras applied (Orchis-Dark-Compact + Tela-Black-Dark)"
+    _want_gtk="Orchis-Dark-Compact"
+    _want_icons="Tela-Black-Dark"
+    [ "$_mode" = "light" ] && _want_gtk="Orchis-Light-Compact" && _want_icons="Tela"
+
+    _has_theme=0
+    "$UMO_LOGIN_SH" -c "test -d /usr/share/themes/$_want_gtk" </dev/null 2>/dev/null && _has_theme=1
+    _has_icons=0
+    "$UMO_LOGIN_SH" -c "test -d /usr/share/icons/$_want_icons" </dev/null 2>/dev/null && _has_icons=1
+    if [ "$_has_theme" = "1" ] && [ "$_has_icons" = "1" ]; then
+        _GTK_THEME="$_want_gtk"
+        _ICON_THEME="$_want_icons"
+        umo_log_ok "Designer extras applied ($_want_gtk + $_want_icons)"
     else
-        umo_log_warn "Designer extras unavailable (offline?) - keeping Materia-dark + Papirus-Dark"
+        _GTK_THEME="$_want_gtk"
+        _ICON_THEME="$_want_icons"
+        umo_log_warn "Designer extras unavailable (offline?) - config targets $_want_gtk + $_want_icons"
     fi
     return 0
 }
@@ -90,6 +121,8 @@ umo_theme_apply_gtk() {
     umo_log_step "Apply GTK theme configuration"
 
     _theme_dir="$SCRIPT_DIR/config/theme"
+    _UI_FONT="$(_umo_theme_ui_font)"
+    _MONO_FONT="$(_umo_theme_mono_font)"
 
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
@@ -98,13 +131,17 @@ umo_theme_apply_gtk() {
             umo_fs_render "$_theme_dir/gtk-3.0/settings.ini.tmpl" "$_home/.config/gtk-3.0/settings.ini" \
                 "GTK_THEME" "$_GTK_THEME" \
                 "ICON_THEME" "$_ICON_THEME" \
-                "CURSOR_THEME" "$_CURSOR_THEME"
+                "CURSOR_THEME" "$_CURSOR_THEME" \
+                "UI_FONT" "$_UI_FONT" \
+                "MONO_FONT" "$_MONO_FONT"
         fi
         if [ -f "$_theme_dir/gtk-2.0/gtkrc.tmpl" ]; then
             umo_fs_render "$_theme_dir/gtk-2.0/gtkrc.tmpl" "$_home/.gtkrc-2.0" \
                 "GTK_THEME" "$_GTK_THEME" \
                 "ICON_THEME" "$_ICON_THEME" \
-                "CURSOR_THEME" "$_CURSOR_THEME"
+                "CURSOR_THEME" "$_CURSOR_THEME" \
+                "UI_FONT" "$_UI_FONT" \
+                "MONO_FONT" "$_MONO_FONT"
         fi
     done
 
@@ -151,10 +188,34 @@ umo_theme_apply_wallpaper() {
     return 0
 }
 
+umo_theme_apply_fastfetch() {
+    umo_log_step "Configure Fastfetch (UMO design)"
+
+    _ff_src="$SCRIPT_DIR/config/theme/fastfetch/config.jsonc"
+    [ -f "$_ff_src" ] || { umo_log_warn "Fastfetch config template missing, skipping"; return 0; }
+
+    if mkdir -p "${UMO_INSTALL_DIR:?}/etc/xdg/fastfetch" 2>/dev/null; then
+        cp -f "$_ff_src" "$UMO_INSTALL_DIR/etc/xdg/fastfetch/config.jsonc" 2>/dev/null || \
+            umo_log_warn "Could not install system-wide fastfetch config"
+    fi
+
+    for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
+        [ -d "$_home" ] || continue
+        if umo_fs_mkdir "$_home/.config/fastfetch"; then
+            cp -f "$_ff_src" "$_home/.config/fastfetch/config.jsonc" 2>/dev/null || true
+        fi
+    done
+
+    chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.config/fastfetch" 2>/dev/null || true
+    umo_log_ok "Fastfetch configuration applied"
+}
+
 umo_theme_apply_xfce() {
     umo_log_step "Configure XFCE4 desktop design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/xfce4"
+    _UI_FONT="$(_umo_theme_ui_font)"
+    _MONO_FONT="$(_umo_theme_mono_font)"
 
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
@@ -165,11 +226,14 @@ umo_theme_apply_xfce() {
             umo_fs_render "$_theme_dir/xsettings.xml.tmpl" "$_xf_conf/xsettings.xml" \
                 "GTK_THEME" "$_GTK_THEME" \
                 "ICON_THEME" "$_ICON_THEME" \
-                "CURSOR_THEME" "$_CURSOR_THEME"
+                "CURSOR_THEME" "$_CURSOR_THEME" \
+                "UI_FONT" "$_UI_FONT" \
+                "MONO_FONT" "$_MONO_FONT"
         fi
         if [ -f "$_theme_dir/xfwm4.xml.tmpl" ]; then
             umo_fs_render "$_theme_dir/xfwm4.xml.tmpl" "$_xf_conf/xfwm4.xml" \
-                "GTK_THEME" "$_GTK_THEME"
+                "GTK_THEME" "$_GTK_THEME" \
+                "UI_FONT" "$_UI_FONT"
         fi
         if [ -f "$_theme_dir/xfce4-panel.xml" ]; then
             cp -f "$_theme_dir/xfce4-panel.xml" "$_xf_conf/"
@@ -177,9 +241,10 @@ umo_theme_apply_xfce() {
         if [ -f "$_theme_dir/xfce4-desktop.xml" ]; then
             cp -f "$_theme_dir/xfce4-desktop.xml" "$_xf_conf/"
         fi
-        if [ -f "$_theme_dir/terminalrc" ]; then
+        if [ -f "$_theme_dir/terminalrc.tmpl" ]; then
             mkdir -p "$_home/.config/xfce4/terminal"
-            cp -f "$_theme_dir/terminalrc" "$_home/.config/xfce4/terminal/terminalrc"
+            umo_fs_render "$_theme_dir/terminalrc.tmpl" "$_home/.config/xfce4/terminal/terminalrc" \
+                "TERMINAL_FONT" "$(_umo_theme_terminal_font)"
         fi
         rm -f "$_home/.config/xfce4/panel/panels.xml" 2>/dev/null || true
     done
@@ -198,6 +263,8 @@ umo_theme_apply_lxde() {
     umo_log_step "Configure LXDE desktop design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/lxde"
+    _UI_FONT="$(_umo_theme_ui_font)"
+    _MONO_FONT="$(_umo_theme_mono_font)"
 
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
@@ -215,6 +282,8 @@ umo_theme_apply_lxde() {
                 "GTK_THEME" "$_GTK_THEME" \
                 "ICON_THEME" "$_ICON_THEME" \
                 "CURSOR_THEME" "$_CURSOR_THEME" \
+                "UI_FONT" "$_UI_FONT" \
+                "MONO_FONT" "$_MONO_FONT" \
                 "DESKTOP_BG" "$_DESKTOP_BG" \
                 "DESKTOP_FG" "$_DESKTOP_FG"
         fi
@@ -235,6 +304,8 @@ umo_theme_apply_openbox() {
     umo_log_step "Configure Openbox desktop design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/openbox"
+    _UI_FONT="$(_umo_theme_ui_font)"
+    _MONO_FONT="$(_umo_theme_mono_font)"
 
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
@@ -258,7 +329,9 @@ umo_theme_apply_openbox() {
             umo_fs_render "$_theme_dir/tint2rc.tmpl" "$_tint_dir/tint2rc" \
                 "TASK_FONT" "$_TINT_FONT" \
                 "ACTIVE_BG" "$_TINT_ACTIVE_BG" \
-                "ACCENT" "$_ACCENT"
+                "ACCENT" "$_ACCENT" \
+                "UI_FONT" "$_UI_FONT" \
+                "MONO_FONT" "$_MONO_FONT"
         fi
     done
 
@@ -277,11 +350,10 @@ umo_theme_setup() {
     umo_log_step "Apply UMO Desktop Theme ($UMO_THEME)"
 
     _umo_theme_mode_setup
+    umo_theme_write_mode_marker
 
     umo_theme_packages || true
-    if [ "$UMO_THEME" != "umo-light" ]; then
-        umo_theme_extras || true
-    fi
+    umo_theme_extras || true
     umo_theme_apply_fonts || true
     umo_theme_apply_wallpaper || true
 
@@ -295,6 +367,7 @@ umo_theme_setup() {
         openbox)    umo_theme_apply_openbox || true ;;
     esac
 
+    umo_theme_apply_fastfetch || true
     umo_theme_fix_ownership || true
 
     umo_log_ok "Desktop theme applied"

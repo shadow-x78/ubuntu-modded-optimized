@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Module: PulseAudio Bridge (sourced) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_AUDIO_LOADED:-}" ] || return 0
 _UMO_MOD_AUDIO_LOADED=1

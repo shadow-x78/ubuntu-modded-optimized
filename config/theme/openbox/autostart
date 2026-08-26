@@ -1,4 +1,6 @@
 #!/bin/sh
+# UMO - Openbox Session Autostart (tint2 + wallpaper) (GPL-3.0-or-later)
+# https://github.com/shadow-x78/ubuntu-modded-optimized
 tint2 &
 if [ -f /usr/share/wallpapers/umo-wallpaper.jpg ]; then
     feh --bg-fill /usr/share/wallpapers/umo-wallpaper.jpg &
