@@ -112,7 +112,10 @@ umo_theme_extras() {
     else
         _GTK_THEME="$_want_gtk"
         _ICON_THEME="$_want_icons"
-        umo_log_warn "Designer Extras Unavailable (Offline?) - Config Targets $_want_gtk + $_want_icons"
+        _missing=""
+        [ "$_has_theme" != "1" ] && _missing="GTK Theme"
+        [ "$_has_icons" != "1" ] && _missing="${_missing:+$_missing + }Icons"
+        umo_log_warn "Designer Extras Incomplete ($_missing Missing) - Config Targets $_want_gtk + $_want_icons"
     fi
     return 0
 }

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.4] - 2026-08-27
+
+### 🐛 Fixed
+- **Designer extras (Orchis / Tela) kept reporting "Designer theme ... unavailable" on every run with no cause shown.** Fixed in `config/container/umo-install-extras`:
+  - The Orchis installer needs the SCSS compiler `sassc` and the murrine GTK2 engine, which the base container does not ship — the install failed silently every single time while its output was swallowed by `tail -n 3` + `|| true`. The script now auto-installs `sassc` + `gtk2-engines-murrine` before the first Orchis run (and warns with log lines if the install still cannot proceed).
+  - **No more silent failures:** every fetch/install command logs to `/tmp/umo-install-extras.log`, and a failure prints the last 6 lines of that command's real output inline.
+  - **New fetch fallback:** when `git clone` fails (mobile carriers sometimes block the git transport / codeload while github.com itself works — the FiraCode download succeeds on the same connection), the script retries with the master tarball over plain HTTPS via curl.
+  - The FiraCode step no longer claims "Installed" when `unzip` silently failed — success is now verified against `fc-list`, and a missing curl/unzip is reported.
+  - The final verdict names exactly what is missing (GTK theme, icons, or both) and prints the retry command (`umo login -c 'umo-install-extras dark'`).
+- **Misleading "(Offline?)" warning in the theme module:** replaced with a per-component status ("Designer Extras Incomplete (GTK Theme + Icons Missing) - Config Targets ...") since the network can be fine while one component fails.
+
+### 🎨 Changed
+- The in-container extras installer follows the same Title Case message convention as the rest of the tool.
+
 ## [v4.15.3] - 2026-08-27
 
 ### 🎨 Changed

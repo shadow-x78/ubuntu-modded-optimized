@@ -19,78 +19,132 @@ fi
 _GRN='\033[38;5;34m'
 _RED='\033[38;5;196m'
 _ORG='\033[38;5;208m'
+_YLW='\033[38;5;226m'
 _NC='\033[0m'
 
 _step() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
 _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
 _fail() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
+_warn() { printf "  %b%s%b  %s\n" "$_YLW" "⚠" "$_NC" "$1"; }
 
-if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
-    if [ ! -d /root/.orchis-theme/.git ]; then
-        _step "Fetching Orchis Theme..."
-        rm -rf /root/.orchis-theme 2>/dev/null || true
-        timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
-    else
-        _step "Reusing Cached Orchis Theme Clone..."
+_LOG=/tmp/umo-install-extras.log
+printf '' > "$_LOG" 2>/dev/null || _LOG=/dev/null
+
+# Show the last lines of the current command's log, indented under the failure.
+_log_tail() { tail -n 6 "$_LOG" 2>/dev/null | sed 's/^/      /'; }
+
+# Fetch $2 from https://github.com/$1 - git clone first, then the master
+# tarball over plain HTTPS (some mobile carriers block the git transport or
+# codeload while github.com itself works). Keeps a cached clone between runs.
+_fetch_repo() {
+    _repo="$1" ; _dst="$2" ; _name="${_repo##*/}"
+    if [ -f "$_dst/install.sh" ]; then
+        _step "Reusing Cached $_name Source..."
+        return 0
     fi
-    if [ -d /root/.orchis-theme/.git ]; then
+    rm -rf "$_dst" "$_dst.tar.gz" 2>/dev/null || true
+    if command -v git >/dev/null 2>&1; then
+        _step "Fetching $_name (git)..."
+        if timeout 300 git clone --depth=1 "https://github.com/$_repo" "$_dst" >>"$_LOG" 2>&1 && [ -f "$_dst/install.sh" ]; then
+            return 0
+        fi
+        rm -rf "$_dst" 2>/dev/null || true
+    fi
+    if command -v curl >/dev/null 2>&1; then
+        _step "Fetching $_name (tarball)..."
+        if timeout 300 curl -fL "https://github.com/$_repo/archive/refs/heads/master.tar.gz" -o "$_dst.tar.gz" >>"$_LOG" 2>&1; then
+            mkdir -p "$_dst"
+            if tar -xzf "$_dst.tar.gz" --strip-components=1 -C "$_dst" >>"$_LOG" 2>&1 && [ -f "$_dst/install.sh" ]; then
+                rm -f "$_dst.tar.gz" 2>/dev/null || true
+                return 0
+            fi
+        fi
+        rm -rf "$_dst" "$_dst.tar.gz" 2>/dev/null || true
+    fi
+    return 1
+}
+
+# Orchis (vinceliuice) needs the SCSS compiler and the murrine GTK2 engine,
+# which the base container does not ship.
+if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
+    if _fetch_repo "vinceliuice/Orchis-theme" "/root/.orchis-theme"; then
+        if ! command -v sassc >/dev/null 2>&1; then
+            _step "Installing Theme Build Dependencies (sassc + murrine)..."
+            printf '' > "$_LOG" 2>/dev/null || true
+            timeout 600 apt-get install -y --no-install-recommends sassc gtk2-engines-murrine >>"$_LOG" 2>&1 || true
+            if ! command -v sassc >/dev/null 2>&1; then
+                _warn "sassc Is Missing - Orchis Install Will Likely Fail"
+                _log_tail
+            fi
+        fi
         if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
             _step "Installing Orchis Dark Compact..."
-            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | tail -n 3 ) || true
+            printf '' > "$_LOG" 2>/dev/null || true
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact ) >>"$_LOG" 2>&1 || true
         fi
         if [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
             _step "Installing Orchis Light Compact..."
-            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light --tweaks compact 2>&1 | tail -n 3 ) || true
+            printf '' > "$_LOG" 2>/dev/null || true
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light --tweaks compact ) >>"$_LOG" 2>&1 || true
         fi
         if [ -d /usr/share/themes/Orchis-Dark-Compact ] && [ -d /usr/share/themes/Orchis-Light-Compact ]; then
-            _ok "Orchis installed"
+            _ok "Orchis Installed (Dark + Light Compact)"
             rm -rf /root/.orchis-theme 2>/dev/null || true
         else
-            _fail "Orchis install incomplete - keeping the clone for the next run"
+            _fail "Orchis Install Incomplete - Keeping The Source For The Next Run"
+            _log_tail
         fi
     else
-        _fail "Orchis theme could not be fetched"
+        _fail "Orchis Theme Could Not Be Fetched (git clone and tarball both failed)"
+        _log_tail
     fi
 fi
 
+# Tela icons are a plain copy install - only the fetch can realistically fail.
 if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; then
-    if [ ! -d /root/.tela-icons/.git ]; then
-        _step "Fetching Tela Icons..."
-        rm -rf /root/.tela-icons 2>/dev/null || true
-        timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
-    else
-        _step "Reusing Cached Tela Icon Clone..."
-    fi
-    if [ -d /root/.tela-icons/.git ]; then
+    if _fetch_repo "vinceliuice/Tela-icon-theme" "/root/.tela-icons"; then
         _step "Installing Tela Icons (All Variants)..."
-        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | tail -n 3 ) || true
+        printf '' > "$_LOG" 2>/dev/null || true
+        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons ) >>"$_LOG" 2>&1 || true
         if [ -d /usr/share/icons/Tela-Black-Dark ] && [ -d /usr/share/icons/Tela ]; then
-            _ok "Tela icons installed"
+            _ok "Tela Icons Installed"
             rm -rf /root/.tela-icons 2>/dev/null || true
         else
-            _fail "Tela install incomplete - keeping the clone for the next run"
+            _fail "Tela Install Incomplete - Keeping The Source For The Next Run"
+            _log_tail
         fi
     else
-        _fail "Tela icons could not be fetched"
+        _fail "Tela Icons Could Not Be Fetched (git clone and tarball both failed)"
+        _log_tail
     fi
 fi
 
 if ! fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
-    _step "Downloading FiraCode Nerd Font..."
-    mkdir -p /usr/local/share/fonts/firacode-nerd
-    timeout 300 curl -fL --progress-bar https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip || true
-    if [ -s /tmp/firamono.zip ]; then
-        _step "Installing FiraCode Nerd Font..."
-        unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd 2>/dev/null || true
-        rm -f /tmp/firamono.zip
-        fc-cache -f >/dev/null 2>&1 || true
-        _ok "FiraCode Nerd Font installed"
+    if command -v curl >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
+        _step "Downloading FiraCode Nerd Font..."
+        mkdir -p /usr/local/share/fonts/firacode-nerd
+        printf '' > "$_LOG" 2>/dev/null || true
+        timeout 300 curl -fL --progress-bar https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip >>"$_LOG" 2>&1 || true
+        if [ -s /tmp/firamono.zip ]; then
+            _step "Installing FiraCode Nerd Font..."
+            unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd >>"$_LOG" 2>&1 || true
+            rm -f /tmp/firamono.zip
+            fc-cache -f >/dev/null 2>&1 || true
+        fi
+    fi
+    if fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
+        _ok "FiraCode Nerd Font Installed"
     else
-        _fail "FiraCode Nerd Font could not be downloaded"
+        _fail "FiraCode Nerd Font Could Not Be Installed (curl/unzip missing or download failed)"
+        _log_tail
     fi
 fi
 
-if [ -d "/usr/share/themes/$_WANT_GTK" ] && [ -d "/usr/share/icons/$_WANT_ICONS" ]; then
+_missing=""
+[ -d "/usr/share/themes/$_WANT_GTK" ] || _missing="GTK theme $_WANT_GTK"
+[ -d "/usr/share/icons/$_WANT_ICONS" ] || _missing="${_missing:+$_missing; }icon theme $_WANT_ICONS"
+
+if [ -z "$_missing" ]; then
     _step "Aligning Existing Configs With $_MODE Mode ($_WANT_GTK + $_WANT_ICONS)..."
     for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
               /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
@@ -104,7 +158,10 @@ if [ -d "/usr/share/themes/$_WANT_GTK" ] && [ -d "/usr/share/icons/$_WANT_ICONS"
             sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Materia-light/Orchis-Light-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g; s/Papirus-Light/Tela/g' "$_f" 2>/dev/null || true
         fi
     done
-    _ok "Designer theme ready ($_WANT_GTK + $_WANT_ICONS)"
-else
-    _fail "Designer theme $_WANT_GTK + $_WANT_ICONS unavailable"
+    _ok "Designer Theme Ready ($_WANT_GTK + $_WANT_ICONS)"
+    exit 0
 fi
+
+_fail "Designer Extras Missing: $_missing"
+_warn "Retry Later With: umo login -c 'umo-install-extras $_MODE'"
+exit 1
