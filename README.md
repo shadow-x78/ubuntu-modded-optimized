@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.15.5-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.15.6-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -132,7 +132,7 @@ umo login
 | `umo user` | Login as default user |
 | `umo run "<cmd>"` | Run one command inside the container |
 | `umo backup [dir]` | Archive the Ubuntu rootfs |
-| `umo update` | Full update: pulls the latest UMO, re-applies your saved settings (theme mode, app set, desktop), and upgrades every Ubuntu package. Use `--scripts-only` for a fast scripts-only refresh |
+| `umo update` | Full update: pulls the latest UMO, re-applies your saved settings (theme mode, app set, desktop), and upgrades every Ubuntu package. Use `--scripts-only` for a fast scripts-only refresh or `--no-upgrade` to skip the Ubuntu system upgrade |
 | `umo refresh` | Re-render the `umo` CLI, host scripts and container scripts from the local tool copy (no git pull) |
 | `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
 | `umo version` | Display current UMO version |

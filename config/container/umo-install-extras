@@ -166,6 +166,17 @@ if [ -z "$_missing" ]; then
               /home/umo/.gtkrc-2.0; do
         if [ -f "$_f" ]; then
             sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Materia-light/Orchis-Light-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g; s/Papirus-Light/Tela/g' "$_f" 2>/dev/null || true
+            case "$_f" in
+                *.xml)
+                    sed -i "s|<property name=\"IconThemeName\" type=\"string\" value=\"[^\"]*\"/>|<property name=\"IconThemeName\" type=\"string\" value=\"$_WANT_ICONS\"/>|" "$_f" 2>/dev/null || true
+                    ;;
+                *.ini)
+                    sed -i "s|^gtk-icon-theme-name=.*|gtk-icon-theme-name=$_WANT_ICONS|" "$_f" 2>/dev/null || true
+                    ;;
+                *.gtkrc-2.0)
+                    sed -i "s|^gtk-icon-theme-name=.*|gtk-icon-theme-name=\"$_WANT_ICONS\"|" "$_f" 2>/dev/null || true
+                    ;;
+            esac
         fi
     done
     _ok "Designer Theme Ready ($_WANT_GTK + $_WANT_ICONS)"

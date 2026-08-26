@@ -50,7 +50,7 @@ umo_theme_packages() {
     umo_log_step "Install Theme Packages"
 
     _theme_pkgs="materia-gtk-theme greybird-gtk-theme dmz-cursor-theme \
-                 papirus-icon-theme gnome-icon-theme unzip \
+                 gnome-icon-theme unzip \
                  fonts-ubuntu fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
 
     cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
@@ -59,6 +59,11 @@ export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
+# papirus-icon-theme was replaced by the Tela designer extras; it unpacked
+# ~120k tiny SVG files which take an hour or more inside proot.
+if dpkg -l papirus-icon-theme 2>/dev/null | grep -q '^ii'; then
+    timeout 600 apt-get remove -y papirus-icon-theme 2>/dev/null || true
+fi
 timeout 600 apt-get install -y --no-install-recommends $_theme_pkgs || true
 timeout 120 apt-get install -y exo-utils 2>/dev/null || true
 dpkg --configure -a || true
@@ -110,12 +115,24 @@ umo_theme_extras() {
         _ICON_THEME="$_want_icons"
         umo_log_ok "Designer Extras Applied ($_want_gtk + $_want_icons)"
     else
-        _GTK_THEME="$_want_gtk"
-        _ICON_THEME="$_want_icons"
         _missing=""
         [ "$_has_theme" != "1" ] && _missing="GTK Theme"
         [ "$_has_icons" != "1" ] && _missing="${_missing:+$_missing + }Icons"
-        umo_log_warn "Designer Extras Incomplete ($_missing Missing) - Config Targets $_want_gtk + $_want_icons"
+        # Fall back to themes that are guaranteed to exist (installed with the
+        # theme packages) so the desktop never points at missing theme dirs.
+        if [ "$_has_theme" = "1" ]; then
+            _GTK_THEME="$_want_gtk"
+        elif [ "$_mode" = "light" ]; then
+            _GTK_THEME="Materia-light"
+        else
+            _GTK_THEME="Materia-dark"
+        fi
+        if [ "$_has_icons" = "1" ]; then
+            _ICON_THEME="$_want_icons"
+        else
+            _ICON_THEME="gnome"
+        fi
+        umo_log_warn "Designer Extras Incomplete ($_missing Missing) - Using Fallback ($_GTK_THEME + $_ICON_THEME) Until The Next Run"
     fi
     return 0
 }

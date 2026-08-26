@@ -607,9 +607,11 @@ _umo_refresh_tools() {
 
 _umo_run_update() {
     _umo_scripts_only=0
+    _umo_skip_upgrade=0
     for _a in "$@"; do
         case "$_a" in
             --scripts-only|--fast) _umo_scripts_only=1 ;;
+            --no-upgrade|--skip-upgrade) _umo_skip_upgrade=1 ;;
         esac
     done
 
@@ -688,7 +690,11 @@ _umo_run_update() {
     fi
 
     _umo_reapply_settings
-    _umo_upgrade_system
+    if [ "$_umo_skip_upgrade" = "1" ]; then
+        _umo_warn "System Upgrade Skipped (--no-upgrade)"
+    else
+        _umo_upgrade_system
+    fi
     _umo_conf_write
 
     printf "\n"
@@ -880,7 +886,7 @@ _umo_status() {
         fi
         _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
         if [ "$_behind" -gt 0 ] 2>/dev/null; then
-            _umo_kv "Updates" "${_UMO_YEL}$_behind new commits on main${_UMO_NC} (umo update)"
+            _umo_kv "Updates" "${_UMO_YEL}$_behind New Commits On Main${_UMO_NC} (umo update)"
         else
             _umo_kv "Updates" "${_UMO_DIM}up to date${_UMO_NC}"
         fi
@@ -912,6 +918,7 @@ _umo_help() {
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "install"            "Re-run the installer (repair/reinstall)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update"             "Full update: tool, scripts, theme, apps and Ubuntu"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update --scripts-only"  "Refresh scripts only (fast)"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "update --no-upgrade"    "Update tool and scripts, skip the Ubuntu upgrade (fast)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "refresh"            "Re-render CLI, host and container scripts (no git)"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "backup [dir]"       "Archive the rootfs to <dir>"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "uninstall"          "Remove UMO completely (rootfs, scripts, aliases)"

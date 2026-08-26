@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.6] - 2026-08-27
+
+### ⚡ Performance
+- **Dropped `papirus-icon-theme` from the theme packages — the single biggest install-time cost.** It unpacks ~120k tiny SVG files, which under proot's syscall emulation takes an hour or more (the "Setting up papirus-icon-theme" hang). It was dead weight anyway: it was re-introduced in v4.3.0 for the old Orchis/Papirus design, but the current design uses the Tela icons from the designer extras (fixed and verified in v4.15.5), and the project's own "Theme Phase Speedup" release had removed it before for exactly this reason. The re-apply path also purges it from existing installs (`apt-get remove -y papirus-icon-theme` when present), freeing ~600 MB of disk and removing it from all future dpkg runs.
+
+### ✨ Added
+- **`umo update --no-upgrade`:** runs the whole update (tool, scripts, settings re-apply) but skips the Ubuntu system upgrade phase - for users who want UMO current without waiting for `apt-get upgrade` + `full-upgrade` inside the container. Documented in the help, README and install docs (EN/AR).
+
+### 🐛 Fixed
+- **No more broken icons when the designer extras are unavailable:** previously the GTK/xsettings configs still pointed at `Tela-Black-Dark`/`Orchis-*-Compact` even when those themes had not installed, leaving the desktop with missing themes. The theme module now falls back to guaranteed-installed themes — `Materia-dark`/`Materia-light` (GTK) and `gnome` (icons) — and says so in the warning line.
+- **The in-container config alignment upgrades fallback configs automatically:** when the Tela/Orchis installer succeeds on a later run, it now rewrites the icon-theme entries too (the `IconThemeName` XML property and the `gtk-icon-theme-name` keys, per file type) instead of only swapping old Papirus/Materia names - so a desktop that started on the fallback themes converges on the full designer set.
+
 ## [v4.15.5] - 2026-08-27
 
 ### 🐛 Fixed
