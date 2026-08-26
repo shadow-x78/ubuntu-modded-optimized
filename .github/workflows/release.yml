@@ -47,10 +47,20 @@ jobs:
       - name: Generate checksums
         run: sha256sum "umo-${{ steps.ver.outputs.version }}.tar.gz" > "umo-${{ steps.ver.outputs.version }}.sha256"
 
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          awk "/^## \[v$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > release_notes.txt
+          if [ ! -s release_notes.txt ]; then
+            echo "No CHANGELOG.md entry found for v$VERSION." > release_notes.txt
+          fi
+          cat release_notes.txt
+
       - name: Publish release
         uses: softprops/action-gh-release@v3
         with:
           files: |
             umo-${{ steps.ver.outputs.version }}.tar.gz
             umo-${{ steps.ver.outputs.version }}.sha256
-          generate_release_notes: true
+          body_path: release_notes.txt
+          generate_release_notes: false

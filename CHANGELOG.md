@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.3] - 2026-08-27
+
+### 🎨 Changed
+- **Title Case everywhere in the `umo update` / `umo refresh` output:** v4.15.1 unified the step headers ("Refreshing Host Scripts", "Upgrading The Ubuntu System...") in title case, but the status lines printed between them were still sentence case ("System packages upgraded", "3 new commits on main:", "finished with warnings"). Every ok/warn/info line the update flow prints is now title case too, across:
+  - `bin/umo-cli` — the whole self-update / release-update / refresh / re-apply / upgrade / summary path ("Host Scripts Updated In ...", "N New Commits On Main:", "UMO Is Already Up To Date", "Release vX Installed", "System Packages Upgraded", "UMO Fully Updated (...)", the wrapper-refresh and xstartup lines...)
+  - `lib/core-ansi.sh` — the "X Failed", "Last 30 Lines Of Log:" and "X Finished With Warnings (Code N)" lines every quiet/streamed run emits
+  - `lib/core-fs.sh` + `lib/core-net.sh` — backup, patch, checksum and download messages ("Backup Created:", "SHA-256 Mismatch For...", "Downloaded File Invalid Or Corrupt, Trying Next Mirror")
+  - the theme / apps / desktop / perf / systemctl / audio / proot / VNC modules — "Theme Packages Installed", "Designer Extras Applied", "VNC Configured", "Login Scripts Ready" and friends
+  - technical tokens keep their real spelling: file names (`xstartup`, `install-vnc.sh`), paths, and copy-pasteable commands after "Run:"/"Fix With:" stay lowercase.
+- **The "CLI Wrapper Updated" line also gets a clean path** (no more `home/../usr/bin` detour) and goes through the display-path shortener like the rest.
+
+### ✨ Added
+- **GitHub releases now carry the CHANGELOG content directly:** the release workflow extracts the `[vX.Y.Z]` section of `CHANGELOG.md` (same awk pattern as the Orbiscreen project) and publishes it as the release notes instead of the bare auto-generated compare link.
+
 ## [v4.15.2] - 2026-08-27
 
 ### 🐛 Fixed

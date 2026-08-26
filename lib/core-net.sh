@@ -57,7 +57,7 @@ umo_net__verify_sha256() {
     elif command -v shasum >/dev/null 2>&1; then
         _got="$(shasum -a 256 "$_f" 2>/dev/null | awk '{print $1}')"
     else
-        umo_log_warn "No sha256sum/shasum available, cannot verify checksum"
+        umo_log_warn "No sha256sum/shasum Available, Cannot Verify Checksum"
         return 0
     fi
     [ "$_got" = "$_want" ]
@@ -72,11 +72,11 @@ umo_net__post_check() {
         if umo_net__verify_sha256 "$_f" "$_want"; then
             umo_log_ok "SHA-256 verified: $(basename "$_url")"
         else
-            umo_log_warn "SHA-256 mismatch for $(basename "$_url"), discarding download"
+            umo_log_warn "SHA-256 Mismatch For $(basename "$_url"), Discarding Download"
             return 1
         fi
     else
-        umo_log_info "No checksum from this mirror, skipping verification: $(basename "$_url")"
+        umo_log_info "No Checksum From This Mirror, Skipping Verification: $(basename "$_url")"
     fi
     return 0
 }
@@ -117,7 +117,7 @@ umo_net_download() {
         umo_net__post_check "$_output" "$_url" || { rm -f "$_output"; return 1; }
         return 0
     else
-        umo_die "No download tool available. Install wget or curl"
+        umo_die "No Download Tool Available. Install wget or curl"
     fi
 }
 
@@ -130,10 +130,10 @@ umo_net_download_mirrors() {
 
     if [ -f "$_output" ]; then
         if umo_net__validate_file "$_output"; then
-            umo_log_info "Using cached archive."
+            umo_log_info "Using Cached Archive."
             return 0
         else
-            umo_log_warn "Cached archive is corrupt, re-downloading..."
+            umo_log_warn "Cached Archive Is Corrupt, Re-Downloading..."
             rm -f "$_output"
         fi
     fi
@@ -145,23 +145,23 @@ umo_net_download_mirrors() {
             if umo_net__validate_file "$_output"; then
                 return 0
             else
-                umo_log_warn "Downloaded file invalid or corrupt, trying next mirror"
+                umo_log_warn "Downloaded File Invalid Or Corrupt, Trying Next Mirror"
                 rm -f "$_output"
             fi
         else
-            umo_log_warn "Mirror failed, trying next"
+            umo_log_warn "Mirror Failed, Trying Next"
             rm -f "$_output"
         fi
     done
 
-    umo_die "All download mirrors failed"
+    umo_die "All Download Mirrors Failed"
 }
 
 umo_net_extract() {
     _archive="$1"
     _dest="${2:-.}"
 
-    [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
+    [ -f "$_archive" ] || umo_die "Archive Not Found: $_archive"
     mkdir -p "$_dest"
 
     umo_log_step "Extract Archive"
@@ -170,12 +170,12 @@ umo_net_extract() {
         *.tar.gz|*.tgz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xzf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (gzip). Archive may be corrupt - re-run to re-download"
+                umo_die "Extraction Failed (gzip). Archive May Be Corrupt - Re-Run To Re-Download"
             ;;
         *.tar.xz)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \
                 proot --link2symlink tar -xJf "$_archive" -C "$_dest" --exclude='dev' || \
-                umo_die "Extraction failed (xz). Archive may be corrupt - re-run to re-download"
+                umo_die "Extraction Failed (xz). Archive May Be Corrupt - Re-Run To Re-Download"
             ;;
         *.zip)
             umo_run_quiet "Decompressing $(basename "$_archive")..." \

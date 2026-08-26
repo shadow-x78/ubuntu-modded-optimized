@@ -94,9 +94,9 @@ _run_installer() {
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-apps.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        umo_log_ok "$_label installed"
+        umo_log_ok "$_label Installed"
     else
-        umo_log_warn "$_label installation finished with warnings (code $_rc)"
+        umo_log_warn "$_label Installation Finished With Warnings (Code $_rc)"
     fi
     rm -f "$_script" 2>/dev/null || true
 }
@@ -117,13 +117,13 @@ umo_apps_install() {
             umo_apps_termux
             ;;
         none)
-            umo_log_info "Application installation disabled."
+            umo_log_info "Application Installation Disabled."
             return 0
             ;;
         *)
-            umo_log_warn "Unknown app set '$UMO_APP_SET', using basic"
+            umo_log_warn "Unknown App Set '$UMO_APP_SET', Using Basic"
             umo_apps_basic
             ;;
     esac
-    umo_log_ok "All applications installed"
+    umo_log_ok "All Applications Installed"
 }

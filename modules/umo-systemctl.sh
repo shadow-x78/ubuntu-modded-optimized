@@ -11,7 +11,7 @@ umo_systemctl_install() {
     umo_log_step "Install Systemctl Emulator"
 
     mkdir -p "${UMO_INSTALL_DIR:?}/usr/local/bin" 2>/dev/null || {
-        umo_log_warn "Cannot create /usr/local/bin - systemctl emulator skipped"
+        umo_log_warn "Cannot Create /usr/local/bin - Systemctl Emulator Skipped"
         return 0
     }
     mkdir -p "${UMO_INSTALL_DIR:?}/usr/bin" "${UMO_INSTALL_DIR:?}/bin" 2>/dev/null || true
@@ -88,7 +88,7 @@ EOF
         ln -sf /usr/local/bin/systemctl "${UMO_INSTALL_DIR}/bin/systemctl" 2>/dev/null || true
     fi
 
-    umo_log_ok "Systemctl emulator installed"
+    umo_log_ok "Systemctl Emulator Installed"
 }
 
 umo_systemctl_setup() {

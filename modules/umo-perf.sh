@@ -54,7 +54,7 @@ EOD
     umo_log_step "Update Package Lists (Global)"
     "$UMO_LOGIN_SH" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
 
-    umo_log_ok "APT configured (mode: $UMO_PERF_MODE)"
+    umo_log_ok "APT Configured (Mode: $UMO_PERF_MODE)"
 }
 
 umo_perf_debloat() {
@@ -74,7 +74,7 @@ dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_stream "Purging Bloat Packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
-        umo_log_warn "Debloat finished with warnings"
+        umo_log_warn "Debloat Finished With Warnings"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh" 2>/dev/null || true
     return 0
 }
@@ -92,7 +92,7 @@ EOR
 
     chattr +i "$_resolv" 2>/dev/null || true
 
-    umo_log_ok "DNS configured (Cloudflare + Google + Quad9)"
+    umo_log_ok "DNS Configured (Cloudflare + Google + Quad9)"
 }
 
 umo_perf_cleanup() {
@@ -107,7 +107,7 @@ apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
     umo_run_stream "Running APT Cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
-        umo_log_warn "APT cleanup finished with warnings"
+        umo_log_warn "APT Cleanup Finished With Warnings"
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh" 2>/dev/null || true
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
@@ -117,7 +117,7 @@ INNER
         rm -rf "$UMO_INSTALL_DIR/usr/share/locale" 2>/dev/null || true
     fi
 
-    umo_log_ok "Cleanup complete"
+    umo_log_ok "Cleanup Complete"
 }
 
 umo_perf_gpu() {
@@ -139,7 +139,7 @@ export LIBGL_ALWAYS_SOFTWARE=0
 '
     fi
 
-    umo_log_ok "GPU rendering configured"
+    umo_log_ok "GPU Rendering Configured"
 }
 
 umo_perf_vnc() {
@@ -154,7 +154,7 @@ umo_perf_vnc() {
         sed -i 's|use_compositing" type="bool" value="true"|use_compositing" type="bool" value="false"|g' "$_xfce_settings" 2>/dev/null || true
     fi
 
-    umo_log_ok "VNC tuned"
+    umo_log_ok "VNC Tuned"
 }
 
 umo_perf_desktop() {
@@ -170,10 +170,10 @@ xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
     umo_run_quiet "Applying Desktop Tweaks..." "$UMO_LOGIN_SH" -c "bash /root/perf-desktop.sh" || \
-        umo_log_warn "Desktop tweaks finished with warnings"
+        umo_log_warn "Desktop Tweaks Finished With Warnings"
     rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh" 2>/dev/null || true
 
-    umo_log_ok "Desktop optimizations applied"
+    umo_log_ok "Desktop Optimizations Applied"
 }
 
 umo_perf_setup() {
@@ -190,6 +190,6 @@ umo_perf_setup() {
         umo_perf_desktop || true
     fi
 
-    umo_log_ok "Performance optimizations complete"
+    umo_log_ok "Performance Optimizations Complete"
     return 0
 }

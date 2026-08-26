@@ -108,7 +108,7 @@ DIVERT
     chmod +x "$UMO_PROOT_DIR/usr/bin/dpkg" "$UMO_PROOT_DIR/usr/bin/apt-get" 2>/dev/null || true
     : > "$UMO_PROOT_DIR/var/lib/dpkg/lock"
     : > "$UMO_PROOT_DIR/var/lib/dpkg/lock-frontend"
-    umo_log_ok "Proot directories ready"
+    umo_log_ok "Proot Directories Ready"
 }
 
 umo_proot_create_scripts() {
@@ -118,7 +118,7 @@ umo_proot_create_scripts() {
     rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
 
     if ! mkdir -p "$UMO_SCRIPT_HOME" 2>/dev/null; then
-        umo_log_warn "Cannot create $(umo_fs_display_path "$UMO_SCRIPT_HOME") - falling back to \$HOME"
+        umo_log_warn "Cannot Create $(umo_fs_display_path "$UMO_SCRIPT_HOME") - falling back to \$HOME"
         UMO_SCRIPT_HOME="$UMO_TERMUX_HOME"
         UMO_LOGIN_SH="$UMO_SCRIPT_HOME/umo-login.sh"
     fi
@@ -210,7 +210,7 @@ EOF
         done
     fi
 
-    umo_log_ok "Login scripts ready ($(umo_fs_display_path "$UMO_SCRIPT_HOME"))"
+    umo_log_ok "Login Scripts Ready ($(umo_fs_display_path "$UMO_SCRIPT_HOME"))"
 }
 
 umo_proot_patch_bashrc() {
@@ -307,7 +307,7 @@ SRCLIST
             </dev/null 2>/dev/null || true
     fi
 
-    umo_log_ok "User 'umo' created (password: umo)"
+    umo_log_ok "User 'umo' Created (Password: umo)"
 }
 
 umo_proot_setup() {

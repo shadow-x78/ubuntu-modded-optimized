@@ -67,9 +67,9 @@ INNER
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-theme.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        umo_log_ok "Theme packages installed"
+        umo_log_ok "Theme Packages Installed"
     else
-        umo_log_warn "Theme packages installation finished with warnings (code $_rc)"
+        umo_log_warn "Theme Packages Installation Finished With Warnings (Code $_rc)"
     fi
     rm -f "$UMO_INSTALL_DIR/root/install-theme.sh"
 }
@@ -108,11 +108,11 @@ umo_theme_extras() {
     if [ "$_has_theme" = "1" ] && [ "$_has_icons" = "1" ]; then
         _GTK_THEME="$_want_gtk"
         _ICON_THEME="$_want_icons"
-        umo_log_ok "Designer extras applied ($_want_gtk + $_want_icons)"
+        umo_log_ok "Designer Extras Applied ($_want_gtk + $_want_icons)"
     else
         _GTK_THEME="$_want_gtk"
         _ICON_THEME="$_want_icons"
-        umo_log_warn "Designer extras unavailable (offline?) - config targets $_want_gtk + $_want_icons"
+        umo_log_warn "Designer Extras Unavailable (Offline?) - Config Targets $_want_gtk + $_want_icons"
     fi
     return 0
 }
@@ -145,7 +145,7 @@ umo_theme_apply_gtk() {
         fi
     done
 
-    umo_log_ok "GTK configuration applied"
+    umo_log_ok "GTK Configuration Applied"
 }
 
 umo_theme_apply_fonts() {
@@ -157,7 +157,7 @@ umo_theme_apply_fonts() {
         cp -f "$SCRIPT_DIR/config/theme/fontconfig/01-umo-fonts.conf" "$_fc_dir/"
     fi
 
-    umo_log_ok "Font configuration applied"
+    umo_log_ok "Font Configuration Applied"
 }
 
 umo_theme_apply_wallpaper() {
@@ -166,7 +166,7 @@ umo_theme_apply_wallpaper() {
     if [ -f "$_wp_src" ]; then
         if mkdir -p "$UMO_INSTALL_DIR/usr/share/wallpapers" 2>/dev/null; then
             cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg" 2>/dev/null || \
-                umo_log_warn "Could not copy wallpaper"
+                umo_log_warn "Could Not Copy Wallpaper"
         fi
 
         _xdg_dir="$UMO_INSTALL_DIR/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
@@ -183,7 +183,7 @@ umo_theme_apply_wallpaper() {
             done
         fi
     else
-        umo_log_info "No wallpaper file found, continuing without wallpaper"
+        umo_log_info "No Wallpaper File Found, Continuing Without Wallpaper"
     fi
     return 0
 }
@@ -192,11 +192,11 @@ umo_theme_apply_fastfetch() {
     umo_log_step "Configure Fastfetch (UMO Design)"
 
     _ff_src="$SCRIPT_DIR/config/theme/fastfetch/config.jsonc"
-    [ -f "$_ff_src" ] || { umo_log_warn "Fastfetch config template missing, skipping"; return 0; }
+    [ -f "$_ff_src" ] || { umo_log_warn "Fastfetch Config Template Missing, Skipping"; return 0; }
 
     if mkdir -p "${UMO_INSTALL_DIR:?}/etc/xdg/fastfetch" 2>/dev/null; then
         cp -f "$_ff_src" "$UMO_INSTALL_DIR/etc/xdg/fastfetch/config.jsonc" 2>/dev/null || \
-            umo_log_warn "Could not install system-wide fastfetch config"
+            umo_log_warn "Could Not Install System-Wide Fastfetch Config"
     fi
 
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
@@ -207,7 +207,7 @@ umo_theme_apply_fastfetch() {
     done
 
     chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.config/fastfetch" 2>/dev/null || true
-    umo_log_ok "Fastfetch configuration applied"
+    umo_log_ok "Fastfetch Configuration Applied"
 }
 
 umo_theme_apply_xfce() {
@@ -256,7 +256,7 @@ umo_theme_apply_xfce() {
         fi
     fi
 
-    umo_log_ok "XFCE4 design applied"
+    umo_log_ok "XFCE4 Design Applied"
 }
 
 umo_theme_apply_lxde() {
@@ -297,7 +297,7 @@ umo_theme_apply_lxde() {
         fi
     done
 
-    umo_log_ok "LXDE design applied"
+    umo_log_ok "LXDE Design Applied"
 }
 
 umo_theme_apply_openbox() {
@@ -335,7 +335,7 @@ umo_theme_apply_openbox() {
         fi
     done
 
-    umo_log_ok "Openbox design applied"
+    umo_log_ok "Openbox Design Applied"
 }
 
 umo_theme_fix_ownership() {
@@ -346,7 +346,7 @@ umo_theme_fix_ownership() {
 }
 
 umo_theme_setup() {
-    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme disabled."; return 0; }
+    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme Disabled."; return 0; }
     umo_log_step "Apply UMO Desktop Theme ($UMO_THEME)"
 
     _umo_theme_mode_setup
@@ -370,6 +370,6 @@ umo_theme_setup() {
     umo_theme_apply_fastfetch || true
     umo_theme_fix_ownership || true
 
-    umo_log_ok "Desktop theme applied"
+    umo_log_ok "Desktop Theme Applied"
     return 0
 }

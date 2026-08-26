@@ -143,7 +143,7 @@ umo_de_install() {
         openbox)   umo_de_openbox ;;
         minimal)   umo_de_minimal ;;
         *)
-            umo_log_warn "Unknown DE '$UMO_DE', using XFCE4"
+            umo_log_warn "Unknown DE '$UMO_DE', Using XFCE4"
             umo_de_xfce4
             ;;
     esac

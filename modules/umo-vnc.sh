@@ -87,11 +87,11 @@ BODY
     if sh -n "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null; then
         umo_log_debug "install-vnc.sh syntax verified"
     else
-        umo_log_warn "install-vnc.sh has syntax issues"
+        umo_log_warn "install-vnc.sh Has Syntax Issues"
     fi
     umo_log_run "Installing TigerVNC..."
     if [ ! -x "$UMO_LOGIN_SH" ]; then
-        umo_log_warn "umo-login.sh not found/executable - VNC install skipped"
+        umo_log_warn "umo-login.sh Not Found/Executable - VNC Install Skipped"
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
         return 0
     fi
@@ -113,18 +113,18 @@ umo_vnc_configure() {
 
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
     if ! mkdir -p "$_vnc_dir" 2>/dev/null; then
-        umo_log_warn "Cannot create $_vnc_dir - VNC configuration skipped"
+        umo_log_warn "Cannot Create $_vnc_dir - VNC Configuration Skipped"
         return 0
     fi
 
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.15.2}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.15.3}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
-        umo_log_warn "config/xstartup template missing - writing fallback session"
+        umo_log_warn "config/xstartup Template Missing - Writing Fallback Session"
         cat > "$_vnc_dir/xstartup" << 'XFALL'
 #!/bin/sh
 export PULSE_SERVER=127.0.0.1
@@ -182,15 +182,15 @@ XFALL
             _pw_cmd="mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd"
             if command -v timeout >/dev/null 2>&1; then
                 timeout 120 "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
-                    umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+                    umo_log_warn "Could Not Set VNC Password (vncpasswd Not Available Yet)"
             else
                 "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
-                    umo_log_warn "Could not set VNC password (vncpasswd not available yet)"
+                    umo_log_warn "Could Not Set VNC Password (vncpasswd Not Available Yet)"
             fi
         fi
     fi
 
-    umo_log_ok "VNC configured"
+    umo_log_ok "VNC Configured"
     return 0
 }
 
@@ -198,7 +198,7 @@ umo_vnc_create_scripts() {
     umo_log_step "Create VNC Scripts"
 
     if ! mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
-        umo_log_warn "Cannot create /usr/local/bin - VNC helper scripts skipped"
+        umo_log_warn "Cannot Create /usr/local/bin - VNC Helper Scripts Skipped"
         return 0
     fi
 
@@ -208,7 +208,7 @@ umo_vnc_create_scripts() {
             cp -f "$_src" "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
             chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
         else
-            umo_log_warn "container script missing: $_src"
+            umo_log_warn "Container Script Missing: $_src"
         fi
     done
 
@@ -230,7 +230,7 @@ exec "$_umo_login" -c "umo-stopvnc"
 EOF
     chmod +x "$_vnc_home/umo-vnc-stop.sh"
 
-    umo_log_ok "VNC scripts created ($_vnc_home)"
+    umo_log_ok "VNC Scripts Created ($_vnc_home)"
 }
 
 umo_vnc_setup() {

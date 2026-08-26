@@ -12,7 +12,7 @@ umo_fs_mkdir() {
     for _dir in "$@"; do
         if [ ! -d "$_dir" ]; then
             if ! mkdir -p "$_dir" 2>/dev/null; then
-                umo_log_warn "Cannot create directory: $_dir"
+                umo_log_warn "Cannot Create Directory: $_dir"
                 _fs_rc=1
             fi
         fi
@@ -26,11 +26,11 @@ umo_fs_write() {
     _tmp="${_file}.tmp.$$"
 
     if ! printf '%s' "$_content" > "$_tmp" 2>/dev/null; then
-        umo_log_warn "Cannot write: $_tmp"
+        umo_log_warn "Cannot Write: $_tmp"
         return 1
     fi
     if ! mv -f "$_tmp" "$_file" 2>/dev/null; then
-        umo_log_warn "Cannot finalize: $_file"
+        umo_log_warn "Cannot Finalize: $_file"
         rm -f "$_tmp" 2>/dev/null || true
         return 1
     fi
@@ -44,7 +44,7 @@ umo_fs_backup() {
 
     if [ -f "$_src" ]; then
         cp -f "$_src" "$_bak" || true
-        umo_log_info "Backup created: $_bak"
+        umo_log_info "Backup Created: $_bak"
     fi
 }
 
@@ -55,13 +55,13 @@ umo_fs_patch() {
 
     if [ ! -f "$_file" ]; then
         touch "$_file" 2>/dev/null || {
-            umo_log_warn "Cannot create patch target: $_file"
+            umo_log_warn "Cannot Create Patch Target: $_file"
             return 0
         }
     fi
 
     if grep -q "$_marker" "$_file" 2>/dev/null; then
-        umo_log_debug "Patch already applied: $_marker"
+        umo_log_debug "Patch Already Applied: $_marker"
         return 0
     fi
 
@@ -69,7 +69,7 @@ umo_fs_patch() {
     if printf '\n%s\n%s\n' "$_marker" "$_content" >> "$_file" 2>/dev/null; then
         umo_log_ok "Patched: $_file"
     else
-        umo_log_warn "Could not patch: $_file"
+        umo_log_warn "Could Not Patch: $_file"
     fi
     return 0
 }
@@ -92,7 +92,7 @@ umo_fs_render() {
     shift 2
 
     if [ ! -f "$_template" ]; then
-        umo_log_warn "Template not found: $_template"
+        umo_log_warn "Template Not Found: $_template"
         return 1
     fi
 
@@ -107,7 +107,7 @@ umo_fs_render() {
 
     _remaining=$(printf '%s' "$_content" | grep -oE '\{\{[A-Z_][A-Z0-9_]*\}\}' | head -5 || true)
     if [ -n "$_remaining" ]; then
-        umo_log_warn "Unreplaced placeholders in $_output: $_remaining"
+        umo_log_warn "Unreplaced Placeholders In $_output: $_remaining"
     fi
 
     umo_fs_write "$_output" "$_content" || return 1

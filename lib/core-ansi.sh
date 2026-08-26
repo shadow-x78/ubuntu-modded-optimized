@@ -200,9 +200,9 @@ umo_run_quiet() {
         rm -f "$_logfile" 2>/dev/null || true
         return 0
     else
-        printf "  %b%s%b  %s failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
+        printf "  %b%s%b  %s Failed\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label"
         if [ -s "$_logfile" ]; then
-            printf "  %bLast 30 lines of log:%b\n" "$UMO_DIM" "$UMO_NC"
+            printf "  %bLast 30 Lines Of Log:%b\n" "$UMO_DIM" "$UMO_NC"
             tail -n 30 "$_logfile" 2>/dev/null | while IFS= read -r _line; do
                 printf "    %s\n" "$_line"
             done
@@ -233,7 +233,7 @@ umo_run_stream() {
     if [ "$_rc" = "0" ]; then
         umo_log_ok "$_label"
     else
-        umo_log_warn "$_label finished with warnings (code $_rc)"
+        umo_log_warn "$_label Finished With Warnings (Code $_rc)"
     fi
     return 0
 }
@@ -287,7 +287,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.15.2}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.15.3}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

@@ -198,11 +198,11 @@ EOF
 
 _umo_self_update() {
     _cli_src="$_UMO_REPO_DIR/bin/umo-cli"
-    [ -f "$_cli_src" ] || { _umo_warn "Wrapper template missing (bin/umo-cli), keeping current CLI"; return 0; }
+    [ -f "$_cli_src" ] || { _umo_warn "Wrapper Template Missing (bin/umo-cli), Keeping Current CLI"; return 0; }
     _cli_dst="${_UMO_TERMUX_HOME}/../usr/bin/umo"
     _cli_dir=$(dirname "$_cli_dst")
     if [ ! -d "$_cli_dir" ] && ! mkdir -p "$_cli_dir" 2>/dev/null; then
-        _umo_warn "Termux bin directory not found, CLI wrapper not refreshed"
+        _umo_warn "Termux Bin Directory Not Found, CLI Wrapper Not Refreshed"
         return 0
     fi
     _ph='@@'
@@ -215,13 +215,13 @@ _umo_self_update() {
         "$_cli_src" > "$_cli_dst.new" 2>/dev/null && [ -s "$_cli_dst.new" ]; then
         if mv -f "$_cli_dst.new" "$_cli_dst" 2>/dev/null; then
             chmod +x "$_cli_dst" 2>/dev/null || true
-            _umo_ok "CLI wrapper updated ($_UMO_TERMUX_HOME/../usr/bin/umo)"
+            _umo_ok "CLI Wrapper Updated ($(_umo_dp "${_UMO_TERMUX_HOME%/*}/usr/bin/umo"))"
         else
-            _umo_warn "CLI wrapper refresh failed, keeping current CLI"
+            _umo_warn "CLI Wrapper Refresh Failed, Keeping Current CLI"
         fi
     else
         rm -f "$_cli_dst.new" 2>/dev/null || true
-        _umo_warn "CLI wrapper refresh failed, keeping current CLI"
+        _umo_warn "CLI Wrapper Refresh Failed, Keeping Current CLI"
     fi
     return 0
 }
@@ -276,14 +276,14 @@ _umo_refresh_host() {
     fi
     _umo_write_aliases "$_sh_dir"
     _UMO_SCRIPT_DIR="$_sh_dir"
-    _umo_ok "Host scripts updated in $(_umo_dp "$_sh_dir") (user: $_umo_user)"
+    _umo_ok "Host Scripts Updated In $(_umo_dp "$_sh_dir") (User: $_umo_user)"
 }
 
 _umo_refresh_container() {
     [ -f "$_UMO_LOGIN" ] || return 0
     _ct_inst_dir="$(_umo_install_dir)"
     if [ ! -d "$_ct_inst_dir" ]; then
-        _umo_warn "Install directory not found ($(_umo_dp "$_ct_inst_dir")), skipping container refresh"
+        _umo_warn "Install Directory Not Found ($(_umo_dp "$_ct_inst_dir")), Skipping Container Refresh"
         return 0
     fi
     _umo_step "Refreshing Container Scripts"
@@ -325,12 +325,12 @@ _umo_refresh_container() {
                 mv -f "$_xsf.tmp" "$_xsf" 2>/dev/null || true
                 chmod +x "$_xsf" 2>/dev/null || true
                 if grep -q "XDG_RUNTIME_DIR" "$_xsf" 2>/dev/null; then
-                    _umo_ok "xstartup updated: $_xsf"
+                    _umo_ok "xstartup Updated: $_xsf"
                 else
-                    _umo_warn "xstartup content check failed: $_xsf"
+                    _umo_warn "xstartup Content Check Failed: $_xsf"
                 fi
             else
-                _umo_warn "FAILED to render xstartup: $_xsf"
+                _umo_warn "Failed To Render xstartup: $_xsf"
             fi
         done
         chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
@@ -343,7 +343,7 @@ _umo_refresh_container() {
         done
         true
     " </dev/null >/dev/null 2>&1 || true
-    _umo_ok "Container hooks applied"
+    _umo_ok "Container Hooks Applied"
 }
 
 _umo_theme_satisfied() {
@@ -378,7 +378,7 @@ _umo_apps_satisfied() {
 _umo_reapply_settings() {
     [ -f "$_UMO_LOGIN" ] || return 0
     _ct_inst_dir="$(_umo_install_dir)"
-    [ -d "$_ct_inst_dir" ] || { _umo_warn "Install directory missing, skipping settings re-apply"; return 0; }
+    [ -d "$_ct_inst_dir" ] || { _umo_warn "Install Directory Missing, Skipping Settings Re-Apply"; return 0; }
 
     UMO_INSTALL_DIR="$_ct_inst_dir"
     UMO_LOGIN_SH="$_UMO_LOGIN"
@@ -390,7 +390,7 @@ _umo_reapply_settings() {
 
     if [ ! -f "$UMO_LIB_DIR/core-ansi.sh" ] || [ ! -f "$UMO_LIB_DIR/core-fs.sh" ] || \
        [ ! -f "$UMO_MOD_DIR/umo-theme.sh" ] || [ ! -f "$UMO_MOD_DIR/umo-apps.sh" ]; then
-        _umo_warn "Tool files missing (lib/modules), skipping settings re-apply"
+        _umo_warn "Tool Files Missing (lib/modules), Skipping Settings Re-Apply"
         return 0
     fi
 
@@ -403,18 +403,18 @@ _umo_reapply_settings() {
 
     if [ "$UMO_DE" != "minimal" ] && [ "$UMO_THEME" != "none" ]; then
         if _umo_theme_satisfied; then
-            _umo_ok "Theme already applied ($UMO_THEME) - verifying designer extras only"
-            umo_theme_extras </dev/null || _umo_warn "Designer extras check finished with warnings"
+            _umo_ok "Theme Already Applied ($UMO_THEME) - Verifying Designer Extras Only"
+            umo_theme_extras </dev/null || _umo_warn "Designer Extras Check Finished With Warnings"
             umo_theme_write_mode_marker || true
         else
-            umo_theme_setup </dev/null || _umo_warn "Theme re-apply finished with warnings"
+            umo_theme_setup </dev/null || _umo_warn "Theme Re-Apply Finished With Warnings"
         fi
     fi
     if [ "$UMO_APP_SET" != "none" ]; then
         if _umo_apps_satisfied; then
-            _umo_ok "Application set already installed ($UMO_APP_SET) - skipping reinstall"
+            _umo_ok "Application Set Already Installed ($UMO_APP_SET) - Skipping Reinstall"
         else
-            umo_apps_install </dev/null || _umo_warn "Application re-apply finished with warnings"
+            umo_apps_install </dev/null || _umo_warn "Application Re-Apply Finished With Warnings"
         fi
     fi
 
@@ -435,7 +435,7 @@ _umo_reapply_settings() {
             _umo_pkgs="xterm xfonts-base" ;;
     esac
     if "$_UMO_LOGIN" -c "command -v $_umo_probe >/dev/null 2>&1" </dev/null 2>/dev/null; then
-        _umo_ok "Desktop verified ($_umo_probe present)"
+        _umo_ok "Desktop Verified ($_umo_probe Present)"
     else
         _umo_step "Desktop Components Missing - Installing ($_umo_probe)"
         "$_UMO_LOGIN" -c "
@@ -445,9 +445,9 @@ _umo_reapply_settings() {
             dpkg --configure -a >/dev/null 2>&1 || true
         " </dev/null || true
         if "$_UMO_LOGIN" -c "command -v $_umo_probe >/dev/null 2>&1" </dev/null 2>/dev/null; then
-            _umo_ok "Desktop components installed"
+            _umo_ok "Desktop Components Installed"
         else
-            _umo_warn "Desktop still missing - run: umo login -c 'apt-get install -y $_umo_pkgs'"
+            _umo_warn "Desktop Still Missing - Run: umo login -c 'apt-get install -y $_umo_pkgs'"
         fi
     fi
     return 0
@@ -468,10 +468,10 @@ _umo_upgrade_system() {
         apt-get clean
     " </dev/null || true
     if "$_UMO_LOGIN" -c "dpkg --audit >/dev/null 2>&1 && apt-get check >/dev/null 2>&1" </dev/null >/dev/null 2>&1; then
-        _umo_ok "System packages upgraded"
+        _umo_ok "System Packages Upgraded"
     else
-        _umo_warn "Upgrade finished but the package system needs attention"
-        _umo_warn "Fix with: umo login -c 'dpkg --configure -a && apt-get -f install -y'"
+        _umo_warn "Upgrade Finished But The Package System Needs Attention"
+        _umo_warn "Fix With: umo login -c 'dpkg --configure -a && apt-get -f install -y'"
     fi
     return 0
 }
@@ -494,12 +494,12 @@ _umo_check_latest_release() {
 
 _umo_update_release() {
     if [ ! -d "$_UMO_REPO_DIR" ] && [ -d "$_UMO_REPO_DIR.old" ]; then
-        _umo_warn "Tool directory missing (interrupted update?), restoring backup copy..."
+        _umo_warn "Tool Directory Missing (Interrupted Update?), Restoring Backup Copy..."
         if ! mv "$_UMO_REPO_DIR.old" "$_UMO_REPO_DIR" 2>/dev/null; then
             _umo_err "Could not restore $(_umo_dp "$_UMO_REPO_DIR.old")"
             exit 1
         fi
-        _umo_ok "Tool directory restored"
+        _umo_ok "Tool Directory Restored"
     fi
     _umo_run "Checking For New Release On GitHub..."
     if ! _umo_check_latest_release; then
@@ -507,7 +507,7 @@ _umo_update_release() {
         exit 1
     fi
     if [ "$_latest_tag" = "$_UMO_VERSION" ]; then
-        _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+        _umo_ok "UMO Is Already Up To Date (v$_UMO_VERSION)"
         exit 0
     fi
     printf "  ${_UMO_DIM}v%s -> v%s${_UMO_NC}\n" "$_UMO_VERSION" "$_latest_tag"
@@ -526,12 +526,12 @@ _umo_update_release() {
     _umo_run "Downloading Release v$_latest_tag..."
     if command -v curl >/dev/null 2>&1; then
         if ! curl -fsSL --max-time 300 -o "$_tb_file" "$_tb_url" || ! curl -fsSL --max-time 60 -o "$_sh_file" "$_sh_url"; then
-            _umo_err "Download failed"
+            _umo_err "Download Failed"
             exit 1
         fi
     else
         if ! wget -q -T 300 -O "$_tb_file" "$_tb_url" || ! wget -q -T 60 -O "$_sh_file" "$_sh_url"; then
-            _umo_err "Download failed"
+            _umo_err "Download Failed"
             exit 1
         fi
     fi
@@ -543,7 +543,7 @@ _umo_update_release() {
     fi
     _expected=$(awk '{print $1}' "$_sh_file")
     if [ -z "$_actual" ] || [ "$_actual" != "$_expected" ]; then
-        _umo_err "SHA-256 verification failed, aborting update"
+        _umo_err "SHA-256 Verification Failed, Aborting Update"
         rm -f "$_tb_file" "$_sh_file"
         exit 1
     fi
@@ -553,12 +553,12 @@ _umo_update_release() {
     rm -rf "$_tmp_dir"
     mkdir -p "$_tmp_dir"
     if ! tar -xzf "$_tb_file" -C "$_tmp_dir" 2>/dev/null; then
-        _umo_err "Extraction failed"
+        _umo_err "Extraction Failed"
         rm -rf "$_tmp_dir"
         exit 1
     fi
     if [ ! -f "$_tmp_dir/bin/umo-install" ]; then
-        _umo_err "Release tarball is malformed, aborting update"
+        _umo_err "Release Tarball Is Malformed, Aborting Update"
         rm -rf "$_tmp_dir"
         exit 1
     fi
@@ -566,11 +566,11 @@ _umo_update_release() {
     rm -rf "$_UMO_REPO_DIR.old"
     mv "$_UMO_REPO_DIR" "$_UMO_REPO_DIR.old"
     if ! mv "$_tmp_dir" "$_UMO_REPO_DIR" 2>/dev/null || [ ! -f "$_UMO_REPO_DIR/bin/umo-install" ]; then
-        _umo_err "Failed to install the new release"
+        _umo_err "Failed To Install The New Release"
         rm -rf "$_UMO_REPO_DIR" 2>/dev/null || true
         if [ -d "$_UMO_REPO_DIR.old" ]; then
             mv "$_UMO_REPO_DIR.old" "$_UMO_REPO_DIR" 2>/dev/null || true
-            _umo_warn "Previous version restored from backup"
+            _umo_warn "Previous Version Restored From Backup"
         fi
         exit 1
     fi
@@ -580,7 +580,7 @@ _umo_update_release() {
         chmod +x "$_UMO_REPO_DIR/bin/$_bin" 2>/dev/null || true
     done
 
-    _umo_ok "Release v$_latest_tag installed"
+    _umo_ok "Release v$_latest_tag Installed"
 }
 
 _umo_refresh_tools() {
@@ -601,7 +601,7 @@ _umo_refresh_tools() {
     _umo_conf_write
 
     printf "\n"
-    _umo_ok "Host and container tools refreshed (v$_UMO_VERSION)"
+    _umo_ok "Host And Container Tools Refreshed (v$_UMO_VERSION)"
     printf "  ${_UMO_DIM}Settings: theme ${UMO_THEME:-umo-dark} · apps ${UMO_APP_SET:-basic} · de ${UMO_DE:-xfce4}${_UMO_NC}\n\n"
 }
 
@@ -624,11 +624,11 @@ _umo_run_update() {
 
         _behind=$(git -C "$_UMO_REPO_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
         if [ "$_behind" -eq 0 ] 2>/dev/null; then
-            _umo_ok "UMO is already up to date (v$_UMO_VERSION)"
+            _umo_ok "UMO Is Already Up To Date (v$_UMO_VERSION)"
             exit 0
         fi
 
-        printf "  ${_UMO_DIM}%s new commits on main:${_UMO_NC}\n" "$_behind"
+        printf "  ${_UMO_DIM}%s New Commits On Main:${_UMO_NC}\n" "$_behind"
         git -C "$_UMO_REPO_DIR" log --oneline --no-decorate HEAD..origin/main 2>/dev/null | head -10 | while IFS= read -r _line; do
             printf "  ${_UMO_CYN}  ➜${_UMO_NC} %s\n" "$_line"
         done
@@ -636,14 +636,14 @@ _umo_run_update() {
 
         _stashed=0
         if [ -n "$(git -C "$_UMO_REPO_DIR" status --porcelain 2>/dev/null)" ]; then
-            _umo_warn "Local modifications detected, stashing them first"
+            _umo_warn "Local Modifications Detected, Stashing Them First"
             _stash_before=$(git -C "$_UMO_REPO_DIR" rev-parse -q --verify refs/stash 2>/dev/null || true)
             if git -C "$_UMO_REPO_DIR" stash push -u -m "umo auto-stash $(date +%Y%m%d-%H%M%S)" >/dev/null 2>&1; then
                 _stash_after=$(git -C "$_UMO_REPO_DIR" rev-parse -q --verify refs/stash 2>/dev/null || true)
                 if [ -n "$_stash_after" ] && [ "$_stash_after" != "$_stash_before" ]; then
                     _stashed=1
                 else
-                    _umo_warn "Nothing was stashed, keeping your changes in place"
+                    _umo_warn "Nothing Was Stashed, Keeping Your Changes In Place"
                 fi
             else
                 _umo_err "Could not stash your local changes - update aborted (nothing was reset)"
@@ -653,7 +653,7 @@ _umo_run_update() {
         fi
 
         if ! git -C "$_UMO_REPO_DIR" reset --hard origin/main >/dev/null 2>&1; then
-            _umo_err "Failed to apply updates"
+            _umo_err "Failed To Apply Updates"
             if [ "$_stashed" = 1 ]; then
                 git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1 || true
             fi
@@ -662,9 +662,9 @@ _umo_run_update() {
 
         if [ "$_stashed" = 1 ]; then
             if git -C "$_UMO_REPO_DIR" stash pop >/dev/null 2>&1; then
-                _umo_ok "Your local changes were preserved"
+                _umo_ok "Your Local Changes Were Preserved"
             else
-                _umo_warn "Stash kept (conflict), resolve with: git -C $_UMO_REPO_DIR stash pop"
+                _umo_warn "Stash Kept (Conflict), Resolve With: git -C $_UMO_REPO_DIR stash pop"
             fi
         fi
     else
@@ -682,7 +682,7 @@ _umo_run_update() {
     if [ "$_umo_scripts_only" = 1 ]; then
         _umo_conf_write
         printf "\n"
-        _umo_ok "Scripts refreshed (v$_UMO_VERSION), settings recorded"
+        _umo_ok "Scripts Refreshed (v$_UMO_VERSION), Settings Recorded"
         printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo update${_UMO_NC} ${_UMO_DIM}(without --scripts-only) for a full update.${_UMO_NC}\n\n"
         exit 0
     fi
@@ -698,7 +698,7 @@ _umo_run_update() {
     _umo_kv "Apps"    "${_UMO_CYN}${UMO_APP_SET:-basic}${_UMO_NC}"
     _umo_kv "Desktop" "${_UMO_CYN}${UMO_DE:-xfce4}${_UMO_NC}"
     printf "\n"
-    _umo_ok "UMO fully updated (scripts, settings, apps, theme and system packages)"
+    _umo_ok "UMO Fully Updated (Scripts, Settings, Apps, Theme And System Packages)"
     printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo status${_UMO_DIM} to verify the environment.${_UMO_NC}\n\n"
 }
 
