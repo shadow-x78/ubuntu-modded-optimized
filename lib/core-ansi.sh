@@ -59,6 +59,16 @@ else
     UMO_GRAD_3=''
 fi
 
+if [ "$UMO_COLOR_SUPPORT" -eq 0 ] 2>/dev/null; then
+    UMO_NC=''
+    UMO_BOLD=''
+    UMO_DIM=''
+    UMO_B_CYAN=''
+    UMO_B_GREEN=''
+    UMO_B_YELLOW=''
+    UMO_B_WHITE=''
+fi
+
 UMO_GLYPH_SUPPORT=0
 _UMO_SPINNER_PID=""
 if [ -z "${UMO_ASCII:-}" ]; then
@@ -128,6 +138,14 @@ umo_log_step()  {
         printf "\n%b%s%b  %b%s%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$*" "$UMO_NC"
     else
         printf "\n%b%s%b  %b%s%b\n" "$UMO_B_CYAN" "$UMO_G_STEP" "$UMO_NC" "$UMO_BOLD" "$*" "$UMO_NC"
+    fi
+}
+
+umo_log_run() {
+    if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
+        printf "  %b%s%b  %s%s\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$(umo_log__time)" "$*"
+    else
+        printf "  %b%s%b  %s%s\n" "$UMO_B_CYAN" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$(umo_log__time)" "$*"
     fi
 }
 
@@ -269,7 +287,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.15.0}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.15.1}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

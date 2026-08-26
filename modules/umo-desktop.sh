@@ -72,7 +72,7 @@ EOF
 }
 
 umo_de_lxde() {
-    umo_log_step "Install LXDE (ultra-lightweight)"
+    umo_log_step "Install LXDE (Ultra-Lightweight)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
     lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true' startlxde
     _run_de_installer "LXDE" startlxde \
@@ -80,7 +80,7 @@ umo_de_lxde() {
 }
 
 umo_de_xfce4() {
-    umo_log_step "Install XFCE4 (professional set)"
+    umo_log_step "Install XFCE4 (Professional Set)"
     _pkgs='timeout 1800 apt-get install -y --no-install-recommends \
     xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
@@ -92,7 +92,7 @@ umo_de_xfce4() {
 }
 
 umo_de_openbox() {
-    umo_log_step "Install Openbox (minimal)"
+    umo_log_step "Install Openbox (Minimal)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
     openbox obconf lxterminal pcmanfm tint2 feh exo-utils || true' openbox-session
     _run_de_installer "Openbox" openbox-session \
@@ -100,10 +100,10 @@ umo_de_openbox() {
 }
 
 umo_de_minimal() {
-    umo_log_step "Install minimal X11"
+    umo_log_step "Install Minimal X11"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
     xterm xfonts-base || true' xterm
-    _run_de_installer "minimal X11" xterm \
+    _run_de_installer "Minimal X11" xterm \
         "apt-get update && apt-get install -y --no-install-recommends xterm xfonts-base"
 }
 
@@ -112,7 +112,7 @@ _run_de_installer() {
     _probe="$2"
     _repair="$3"
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
-    printf "  %b>%b  Installing %s...\n" "$UMO_B_CYAN" "$UMO_NC" "$_label"
+    umo_log_run "Installing $_label..."
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-de.sh 2>&1 | tee /root/install-de.log; exit \${PIPESTATUS[0]}" || _rc=$?
     if [ "$_rc" -eq 0 ]; then

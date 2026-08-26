@@ -10,7 +10,7 @@ _UMO_MOD_APPS_LOADED=1
 UMO_APP_SET="${UMO_APP_SET:-basic}"
 
 umo_apps_basic() {
-    umo_log_step "Install base utilities"
+    umo_log_step "Install Base Utilities"
     _run_installer "Base utilities" "
 apt-get install -y --no-install-recommends nano wget curl git htop man-db ca-certificates || true
 dpkg --configure -a || true
@@ -29,7 +29,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_browsers() {
-    umo_log_step "Install browsers"
+    umo_log_step "Install Browsers"
     _run_installer "Browsers" "
 apt-get install -y --no-install-recommends firefox-esr || true
 dpkg --configure -a || true
@@ -39,7 +39,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_office() {
-    umo_log_step "Install office suite"
+    umo_log_step "Install Office Suite"
     _run_installer "Office suite" "
 apt-get install -y --no-install-recommends libreoffice-writer libreoffice-calc libreoffice-impress || true
 dpkg --configure -a || true
@@ -49,7 +49,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_media() {
-    umo_log_step "Install media tools"
+    umo_log_step "Install Media Tools"
     _run_installer "Media tools" "
 apt-get install -y --no-install-recommends vlc ffmpeg || true
 dpkg --configure -a || true
@@ -63,7 +63,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_dev() {
-    umo_log_step "Install development tools"
+    umo_log_step "Install Development Tools"
     _run_installer "Development tools" "
 apt-get install -y --no-install-recommends python3 python3-pip python3-venv || true
 dpkg --configure -a || true
@@ -77,7 +77,7 @@ dpkg --configure -a || true
 }
 
 umo_apps_termux() {
-    umo_log_step "Install Termux integration"
+    umo_log_step "Install Termux Integration"
     _run_installer "Termux integration" "
 apt-get install -y termux-api 2>/dev/null || true
 apt-get install -y --no-install-recommends xclip xsel || true

@@ -10,7 +10,7 @@ _UMO_MOD_AUDIO_LOADED=1
 UMO_TERMUX_PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 
 umo_audio_install_termux() {
-    umo_log_step "Install PulseAudio in Termux"
+    umo_log_step "Install PulseAudio In Termux"
 
     if ! command -v pulseaudio >/dev/null 2>&1; then
         pkg install -y pulseaudio 2>/dev/null || \
@@ -22,7 +22,7 @@ umo_audio_install_termux() {
 }
 
 umo_audio_configure() {
-    umo_log_step "Configure PulseAudio bridge"
+    umo_log_step "Configure PulseAudio Bridge"
 
     if ! mkdir -p "$UMO_TERMUX_PREFIX/etc/pulse" 2>/dev/null; then
         umo_log_warn "Cannot write PulseAudio config dir"

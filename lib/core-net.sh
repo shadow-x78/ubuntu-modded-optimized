@@ -70,13 +70,13 @@ umo_net__post_check() {
     _want="$(umo_net_checksums "$_url")"
     if [ -n "$_want" ]; then
         if umo_net__verify_sha256 "$_f" "$_want"; then
-            umo_log_ok "[OK] SHA-256 verified: $(basename "$_url")"
+            umo_log_ok "SHA-256 verified: $(basename "$_url")"
         else
             umo_log_warn "SHA-256 mismatch for $(basename "$_url"), discarding download"
             return 1
         fi
     else
-        umo_log_info "SKIP checksum (mirror has none): $(basename "$_url")"
+        umo_log_info "No checksum from this mirror, skipping verification: $(basename "$_url")"
     fi
     return 0
 }
@@ -164,7 +164,7 @@ umo_net_extract() {
     [ -f "$_archive" ] || umo_die "Archive not found: $_archive"
     mkdir -p "$_dest"
 
-    umo_log_step "Extract archive"
+    umo_log_step "Extract Archive"
 
     case "$_archive" in
         *.tar.gz|*.tgz)

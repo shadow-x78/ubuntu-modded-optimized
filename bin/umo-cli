@@ -41,9 +41,9 @@ if [ "$_UMO_GLYPH" -eq 0 ] && command -v locale >/dev/null 2>&1; then
     esac
 fi
 if [ "$_UMO_GLYPH" -eq 1 ]; then
-    _G_OK='✔'; _G_ERR='✖'; _G_WARN='⚠'; _G_INFO='ℹ'; _G_NOTE='▌'; _G_LINE='─'
+    _G_OK='✔'; _G_ERR='✖'; _G_WARN='⚠'; _G_NOTE='▌'; _G_LINE='─'
 else
-    _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_INFO='i'; _G_NOTE='|'; _G_LINE='-'
+    _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_NOTE='|'; _G_LINE='-'
 fi
 
 _umo_header() {
@@ -71,11 +71,11 @@ _umo_plate() {
 }
 
 _umo_step()  { printf "\n  %b%s%b  %b%s%b\n" "$_UMO_PRI" "$_G_NOTE" "$_UMO_NC" "$_UMO_BOLD" "$1" "$_UMO_NC"; }
+_umo_run()   { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_G_NOTE" "$_UMO_NC" "$1"; }
 _umo_ok()    { printf "  %b%s%b  %s\n" "$_UMO_GRN" "$_G_OK" "$_UMO_NC" "$1"; }
 _umo_err()   { printf "  %b%s%b  %s\n" "$_UMO_RED" "$_G_ERR" "$_UMO_NC" "$1" >&2; }
 _umo_warn()  { printf "  %b%s%b  %s\n" "$_UMO_YEL" "$_G_WARN" "$_UMO_NC" "$1"; }
-_umo_info()  { printf "  %b%s%b  %s\n" "$_UMO_CYN" "$_G_INFO" "$_UMO_NC" "$1"; }
-_umo_kv()    { printf "  %b%-14s%b %b\n" "$_UMO_BOLD" "$1" "$_UMO_NC" "$2"; }
+_umo_kv()    { printf "  %b%-20s%b %b\n" "$_UMO_BOLD" "$1:" "$_UMO_NC" "$2"; }
 
 _umo_esc_sed() {
     printf '%s' "$1" | sed -e 's/[\\&|"]/\\&/g'
@@ -218,7 +218,7 @@ _umo_self_update() {
 }
 
 _umo_refresh_host() {
-    _umo_step "Refreshing host scripts"
+    _umo_step "Refreshing Host Scripts"
     _tpl="$_UMO_REPO_DIR/config/templates"
     _sh_dir="$_UMO_SCRIPT_DIR"
     mkdir -p "$_sh_dir" 2>/dev/null || _sh_dir="$_UMO_TERMUX_HOME"
@@ -277,7 +277,7 @@ _umo_refresh_container() {
         _umo_warn "Install directory not found ($_ct_inst_dir), skipping container refresh"
         return 0
     fi
-    _umo_step "Refreshing container scripts"
+    _umo_step "Refreshing Container Scripts"
 
     _bin_dir="$_ct_inst_dir/usr/local/bin"
     if mkdir -p "$_bin_dir" 2>/dev/null; then
@@ -287,9 +287,9 @@ _umo_refresh_container() {
             if [ -f "$_csrc" ]; then
                 if cp -f "$_csrc" "$_bin_dir/$_cscript.tmp" 2>/dev/null && mv -f "$_bin_dir/$_cscript.tmp" "$_bin_dir/$_cscript" 2>/dev/null; then
                     chmod +x "$_bin_dir/$_cscript" 2>/dev/null || true
-                    _umo_ok "deployed: /usr/local/bin/$_cscript"
+                    _umo_ok "Deployed: /usr/local/bin/$_cscript"
                 else
-                    _umo_warn "FAILED to deploy: /usr/local/bin/$_cscript"
+                    _umo_warn "Failed to deploy: /usr/local/bin/$_cscript"
                 fi
             fi
         done
@@ -385,7 +385,7 @@ _umo_reapply_settings() {
         return 0
     fi
 
-    _umo_step "Re-applying saved settings (theme: $UMO_THEME, apps: $UMO_APP_SET, de: $UMO_DE)"
+    _umo_step "Re-applying Saved Settings (Theme: $UMO_THEME, Apps: $UMO_APP_SET, DE: $UMO_DE)"
 
     . "$UMO_LIB_DIR/core-ansi.sh"
     . "$UMO_LIB_DIR/core-fs.sh"
@@ -428,7 +428,7 @@ _umo_reapply_settings() {
     if "$_UMO_LOGIN" -c "command -v $_umo_probe >/dev/null 2>&1" </dev/null 2>/dev/null; then
         _umo_ok "Desktop verified ($_umo_probe present)"
     else
-        _umo_step "Desktop components missing - installing ($_umo_probe)"
+        _umo_step "Desktop Components Missing - Installing ($_umo_probe)"
         "$_UMO_LOGIN" -c "
             export DEBIAN_FRONTEND=noninteractive
             apt-get update 2>&1 | grep -E '^(Get:[0-9]|Unpacking |Setting up |E: )' || true
@@ -448,7 +448,7 @@ _umo_upgrade_system() {
     [ -f "$_UMO_LOGIN" ] || return 0
     _ct_inst_dir="$(_umo_install_dir)"
     [ -d "$_ct_inst_dir" ] || return 0
-    _umo_step "Upgrading the Ubuntu system (this may take a while)"
+    _umo_step "Upgrading The Ubuntu System (This May Take A While)"
     "$_UMO_LOGIN" -c "
         export DEBIAN_FRONTEND=noninteractive
         apt-get update
@@ -492,7 +492,7 @@ _umo_update_release() {
         fi
         _umo_ok "Tool directory restored"
     fi
-    _umo_info "Checking for new release on GitHub..."
+    _umo_run "Checking For New Release On GitHub..."
     if ! _umo_check_latest_release; then
         _umo_err "Could not reach GitHub Releases API. Check your connection and retry."
         exit 1
@@ -514,7 +514,7 @@ _umo_update_release() {
     _tb_file="$_cache/$(basename "$_tb_url")"
     _sh_file="$_cache/$(basename "$_sh_url")"
 
-    _umo_info "Downloading release v$_latest_tag..."
+    _umo_run "Downloading Release v$_latest_tag..."
     if command -v curl >/dev/null 2>&1; then
         if ! curl -fsSL --max-time 300 -o "$_tb_file" "$_tb_url" || ! curl -fsSL --max-time 60 -o "$_sh_file" "$_sh_url"; then
             _umo_err "Download failed"
@@ -607,7 +607,7 @@ _umo_run_update() {
     _umo_plate "Update"
 
     if [ -d "$_UMO_REPO_DIR/.git" ]; then
-        _umo_info "Fetching latest changes from origin/main..."
+        _umo_run "Fetching Latest Changes From origin/main..."
         if ! git -C "$_UMO_REPO_DIR" fetch origin main 2>/dev/null; then
             _umo_err "Could not reach GitHub. Check your connection and retry."
             exit 1
@@ -720,7 +720,7 @@ _umo_set_user() {
         _umo_err "UMO not installed"
         exit 1
     fi
-    _umo_info "Switching default user to: $_new_user"
+    _umo_run "Switching Default User To: $_new_user"
     "$_login" -c "id $_new_user >/dev/null 2>&1 || { useradd -m -s /bin/bash $_new_user && echo '${_new_user}:${_new_user}' | chpasswd; }" </dev/null >/dev/null 2>&1
     sed -i "s|/bin/su - [^ ]*|/bin/su - $_new_user|g" "$_user_sh" 2>/dev/null || true
     sed -i "s|HOME=/home/[^ ]*|HOME=/home/$_new_user|g" "$_user_sh" 2>/dev/null || true
@@ -768,18 +768,18 @@ _umo_uninstall() {
         esac
     fi
 
-    _umo_info "Stopping all UMO services..."
+    _umo_run "Stopping All UMO Services..."
     for _proc in proot Xtigervnc Xvnc dbus-daemon pulseaudio termux-x11 dconf-service xfce4-session; do
         pkill -9 -f "$_proc" 2>/dev/null || true
     done
     sleep 1
 
     if [ -d "$_inst_dir" ]; then
-        _umo_info "Removing Ubuntu rootfs: $_inst_dir"
+        _umo_run "Removing Ubuntu RootFS: $_inst_dir"
         rm -rf "$_inst_dir" 2>/dev/null || _umo_warn "Could not fully remove $_inst_dir (check permissions)"
     fi
     if [ -d "$_UMO_SCRIPT_DIR" ]; then
-        _umo_info "Removing host scripts, cache and settings: $_UMO_SCRIPT_DIR"
+        _umo_run "Removing Host Scripts, Cache And Settings: $_UMO_SCRIPT_DIR"
         rm -rf "$_UMO_SCRIPT_DIR" 2>/dev/null || true
     fi
     if [ -n "$_legacy" ]; then
@@ -791,7 +791,7 @@ _umo_uninstall() {
         rm -f "$_cli" 2>/dev/null || true
     fi
 
-    _umo_info "Removing UMO aliases from shell configs..."
+    _umo_run "Removing UMO Aliases From Shell Configs..."
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         [ -f "$_rc" ] || continue
         sed -i -e '/# ===== UMO =====/,+1d' -e '/\.umo\/aliases\.sh/d' \
@@ -802,7 +802,7 @@ _umo_uninstall() {
     case "$_UMO_REPO_DIR" in
         "$HOME/.local/share/umo"*)
             if [ -d "$_UMO_REPO_DIR" ]; then
-                _umo_info "Removing UMO tool files: $_UMO_REPO_DIR"
+                _umo_run "Removing UMO Tool Files: $_UMO_REPO_DIR"
                 rm -rf "$_UMO_REPO_DIR" 2>/dev/null || true
             fi ;;
     esac
@@ -821,7 +821,7 @@ _umo_backup() {
         exit 1
     fi
     mkdir -p "$_bak_dir"
-    _umo_info "Backing up to: $_bak_file"
+    _umo_run "Backing Up To: $_bak_file"
     tar -czf "$_bak_file" -C "$(dirname "$_install_dir")" "$(basename "$_install_dir")" 2>/dev/null
     _sz=$(du -sh "$_bak_file" 2>/dev/null | cut -f1)
     _umo_ok "Backup complete (size: $_sz)"
@@ -943,7 +943,7 @@ case "$1" in
     install)
         if [ -f "$_UMO_REPO_DIR/bin/umo-install" ]; then
             shift
-            _umo_info "Re-running the UMO installer..."
+            _umo_run "Re-running The UMO Installer..."
             exec sh "$_UMO_REPO_DIR/bin/umo-install" "$@"
         else
             _umo_err "Installer not found at $_UMO_REPO_DIR/bin/umo-install"

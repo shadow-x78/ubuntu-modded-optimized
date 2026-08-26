@@ -16,7 +16,7 @@ UMO_SCRIPT_HOME="${UMO_SCRIPT_DIR:-$UMO_TERMUX_HOME/.umo}"
 UMO_LOGIN_SH="${UMO_LOGIN_SH:-$UMO_SCRIPT_HOME/umo-login.sh}"
 
 umo_proot_prepare() {
-    umo_log_step "Prepare proot container"
+    umo_log_step "Prepare Proot Container"
 
     for _d in dev proc sys tmp sdcard data termux root home/umo; do
         umo_fs_mkdir "$UMO_PROOT_DIR/$_d"
@@ -112,7 +112,7 @@ DIVERT
 }
 
 umo_proot_create_scripts() {
-    umo_log_step "Create login wrappers"
+    umo_log_step "Create Login Wrappers"
 
     rm -rf "$UMO_PROOT_DIR/.fake_proc" 2>/dev/null || true
     rm -f "$UMO_PROOT_DIR/swapfile" 2>/dev/null || true
@@ -128,7 +128,19 @@ umo_proot_create_scripts() {
 INSTALL_DIR="$UMO_PROOT_DIR"
 PREFIX="$UMO_TERMUX_PREFIX"
 
-[ -d "\$INSTALL_DIR" ] || { echo "[ERR] UMO not installed."; exit 1; }
+if [ ! -d "\$INSTALL_DIR" ]; then
+    _umo_g='ERR'; _umo_c=''; _umo_n=''; _umo_utf8=0
+    if [ -t 1 ]; then
+        case "\${LANG:-}\${LC_ALL:-}\${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_utf8=1 ;; esac
+        if [ "\$_umo_utf8" -eq 0 ] && command -v locale >/dev/null 2>&1; then
+            case "\$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _umo_utf8=1 ;; esac
+        fi
+        if [ "\$_umo_utf8" -eq 1 ]; then _umo_g='✖'; fi
+        if [ -z "\${NO_COLOR:-}" ]; then _umo_c='\033[38;5;196m'; _umo_n='\033[0m'; fi
+    fi
+    printf "  %b%s%b  UMO not installed.\n" "\$_umo_c" "\$_umo_g" "\$_umo_n" >&2
+    exit 1
+fi
 
 unset LD_PRELOAD
 unset LD_LIBRARY_PATH
@@ -175,7 +187,16 @@ EOF
 
     cat > "$UMO_SCRIPT_HOME/umo-start.sh" << EOF
 #!/bin/sh
-echo "[==>] Starting UMO environment..."
+_umo_g='|'; _umo_c=''; _umo_n=''; _umo_utf8=0
+if [ -t 1 ]; then
+    case "\${LANG:-}\${LC_ALL:-}\${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_utf8=1 ;; esac
+    if [ "\$_umo_utf8" -eq 0 ] && command -v locale >/dev/null 2>&1; then
+        case "\$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _umo_utf8=1 ;; esac
+    fi
+    if [ "\$_umo_utf8" -eq 1 ]; then _umo_g='▌'; fi
+    if [ -z "\${NO_COLOR:-}" ]; then _umo_c='\033[38;5;208m'; _umo_n='\033[0m'; fi
+fi
+printf "  %b%s%b  Starting UMO Environment...\n" "\$_umo_c" "\$_umo_g" "\$_umo_n"
 termux-wake-lock 2>/dev/null || true
 pulseaudio --start 2>/dev/null || true
 sleep 1
@@ -231,7 +252,7 @@ fi
 }
 
 umo_proot_create_user() {
-    umo_log_step "Create default user 'umo'"
+    umo_log_step "Create Default User 'umo'"
 
     _etc="$UMO_PROOT_DIR/etc"
 

@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.1] - 2026-08-27
+
+### 🎨 Changed
+- **One unified output language across every surface:** the session scripts (`umo-start`/`umo-stop`), the CLI, the generated host wrappers (login / start / VNC start / VNC stop), the container helpers (`umo-startvnc`, `umo-install-extras`), the release installer (`umo.sh`) and the repo entry (`install.sh`) all print the same `▌` run marks, `✔`/`✖`/`⚠`/`ℹ` glyphs and the shared orange/green/red/cyan/yellow palette - the last `[OK]`/`[ERR]`/`[..]`-style echo lines are gone from the whole project.
+- **NO_COLOR + TTY-aware colors everywhere:** every standalone entry point blanks its palette when `NO_COLOR` is set or stdout is not a TTY, so piped and logged output stays plain; `core-ansi` also blanks the shared `NC/BOLD/DIM` + brand color variables whenever color support resolves to zero.
+- **UTF-8 glyph detection with a locale fallback:** glyph support is detected from `LANG/LC_ALL/LC_CTYPE` and falls back to `locale charmap` when those are unset - a Termux session without an explicit `LANG` still gets the Unicode marks, non-UTF-8 terminals get a clean ASCII fallback (`OK`/`ERR`/`!`/`|`), consistently from the release installer down to the in-container logs.
+- **The release installer (`umo.sh`) output is modernized:** every `[OK]/[ERR]/[..]` echo is replaced with styled `✔`/`✖`/`▌`/`ℹ` lines using self-contained color + glyph detection (no library dependency before anything is installed), and "UMO Release Installer" now uses the same `▌` step mark as the rest of the tool.
+- **CLI vocabulary:** the unused `_umo_info` is replaced by a new `_umo_run` in-progress line (orange `▌`), `_umo_kv` labels now use a width-20 colon format matching the installer summaries, and step messages use consistent title case ("Refreshing Host Scripts", "Installing Dependencies"...) - the container helpers follow the same capitalization.
+
+### ✨ Added
+- **`umo_log_run()` in `core-ansi`:** a shared in-progress line (step `▌` block without the leading newline) used by the desktop and VNC installers for their "Installing ..." runs.
+
+### 🐛 Fixed
+- **Literal `\033[0m` printed after "UMO VNC Server Active":** in `config/container/umo-startvnc` the reset code was passed to a `%s` printf slot, which never interprets escapes - the raw text ended up on screen. It is now passed via `%b` like every other code.
+- **`install.sh` cleared the screen even when piped:** the screen-clear escape burst was emitted unconditionally, polluting logs and the error path; it now runs only on a real TTY.
+- **Hard errors in the container VNC helper were named `_warn`** while printing a red `✖` - renamed to `_err` so the function name, color and severity agree.
+- **SECURITY.md version badge synced:** it was left on 4.14.2 (missed in the v4.15.0 docs pass) and now tracks the release again.
+
+### 🧹 Cleanup
+- **Full-project audit pass:** `sh -n` + shellcheck clean across all 27 scripts, every function call cross-checked against its definition across lib/module/CLI boundaries, every `{{...}}` template placeholder verified against its renderer, and every error path (missing install dir, missing installer, non-Termux host, `refresh` outside an install) behavior-tested. Dead vocabulary removed with the change (`_umo_info`/`_G_INFO` in the CLI, the unused `_UMO_DIM` in `bin/umo-stop`).
+
 ## [v4.15.0] - 2026-08-26
 
 ### ✨ Added

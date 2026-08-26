@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.15.0"
+export UMO_VERSION="4.15.1"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -103,7 +103,7 @@ umo_phase_deps() {
         $_pkg_cmd virglrenderer-android termux-x11-nightly >/dev/null 2>&1 || true
         return 0
     }
-    umo_run_quiet "Installing dependencies" _install_deps || \
+    umo_run_quiet "Installing Dependencies" _install_deps || \
         umo_log_warn "Some dependencies could not be installed yet"
     return 0
 }
@@ -127,7 +127,7 @@ umo_phase_config() {
         "XFCE4 (Recommended - Balanced)" \
         "LXDE (Ultra-Lightweight)" \
         "Openbox (Minimal - Advanced)" \
-        "Minimal (CLI only - No GUI)"
+        "Minimal (CLI Only - No GUI)"
 
     case "$UMO_MENU_IDX" in
         1) UMO_DE="xfce4" ;;
@@ -137,8 +137,8 @@ umo_phase_config() {
     esac
 
     umo_ui_menu "Choose Theme Mode" \
-        "Night Mode - Dark theme (Orchis-Dark, Recommended)" \
-        "Day Mode - Light theme (Orchis-Light)"
+        "Night Mode - Dark Theme (Orchis-Dark, Recommended)" \
+        "Day Mode - Light Theme (Orchis-Light)"
 
     case "$UMO_MENU_IDX" in
         2) UMO_THEME="umo-light" ;;
@@ -205,7 +205,7 @@ umo_phase_proot() {
     umo_ui_header "Proot Container"
     umo_run_quiet "Configuring Proot Container..." umo_proot_setup || \
         umo_die "Proot container setup failed - check ~/.umo/logs/ for details"
-    umo_run_quiet "Setting up Container User..." umo_proot_create_user || \
+    umo_run_quiet "Setting Up Container User..." umo_proot_create_user || \
         umo_log_warn "Container user setup finished with warnings"
     return 0
 }
@@ -260,7 +260,7 @@ umo_phase_finalize() {
 
     _umo_finalize_codename="jammy"
     [ "$UMO_UBUNTU_VERSION" = "24.04" ] && _umo_finalize_codename="noble"
-    umo_run_quiet "Configuring APT sources..." sh -c "printf '%s\n' \
+    umo_run_quiet "Configuring APT Sources..." sh -c "printf '%s\n' \
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename} main restricted universe multiverse' \
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-updates main restricted universe multiverse' \
         'deb [trusted=yes] http://ports.ubuntu.com/ubuntu-ports ${_umo_finalize_codename}-backports main restricted universe multiverse' \
@@ -277,12 +277,12 @@ umo_phase_finalize() {
                 "$(umo_login_sh)" "$@" </dev/null
             fi
         }
-        umo_run_stream "Installing dependencies..." _umo_login_timeout 600 -c \
+        umo_run_stream "Installing Dependencies..." _umo_login_timeout 600 -c \
             "export DEBIAN_FRONTEND=noninteractive; apt-get install -y --no-install-recommends sudo || true" || true
-        umo_run_stream "Configuring packages..." _umo_login_timeout 900 -c \
+        umo_run_stream "Configuring Packages..." _umo_login_timeout 900 -c \
             "export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a || true" || true
-        umo_run_quiet "Setting up users..." _umo_login_timeout 120 -c "usermod -aG sudo umo" || true
-        umo_run_quiet "Restoring service binaries..." _umo_login_timeout 120 -c '
+        umo_run_quiet "Setting Up Users..." _umo_login_timeout 120 -c "usermod -aG sudo umo" || true
+        umo_run_quiet "Restoring Service Binaries..." _umo_login_timeout 120 -c '
             for _f in invoke-rc.d service systemctl; do
                 if [ -L "/usr/sbin/$_f" ] && [ -f "/usr/sbin/$_f.real" ]; then
                     rm -f "/usr/sbin/$_f"
@@ -305,8 +305,8 @@ if [ -n "$_broken" ]; then
     timeout 300 dpkg --configure -a 2>&1 | _apt_filter || true
 fi'
     if [ -x "$_umo_cli_login" ]; then
-        umo_run_stream "Configuring any remaining packages..." "$_umo_cli_login" -c "$_cplt_body" || true
-        umo_run_quiet "Cleaning dpkg locks..." "$_umo_cli_login" -c "rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true" || true
+        umo_run_stream "Configuring Any Remaining Packages..." "$_umo_cli_login" -c "$_cplt_body" || true
+        umo_run_quiet "Cleaning Dpkg Locks..." "$_umo_cli_login" -c "rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true" || true
     fi
 
     for _rc in "$HOME/.bashrc" "$HOME/.zshrc"; do

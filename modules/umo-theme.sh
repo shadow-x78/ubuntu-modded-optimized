@@ -47,7 +47,7 @@ _umo_theme_terminal_font() {
 }
 
 umo_theme_packages() {
-    umo_log_step "Install theme packages"
+    umo_log_step "Install Theme Packages"
 
     _theme_pkgs="materia-gtk-theme greybird-gtk-theme dmz-cursor-theme \
                  papirus-icon-theme gnome-icon-theme unzip \
@@ -86,7 +86,7 @@ umo_theme_write_mode_marker() {
 umo_theme_extras() {
     _mode="dark"
     [ "$UMO_THEME" = "umo-light" ] && _mode="light"
-    umo_log_step "Install designer extras (Orchis / Tela / FiraCode Nerd, mode: $_mode)"
+    umo_log_step "Install Designer Extras (Orchis / Tela / FiraCode Nerd, Mode: $_mode)"
 
     _extras_src="$SCRIPT_DIR/config/container/umo-install-extras"
     if [ -f "$_extras_src" ]; then
@@ -118,7 +118,7 @@ umo_theme_extras() {
 }
 
 umo_theme_apply_gtk() {
-    umo_log_step "Apply GTK theme configuration"
+    umo_log_step "Apply GTK Theme Configuration"
 
     _theme_dir="$SCRIPT_DIR/config/theme"
     _UI_FONT="$(_umo_theme_ui_font)"
@@ -149,7 +149,7 @@ umo_theme_apply_gtk() {
 }
 
 umo_theme_apply_fonts() {
-    umo_log_step "Configure fonts"
+    umo_log_step "Configure Fonts"
 
     _fc_dir="$UMO_INSTALL_DIR/etc/fonts/conf.d"
     umo_fs_mkdir "$_fc_dir"
@@ -189,7 +189,7 @@ umo_theme_apply_wallpaper() {
 }
 
 umo_theme_apply_fastfetch() {
-    umo_log_step "Configure Fastfetch (UMO design)"
+    umo_log_step "Configure Fastfetch (UMO Design)"
 
     _ff_src="$SCRIPT_DIR/config/theme/fastfetch/config.jsonc"
     [ -f "$_ff_src" ] || { umo_log_warn "Fastfetch config template missing, skipping"; return 0; }
@@ -211,7 +211,7 @@ umo_theme_apply_fastfetch() {
 }
 
 umo_theme_apply_xfce() {
-    umo_log_step "Configure XFCE4 desktop design"
+    umo_log_step "Configure XFCE4 Desktop Design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/xfce4"
     _UI_FONT="$(_umo_theme_ui_font)"
@@ -260,7 +260,7 @@ umo_theme_apply_xfce() {
 }
 
 umo_theme_apply_lxde() {
-    umo_log_step "Configure LXDE desktop design"
+    umo_log_step "Configure LXDE Desktop Design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/lxde"
     _UI_FONT="$(_umo_theme_ui_font)"
@@ -301,7 +301,7 @@ umo_theme_apply_lxde() {
 }
 
 umo_theme_apply_openbox() {
-    umo_log_step "Configure Openbox desktop design"
+    umo_log_step "Configure Openbox Desktop Design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/openbox"
     _UI_FONT="$(_umo_theme_ui_font)"

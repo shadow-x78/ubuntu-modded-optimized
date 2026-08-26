@@ -33,7 +33,7 @@ REPAIR
 }
 
 umo_vnc_install() {
-    umo_log_step "Install VNC server"
+    umo_log_step "Install VNC Server"
     {
         cat << 'HDR'
 #!/bin/sh
@@ -89,7 +89,7 @@ BODY
     else
         umo_log_warn "install-vnc.sh has syntax issues"
     fi
-    printf "  %b>%b  Installing TigerVNC...\n" "$UMO_B_CYAN" "$UMO_NC"
+    umo_log_run "Installing TigerVNC..."
     if [ ! -x "$UMO_LOGIN_SH" ]; then
         umo_log_warn "umo-login.sh not found/executable - VNC install skipped"
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
@@ -120,7 +120,7 @@ umo_vnc_configure() {
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.15.0}" \
+            "UMO_VERSION" "${UMO_VERSION:-4.15.1}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -195,7 +195,7 @@ XFALL
 }
 
 umo_vnc_create_scripts() {
-    umo_log_step "Create VNC scripts"
+    umo_log_step "Create VNC Scripts"
 
     if ! mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
         umo_log_warn "Cannot create /usr/local/bin - VNC helper scripts skipped"

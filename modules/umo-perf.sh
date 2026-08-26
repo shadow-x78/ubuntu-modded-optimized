@@ -11,7 +11,7 @@ _UMO_MOD_PERF_LOADED=1
 UMO_PERF_MODE="${UMO_PERF_MODE:-balanced}"
 
 umo_perf_apt() {
-    umo_log_step "Optimize APT configuration"
+    umo_log_step "Optimize APT Configuration"
 
     _apt_conf="/etc/apt/apt.conf.d/99umo-speed"
     mkdir -p "${UMO_INSTALL_DIR:?}/etc/apt/apt.conf.d" 2>/dev/null || true
@@ -51,14 +51,14 @@ EOD
         printf '%s\n' 'APT::Get::Assume-Yes "true";' >> "${UMO_INSTALL_DIR:?}$_apt_conf"
     fi
 
-    umo_log_step "Update package lists (Global)"
+    umo_log_step "Update Package Lists (Global)"
     "$UMO_LOGIN_SH" -c "apt-get update -qq" </dev/null >/dev/null 2>&1 || true
 
     umo_log_ok "APT configured (mode: $UMO_PERF_MODE)"
 }
 
 umo_perf_debloat() {
-    umo_log_step "Remove unnecessary services"
+    umo_log_step "Remove Unnecessary Services"
 
     _bloat="snapd unattended-upgrades apport ModemManager modemmanager cups cups-browsed avahi-daemon"
 
@@ -73,14 +73,14 @@ apt-get install -y ubuntu-keyring 2>/dev/null || true
 dpkg --configure -a || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
-    umo_run_stream "Purging bloat packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
+    umo_run_stream "Purging Bloat Packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
         umo_log_warn "Debloat finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/debloat.sh" 2>/dev/null || true
     return 0
 }
 
 umo_perf_dns() {
-    umo_log_step "Harden DNS configuration"
+    umo_log_step "Harden DNS Configuration"
 
     _resolv="$UMO_INSTALL_DIR/etc/resolv.conf"
     cat > "$_resolv" << 'EOR'
@@ -96,7 +96,7 @@ EOR
 }
 
 umo_perf_cleanup() {
-    umo_log_step "Clean up"
+    umo_log_step "Clean Up"
 
     cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
@@ -106,12 +106,12 @@ rm -rf /var/lib/apt/lists/* || true
 apt-get update -qq || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
-    umo_run_stream "Running APT cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
+    umo_run_stream "Running APT Cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \
         umo_log_warn "APT cleanup finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/cleanup.sh" 2>/dev/null || true
 
     if [ "${UMO_LEAN:-0}" = "1" ]; then
-        umo_log_step "Remove documentation and locale data (--lean)"
+        umo_log_step "Remove Documentation And Locale Data (--lean)"
         rm -rf "$UMO_INSTALL_DIR/usr/share/doc" 2>/dev/null || true
         rm -rf "$UMO_INSTALL_DIR/usr/share/man" 2>/dev/null || true
         rm -rf "$UMO_INSTALL_DIR/usr/share/locale" 2>/dev/null || true
@@ -121,7 +121,7 @@ INNER
 }
 
 umo_perf_gpu() {
-    umo_log_step "Configure GPU rendering"
+    umo_log_step "Configure GPU Rendering"
 
     umo_fs_patch "$UMO_INSTALL_DIR/root/.bashrc" "# ===== UMO GPU =====" '
 export GALLIUM_DRIVER=virpipe
@@ -143,7 +143,7 @@ export LIBGL_ALWAYS_SOFTWARE=0
 }
 
 umo_perf_vnc() {
-    umo_log_step "Tune VNC performance"
+    umo_log_step "Tune VNC Performance"
 
     if [ "$UMO_PERF_MODE" = "aggressive" ]; then
         export UMO_VNC_DEPTH=16
@@ -158,7 +158,7 @@ umo_perf_vnc() {
 }
 
 umo_perf_desktop() {
-    umo_log_step "Optimize desktop environment"
+    umo_log_step "Optimize Desktop Environment"
 
     cat > "$UMO_INSTALL_DIR/root/perf-desktop.sh" << 'INNER'
 #!/bin/sh
@@ -169,7 +169,7 @@ xfconf-query -c xfwm4 -p /general/theme_animation -s false 2>/dev/null || true
 xfconf-query -c xfwm4 -p /general/use_compositing -s false 2>/dev/null || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/perf-desktop.sh"
-    umo_run_quiet "Applying desktop tweaks..." "$UMO_LOGIN_SH" -c "bash /root/perf-desktop.sh" || \
+    umo_run_quiet "Applying Desktop Tweaks..." "$UMO_LOGIN_SH" -c "bash /root/perf-desktop.sh" || \
         umo_log_warn "Desktop tweaks finished with warnings"
     rm -f "$UMO_INSTALL_DIR/root/perf-desktop.sh" 2>/dev/null || true
 
@@ -177,7 +177,7 @@ INNER
 }
 
 umo_perf_setup() {
-    umo_log_step "Apply performance tuning (mode: $UMO_PERF_MODE)"
+    umo_log_step "Apply Performance Tuning (Mode: $UMO_PERF_MODE)"
 
     umo_perf_apt
     umo_perf_dns

@@ -10,9 +10,26 @@ UMO_LOGIN="$UMO_SCRIPT_HOME/umo-login.sh"
 
 _UMO_NC='\033[0m'
 _UMO_BOLD='\033[1m'
-_UMO_DIM='\033[2m'
 _UMO_PRI='\033[38;5;208m'
 _UMO_GRN='\033[38;5;34m'
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    _UMO_NC=''; _UMO_BOLD=''; _UMO_PRI=''; _UMO_GRN=''
+fi
+
+_UMO_GLYPH=0
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) [ -t 1 ] && _UMO_GLYPH=1 ;;
+esac
+if [ "$_UMO_GLYPH" -eq 0 ] && [ -t 1 ] && command -v locale >/dev/null 2>&1; then
+    case "$(locale charmap 2>/dev/null)" in
+        UTF-8*|utf-8*) _UMO_GLYPH=1 ;;
+    esac
+fi
+if [ "$_UMO_GLYPH" -eq 1 ]; then
+    _G_RUN='▌'
+else
+    _G_RUN='|'
+fi
 
 printf "\n${_UMO_PRI}"
 printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
@@ -23,7 +40,7 @@ printf "  ╚██████╔╝██║ ╚═╝ ██║╚███�
 printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
 printf "${_UMO_NC}\n"
 
-printf "  %b[ ⚙ ] Stopping UMO services...%b\n" "$_UMO_DIM" "$_UMO_NC"
+printf "  %b%s%b  Stopping UMO Services...\n" "$_UMO_PRI" "$_G_RUN" "$_UMO_NC"
 
 "$UMO_LOGIN" -c "umo-stopvnc" >/dev/null 2>&1 || true
 

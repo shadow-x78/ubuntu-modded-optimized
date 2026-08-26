@@ -18,28 +18,28 @@ fi
 
 _GRN='\033[38;5;34m'
 _RED='\033[38;5;196m'
-_CYN='\033[38;5;39m'
+_ORG='\033[38;5;208m'
 _NC='\033[0m'
 
-_step() { printf "  %b>%b  %s\n" "$_CYN" "$_NC" "$1"; }
+_step() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
 _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
 _fail() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
 
 if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
     if [ ! -d /root/.orchis-theme/.git ]; then
-        _step "Fetching Orchis theme..."
+        _step "Fetching Orchis Theme..."
         rm -rf /root/.orchis-theme 2>/dev/null || true
         timeout 300 git clone --depth=1 https://github.com/vinceliuice/Orchis-theme /root/.orchis-theme >/dev/null 2>&1 || true
     else
-        _step "Reusing cached Orchis theme clone..."
+        _step "Reusing Cached Orchis Theme Clone..."
     fi
     if [ -d /root/.orchis-theme/.git ]; then
         if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
-            _step "Installing Orchis dark compact..."
+            _step "Installing Orchis Dark Compact..."
             ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact 2>&1 | tail -n 3 ) || true
         fi
         if [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
-            _step "Installing Orchis light compact..."
+            _step "Installing Orchis Light Compact..."
             ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light --tweaks compact 2>&1 | tail -n 3 ) || true
         fi
         if [ -d /usr/share/themes/Orchis-Dark-Compact ] && [ -d /usr/share/themes/Orchis-Light-Compact ]; then
@@ -55,14 +55,14 @@ fi
 
 if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; then
     if [ ! -d /root/.tela-icons/.git ]; then
-        _step "Fetching Tela icons..."
+        _step "Fetching Tela Icons..."
         rm -rf /root/.tela-icons 2>/dev/null || true
         timeout 300 git clone --depth=1 https://github.com/vinceliuice/Tela-icon-theme /root/.tela-icons >/dev/null 2>&1 || true
     else
-        _step "Reusing cached Tela icon clone..."
+        _step "Reusing Cached Tela Icon Clone..."
     fi
     if [ -d /root/.tela-icons/.git ]; then
-        _step "Installing Tela icons (all variants)..."
+        _step "Installing Tela Icons (All Variants)..."
         ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons 2>&1 | tail -n 3 ) || true
         if [ -d /usr/share/icons/Tela-Black-Dark ] && [ -d /usr/share/icons/Tela ]; then
             _ok "Tela icons installed"
@@ -91,7 +91,7 @@ if ! fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
 fi
 
 if [ -d "/usr/share/themes/$_WANT_GTK" ] && [ -d "/usr/share/icons/$_WANT_ICONS" ]; then
-    _step "Aligning existing configs with $_MODE mode ($_WANT_GTK + $_WANT_ICONS)..."
+    _step "Aligning Existing Configs With $_MODE Mode ($_WANT_GTK + $_WANT_ICONS)..."
     for _f in /root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
               /home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml \
               /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml \
