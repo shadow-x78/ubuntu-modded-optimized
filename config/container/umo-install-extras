@@ -80,12 +80,12 @@ if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Or
         if [ ! -d /usr/share/themes/Orchis-Dark-Compact ]; then
             _step "Installing Orchis Dark Compact..."
             printf '' > "$_LOG" 2>/dev/null || true
-            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark --tweaks compact ) >>"$_LOG" 2>&1 || true
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c dark -s compact --tweaks compact ) >>"$_LOG" 2>&1 || true
         fi
         if [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
             _step "Installing Orchis Light Compact..."
             printf '' > "$_LOG" 2>/dev/null || true
-            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light --tweaks compact ) >>"$_LOG" 2>&1 || true
+            ( cd /root/.orchis-theme && timeout 900 ./install.sh -d /usr/share/themes -c light -s compact --tweaks compact ) >>"$_LOG" 2>&1 || true
         fi
         if [ -d /usr/share/themes/Orchis-Dark-Compact ] && [ -d /usr/share/themes/Orchis-Light-Compact ]; then
             _ok "Orchis Installed (Dark + Light Compact)"
@@ -101,11 +101,21 @@ if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Or
 fi
 
 # Tela icons are a plain copy install - only the fetch can realistically fail.
+# Two calls: the color argument selects the family, so 'standard' alone gives
+# Tela/Tela-light/Tela-dark and 'black' adds Tela-black/Tela-black-light/
+# Tela-black-dark - the design needs both families.
 if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; then
     if _fetch_repo "vinceliuice/Tela-icon-theme" "/root/.tela-icons"; then
-        _step "Installing Tela Icons (All Variants)..."
-        printf '' > "$_LOG" 2>/dev/null || true
-        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons ) >>"$_LOG" 2>&1 || true
+        if [ ! -d /usr/share/icons/Tela ]; then
+            _step "Installing Tela Icons (Standard Variants)..."
+            printf '' > "$_LOG" 2>/dev/null || true
+            ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons ) >>"$_LOG" 2>&1 || true
+        fi
+        if [ ! -d /usr/share/icons/Tela-Black-Dark ]; then
+            _step "Installing Tela Icons (Black Variants)..."
+            printf '' > "$_LOG" 2>/dev/null || true
+            ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons black ) >>"$_LOG" 2>&1 || true
+        fi
         if [ -d /usr/share/icons/Tela-Black-Dark ] && [ -d /usr/share/icons/Tela ]; then
             _ok "Tela Icons Installed"
             rm -rf /root/.tela-icons 2>/dev/null || true

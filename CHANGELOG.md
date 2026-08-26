@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.5] - 2026-08-27
+
+### 🐛 Fixed
+- **The designer extras could never fully succeed - the two upstream installers were invoked with the wrong options, so the checked directories were never created (verified against the actual Orchis/Tela installer sources and a full local install run):**
+  - **Orchis:** `--tweaks compact` only selects the no-floating-panel asset tweak and does not change the installed directory name - the install produced `Orchis-Dark` while the check looked for `Orchis-Dark-Compact`. The call now uses `-s compact` (the size variant that actually appends `-Compact` to the directory name) alongside the tweak: `./install.sh -d /usr/share/themes -c dark -s compact --tweaks compact` (same for light).
+  - **Tela:** the installer's color argument selects the variant family, and no argument means "standard only" - the old call created `Tela`/`Tela-light`/`Tela-dark` but never `Tela-Black-Dark`. The script now runs both families: the standard set plus `./install.sh -d /usr/share/icons black`, each step skipped when its variant already exists.
+  - Local proof run: the corrected Tela calls produce exactly `Tela`, `Tela-light`, `Tela-dark`, `Tela-black`, `Tela-black-light`, `Tela-black-dark` in dependency order; the Orchis name assembly (`name + color + size` in `core.sh`) confirms `Orchis-Dark-Compact`/`Orchis-Light-Compact` from the corrected flags.
+- Together with v4.15.4 (auto-installed `sassc` + murrine, logged failures with inline log tails, git→tarball fetch fallback), the designer extras now complete end-to-end and - if anything still fails - say exactly what and why.
+
 ## [v4.15.4] - 2026-08-27
 
 ### 🐛 Fixed
