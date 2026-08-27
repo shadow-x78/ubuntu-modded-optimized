@@ -87,6 +87,7 @@ _run_installer() {
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
     printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C\n[ -t 0 ] && exec </dev/null\n%s\n' "$_script_body" > "$_script"
     chmod +x "$_script"
+    umo_log_run "Installing $_label..."
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-apps.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then

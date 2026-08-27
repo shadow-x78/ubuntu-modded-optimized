@@ -183,13 +183,13 @@ EOF
 
     cat > "$UMO_SCRIPT_HOME/umo-start.sh" << EOF
 #!/bin/sh
-_umo_g='|'; _umo_c=''; _umo_n=''; _umo_utf8=0
+_umo_g='>'; _umo_c=''; _umo_n=''; _umo_utf8=0
 if [ -t 1 ]; then
     case "\${LANG:-}\${LC_ALL:-}\${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_utf8=1 ;; esac
     if [ "\$_umo_utf8" -eq 0 ] && command -v locale >/dev/null 2>&1; then
         case "\$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _umo_utf8=1 ;; esac
     fi
-    if [ "\$_umo_utf8" -eq 1 ]; then _umo_g='▌'; fi
+    if [ "\$_umo_utf8" -eq 1 ]; then _umo_g='❯'; fi
     if [ -z "\${NO_COLOR:-}" ]; then _umo_c='\033[38;5;208m'; _umo_n='\033[0m'; fi
 fi
 printf "  %b%s%b  Starting UMO Environment...\n" "\$_umo_c" "\$_umo_g" "\$_umo_n"

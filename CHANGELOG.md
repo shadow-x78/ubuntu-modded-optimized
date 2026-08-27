@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.1] - 2026-08-27
+
+### 🎨 Changed
+- **Every in-progress sub-step now carries the chevron arrow, everywhere, and only section headings keep the side block:** the designer-extras flow already set the pattern (`▌  Install Designer Extras...` heading above `❯  Fetching Orchis-theme (git)...` sub-steps) and the whole tool reads the same way now. The install flow prints `❯  Installing XFCE4...`, `❯  Installing TigerVNC...` and `❯  Installing <set>...` under their `▌` step headings (the apps module printed no in-progress line at all before - it ran from the heading straight into its container script with nothing on screen until the final verdict, so multi-minute set installs looked like a stall). The update flow prints `❯  Checking For New Release On GitHub...`, `❯  Downloading Release...`, `❯  Refreshing Host/Container Scripts...` under its `▌` step headings. `umo start` prints `❯  Initializing Termux:X11 Services...`, `❯  Initializing UMO Services...`, the generated environment wrapper prints `❯  Starting UMO Environment...` and the in-container VNC script prints `❯  Starting UMO VNC Server...` (its block glyph is gone - every line it prints is a sub-step). `umo stop` prints `❯  Stopping UMO Services...` and the rendered stop script prints `❯  Stopping VNC...`, and the one-liner release installer prints `❯  Fetching Latest Release From GitHub...` / `❯  Starting Installer...` under its `▌  UMO Release Installer` heading. On non-UTF-8 terminals the chevron falls back to `>` exactly like the extras lines, while headings keep the `|` block - the two stay visually distinct in ASCII mode too. Verified end-to-end under a PTY against the desktop, VNC, apps, update, start, stop and release-installer flows, in both UTF-8 and ASCII modes.
+
 ## [v4.16.0] - 2026-08-27
 
 ### 🔒 Security

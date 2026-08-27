@@ -18,7 +18,7 @@ if [ -z "${NO_COLOR:-}" ] && [ -t 1 ]; then
     _UMO_NC='\033[0m'; _UMO_GRN='\033[38;5;34m'; _UMO_RED='\033[38;5;196m'
     _UMO_CYN='\033[38;5;39m'; _UMO_PRI='\033[38;5;208m'
 fi
-_UMO_G_OK='OK'; _UMO_G_ERR='ERR'; _UMO_G_INFO='i'; _UMO_G_RUN='|'
+_UMO_G_OK='OK'; _UMO_G_ERR='ERR'; _UMO_G_INFO='i'; _UMO_G_HEAD='|'; _UMO_G_STEP='>'
 if [ -t 1 ]; then
     _UMO_UTF8=0
     case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in *UTF-8*|*utf8*) _UMO_UTF8=1 ;; esac
@@ -26,13 +26,14 @@ if [ -t 1 ]; then
         case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMO_UTF8=1 ;; esac
     fi
     if [ "$_UMO_UTF8" -eq 1 ]; then
-        _UMO_G_OK='✔'; _UMO_G_ERR='✖'; _UMO_G_INFO='ℹ'; _UMO_G_RUN='▌'
+        _UMO_G_OK='✔'; _UMO_G_ERR='✖'; _UMO_G_INFO='ℹ'; _UMO_G_HEAD='▌'; _UMO_G_STEP='❯'
     fi
 fi
 _umo_ok()   { printf "  %b%s%b  %s\n" "$_UMO_GRN" "$_UMO_G_OK" "$_UMO_NC" "$1"; }
 _umo_err()  { printf "  %b%s%b  %s\n" "$_UMO_RED" "$_UMO_G_ERR" "$_UMO_NC" "$1" >&2; }
 _umo_info() { printf "  %b%s%b  %s\n" "$_UMO_CYN" "$_UMO_G_INFO" "$_UMO_NC" "$1"; }
-_umo_step() { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_UMO_G_RUN" "$_UMO_NC" "$1"; }
+_umo_step() { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_UMO_G_HEAD" "$_UMO_NC" "$1"; }
+_umo_run()  { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_UMO_G_STEP" "$_UMO_NC" "$1"; }
 
 _umo_dp() {
     _dp_b="/data/data/com.termux/files"
@@ -78,7 +79,7 @@ _get_fetch() {
     fi
 }
 
-_umo_step "Fetching Latest Release From GitHub..."
+_umo_run "Fetching Latest Release From GitHub..."
 _GET_TIMEOUT=60
 _rel_json="$_GET_CACHE/latest-release.json"
 if ! _get_fetch "https://api.github.com/repos/$_GET_REPO/releases/latest" "$_rel_json"; then
@@ -151,7 +152,7 @@ if [ -n "$_GET_NO_RUN" ]; then
     exit 0
 fi
 
-_umo_step "Starting Installer..."
+_umo_run "Starting Installer..."
 if [ -t 0 ]; then
     exec sh "$_GET_DEST/bin/umo-install"
 elif [ -e /dev/tty ]; then

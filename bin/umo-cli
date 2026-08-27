@@ -39,9 +39,9 @@ if [ "$_UMO_GLYPH" -eq 0 ] && command -v locale >/dev/null 2>&1; then
     esac
 fi
 if [ "$_UMO_GLYPH" -eq 1 ]; then
-    _G_OK='✔'; _G_ERR='✖'; _G_WARN='⚠'; _G_NOTE='▌'; _G_LINE='─'
+    _G_OK='✔'; _G_ERR='✖'; _G_WARN='⚠'; _G_NOTE='▌'; _G_STEP='❯'; _G_LINE='─'
 else
-    _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_NOTE='|'; _G_LINE='-'
+    _G_OK='OK'; _G_ERR='ERR'; _G_WARN='!'; _G_NOTE='|'; _G_STEP='>'; _G_LINE='-'
 fi
 
 _umo_dp() {
@@ -84,7 +84,7 @@ _umo_plate() {
 }
 
 _umo_step()  { printf "\n  %b%s%b  %b%s%b\n" "$_UMO_PRI" "$_G_NOTE" "$_UMO_NC" "$_UMO_BOLD" "$1" "$_UMO_NC"; }
-_umo_run()   { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_G_NOTE" "$_UMO_NC" "$1"; }
+_umo_run()   { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_G_STEP" "$_UMO_NC" "$1"; }
 _umo_ok()    { printf "  %b%s%b  %s\n" "$_UMO_GRN" "$_G_OK" "$_UMO_NC" "$1"; }
 _umo_err()   { printf "  %b%s%b  %s\n" "$_UMO_RED" "$_G_ERR" "$_UMO_NC" "$1" >&2; }
 _umo_warn()  { printf "  %b%s%b  %s\n" "$_UMO_YEL" "$_G_WARN" "$_UMO_NC" "$1"; }

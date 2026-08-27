@@ -1,13 +1,13 @@
 #!/bin/sh
 _UMO_NC=''; _UMO_GRN=''; _UMO_PRI=''; _UMO_YEL=''
-_UMO_G_OK='OK'; _UMO_G_WARN='!'; _UMO_G_RUN='|'
+_UMO_G_OK='OK'; _UMO_G_WARN='!'; _UMO_G_RUN='>'
 if [ -t 1 ]; then
     _UMO_UTF8=0
     case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in *UTF-8*|*utf8*) _UMO_UTF8=1 ;; esac
     if [ "$_UMO_UTF8" -eq 0 ] && command -v locale >/dev/null 2>&1; then
         case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMO_UTF8=1 ;; esac
     fi
-    if [ "$_UMO_UTF8" -eq 1 ]; then _UMO_G_OK='✔'; _UMO_G_WARN='⚠'; _UMO_G_RUN='▌'; fi
+    if [ "$_UMO_UTF8" -eq 1 ]; then _UMO_G_OK='✔'; _UMO_G_WARN='⚠'; _UMO_G_RUN='❯'; fi
     if [ -z "${NO_COLOR:-}" ]; then _UMO_NC='\033[0m'; _UMO_GRN='\033[38;5;34m'; _UMO_PRI='\033[38;5;208m'; _UMO_YEL='\033[38;5;220m'; fi
 fi
 

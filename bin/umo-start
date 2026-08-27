@@ -29,9 +29,9 @@ if [ "$_UMO_GLYPH" -eq 0 ] && [ -t 1 ] && command -v locale >/dev/null 2>&1; the
     esac
 fi
 if [ "$_UMO_GLYPH" -eq 1 ]; then
-    _G_ERR='✖'; _G_WARN='⚠'; _G_RUN='▌'
+    _G_ERR='✖'; _G_WARN='⚠'; _G_RUN='❯'
 else
-    _G_ERR='ERR'; _G_WARN='!'; _G_RUN='|'
+    _G_ERR='ERR'; _G_WARN='!'; _G_RUN='>'
 fi
 
 _umo_dp() {

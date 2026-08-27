@@ -16,16 +16,16 @@ if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
     _GRN=''; _RED=''; _CYN=''; _ORG=''; _YEL=''; _DIM=''; _NC=''
 fi
 
-_UMO_GBLOCK='|'; _UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'; _UMO_GPLAY='*'
+_UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'; _UMO_GPLAY='*'
 case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
     *UTF-8*|*utf8*) _UMOG=1 ;;
     *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
 esac
 if [ "${_UMOG:-0}" = "1" ]; then
-    _UMO_GBLOCK='▌'; _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'; _UMO_GPLAY='▸'
+    _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'; _UMO_GPLAY='▸'
 fi
 
-_step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GBLOCK" "$_NC" "$1"; }
+_step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
 _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
 _err()  { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
 _note() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
