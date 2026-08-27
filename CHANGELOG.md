@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.11] - 2026-08-27
+
+### 🐛 Fixed
+- **The Plank dock rendered as the square, edge-glued stock dock instead of the rounded design:** the dock runs with `Theme=Gtk+`, which plank resolves to a `plank/dock.theme` file inside the ACTIVE GTK theme folder - and the Orchis installer never ships its plank theme (the file exists in the Orchis source, but `install.sh` does not copy it), so plank warned and fell back to its built-in Default theme (the square one). UMO now carries the rounded Orchis dock.theme (TopRoundness=18, translucent black, the exact file from the Orchis source) in `config/theme/plank/` and installs it under every GTK theme the design may activate (Orchis-Dark/Light-Compact and both Materia fallbacks), so the dock is rounded whichever theme wins.
+- **The UMO wallpaper still did not appear in some sessions:** the in-container desktop init is no longer silent - every step (wallpaper found, bus source, channel wait, apply rounds, reload, theme enforcement) now logs to `/tmp/umo-desktop-init.log` inside the container, so a failure is one file away from a diagnosis. Two real fixes on top: the session dbus discovery gains a third fallback (reading `DBUS_SESSION_BUS_ADDRESS` from the environ of a running xfconfd/xfdesktop/xfce4-session/xfwm4/plank process when the dbus session file is missing), and after writing every backdrop property the init now runs `xfdesktop -R` (reload all settings and repaint), because a session that started before the channel write can miss the change notification and keep showing the old backdrop.
+- **Em dashes removed from the remaining places:** all em dashes left in the older commit messages and in the published release notes of v4.15.1 through v4.15.9 are gone - the history was rewritten, all tags re-pointed at the rewritten commits, and the release notes re-published from the updated CHANGELOG.
+
 ## [v4.15.10] - 2026-08-27
 
 ### 🐛 Fixed

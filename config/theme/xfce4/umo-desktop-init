@@ -1,25 +1,64 @@
 #!/bin/sh
 # UMO - In-Container XFCE Desktop First-Boot Init (GPL-3.0-or-later)
 # https://github.com/shadow-x78/ubuntu-modded-optimized
+#
+# Every step logs to /tmp/umo-desktop-init.log inside the container, so a
+# missing wallpaper or theme can be diagnosed from one file.
 
-command -v xfconf-query >/dev/null 2>&1 || exit 0
+_LOG=/tmp/umo-desktop-init.log
+_log() {
+    printf '%s %s\n' "$(date '+%H:%M:%S' 2>/dev/null || echo '?')" "$*" >> "$_LOG" 2>/dev/null || true
+}
+
+command -v xfconf-query >/dev/null 2>&1 || { _log "xfconf-query Missing, Exit"; exit 0; }
 
 WP="/usr/share/wallpapers/umo-wallpaper.jpg"
 [ -f "$WP" ] || WP="/usr/local/share/wallpapers/umo-wallpaper.jpg"
-[ -f "$WP" ] || exit 0
+if [ ! -f "$WP" ]; then
+    _log "Wallpaper File Not Found, Exit"
+    exit 0
+fi
+_log "Start (Wallpaper: $WP)"
 
 # The session dbus address is only exported into startxfce4's child chain
-# (dbus-launch), so this script discovers the bus from its session file.
+# (dbus-launch), so this script discovers the bus in order of preference:
+# 1. an inherited DBUS_SESSION_BUS_ADDRESS,
+# 2. the session file dbus-launch writes to ~/.dbus/session-bus/,
+# 3. the environ of a running session process (/proc scan, root only).
 # Must happen before ANY xfconf-query call, otherwise they all fail.
-if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    _log "Bus Inherited From Environment"
+else
     for _bus_file in "$HOME/.dbus/session-bus/"*; do
         [ -f "$_bus_file" ] || continue
         . "$_bus_file" 2>/dev/null || true
-        [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && break
+        if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+            _log "Bus From Session File ($_bus_file)"
+            break
+        fi
     done
     export DBUS_SESSION_BUS_ADDRESS
 fi
-[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] || exit 0
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    for _env in /proc/[0-9]*/environ; do
+        _pid="${_env#/proc/}"; _pid="${_pid%/environ}"
+        case "$(cat "/proc/$_pid/comm" 2>/dev/null || true)" in
+            xfconfd|xfdesktop|xfce4-session|xfwm4|plank) ;;
+            *) continue ;;
+        esac
+        _addr="$(tr '\0' '\n' < "$_env" 2>/dev/null | sed -n 's|^DBUS_SESSION_BUS_ADDRESS=||p' | head -1)"
+        if [ -n "$_addr" ]; then
+            DBUS_SESSION_BUS_ADDRESS="$_addr"
+            export DBUS_SESSION_BUS_ADDRESS
+            _log "Bus From Process Environ (pid $_pid)"
+            break
+        fi
+    done
+fi
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    _log "No Session Bus Found, Exit"
+    exit 0
+fi
 
 _i=0
 until xfconf-query -c xfce4-desktop -l >/dev/null 2>&1; do
@@ -27,12 +66,18 @@ until xfconf-query -c xfce4-desktop -l >/dev/null 2>&1; do
     [ "$_i" -ge 60 ] && break
     sleep 1
 done
+if [ "$_i" -ge 60 ]; then
+    _log "xfce4-desktop Channel Never Listed After 60s"
+else
+    _log "xfce4-desktop Channel Listed (After ${_i}s)"
+fi
 sleep 2
 
 # Apply the wallpaper to every monitor key we can find (existing xfconf
 # entries, xrandr outputs and the common fallback names), retrying a few
 # rounds while xfdesktop finishes registering its channels.
 _wp_round=0
+_wp_found=0
 while [ "$_wp_round" -lt 3 ]; do
     _wp_round=$((_wp_round + 1))
 
@@ -67,10 +112,38 @@ default"
     done
 
     if xfconf-query -c xfce4-desktop -l -v 2>/dev/null | grep -qF "$WP"; then
+        _log "Wallpaper Written To Channel (Round $_wp_round)"
+        _wp_found=1
         break
     fi
+    _log "Wallpaper Not Visible In Channel Yet (Round $_wp_round)"
     sleep 5
 done
+[ "$_wp_found" = 1 ] || _log "Wallpaper Never Appeared In The Channel"
+
+# Force the running xfdesktop to re-read every setting and repaint. A
+# session that started before the channel writes can miss the property
+# change notification, and -R reloads the backdrop unconditionally.
+if command -v xfdesktop >/dev/null 2>&1; then
+    _xfce_up=1
+    if command -v pgrep >/dev/null 2>&1; then
+        _j=0
+        until pgrep -x xfdesktop >/dev/null 2>&1; do
+            _j=$((_j + 1))
+            [ "$_j" -ge 30 ] && { _xfce_up=0; break; }
+            sleep 1
+        done
+    fi
+    if [ "$_xfce_up" = 1 ]; then
+        if xfdesktop -R >/dev/null 2>&1; then
+            _log "xfdesktop Reloaded Settings And Wallpaper"
+        else
+            _log "xfdesktop Reload Failed"
+        fi
+    else
+        _log "xfdesktop Not Running After 30s, Reload Skipped (Fresh Session Will Read The Channel)"
+    fi
+fi
 
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0 >/dev/null 2>&1 || true
 xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons -n -t int -s 0 >/dev/null 2>&1 || true
@@ -96,6 +169,10 @@ if xfconf-query -c xsettings -l >/dev/null 2>&1; then
     xfconf-query -c xsettings -p /Net/ThemeName -s "$_um_gtk" >/dev/null 2>&1 || true
     xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "$_um_icons" >/dev/null 2>&1 || true
     xfconf-query -c xsettings -p /Net/IconThemeName -s "$_um_icons" >/dev/null 2>&1 || true
+    _log "Theme Enforced ($_um_gtk + $_um_icons)"
+else
+    _log "xsettings Channel Never Listed, Theme Enforcement Skipped"
 fi
 
+_log "Done"
 exit 0

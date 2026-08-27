@@ -355,6 +355,29 @@ X-GNOME-Autostart-enabled=true
 PLANKDESK
     fi
 
+    # Plank dock theme: the dock runs with Theme=Gtk+, which plank resolves
+    # to a plank/ folder inside the ACTIVE GTK theme. The Orchis installer
+    # never ships its own plank theme (it carries one in its source), so
+    # without this copy plank falls back to its built-in square Default
+    # theme. Install the rounded UMO/Orchis dock.theme under every GTK
+    # theme the design may activate, including the Materia fallbacks.
+    _pp_src="$SCRIPT_DIR/config/theme/plank/dock.theme"
+    if [ -f "$_pp_src" ]; then
+        _pp_done=0
+        for _pp_theme in Orchis-Dark-Compact Orchis-Light-Compact Materia-dark Materia-light; do
+            if [ -d "$UMO_INSTALL_DIR/usr/share/themes/$_pp_theme" ]; then
+                mkdir -p "$UMO_INSTALL_DIR/usr/share/themes/$_pp_theme/plank" 2>/dev/null || continue
+                cp -f "$_pp_src" "$UMO_INSTALL_DIR/usr/share/themes/$_pp_theme/plank/dock.theme" 2>/dev/null || continue
+                _pp_done=1
+            fi
+        done
+        if [ "$_pp_done" = 1 ]; then
+            umo_log_ok "Plank Dock Theme Installed (Rounded)"
+        else
+            umo_log_info "Plank Dock Theme Skipped (No GTK Theme Directory Found Yet)"
+        fi
+    fi
+
     if [ -d "${UMO_INSTALL_DIR}/usr/local/bin" ] || mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
         if [ -f "$_theme_dir/umo-desktop-init" ]; then
             cp -f "$_theme_dir/umo-desktop-init" "${UMO_INSTALL_DIR}/usr/local/bin/umo-desktop-init" 2>/dev/null || true
