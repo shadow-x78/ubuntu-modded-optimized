@@ -137,7 +137,7 @@ umo login
 | `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
 | `umo version` | Display current UMO version |
 
-> Host-side scripts (`umo-login.sh`, `umo-start.sh`, `umo-stop.sh`, `umo-vnc-*.sh`, `aliases.sh`) live in `~/.umo/` — the Termux home stays clean. The installer sources `~/.umo/aliases.sh` from your shell rc, so `umo-start`, `umo-stop`, `umo-startvnc`, `umo-stopvnc`, `umo-login` and `umo-user` are usable as plain commands.
+> Host-side scripts (`umo-login.sh`, `umo-start.sh`, `umo-stop.sh`, `umo-vnc-*.sh`, `aliases.sh`) live in `~/.umo/` - the Termux home stays clean. The installer sources `~/.umo/aliases.sh` from your shell rc, so `umo-start`, `umo-stop`, `umo-startvnc`, `umo-stopvnc`, `umo-login` and `umo-user` are usable as plain commands.
 ### Inside Ubuntu
 
 | Command | Description |

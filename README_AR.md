@@ -137,7 +137,7 @@ umo login
 | `umo uninstall` | إزالة UMO بالكامل (الجذر، سكربتات الهوست، أمر `umo`، والـ aliases) |
 | `umo version` | عرض إصدار UMO الحالي |
 
-> سكربتات الهوست (`umo-login.sh`، `umo-start.sh`، `umo-stop.sh`، `umo-vnc-*.sh`، `aliases.sh`) تُثبَّت في `~/.umo/` — فيبقى مجلد Termux الرئيسي نظيفًا. يضيف المثبّت سطرًا في ملف الـ shell rc يستدعي `~/.umo/aliases.sh`، فتصبح `umo-start` و`umo-stop` و`umo-startvnc` و`umo-stopvnc` و`umo-login` و`umo-user` أوامر مباشرة.
+> سكربتات الهوست (`umo-login.sh`، `umo-start.sh`، `umo-stop.sh`، `umo-vnc-*.sh`، `aliases.sh`) تُثبَّت في `~/.umo/` - فيبقى مجلد Termux الرئيسي نظيفًا. يضيف المثبّت سطرًا في ملف الـ shell rc يستدعي `~/.umo/aliases.sh`، فتصبح `umo-start` و`umo-stop` و`umo-startvnc` و`umo-stopvnc` و`umo-login` و`umo-user` أوامر مباشرة.
 ### داخل Ubuntu
 
 | الأمر | الوصف |
