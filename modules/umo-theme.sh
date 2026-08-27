@@ -519,26 +519,49 @@ umo_theme_fix_ownership() {
 }
 
 umo_theme_apply_brand_icon() {
-    _bi_src="$SCRIPT_DIR/config/theme/icons/ubuntu.svg"
-    [ -f "$_bi_src" ] || return 0
-    _bi_dir="$UMO_INSTALL_DIR/usr/share/icons/hicolor/scalable/apps"
-    if mkdir -p "$_bi_dir" 2>/dev/null && cp -f "$_bi_src" "$_bi_dir/ubuntu.svg" 2>/dev/null; then
-        if [ ! -f "$UMO_INSTALL_DIR/usr/share/icons/hicolor/index.theme" ]; then
-            {
-                printf '[Icon Theme]\n'
-                printf 'Name=Hicolor\n'
-                printf 'Comment=Fallback theme\n'
-                printf 'Directories=scalable/apps\n'
-                printf '\n'
-                printf '[scalable/apps]\n'
-                printf 'Size=48\n'
+    _bi_src_dir="$SCRIPT_DIR/config/theme/icons"
+    [ -d "$_bi_src_dir" ] || return 0
+
+    _bi_hicolor="$UMO_INSTALL_DIR/usr/share/icons/hicolor"
+    if [ -f "$_bi_src_dir/ubuntu.svg" ]; then
+        mkdir -p "$_bi_hicolor/scalable/apps" 2>/dev/null || true
+        cp -f "$_bi_src_dir/ubuntu.svg" "$_bi_hicolor/scalable/apps/ubuntu.svg" 2>/dev/null || true
+    fi
+    for _bi_size in 48 64 96 128 256; do
+        [ -f "$_bi_src_dir/ubuntu-$_bi_size.png" ] || continue
+        mkdir -p "$_bi_hicolor/${_bi_size}x${_bi_size}/apps" 2>/dev/null || true
+        cp -f "$_bi_src_dir/ubuntu-$_bi_size.png" "$_bi_hicolor/${_bi_size}x${_bi_size}/apps/ubuntu.png" 2>/dev/null || true
+    done
+    if [ ! -f "$_bi_hicolor/index.theme" ]; then
+        {
+            printf '[Icon Theme]\n'
+            printf 'Name=Hicolor\n'
+            printf 'Comment=Fallback theme\n'
+            printf 'Directories=48x48/apps,64x64/apps,96x96/apps,128x128/apps,256x256/apps,scalable/apps\n'
+            printf '\n'
+            for _bi_size in 48 64 96 128 256; do
+                printf '[%sx%s/apps]\n' "$_bi_size" "$_bi_size"
+                printf 'Size=%s\n' "$_bi_size"
                 printf 'Context=Applications\n'
-                printf 'MinSize=16\n'
-                printf 'MaxSize=512\n'
-                printf 'Type=Scalable\n'
-            } > "$UMO_INSTALL_DIR/usr/share/icons/hicolor/index.theme" 2>/dev/null || true
-        fi
-        umo_log_ok "Ubuntu Panel Icon Installed (/usr/share/icons/hicolor)"
+                printf 'Type=Fixed\n'
+                printf '\n'
+            done
+            printf '[scalable/apps]\n'
+            printf 'Size=48\n'
+            printf 'Context=Applications\n'
+            printf 'MinSize=16\n'
+            printf 'MaxSize=512\n'
+            printf 'Type=Scalable\n'
+        } > "$_bi_hicolor/index.theme" 2>/dev/null || true
+    fi
+
+    if [ -f "$_bi_src_dir/ubuntu-256.png" ]; then
+        mkdir -p "$UMO_INSTALL_DIR/usr/share/umo/brand" 2>/dev/null || true
+        cp -f "$_bi_src_dir/ubuntu-256.png" "$UMO_INSTALL_DIR/usr/share/umo/brand/ubuntu.png" 2>/dev/null || true
+    fi
+
+    if [ -f "$_bi_hicolor/scalable/apps/ubuntu.svg" ] || [ -f "$UMO_INSTALL_DIR/usr/share/umo/brand/ubuntu.png" ]; then
+        umo_log_ok "Ubuntu Brand Icon Installed (hicolor + /usr/share/umo/brand/ubuntu.png)"
     fi
     return 0
 }

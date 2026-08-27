@@ -23,7 +23,7 @@
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu">
       <property name="show-button-title" type="bool" value="false"/>
-      <property name="button-icon" type="string" value="ubuntu"/>
+      <property name="button-icon" type="string" value="/usr/share/umo/brand/ubuntu.png"/>
     </property>
     <property name="plugin-2" type="string" value="tasklist">
       <property name="show-labels" type="bool" value="true"/>

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.5] - 2026-08-28
+
+### 🎨 Changed
+- **The bundled Ubuntu logo is now the authentic one, fetched from the internet, not a hand-drawn approximation:** v4.16.4 shipped a locally-constructed `ubuntu.svg`; that is replaced with the exact official Ubuntu 2022 brand mark - the orange Circle of Friends with no wordmark - fetched verbatim from Wikimedia Commons (`Ubuntu-logo-no-wordmark-solid-o-2022.svg`, © Canonical Ltd., GPLv3). The bundled `config/theme/icons/ubuntu.svg` is byte-for-byte identical to the upstream file (only a trailing newline differs, verified by hash). It is also rasterized to PNG at 48/64/96/128/256 and every raster is squared onto a transparent canvas so it renders cleanly in the panel button.
+
+### 🐛 Fixed
+- **The whiskermenu button icon still did not change to the Ubuntu logo after v4.16.4:** the v4.16.4 approach pointed the panel at an icon *name* (`button-icon=ubuntu`) installed only as an SVG in the hicolor theme, which relies on the whole icon-theme/lookup chain resolving the name at runtime - a chain that stays broken under the minimal container (no inherited theme index reliably mapping the name, and no SVG rasterizer wired into the panel's icon lookup), so the button kept its stock icon. Reading the actual `xfce4-whiskermenu-plugin` source shows the reliable path: when `button-icon` is an **absolute file path**, the plugin's `icon_changed()` flags it as a file icon and `size_changed()` loads it directly with `gdk_pixbuf_new_from_file_at_size()`, completely bypassing icon-theme resolution and the SVG loader. The panel template now ships `button-icon=/usr/share/umo/brand/ubuntu.png`, the deploy step installs that exact raster to that exact path, and the session-boot init re-points every whiskermenu plugin to the same absolute path at every session start (guarded on the file existing), so the logo shows regardless of theme state. Both the install-time theme apply and the host-side `umo update`/`umo refresh` now deploy the full set (SVG + all five PNGs into hicolor, plus the brand PNG), replacing the old SVG-only copy.
+
 ## [v4.16.4] - 2026-08-27
 
 ### ✨ Added

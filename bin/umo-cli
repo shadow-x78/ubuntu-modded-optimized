@@ -355,12 +355,23 @@ _umo_refresh_container() {
         fi
     fi
 
-    _ico_src="$_UMO_REPO_DIR/config/theme/icons/ubuntu.svg"
-    _ico_dst="$_ct_inst_dir/usr/share/icons/hicolor/scalable/apps"
-    if [ -f "$_ico_src" ] && mkdir -p "$_ico_dst" 2>/dev/null; then
-        if cp -f "$_ico_src" "$_ico_dst/ubuntu.svg" 2>/dev/null; then
-            _umo_ok "Ubuntu Panel Icon Deployed"
+    _ico_src="$_UMO_REPO_DIR/config/theme/icons"
+    if [ -d "$_ico_src" ]; then
+        _ico_hicolor="$_ct_inst_dir/usr/share/icons/hicolor"
+        if [ -f "$_ico_src/ubuntu.svg" ]; then
+            mkdir -p "$_ico_hicolor/scalable/apps" 2>/dev/null || true
+            cp -f "$_ico_src/ubuntu.svg" "$_ico_hicolor/scalable/apps/ubuntu.svg" 2>/dev/null || true
         fi
+        for _ico_size in 48 64 96 128 256; do
+            [ -f "$_ico_src/ubuntu-$_ico_size.png" ] || continue
+            mkdir -p "$_ico_hicolor/${_ico_size}x${_ico_size}/apps" 2>/dev/null || true
+            cp -f "$_ico_src/ubuntu-$_ico_size.png" "$_ico_hicolor/${_ico_size}x${_ico_size}/apps/ubuntu.png" 2>/dev/null || true
+        done
+        if [ -f "$_ico_src/ubuntu-256.png" ]; then
+            mkdir -p "$_ct_inst_dir/usr/share/umo/brand" 2>/dev/null || true
+            cp -f "$_ico_src/ubuntu-256.png" "$_ct_inst_dir/usr/share/umo/brand/ubuntu.png" 2>/dev/null || true
+        fi
+        _umo_ok "Ubuntu Brand Icon Deployed"
     fi
 
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"

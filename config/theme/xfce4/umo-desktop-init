@@ -166,15 +166,16 @@ if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons/hicolor ]; the
     _log "Hicolor Icon Cache Refreshed"
 fi
 
-if xfconf-query -c xfce4-panel -l >/dev/null 2>&1; then
+_bi_icon="/usr/share/umo/brand/ubuntu.png"
+if [ -f "$_bi_icon" ] && xfconf-query -c xfce4-panel -l >/dev/null 2>&1; then
     for _plg in $(xfconf-query -c xfce4-panel -l 2>/dev/null | sed -n 's|^/plugins/\([^/]*\)$|\1|p'); do
         _plg_type=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg" 2>/dev/null)
         [ "$_plg_type" = "whiskermenu" ] || continue
         _cur_icon=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" 2>/dev/null)
-        [ "$_cur_icon" = "ubuntu" ] && continue
-        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -n -t string -s ubuntu >/dev/null 2>&1 || true
-        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -s ubuntu >/dev/null 2>&1 || true
-        _log "Panel Menu Button Icon Set To ubuntu ($_plg, was: ${_cur_icon:-unset})"
+        [ "$_cur_icon" = "$_bi_icon" ] && continue
+        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -n -t string -s "$_bi_icon" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -s "$_bi_icon" >/dev/null 2>&1 || true
+        _log "Panel Menu Button Icon Set To $_bi_icon ($_plg, was: ${_cur_icon:-unset})"
     done
 fi
 
