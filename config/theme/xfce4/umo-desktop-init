@@ -161,5 +161,22 @@ else
     _log "xsettings Channel Never Listed, Theme Enforcement Skipped"
 fi
 
+if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons/hicolor ]; then
+    /usr/bin/gtk-update-icon-cache -qf /usr/share/icons/hicolor >/dev/null 2>&1 || true
+    _log "Hicolor Icon Cache Refreshed"
+fi
+
+if xfconf-query -c xfce4-panel -l >/dev/null 2>&1; then
+    for _plg in $(xfconf-query -c xfce4-panel -l 2>/dev/null | sed -n 's|^/plugins/\([^/]*\)$|\1|p'); do
+        _plg_type=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg" 2>/dev/null)
+        [ "$_plg_type" = "whiskermenu" ] || continue
+        _cur_icon=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" 2>/dev/null)
+        [ "$_cur_icon" = "ubuntu" ] && continue
+        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -n -t string -s ubuntu >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -s ubuntu >/dev/null 2>&1 || true
+        _log "Panel Menu Button Icon Set To ubuntu ($_plg, was: ${_cur_icon:-unset})"
+    done
+fi
+
 _log "Done"
 exit 0

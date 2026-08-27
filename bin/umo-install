@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.16.3"
+export UMO_VERSION="4.16.4"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -166,6 +166,7 @@ umo_phase_config() {
     umo_kv "Theme"   "$UMO_THEME"
     umo_kv "Install" "$(umo_fs_display_path "$UMO_INSTALL_DIR")"
     umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
+    umo_kv "Timezone" "${UMO_TZ:-Etc/UTC} (Device)"
 
     umo_ui_confirm "Confirm installation?" "Y" || {
         umo_log_info "Installation cancelled."
@@ -195,6 +196,11 @@ umo_phase_download() {
 
     if [ ! -f "$UMO_INSTALL_DIR/bin/bash" ] || [ ! -f "$UMO_INSTALL_DIR/bin/sh" ]; then
         umo_die "RootFS extraction failed: /bin/bash or /bin/sh not found. Try a different mirror"
+    fi
+    if [ ! -f "$UMO_INSTALL_DIR/usr/share/zoneinfo/${UMO_TZ:-Etc/UTC}" ]; then
+        umo_log_warn "Device timezone '${UMO_TZ:-unknown}' not in rootfs, falling back to Etc/UTC"
+        UMO_TZ="Etc/UTC"
+        export UMO_TZ
     fi
     umo_log_ok "RootFS integrity verified"
 }
@@ -244,6 +250,12 @@ umo_phase_apps() {
 
 umo_phase_finalize() {
     umo_ui_header "Finalizing"
+
+    if _umo_apply_tz_files "$UMO_INSTALL_DIR" "${UMO_TZ:-Etc/UTC}"; then
+        umo_log_ok "Timezone Synced From Device (${UMO_TZ:-Etc/UTC})"
+    else
+        umo_log_warn "Could Not Apply Device Timezone (Using RootFS Default)"
+    fi
 
     if [ "$UMO_DE" != "minimal" ] && [ -x "$(umo_login_sh)" ]; then
         _fin_probe="startxfce4"
@@ -405,6 +417,7 @@ umo_phase_summary() {
     umo_kv "Desktop" "$UMO_DE"
     umo_kv "Theme"   "$UMO_THEME"
     umo_kv "Apps"    "$UMO_APP_SET"
+    umo_kv "Timezone" "${UMO_TZ:-Etc/UTC} (Device)"
     umo_kv "Path"    "$(umo_fs_display_path "$UMO_INSTALL_DIR")"
 
     termux-wake-unlock >/dev/null 2>&1 || true
@@ -624,6 +637,9 @@ umo_main() {
         light|day)  UMO_THEME="umo-light" ;;
         *) UMO_THEME="umo-dark" ;;
     esac
+
+    UMO_TZ="$(_umo_detect_tz)"
+    export UMO_TZ
 
     umo_phase_check
     umo_phase_deps

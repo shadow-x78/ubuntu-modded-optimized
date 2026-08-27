@@ -341,6 +341,28 @@ _umo_refresh_container() {
         fi
     fi
 
+    UMO_LIB_DIR="${UMO_LIB_DIR:-$_UMO_REPO_DIR/lib}"
+    [ -f "$UMO_LIB_DIR/core-system.sh" ] && . "$UMO_LIB_DIR/core-system.sh" 2>/dev/null
+    _ct_tz=""
+    if command -v _umo_detect_tz >/dev/null 2>&1; then
+        _ct_tz="$(_umo_detect_tz)"
+    fi
+    if [ -n "$_ct_tz" ]; then
+        if _umo_apply_tz_files "$_ct_inst_dir" "$_ct_tz"; then
+            _umo_ok "Timezone Synced From Device ($_ct_tz)"
+        else
+            _umo_warn "Device Timezone '$_ct_tz' Not Found In RootFS Zoneinfo"
+        fi
+    fi
+
+    _ico_src="$_UMO_REPO_DIR/config/theme/icons/ubuntu.svg"
+    _ico_dst="$_ct_inst_dir/usr/share/icons/hicolor/scalable/apps"
+    if [ -f "$_ico_src" ] && mkdir -p "$_ico_dst" 2>/dev/null; then
+        if cp -f "$_ico_src" "$_ico_dst/ubuntu.svg" 2>/dev/null; then
+            _umo_ok "Ubuntu Panel Icon Deployed"
+        fi
+    fi
+
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
     if [ -f "$_xs_tpl" ]; then
         for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do

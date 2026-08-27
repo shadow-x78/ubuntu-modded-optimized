@@ -33,15 +33,18 @@ umo_vnc_install() {
         cat << 'HDR'
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-export TZ=Etc/UTC
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
 
-echo "tzdata tzdata/Areas select Etc" | debconf-set-selections 2>/dev/null || true
-echo "tzdata tzdata/Zones/Etc select UTC" | debconf-set-selections 2>/dev/null || true
-
 HDR
+        _tz_area="${UMO_TZ%%/*}"
+        _tz_zone="${UMO_TZ#*/}"
+        [ -n "$_tz_area" ] || _tz_area="Etc"
+        [ -n "$_tz_zone" ] || _tz_zone="UTC"
+        printf 'echo "tzdata tzdata/Areas select %s" | debconf-set-selections 2>/dev/null || true\n' "$_tz_area"
+        printf 'echo "tzdata tzdata/Zones/%s select %s" | debconf-set-selections 2>/dev/null || true\n' "$_tz_area" "$_tz_zone"
+        printf '\n'
         _umo_apt_repair_body
         cat << 'BODY'
 

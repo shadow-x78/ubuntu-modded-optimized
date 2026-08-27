@@ -142,3 +142,53 @@ umo_sys_summary() {
     umo_kv "RAM"      "${_ram}MB available"
     umo_kv "Path"     "$(umo_fs_display_path "$_dir")"
 }
+
+_umo_detect_tz() {
+    _dtz=""
+    if command -v getprop >/dev/null 2>&1; then
+        _dtz=$(getprop persist.sys.timezone 2>/dev/null | tr -d ' \t\r\n"'"'")
+    fi
+    [ -n "$_dtz" ] || _dtz="${TZ:-}"
+    if [ -z "$_dtz" ]; then
+        _doff=$(date +%z 2>/dev/null)
+        case "$_doff" in
+            +[0-9][0-9][0-9][0-9]|-[0-9][0-9][0-9][0-9])
+                _dsign=$(printf '%s' "$_doff" | cut -c1)
+                _drest=$(printf '%s' "$_doff" | cut -c2-)
+                _dhh=$(printf '%s' "$_drest" | cut -c1-2 | sed 's/^0*//')
+                _dmm=$(printf '%s' "$_drest" | cut -c3-4)
+                [ -n "$_dhh" ] || _dhh=0
+                case "$_dmm" in
+                    [3-5][0-9]) _dhh=$((_dhh + 1)) ;;
+                esac
+                if [ "$_dhh" -eq 0 ] 2>/dev/null; then
+                    _dtz="Etc/UTC"
+                else
+                    case "$_dsign" in
+                        +) _dtz="Etc/GMT-$_dhh" ;;
+                        *) _dtz="Etc/GMT+$_dhh" ;;
+                    esac
+                fi
+                ;;
+        esac
+    fi
+    case "$_dtz" in
+        ''|*..*|*[!A-Za-z0-9_./+-]*|*/*/*/*) _dtz="Etc/UTC" ;;
+    esac
+    case "$_dtz" in
+        */*) : ;;
+        *) _dtz="Etc/UTC" ;;
+    esac
+    printf '%s' "$_dtz"
+}
+
+_umo_apply_tz_files() {
+    _atz_root="$1"
+    _atz_tz="$2"
+    [ -n "$_atz_root" ] || return 1
+    [ -f "$_atz_root/usr/share/zoneinfo/$_atz_tz" ] || return 1
+    mkdir -p "$_atz_root/etc" 2>/dev/null || true
+    ln -sf "/usr/share/zoneinfo/$_atz_tz" "$_atz_root/etc/localtime" 2>/dev/null || true
+    printf '%s\n' "$_atz_tz" > "$_atz_root/etc/timezone" 2>/dev/null || true
+    return 0
+}

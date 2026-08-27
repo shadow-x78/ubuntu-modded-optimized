@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.4] - 2026-08-27
+
+### ✨ Added
+- **The XFCE top-panel menu button now carries the Ubuntu identity:** the whiskermenu button icon switches from the stock `start-here-symbolic` to a bundled Ubuntu roundel (the orange Circle of Friends, shipped as `config/theme/icons/ubuntu.svg`). The icon is installed into the universal hicolor theme at `/usr/share/icons/hicolor/scalable/apps/ubuntu.svg` so it resolves under every icon theme the design activates (Tela, Materia, gnome) - with a minimal hicolor `index.theme` written only when the system one is missing - the panel template ships `button-icon=ubuntu`, and the session-boot init refreshes the hicolor icon cache and re-points every whiskermenu plugin's `button-icon` to `ubuntu` at every session start, so existing containers get the icon on their next `umo stop && umo start` after an update (the icon file is also deployed host-side during `umo update`/`umo refresh`).
+
+### 🐛 Fixed
+- **The container clock and date no longer run on hardcoded UTC:** the container now inherits the device timezone automatically, the same one Termux sees. The installer reads `getprop persist.sys.timezone` (falling back to `$TZ`, then to the numeric `date +%z` offset mapped onto `Etc/GMT±N` with the inverted Etc sign and half-hour rounding, with charset/depth validation and `..` traversal rejection on every path) and ships the value three ways: the rootfs gets `/etc/localtime` linked and `/etc/timezone` written during finalize, the `tzdata` debconf preseeds in the desktop and VNC install scripts now carry the detected Area/Zone instead of the old pinned `Etc`/`UTC` (so tzdata's postinst can never reset the container to UTC), and the stray `export TZ=Etc/UTC` left in the VNC script header is gone. The detected zone shows in both the Configuration Summary and the Installation Complete summary, `umo update`/`umo refresh` sync the timezone into existing containers from the device, and a zone the rootfs does not carry falls back to `Etc/UTC` with a warning instead of a broken clock. The panel clock template also becomes explicit about showing both the time and the date (digital mode with the date+time layout, the only layout that renders both) and drops the `show-seconds` property that digital mode never reads, so the corrected zone surfaces as the right local time and date straight from the first session.
+
 ## [v4.16.3] - 2026-08-27
 
 ### 🐛 Fixed

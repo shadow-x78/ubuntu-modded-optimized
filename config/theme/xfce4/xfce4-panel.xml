@@ -23,7 +23,7 @@
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu">
       <property name="show-button-title" type="bool" value="false"/>
-      <property name="button-icon" type="string" value="start-here-symbolic"/>
+      <property name="button-icon" type="string" value="ubuntu"/>
     </property>
     <property name="plugin-2" type="string" value="tasklist">
       <property name="show-labels" type="bool" value="true"/>
@@ -38,7 +38,7 @@
     </property>
     <property name="plugin-5" type="string" value="clock">
       <property name="mode" type="uint" value="2"/>
-      <property name="show-seconds" type="bool" value="false"/>
+      <property name="digital-layout" type="uint" value="0"/>
     </property>
   </property>
 </channel>

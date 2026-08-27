@@ -518,9 +518,35 @@ umo_theme_fix_ownership() {
     fi
 }
 
+umo_theme_apply_brand_icon() {
+    _bi_src="$SCRIPT_DIR/config/theme/icons/ubuntu.svg"
+    [ -f "$_bi_src" ] || return 0
+    _bi_dir="$UMO_INSTALL_DIR/usr/share/icons/hicolor/scalable/apps"
+    if mkdir -p "$_bi_dir" 2>/dev/null && cp -f "$_bi_src" "$_bi_dir/ubuntu.svg" 2>/dev/null; then
+        if [ ! -f "$UMO_INSTALL_DIR/usr/share/icons/hicolor/index.theme" ]; then
+            {
+                printf '[Icon Theme]\n'
+                printf 'Name=Hicolor\n'
+                printf 'Comment=Fallback theme\n'
+                printf 'Directories=scalable/apps\n'
+                printf '\n'
+                printf '[scalable/apps]\n'
+                printf 'Size=48\n'
+                printf 'Context=Applications\n'
+                printf 'MinSize=16\n'
+                printf 'MaxSize=512\n'
+                printf 'Type=Scalable\n'
+            } > "$UMO_INSTALL_DIR/usr/share/icons/hicolor/index.theme" 2>/dev/null || true
+        fi
+        umo_log_ok "Ubuntu Panel Icon Installed (/usr/share/icons/hicolor)"
+    fi
+    return 0
+}
+
 _umo_theme_apply_local() {
     umo_theme_apply_fonts || true
     umo_theme_apply_wallpaper || true
+    umo_theme_apply_brand_icon || true
 
     if [ "$UMO_DE" != "minimal" ]; then
         umo_theme_apply_gtk || true
