@@ -174,6 +174,60 @@ umo_theme_apply_fonts() {
     umo_log_ok "Font Configuration Applied"
 }
 
+_umo_theme_channel_xml() {
+    _cx_wp="$1"
+    printf '<?xml version="1.0" encoding="UTF-8"?>\n\n'
+    printf '<channel name="xfce4-desktop" version="1.0">\n'
+    printf '  <property name="backdrop" type="empty">\n'
+    printf '    <property name="screen0" type="empty">\n'
+    for _cx_mon in monitor0 monitor-0 monitor1 monitor-1 monitorVNC0 monitorVNC-0 monitorVirtual1 default; do
+        printf '      <property name="%s" type="empty">\n' "$_cx_mon"
+        printf '        <property name="workspace0" type="empty">\n'
+        printf '          <property name="image-path" type="string" value="%s"/>\n' "$_cx_wp"
+        printf '          <property name="last-image" type="string" value="%s"/>\n' "$_cx_wp"
+        printf '          <property name="last-single-image" type="string" value="%s"/>\n' "$_cx_wp"
+        printf '          <property name="image-show" type="bool" value="true"/>\n'
+        printf '          <property name="image-style" type="int" value="5"/>\n'
+        printf '          <property name="color-style" type="int" value="0"/>\n'
+        printf '        </property>\n'
+        printf '      </property>\n'
+    done
+    printf '    </property>\n'
+    printf '  </property>\n'
+    printf '  <property name="last" type="empty">\n'
+    printf '    <property name="window-alignment" type="int" value="1"/>\n'
+    printf '  </property>\n'
+    printf '</channel>\n'
+}
+
+umo_theme_seed_desktop_channel() {
+    _sc_wp="/usr/share/wallpapers/umo-wallpaper.jpg"
+    for _sc_home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
+        [ -d "$_sc_home" ] || continue
+        [ "$UMO_DE" != "xfce4" ] && [ "$UMO_DE" != "xfce" ] && [ -n "${UMO_DE:-}" ] && continue
+        _sc_dir="$_sc_home/.config/xfce4/xfconf/xfce-perchannel-xml"
+        _sc_file="$_sc_dir/xfce4-desktop.xml"
+        mkdir -p "$_sc_dir" 2>/dev/null || continue
+        if [ -f "$_sc_file" ]; then
+            sed -i \
+                -e "s|\(name=\"image-path\" type=\"string\" value=\"\)[^\"]*\(\".*\)|\1$_sc_wp\2|" \
+                -e "s|\(name=\"last-image\" type=\"string\" value=\"\)[^\"]*\(\".*\)|\1$_sc_wp\2|" \
+                -e "s|\(name=\"last-single-image\" type=\"string\" value=\"\)[^\"]*\(\".*\)|\1$_sc_wp\2|" \
+                "$_sc_file" 2>/dev/null || true
+            if ! grep -qF "$_sc_wp" "$_sc_file" 2>/dev/null; then
+                _umo_theme_channel_xml "$_sc_wp" > "$_sc_file" 2>/dev/null || true
+            fi
+        else
+            _umo_theme_channel_xml "$_sc_wp" > "$_sc_file" 2>/dev/null || true
+        fi
+        chmod 644 "$_sc_file" 2>/dev/null || true
+    done
+    if [ -d "$UMO_INSTALL_DIR/home/umo" ]; then
+        chown -R 1000:1000 "$UMO_INSTALL_DIR/home/umo/.config/xfce4" 2>/dev/null || true
+    fi
+    return 0
+}
+
 umo_theme_apply_wallpaper() {
     _wp_src="$SCRIPT_DIR/config/theme/wallpaper/umo-wallpaper.jpg"
 
@@ -199,6 +253,17 @@ umo_theme_apply_wallpaper() {
                 fi
             done
         fi
+
+        _bg_dir="$UMO_INSTALL_DIR/usr/share/backgrounds/xfce"
+        if [ -d "$_bg_dir" ]; then
+            for _bg in "$_bg_dir"/*.jpg "$_bg_dir"/*.jpeg "$_bg_dir"/*.png; do
+                if [ -f "$_bg" ]; then
+                    cp -f "$_wp_src" "$_bg" 2>/dev/null || true
+                fi
+            done
+        fi
+
+        umo_theme_seed_desktop_channel
     else
         umo_log_info "No Wallpaper File Found, Continuing Without Wallpaper"
     fi

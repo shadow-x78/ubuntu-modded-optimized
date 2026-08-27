@@ -62,6 +62,10 @@ else
 fi
 sleep 2
 
+_log "xrandr Connected Outputs: $(xrandr --query 2>/dev/null | awk '/ connected/{printf "%s ", $1}')"
+_log "Channel Monitor Keys Before: $(xfconf-query -c xfce4-desktop -l 2>/dev/null | sed -n 's|.*/backdrop/screen0/\([^/]*\)/.*|\1|p' | sort -u | tr '\n' ' ')"
+_log "Backdrop Values Before: $(xfconf-query -c xfce4-desktop -l -v 2>/dev/null | grep -E 'image-path|last-image|last-single-image' | head -6 | tr '\n' ' ')"
+
 _wp_round=0
 _wp_found=0
 while [ "$_wp_round" -lt 3 ]; do
@@ -123,6 +127,8 @@ if command -v xfdesktop >/dev/null 2>&1; then
         else
             _log "xfdesktop Reload Failed"
         fi
+        sleep 2
+        _log "Backdrop Values After Reload: $(xfconf-query -c xfce4-desktop -l -v 2>/dev/null | grep -E 'image-path|last-image|last-single-image' | head -6 | tr '\n' ' ')"
     else
         _log "xfdesktop Not Running After 30s, Reload Skipped (Fresh Session Will Read The Channel)"
     fi

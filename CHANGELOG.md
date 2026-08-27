@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.2] - 2026-08-27
+
+### 🐛 Fixed
+- **GNOME Web (the basic-set browser) could not run inside the container:** WebKitGTK launches its web/network subprocesses inside a bubblewrap sandbox, which needs user namespaces that proot does not provide - so Epiphany died or came up blank the moment a page tried to load. Every launch path now disables that sandbox with the official `WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS` switch: the app's `.desktop` file is rewritten to `Exec=env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany %U` right after the app-set install inside the container, the same rewrite is applied host-side during `umo update`/`umo refresh` for containers that already have the browser (so existing installs are fixed without reinstalling), the Openbox menu fallback chain carries the switch, and fresh containers export it from the root shell profile so running `epiphany` in a terminal works too.
+- **The XFCE desktop could still boot with the stock wallpaper instead of the UMO one:** the per-channel defaults in `/etc/xdg` only seed properties the session user has never saved, and a saved `last-image`/`last-single-image` from the XFCE default always won on the next boot. The theme apply now also rewrites the session users' own xfconf channel files on disk (`/root` and `/home/umo`) - existing files keep every other setting but get their image paths pointed at `/usr/share/wallpapers/umo-wallpaper.jpg`, missing files are created with the UMO backdrop under every plausible VNC monitor key (monitor0, monitor-0, monitorVNC0, monitorVNC-0, monitorVirtual1, default...) - so the very first xfdesktop of a fresh user already reads the UMO wallpaper, with the existing session-boot apply (xfconf writes + `xfdesktop -R`) kept as the live-session layer. The stock wallpapers shipped under `/usr/share/backgrounds/xfce/` are now overwritten with the UMO image alongside `/usr/share/xfce4/backdrops/`, the shipped per-channel template gains the XFCE-4.18 `last-single-image` key and the full monitor-key matrix, and the session-boot init logs the connected outputs, the channel's monitor keys and the backdrop values before and after its reload (`/tmp/umo-desktop-init.log`) so any future miss is one file away from a diagnosis.
+
 ## [v4.16.1] - 2026-08-27
 
 ### 🎨 Changed

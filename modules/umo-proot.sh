@@ -220,6 +220,7 @@ export DISPLAY=:1
 export PROOT_NO_SECCOMP=1
 export GALLIUM_DRIVER=virpipe
 export MESA_GL_VERSION_OVERRIDE=4.0
+export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 
 alias ls="ls --color=auto 2>/dev/null"
 alias ll="ls -alF 2>/dev/null"

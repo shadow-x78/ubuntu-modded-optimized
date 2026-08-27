@@ -329,6 +329,13 @@ _umo_refresh_container() {
         done
     fi
 
+    _eph_desktop="$_ct_inst_dir/usr/share/applications/org.gnome.Epiphany.desktop"
+    if [ -f "$_eph_desktop" ] && ! grep -q "WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS" "$_eph_desktop" 2>/dev/null; then
+        if sed -i 's|^Exec=.*|Exec=env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany %U|' "$_eph_desktop" 2>/dev/null; then
+            _umo_ok "Browser Launcher Hardened For Proot (WebKit Sandbox Disabled)"
+        fi
+    fi
+
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
     if [ -f "$_xs_tpl" ]; then
         for _xsf in "$_ct_inst_dir/root/.vnc/xstartup" "$_ct_inst_dir/home/umo/.vnc/xstartup"; do

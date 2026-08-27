@@ -23,6 +23,7 @@ apt-get install -y --no-install-recommends mousepad ristretto file-roller || tru
 dpkg --configure -a || true
 apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
+_umo_harden_epiphany
 "
 }
 
@@ -31,6 +32,7 @@ umo_apps_browsers() {
     _run_installer "Browsers" "
 apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
+_umo_harden_epiphany
 "
 }
 
@@ -85,7 +87,17 @@ _run_installer() {
     _label="$1"
     _script_body="$2"
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
-    printf '#!/bin/sh\nexport DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C\n[ -t 0 ] && exec </dev/null\n%s\n' "$_script_body" > "$_script"
+    {
+        printf '%s\n' '#!/bin/sh'
+        printf '%s\n' 'export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C'
+        printf '%s\n' '[ -t 0 ] && exec </dev/null'
+        printf '%s\n' '_umo_harden_epiphany() {'
+        printf '%s\n' '    _eph=/usr/share/applications/org.gnome.Epiphany.desktop'
+        printf '%s\n' '    [ -f "$_eph" ] || return 0'
+        printf '%s\n' '    sed -i '"'"'s|^Exec=.*|Exec=env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany %U|'"'"' "$_eph" 2>/dev/null || true'
+        printf '%s\n' '}'
+        printf '%s\n' "$_script_body"
+    } > "$_script"
     chmod +x "$_script"
     umo_log_run "Installing $_label..."
     _rc=0
