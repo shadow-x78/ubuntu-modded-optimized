@@ -1,0 +1,29 @@
+#!/bin/sh
+
+_LOG=/tmp/umo-browser.log
+_ts() { date '+%H:%M:%S' 2>/dev/null || echo '?'; }
+
+printf '[%s] launch args: %s\n' "$(_ts)" "$*" >> "$_LOG" 2>/dev/null || true
+
+_EPH_BIN=""
+if command -v epiphany >/dev/null 2>&1; then
+    _EPH_BIN=epiphany
+elif command -v epiphany-browser >/dev/null 2>&1; then
+    _EPH_BIN=epiphany-browser
+fi
+
+if [ -z "$_EPH_BIN" ]; then
+    printf '[%s] ERROR: epiphany binary missing - install with: apt-get install -y --no-install-recommends epiphany-browser\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+    printf 'UMO Browser: epiphany is not installed in the container.\n' >&2
+    printf 'Install it with: apt-get install -y --no-install-recommends epiphany-browser\n' >&2
+    printf 'Full log: %s\n' "$_LOG" >&2
+    exit 127
+fi
+
+export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
+export GSK_RENDERER="${GSK_RENDERER:-cairo}"
+export LIBGL_ALWAYS_SOFTWARE=1
+[ -n "${DISPLAY:-}" ] || export DISPLAY=:1
+
+printf '[%s] exec: %s (DISPLAY=%s GSK_RENDERER=%s)\n' "$(_ts)" "$_EPH_BIN" "$DISPLAY" "$GSK_RENDERER" >> "$_LOG" 2>/dev/null || true
+exec "$_EPH_BIN" "$@" >> "$_LOG" 2>&1

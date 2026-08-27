@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.3] - 2026-08-27
+
+### 🐛 Fixed
+- **GNOME Web still did nothing on click in the basic set (even with v4.16.2's sandbox switch):** the sandbox switch only reached launches that ran the patched `Exec=` line, but GNOME Web's desktop entry ships with `DBusActivatable=true`, so XFCE launchers (menu, plank dock, panel launchers) activate it through the D-Bus service (`org.gnome.Epiphany.service`), which runs the raw binary and skips the `Exec=` line entirely - the WebKit sandbox then kills the web process before a window ever appears. On top of that, GNOME Web on noble is GTK4, and under Xvnc the GL renderer path dies before first paint. Every click-launch path now funnels through a dedicated launcher wrapper (`/usr/local/bin/umo-browser`, shipped in `config/container/`), which disables the WebKit sandbox with the official switch, pins the GTK4 renderer to cairo (with software GL), defaults DISPLAY, resolves the binary even when only `epiphany-browser` is on PATH, and logs every attempt to `/tmp/umo-browser.log` so any future failure is one file away from a diagnosis. The wrapper is deployed at install time (VNC scripts phase plus the apps phase, so minimal-mode containers get it too) and during `umo update`/`umo refresh` for existing containers; the `.desktop` file is rewritten to `Exec=/usr/local/bin/umo-browser %U` with `DBusActivatable=false` forced and the cold-start D-Bus service file moved aside (at app-set install inside the container and host-side during update/refresh, including containers already carrying the older env-based Exec line from v4.16.2); the Openbox fallback menu now calls the wrapper first; and fresh containers export `GSK_RENDERER=cairo` and `LIBGL_ALWAYS_SOFTWARE=1` from the root shell profile alongside the sandbox switch so terminal launches behave the same. The post-install browser probe now also reports the installed version (`UMO-BROWSER-OK ...` / `UMO-BROWSER-MISSING ...`) and runs inside the container instead of being evaluated on the host at script-generation time.
+
 ## [v4.16.2] - 2026-08-27
 
 ### 🐛 Fixed

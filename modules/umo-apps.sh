@@ -24,6 +24,11 @@ dpkg --configure -a || true
 apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
 _umo_harden_epiphany
+if command -v epiphany >/dev/null 2>&1; then
+    printf 'UMO-BROWSER-OK %s\n' \"\$(epiphany --version 2>/dev/null | head -1)\"
+else
+    printf 'UMO-BROWSER-MISSING: epiphany-browser failed to install\n'
+fi
 "
 }
 
@@ -33,6 +38,11 @@ umo_apps_browsers() {
 apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
 _umo_harden_epiphany
+if command -v epiphany >/dev/null 2>&1; then
+    printf 'UMO-BROWSER-OK %s\n' \"\$(epiphany --version 2>/dev/null | head -1)\"
+else
+    printf 'UMO-BROWSER-MISSING: epiphany-browser failed to install\n'
+fi
 "
 }
 
@@ -94,7 +104,10 @@ _run_installer() {
         printf '%s\n' '_umo_harden_epiphany() {'
         printf '%s\n' '    _eph=/usr/share/applications/org.gnome.Epiphany.desktop'
         printf '%s\n' '    [ -f "$_eph" ] || return 0'
-        printf '%s\n' '    sed -i '"'"'s|^Exec=.*|Exec=env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany %U|'"'"' "$_eph" 2>/dev/null || true'
+        printf '%s\n' '    sed -i '"'"'s|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|'"'"' "$_eph" 2>/dev/null || true'
+        printf '%s\n' '    sed -i '"'"'s|^DBusActivatable=.*|DBusActivatable=false|'"'"' "$_eph" 2>/dev/null || true'
+        printf '%s\n' '    _svc=/usr/share/dbus-1/services/org.gnome.Epiphany.service'
+        printf '%s\n' '    [ -f "$_svc" ] && mv -f "$_svc" "$_svc.umo-disabled" 2>/dev/null || true'
         printf '%s\n' '}'
         printf '%s\n' "$_script_body"
     } > "$_script"
@@ -110,7 +123,18 @@ _run_installer() {
     rm -f "$_script" 2>/dev/null || true
 }
 
+_umo_deploy_browser_wrapper() {
+    _bw_src="$SCRIPT_DIR/config/container/umo-browser"
+    _bw_dst="${UMO_INSTALL_DIR:?}/usr/local/bin/umo-browser"
+    if [ -f "$_bw_src" ]; then
+        mkdir -p "$(dirname "$_bw_dst")" 2>/dev/null || true
+        cp -f "$_bw_src" "$_bw_dst" 2>/dev/null || true
+        chmod +x "$_bw_dst" 2>/dev/null || true
+    fi
+}
+
 umo_apps_install() {
+    _umo_deploy_browser_wrapper
     case "$UMO_APP_SET" in
         basic)   umo_apps_basic ;;
         dev)     umo_apps_basic; umo_apps_dev ;;

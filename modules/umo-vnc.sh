@@ -202,7 +202,7 @@ umo_vnc_create_scripts() {
         return 0
     fi
 
-    for _cscript in umo-startvnc umo-stopvnc; do
+    for _cscript in umo-startvnc umo-stopvnc umo-browser; do
         _src="$SCRIPT_DIR/config/container/$_cscript"
         if [ -f "$_src" ]; then
             cp -f "$_src" "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true

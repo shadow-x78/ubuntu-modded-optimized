@@ -315,7 +315,7 @@ _umo_refresh_container() {
 
     _bin_dir="$_ct_inst_dir/usr/local/bin"
     if mkdir -p "$_bin_dir" 2>/dev/null; then
-        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras; do
+        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras umo-browser; do
             _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
             [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
             if [ -f "$_csrc" ]; then
@@ -330,9 +330,14 @@ _umo_refresh_container() {
     fi
 
     _eph_desktop="$_ct_inst_dir/usr/share/applications/org.gnome.Epiphany.desktop"
-    if [ -f "$_eph_desktop" ] && ! grep -q "WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS" "$_eph_desktop" 2>/dev/null; then
-        if sed -i 's|^Exec=.*|Exec=env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany %U|' "$_eph_desktop" 2>/dev/null; then
-            _umo_ok "Browser Launcher Hardened For Proot (WebKit Sandbox Disabled)"
+    if [ -f "$_eph_desktop" ] && ! grep -q "^Exec=/usr/local/bin/umo-browser" "$_eph_desktop" 2>/dev/null; then
+        if sed -i 's|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|' "$_eph_desktop" 2>/dev/null; then
+            sed -i 's|^DBusActivatable=.*|DBusActivatable=false|' "$_eph_desktop" 2>/dev/null || true
+            _eph_svc="$_ct_inst_dir/usr/share/dbus-1/services/org.gnome.Epiphany.service"
+            if [ -f "$_eph_svc" ]; then
+                mv -f "$_eph_svc" "$_eph_svc.umo-disabled" 2>/dev/null || true
+            fi
+            _umo_ok "Browser Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
         fi
     fi
 

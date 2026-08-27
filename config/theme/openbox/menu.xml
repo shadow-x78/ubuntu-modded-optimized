@@ -12,7 +12,7 @@
       <action name="Execute"><command>pcmanfm</command></action>
     </item>
     <item label="Web Browser">
-      <action name="Execute"><command>sh -c "exo-open --launch WebBrowser || env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany || midori || true"</command></action>
+      <action name="Execute"><command>sh -c "/usr/local/bin/umo-browser || exo-open --launch WebBrowser || env WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 epiphany || true"</command></action>
     </item>
     <separator/>
     <item label="Reconfigure Openbox">
