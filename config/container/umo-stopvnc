@@ -5,4 +5,9 @@ for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do
     kill "$_pid" 2>/dev/null || true
 done
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1 /tmp/.X2-lock /tmp/.X11-unix/X2 2>/dev/null || true
-printf "  \033[38;5;34m✔\033[0m  VNC stopped\n"
+_UMO_GOK='OK'
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) _UMO_GOK='✔' ;;
+    *) command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMO_GOK='✔' ;; esac ;;
+esac
+printf "  \033[38;5;34m%s\033[0m  VNC Stopped\n" "$_UMO_GOK"

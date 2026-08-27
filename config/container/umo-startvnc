@@ -14,12 +14,26 @@ _ORG='\033[38;5;208m'
 _YEL='\033[38;5;220m'
 _DIM='\033[2m'
 _NC='\033[0m'
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    _GRN=''; _RED=''; _CYN=''; _ORG=''; _YEL=''; _DIM=''; _NC=''
+fi
 
-_step() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
-_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
-_err()  { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
-_note() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
-_hint() { printf "  %b%s%b  %s\n" "$_YEL" "⚠" "$_NC" "$1"; }
+# Glyph support - same detection as the installer. Main steps keep the block
+# mark, sub-lines use the side arrow like the install flow.
+_UMO_GBLOCK='|'; _UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'; _UMO_GPLAY='*'
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) _UMOG=1 ;;
+    *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
+esac
+if [ "${_UMOG:-0}" = "1" ]; then
+    _UMO_GBLOCK='▌'; _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'; _UMO_GPLAY='▸'
+fi
+
+_step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GBLOCK" "$_NC" "$1"; }
+_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
+_err()  { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
+_note() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
+_hint() { printf "  %b%s%b  %s\n" "$_YEL" "$_UMO_GWARN" "$_NC" "$1"; }
 _apt_progress() { grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" | sed 's/^/    /' || true; }
 
 for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
@@ -156,7 +170,7 @@ _start_session
 
 printf "\n"
 printf "  %b────────────────────────────────────────%b\n" "$_ORG" "$_NC"
-printf "  %b%s UMO VNC Server Active%b\n" "$_ORG" "▸" "$_NC"
+printf "  %b%s UMO VNC Server Active%b\n" "$_ORG" "$_UMO_GPLAY" "$_NC"
 printf "  %b────────────────────────────────────────%b\n" "$_ORG" "$_NC"
 printf "\n"
 printf "  %bDisplay:%b    %b%s%b\n" "" "$_NC" "$_CYN" "$VNC_DISPLAY" "$_NC"

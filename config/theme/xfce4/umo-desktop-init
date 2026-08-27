@@ -4,17 +4,13 @@
 
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 
-_i=0
-until xfconf-query -c xfce4-desktop -l >/dev/null 2>&1; do
-    _i=$((_i + 1))
-    [ "$_i" -ge 20 ] && exit 0
-    sleep 1
-done
-
 WP="/usr/share/wallpapers/umo-wallpaper.jpg"
 [ -f "$WP" ] || WP="/usr/local/share/wallpapers/umo-wallpaper.jpg"
 [ -f "$WP" ] || exit 0
 
+# The session dbus address is only exported into startxfce4's child chain
+# (dbus-launch), so this script discovers the bus from its session file.
+# Must happen before ANY xfconf-query call, otherwise they all fail.
 if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
     for _bus_file in "$HOME/.dbus/session-bus/"*; do
         [ -f "$_bus_file" ] || continue
@@ -23,28 +19,57 @@ if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
     done
     export DBUS_SESSION_BUS_ADDRESS
 fi
-command -v xfconf-query >/dev/null 2>&1 || exit 0
+[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] || exit 0
 
-_monitors="$(xfconf-query -c xfce4-desktop -l 2>/dev/null \
-    | grep '/backdrop/screen0/' \
-    | sed -n 's|.*/backdrop/screen0/\([^/]*\)/.*|/backdrop/screen0/\1|p')"
-if command -v xrandr >/dev/null 2>&1; then
-    for _m in $(xrandr --query 2>/dev/null | awk '/ connected/{print $1}'); do
-        [ -n "$_m" ] && _monitors="$_monitors
-/backdrop/screen0/$_m"
+_i=0
+until xfconf-query -c xfce4-desktop -l >/dev/null 2>&1; do
+    _i=$((_i + 1))
+    [ "$_i" -ge 60 ] && break
+    sleep 1
+done
+sleep 2
+
+# Apply the wallpaper to every monitor key we can find (existing xfconf
+# entries, xrandr outputs and the common fallback names), retrying a few
+# rounds while xfdesktop finishes registering its channels.
+_wp_round=0
+while [ "$_wp_round" -lt 3 ]; do
+    _wp_round=$((_wp_round + 1))
+
+    _mons="$(xfconf-query -c xfce4-desktop -l 2>/dev/null \
+        | sed -n 's|.*/backdrop/screen0/\([^/]*\)/.*|\1|p')"
+    if command -v xrandr >/dev/null 2>&1; then
+        _mons="$_mons
+$(xrandr --query 2>/dev/null | awk '/ connected/{print $1}')"
+    fi
+    _mons="$_mons
+monitor0
+monitor-0
+monitor1
+monitorVirtual1
+default"
+    _mons="$(printf '%s\n' "$_mons" | sed '/^$/d' | sort -u)"
+
+    for _mon in $_mons; do
+        _base="/backdrop/screen0/$_mon/workspace0"
+        xfconf-query -c xfce4-desktop -p "$_base/image-path" -n -t string -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/image-path" -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/last-image" -n -t string -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/last-image" -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/last-single-image" -n -t string -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/last-single-image" -s "$WP" >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/image-show" -n -t bool -s true >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/image-show" -s true >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/image-style" -n -t int -s 5 >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/image-style" -s 5 >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/color-style" -n -t int -s 0 >/dev/null 2>&1 || true
+        xfconf-query -c xfce4-desktop -p "$_base/color-style" -s 0 >/dev/null 2>&1 || true
     done
-fi
-_monitors="$_monitors
-/backdrop/screen0/monitor0"
-_monitors="$(printf '%s\n' "$_monitors" | sed '/^$/d' | sort -u)"
 
-for _mon in $_monitors; do
-    _base="$_mon/workspace0"
-    xfconf-query -c xfce4-desktop -p "$_base/image-path" -n -t string -s "$WP" >/dev/null 2>&1 || true
-    xfconf-query -c xfce4-desktop -p "$_base/last-image" -n -t string -s "$WP" >/dev/null 2>&1 || true
-    xfconf-query -c xfce4-desktop -p "$_base/image-show" -n -t bool -s true >/dev/null 2>&1 || true
-    xfconf-query -c xfce4-desktop -p "$_base/image-style" -n -t int -s 5 >/dev/null 2>&1 || true
-    xfconf-query -c xfce4-desktop -p "$_base/color-style" -n -t int -s 0 >/dev/null 2>&1 || true
+    if xfconf-query -c xfce4-desktop -l -v 2>/dev/null | grep -qF "$WP"; then
+        break
+    fi
+    sleep 5
 done
 
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0 >/dev/null 2>&1 || true

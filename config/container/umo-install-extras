@@ -21,11 +21,25 @@ _RED='\033[38;5;196m'
 _ORG='\033[38;5;208m'
 _YLW='\033[38;5;226m'
 _NC='\033[0m'
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    _GRN=''; _RED=''; _ORG=''; _YLW=''; _NC=''
+fi
 
-_step() { printf "  %b%s%b  %s\n" "$_ORG" "▌" "$_NC" "$1"; }
-_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "✔" "$_NC" "$1"; }
-_fail() { printf "  %b%s%b  %s\n" "$_RED" "✖" "$_NC" "$1"; }
-_warn() { printf "  %b%s%b  %s\n" "$_YLW" "⚠" "$_NC" "$1"; }
+# Glyph support - same detection as the installer, so sub-steps use the
+# side arrow exactly like the install flow does.
+_UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) _UMOG=1 ;;
+    *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
+esac
+if [ "${_UMOG:-0}" = "1" ]; then
+    _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'
+fi
+
+_step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
+_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
+_fail() { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
+_warn() { printf "  %b%s%b  %s\n" "$_YLW" "$_UMO_GWARN" "$_NC" "$1"; }
 
 _LOG=/tmp/umo-install-extras.log
 printf '' > "$_LOG" 2>/dev/null || _LOG=/dev/null

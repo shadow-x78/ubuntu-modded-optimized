@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.8] - 2026-08-27
+
+### 🐛 Fixed
+- **The UMO wallpaper never appeared in the VNC session — root cause found:** `umo-desktop-init` waited for the xfce4-desktop xfconf channel *before* discovering the session dbus address, and dbus-launch only exports that address into the session's own child chain (not into the background init script) — so every `xfconf-query` failed and the script gave up after 20 seconds without applying anything. The dbus discovery now runs first (from the session bus file), the channel wait was extended to 60 seconds, and the wallpaper is applied to every monitor key that exists (xfconf-enumerated keys + xrandr outputs + the common fallback names), including `last-single-image`, with a verification grep and up to 3 retry rounds while xfdesktop finishes registering.
+- **Plank dock did not match the design and had no pinned apps:** the dock now gets a written configuration on every design apply — `Theme=Gtk+` so it inherits the active GTK theme (Orchis dark/light instead of the stock gray), bottom position, centered, 48px icons, no auto-hide — plus default launchers pinned per the selected application set (base: Thunar, Terminal, Firefox ESR, Mousepad; media/full add VLC + GIMP; office adds LibreOffice + Atril; browser/full add Epiphany). Only apps whose `.desktop` file actually exists in the container get pinned, so the dock is always valid.
+
+### 🎨 Changed
+- **Sub-headings now use the installer's side arrow:** the in-container scripts (designer extras installer, VNC launcher/stopper) detect glyph support exactly like the installer — sub-steps print `❯` instead of the block mark (which stays reserved for main steps), with a clean ASCII fallback on non-UTF-8 terminals, and NO_COLOR/non-TTY output is blanked like everywhere else.
+
 ## [v4.15.7] - 2026-08-27
 
 ### 🐛 Fixed

@@ -185,8 +185,11 @@ umo_theme_apply_wallpaper() {
 
     if [ -f "$_wp_src" ]; then
         if mkdir -p "$UMO_INSTALL_DIR/usr/share/wallpapers" 2>/dev/null; then
-            cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg" 2>/dev/null || \
+            if cp -f "$_wp_src" "$UMO_INSTALL_DIR/usr/share/wallpapers/umo-wallpaper.jpg" 2>/dev/null; then
+                umo_log_ok "Wallpaper Installed (/usr/share/wallpapers/umo-wallpaper.jpg)"
+            else
                 umo_log_warn "Could Not Copy Wallpaper"
+            fi
         fi
 
         _xdg_dir="$UMO_INSTALL_DIR/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
@@ -230,13 +233,62 @@ umo_theme_apply_fastfetch() {
     umo_log_ok "Fastfetch Configuration Applied"
 }
 
+# Base names of the .desktop files pinned to the Plank dock, based on the
+# selected application set (only entries actually installed get pinned).
+_umo_plank_launchers() {
+    printf '%s\n' thunar xfce4-terminal firefox-esr mousepad
+    case "${UMO_APP_SET:-basic}" in
+        media)   printf '%s\n' vlc gimp ;;
+        office)  printf '%s\n' libreoffice-startcenter atril ;;
+        browser) printf '%s\n' org.gnome.Epiphany ;;
+        full)    printf '%s\n' vlc gimp libreoffice-startcenter atril org.gnome.Epiphany ;;
+        dev|basic|*) : ;;
+    esac
+    return 0
+}
+
+# Write the Plank dock configuration for one home dir: dark theme-consistent
+# dock (Theme=Gtk+ inherits the applied GTK theme) at the bottom, plus the
+# default launchers for the selected app set.
+_umo_theme_apply_plank() {
+    _pl_home="$1"
+    _pl_dir="$_pl_home/.config/plank/dock1"
+    mkdir -p "$_pl_dir/launchers" 2>/dev/null || return 0
+
+    cat > "$_pl_dir/settings.ini" << 'PLANKINI'
+[PlankDockPreferences]
+Position=3
+IconSize=48
+HideMode=0
+Theme=Gtk+
+ShowDockItem=false
+PinnedOnly=false
+Alignment=3
+ItemsAlignment=3
+ZoomEnabled=false
+ZoomPercent=140
+LockItems=false
+PressureReveal=false
+PLANKINI
+
+    rm -f "$_pl_dir/launchers/"*.dockitem 2>/dev/null || true
+    for _desk in $(_umo_plank_launchers); do
+        if [ -f "$UMO_INSTALL_DIR/usr/share/applications/$_desk.desktop" ]; then
+            {
+                printf '[PlankDockItemPreferences]\n'
+                printf 'Launcher=file:///usr/share/applications/%s.desktop\n' "$_desk"
+            } > "$_pl_dir/launchers/$_desk.dockitem" 2>/dev/null || true
+        fi
+    done
+    return 0
+}
+
 umo_theme_apply_xfce() {
     umo_log_step "Configure XFCE4 Desktop Design"
 
     _theme_dir="$SCRIPT_DIR/config/theme/xfce4"
     _UI_FONT="$(_umo_theme_ui_font)"
     _MONO_FONT="$(_umo_theme_mono_font)"
-
     for _home in "$UMO_INSTALL_DIR/root" "$UMO_INSTALL_DIR/home/umo"; do
         [ -d "$_home" ] || continue
         _xf_conf="$_home/.config/xfce4/xfconf/xfce-perchannel-xml"
@@ -283,6 +335,9 @@ NoDisplay=false
 X-GNOME-Autostart-enabled=true
 PLANKDESK
         fi
+
+        # Dock theme + default launchers for the selected application set.
+        _umo_theme_apply_plank "$_home"
     done
 
     # System-wide autostart fallback (covers accounts without the user entry).
