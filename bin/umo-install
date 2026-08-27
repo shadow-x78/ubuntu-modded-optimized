@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Installer (phased: rootfs, proot, DE, apps, theme) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 unset LD_PRELOAD
@@ -8,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.15.11"
+export UMO_VERSION="4.16.0"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -80,7 +78,7 @@ ALIASES
         sed -i -e '/# ===== UMO =====/,+1d' "$_rc" 2>/dev/null || true
         printf '\n# ===== UMO =====\n[ -f "%s/aliases.sh" ] && . "%s/aliases.sh"\n' "$UMO_SCRIPT_DIR" "$UMO_SCRIPT_DIR" >> "$_rc" 2>/dev/null || true
     done
-    umo_log_ok "Host aliases written to $UMO_SCRIPT_DIR/aliases.sh"
+    umo_log_ok "Host aliases written to $(umo_fs_display_path "$UMO_SCRIPT_DIR")/aliases.sh"
 }
 
 umo_phase_check() {
@@ -179,7 +177,7 @@ umo_phase_download() {
     umo_ui_header "Ubuntu RootFS"
     export UMO_CACHE_DIR="$HOME/.umo/cache"
     if ! mkdir -p "$UMO_CACHE_DIR" 2>/dev/null; then
-        umo_die "Cannot create cache directory: $UMO_CACHE_DIR"
+        umo_die "Cannot create cache directory: $(umo_fs_display_path "$UMO_CACHE_DIR")"
     fi
 
     _arch=$(uname -m)
@@ -191,7 +189,7 @@ umo_phase_download() {
 
     _archive="$UMO_CACHE_DIR/umo-rootfs-${UMO_UBUNTU_VERSION}-${_uarch}.tar.gz"
     umo_net_download_mirrors "$_archive"
-    [ -f "$_archive" ] || umo_die "Download reported success but archive is missing: $_archive"
+    [ -f "$_archive" ] || umo_die "Download reported success but archive is missing: $(umo_fs_display_path "$_archive")"
     umo_net_extract "$_archive" "$UMO_INSTALL_DIR"
     rm -f "$_archive"
 
@@ -291,6 +289,16 @@ umo_phase_finalize() {
             done
             true
         ' || true
+        umo_run_quiet "Hardening Package Manager Config..." _umo_login_timeout 120 -c '
+            cat > /etc/apt/apt.conf.d/99-umo-sandbox << "UMOAPT"
+APT::Sandbox::User "root";
+Dpkg::Options:: "--force-confdef";
+Dpkg::Options:: "--force-confold";
+Dpkg::Use-Pty "0";
+DPkg::FlushSTDIN "false";
+UMOAPT
+            chmod 644 /etc/apt/apt.conf.d/99-umo-sandbox
+        ' || true
     fi
 
     _cplt_body='export DEBIAN_FRONTEND=noninteractive
@@ -320,7 +328,7 @@ fi'
     done
 
     mkdir -p "$UMO_SCRIPT_DIR" 2>/dev/null || {
-        umo_log_warn "Cannot create $UMO_SCRIPT_DIR, host scripts stay where they are"
+        umo_log_warn "Cannot create $(umo_fs_display_path "$UMO_SCRIPT_DIR"), host scripts stay where they are"
         UMO_SCRIPT_DIR="$HOME"
     }
     for _script in start stop; do
@@ -353,7 +361,7 @@ fi'
         _umo_cli_src="$SCRIPT_DIR/bin/umo-cli"
         if [ -f "$_umo_cli_src" ]; then
             if umo_render_cli "$_umo_cli_src" "$_umo_cli_target"; then
-                umo_log_ok "CLI command installed ($_umo_cli_target)"
+                umo_log_ok "CLI command installed ($(umo_fs_display_path "$_umo_cli_target"))"
             else
                 umo_log_warn "CLI wrapper render failed, keeping current CLI if any"
             fi
@@ -376,7 +384,7 @@ fi'
             printf 'UMO_USER="umo"\n'
             printf 'REPO_DIR="%s"\n' "$SCRIPT_DIR"
         } > "$UMO_RUNTIME_DIR/umo.conf"
-        umo_log_ok "Installation settings saved ($UMO_RUNTIME_DIR/umo.conf)"
+        umo_log_ok "Installation settings saved ($(umo_fs_display_path "$UMO_RUNTIME_DIR")/umo.conf)"
     fi
 
     umo_log_ok "Finalized"
@@ -388,9 +396,9 @@ umo_phase_summary() {
     umo_banner || true
     umo_rule
 
-    printf "\n  %b%bInstallation Complete%b\n" "$UMO_BOLD" "$UMO_COLOR_SUCCESS" "$UMO_NC"
+    printf "\n  %b%s%b  %b%bInstallation Complete%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$UMO_COLOR_SUCCESS" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
-    umo_repeat "$UMO_LINE_H" 21
+    umo_repeat "$UMO_LINE_H" 24
     printf "%b\n\n" "$UMO_NC"
 
     umo_kv "Version" "Ubuntu $UMO_UBUNTU_VERSION"
@@ -411,9 +419,9 @@ umo_phase_summary() {
     fi
     umo_kv "User"    "umo (login pass: umo)"
 
-    printf "\n  %b%bGet Started%b\n" "$UMO_BOLD" "$UMO_COLOR_PRIMARY" "$UMO_NC"
+    printf "\n  %b%s%b  %b%bGet Started%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$UMO_COLOR_PRIMARY" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
-    umo_repeat "$UMO_LINE_H" 11
+    umo_repeat "$UMO_LINE_H" 14
     printf "%b\n\n" "$UMO_NC"
 
     printf "  %b%-30s%b %s\n" "$UMO_B_CYAN" "umo start" "$UMO_NC" "Start UMO session & VNC"
@@ -428,9 +436,9 @@ umo_phase_summary() {
     printf "  %b%-30s%b %s\n" "$UMO_B_CYAN" "umo update" "$UMO_NC" "Update UMO tool"
     printf "  %b%-30s%b %s\n" "$UMO_B_CYAN" "umo uninstall" "$UMO_NC" "Remove UMO completely"
 
-_readme_dir="$UMO_INSTALL_DIR/root/.umo"
+    _readme_dir="$UMO_INSTALL_DIR/root/.umo"
     umo_fs_mkdir "$_readme_dir" 2>/dev/null || true
-    timeout 5 sh -c "cat > '$_readme_dir/README.txt' 2>/dev/null" << README_EOF || true
+    timeout 5 sh -c 'cat > "$1" 2>/dev/null' _ "$_readme_dir/README.txt" << README_EOF || true
 ========================================
   UMO Ubuntu - v$UMO_VERSION
   Version: $UMO_UBUNTU_VERSION
@@ -466,7 +474,23 @@ umo_cli_parse() {
             --refresh) UMO_REFRESH=1 ;;
             --de=*)      UMO_DE="${_arg#*=}" ;;
             --apps=*)    UMO_APP_SET="${_arg#*=}" ;;
-            --dir=*)     UMO_INSTALL_DIR="${_arg#*=}" ;;
+            --dir=*)
+                UMO_INSTALL_DIR="${_arg#*=}"
+                _umo_tilde='~'
+                if [ "$UMO_INSTALL_DIR" = "$_umo_tilde" ]; then
+                    UMO_INSTALL_DIR="$HOME"
+                else
+                    case "$UMO_INSTALL_DIR" in
+                        "$_umo_tilde"/*) UMO_INSTALL_DIR="$HOME/${UMO_INSTALL_DIR#"$_umo_tilde/"}" ;;
+                    esac
+                fi
+                case "$UMO_INSTALL_DIR" in
+                    *[!A-Za-z0-9_./-]*)
+                        umo_log_err "Invalid --dir value: $UMO_INSTALL_DIR"
+                        umo_die "Allowed characters: letters, digits, dot, underscore, hyphen, slash"
+                        ;;
+                esac
+                ;;
             --ubuntu=*)  UMO_UBUNTU_VERSION="${_arg#*=}" ;;
             --version=*) UMO_UBUNTU_VERSION="${_arg#*=}" ;;
             --perf=*)    UMO_PERF_MODE="${_arg#*=}" ;;
@@ -477,13 +501,13 @@ umo_cli_parse() {
                 printf "\n  %bUbuntu Modded Optimized (UMO) Installer%b\n\n" "$UMO_BOLD" "$UMO_NC"
                 printf "  %bUSAGE:%b\n" "$UMO_BOLD" "$UMO_NC"
                 printf "    %bumo-install%b [OPTIONS]\n\n" "$UMO_B_CYAN" "$UMO_NC"
-                
+
                 printf "  %bOPTIONS:%b\n" "$UMO_BOLD" "$UMO_NC"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "-h, --help" "$UMO_NC" "Print help information"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--no-gui, --non-interactive" "$UMO_NC" "Run in non-interactive mode"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--lean" "$UMO_NC" "Remove docs/man/locales to save space"
                 printf "\n"
-                
+
                 printf "  %bCONFIGURATION:%b\n" "$UMO_BOLD" "$UMO_NC"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--de=<env>" "$UMO_NC" "Desktop environment (xfce4, lxde, openbox)"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--apps=<set>" "$UMO_NC" "Application set (basic, dev, media, office, browser, full)"
@@ -493,10 +517,10 @@ umo_cli_parse() {
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--theme=<theme>" "$UMO_NC" "Desktop theme (umo-dark, umo-light, none)"
                 printf "    %b%-30s%b %s\n" "$UMO_B_CYAN" "--mode=<mode>" "$UMO_NC" "Theme mode alias (dark, light)"
                 printf "\n"
-                
+
                 printf "  %bEXAMPLES:%b\n" "$UMO_BOLD" "$UMO_NC"
                 printf "    %b\$ umo-install --no-gui --de=xfce4 --apps=full%b\n" "$UMO_DIM" "$UMO_NC"
-                printf "    %b\$ umo-install --dir=/data/data/com.termux/files/home/ubuntu%b\n\n" "$UMO_DIM" "$UMO_NC"
+                printf "    %b\$ umo-install --dir=\$HOME/ubuntu%b\n\n" "$UMO_DIM" "$UMO_NC"
                 exit 0
                 ;;
         esac

@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Core Library: ANSI Colors, Logging, Spinner (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_ANSI_LOADED:-}" ] || return 0
 _UMO_ANSI_LOADED=1
@@ -287,7 +285,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.15.11}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.16.0}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

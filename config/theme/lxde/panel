@@ -1,5 +1,7 @@
-# UMO - LXPanel Bottom Panel Layout (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
+# ─────────────────────────────────────────────
+# UMO - LXPanel Bottom Panel Layout
+# ─────────────────────────────────────────────
+
 
 Global {
     edge=bottom

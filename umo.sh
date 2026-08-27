@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - One-liner Release Installer (fetches latest release) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 
@@ -35,6 +33,21 @@ _umo_ok()   { printf "  %b%s%b  %s\n" "$_UMO_GRN" "$_UMO_G_OK" "$_UMO_NC" "$1"; 
 _umo_err()  { printf "  %b%s%b  %s\n" "$_UMO_RED" "$_UMO_G_ERR" "$_UMO_NC" "$1" >&2; }
 _umo_info() { printf "  %b%s%b  %s\n" "$_UMO_CYN" "$_UMO_G_INFO" "$_UMO_NC" "$1"; }
 _umo_step() { printf "  %b%s%b  %s\n" "$_UMO_PRI" "$_UMO_G_RUN" "$_UMO_NC" "$1"; }
+
+_umo_dp() {
+    _dp_b="/data/data/com.termux/files"
+    if [ -n "${PREFIX:-}" ]; then
+        _dp_f=$(cd "${PREFIX%/}/.." 2>/dev/null && pwd) || _dp_f=""
+        case "$_dp_f" in
+            */files) _dp_b="$_dp_f" ;;
+        esac
+    fi
+    case "$1" in
+        "$_dp_b")   printf '%s' "/" ;;
+        "$_dp_b"/*) printf '%s' "${1#"$_dp_b"}" ;;
+        *)          printf '%s' "$1" ;;
+    esac
+}
 
 _umo_step "UMO Release Installer"
 
@@ -128,7 +141,7 @@ mv "$_tmp_dest" "$_GET_DEST"
 rm -rf "$_GET_DEST.old"
 chmod +x "$_GET_DEST/bin/umo-install" 2>/dev/null || true
 
-_umo_ok "UMO $_tag installed to $_GET_DEST"
+_umo_ok "UMO $_tag installed to $(_umo_dp "$_GET_DEST")"
 rm -f "$_tb_file" "$_sh_file" "$_rel_json" 2>/dev/null || true
 
 if [ -n "$_GET_NO_RUN" ]; then

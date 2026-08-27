@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Core Library: Termux/Arch/Space Checks (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_SYS_LOADED:-}" ] || return 0
 _UMO_SYS_LOADED=1

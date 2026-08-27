@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Module: Design System and Theme Modes (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_THEME_LOADED:-}" ] || return 0
 _UMO_MOD_THEME_LOADED=1
@@ -59,8 +57,6 @@ export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
-# papirus-icon-theme was replaced by the Tela designer extras; it unpacked
-# ~120k tiny SVG files which take an hour or more inside proot.
 if dpkg -l papirus-icon-theme 2>/dev/null | grep -q '^ii'; then
     timeout 600 apt-get remove -y papirus-icon-theme 2>/dev/null || true
 fi
@@ -118,8 +114,6 @@ umo_theme_extras() {
         _missing=""
         [ "$_has_theme" != "1" ] && _missing="GTK Theme"
         [ "$_has_icons" != "1" ] && _missing="${_missing:+$_missing + }Icons"
-        # Fall back to themes that are guaranteed to exist (installed with the
-        # theme packages) so the desktop never points at missing theme dirs.
         if [ "$_has_theme" = "1" ]; then
             _GTK_THEME="$_want_gtk"
         elif [ "$_mode" = "light" ]; then
@@ -233,8 +227,6 @@ umo_theme_apply_fastfetch() {
     umo_log_ok "Fastfetch Configuration Applied"
 }
 
-# Base names of the .desktop files pinned to the Plank dock, based on the
-# selected application set (only entries actually installed get pinned).
 _umo_plank_launchers() {
     printf '%s\n' thunar xfce4-terminal org.gnome.Epiphany mousepad
     case "${UMO_APP_SET:-basic}" in
@@ -247,9 +239,6 @@ _umo_plank_launchers() {
     return 0
 }
 
-# Write the Plank dock configuration for one home dir: dark theme-consistent
-# dock (Theme=Gtk+ inherits the applied GTK theme) at the bottom, plus the
-# default launchers for the selected app set.
 _umo_theme_apply_plank() {
     _pl_home="$1"
     _pl_dir="$_pl_home/.config/plank/dock1"
@@ -320,8 +309,6 @@ umo_theme_apply_xfce() {
         fi
         rm -f "$_home/.config/xfce4/panel/panels.xml" 2>/dev/null || true
 
-        # Plank bottom dock - autostarted by xfce4-session (the VNC xstartup
-        # execs startxfce4, so plank must come from the session autostart).
         _autostart_dir="$_home/.config/autostart"
         if mkdir -p "$_autostart_dir" 2>/dev/null; then
             cat > "$_autostart_dir/plank.desktop" << 'PLANKDESK'
@@ -336,11 +323,9 @@ X-GNOME-Autostart-enabled=true
 PLANKDESK
         fi
 
-        # Dock theme + default launchers for the selected application set.
         _umo_theme_apply_plank "$_home"
     done
 
-    # System-wide autostart fallback (covers accounts without the user entry).
     _xdg_autostart="${UMO_INSTALL_DIR}/etc/xdg/autostart"
     if mkdir -p "$_xdg_autostart" 2>/dev/null; then
         cat > "$_xdg_autostart/plank.desktop" << 'PLANKDESK'
@@ -355,12 +340,6 @@ X-GNOME-Autostart-enabled=true
 PLANKDESK
     fi
 
-    # Plank dock theme: the dock runs with Theme=Gtk+, which plank resolves
-    # to a plank/ folder inside the ACTIVE GTK theme. The Orchis installer
-    # never ships its own plank theme (it carries one in its source), so
-    # without this copy plank falls back to its built-in square Default
-    # theme. Install the rounded UMO/Orchis dock.theme under every GTK
-    # theme the design may activate, including the Materia fallbacks.
     _pp_src="$SCRIPT_DIR/config/theme/plank/dock.theme"
     if [ -f "$_pp_src" ]; then
         _pp_done=0
@@ -474,10 +453,6 @@ umo_theme_fix_ownership() {
     fi
 }
 
-# Cheap local design application (fonts, wallpaper, GTK, DE layout, fastfetch,
-# ownership). Safe to re-run on every update - no apt, no downloads.
-# Callers must run _umo_theme_mode_setup and umo_theme_extras first so
-# _GTK_THEME/_ICON_THEME reflect availability fallbacks.
 _umo_theme_apply_local() {
     umo_theme_apply_fonts || true
     umo_theme_apply_wallpaper || true

@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Proot Login Script Template (rendered per install) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 INSTALL_DIR="{{INSTALL_DIR}}"
 PREFIX="{{TERMUX_PREFIX}}"
 
@@ -23,6 +21,7 @@ unset LD_LIBRARY_PATH
 
 AUDIO_SOCK=""
 [ -S "$PREFIX/tmp/pulse-$(id -u)/native" ] && AUDIO_SOCK="-b $PREFIX/tmp/pulse-$(id -u)/native:/tmp/pulse-native"
+[ -S "$PREFIX/root/pulse-$(id -u)/native" ] && AUDIO_SOCK="-b $PREFIX/root/pulse-$(id -u)/native:/tmp/pulse-native"
 [ -S "$PREFIX/tmp/pulse-native" ] && AUDIO_SOCK="-b $PREFIX/tmp/pulse-native:/tmp/pulse-native"
 
 for _g in $(id -G 2>/dev/null); do

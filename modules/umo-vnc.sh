@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Module: TigerVNC Server Setup (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_MOD_VNC_LOADED:-}" ] || return 0
 _UMO_MOD_VNC_LOADED=1
@@ -8,9 +6,6 @@ _UMO_MOD_VNC_LOADED=1
 . "${UMO_LIB_DIR:-./lib}/core-ansi.sh"
 . "${UMO_LIB_DIR:-./lib}/core-fs.sh"
 
-UMO_VNC_PORT="${UMO_VNC_PORT:-5901}"
-UMO_VNC_GEOMETRY="${UMO_VNC_GEOMETRY:-1280x720}"
-UMO_VNC_DEPTH="${UMO_VNC_DEPTH:-24}"
 UMO_VNC_DISPLAY="${UMO_VNC_DISPLAY:-:1}"
 
 _umo_apt_repair_body() {
@@ -51,6 +46,8 @@ HDR
         cat << 'BODY'
 
 _um_apt_repair
+
+timeout 600 apt-get update -qq || true
 
 timeout 600 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
@@ -97,7 +94,7 @@ BODY
     fi
     _rc=0
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
-        "$UMO_LOGIN_SH" -c "bash /root/install-vnc.sh" || _rc=$?
+        timeout 3600 "$UMO_LOGIN_SH" -c "bash /root/install-vnc.sh" || _rc=$?
     fi
     if [ "$_rc" -eq 0 ]; then
         printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
@@ -113,14 +110,13 @@ umo_vnc_configure() {
 
     _vnc_dir="${UMO_INSTALL_DIR}/root/.vnc"
     if ! mkdir -p "$_vnc_dir" 2>/dev/null; then
-        umo_log_warn "Cannot Create $_vnc_dir - VNC Configuration Skipped"
+        umo_log_warn "Cannot Create $(umo_fs_display_path "$_vnc_dir") - VNC Configuration Skipped"
         return 0
     fi
 
     _template="$SCRIPT_DIR/config/xstartup"
     if [ -f "$_template" ]; then
         umo_fs_render "$_template" "$_vnc_dir/xstartup" \
-            "UMO_VERSION" "${UMO_VERSION:-4.15.11}" \
             "UMO_DE" "${UMO_DE:-xfce4}" \
             "DISPLAY" "${UMO_VNC_DISPLAY:-:1}"
     else
@@ -176,17 +172,21 @@ XFALL
     printf '%s\n' "$_vnc_pass" > "$_vnc_pass_file" 2>/dev/null || true
     chmod 600 "$_vnc_pass_file" 2>/dev/null || true
 
-    _passwd="${UMO_INSTALL_DIR}/root/.vnc/passwd"
-    if [ ! -f "$_passwd" ]; then
-        if [ -x "$UMO_LOGIN_SH" ]; then
-            _pw_cmd="mkdir -p ~/.vnc && echo '$_vnc_pass' | vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd"
-            if command -v timeout >/dev/null 2>&1; then
-                timeout 120 "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
-                    umo_log_warn "Could Not Set VNC Password (vncpasswd Not Available Yet)"
-            else
-                "$UMO_LOGIN_SH" -c "$_pw_cmd" </dev/null 2>/dev/null || \
-                    umo_log_warn "Could Not Set VNC Password (vncpasswd Not Available Yet)"
-            fi
+    if [ -x "$UMO_LOGIN_SH" ]; then
+        _pw_rc=0
+        if command -v timeout >/dev/null 2>&1; then
+            printf '%s\n' "$_vnc_pass" | timeout 120 "$UMO_LOGIN_SH" -c \
+                'mkdir -p ~/.vnc && vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd' 2>/dev/null || _pw_rc=1
+        else
+            printf '%s\n' "$_vnc_pass" | "$UMO_LOGIN_SH" -c \
+                'mkdir -p ~/.vnc && vncpasswd -f > ~/.vnc/passwd && chmod 600 ~/.vnc/passwd' 2>/dev/null || _pw_rc=1
+        fi
+        if [ "$_pw_rc" -eq 0 ]; then
+            cp -f "${UMO_INSTALL_DIR}/root/.vnc/passwd" "${UMO_INSTALL_DIR}/home/umo/.vnc/passwd" 2>/dev/null || true
+            chmod 600 "${UMO_INSTALL_DIR}/home/umo/.vnc/passwd" 2>/dev/null || true
+            chown -R 1000:1000 "${UMO_INSTALL_DIR}/home/umo/.vnc" 2>/dev/null || true
+        else
+            umo_log_warn "Could Not Set VNC Password (vncpasswd Not Available Yet)"
         fi
     fi
 
@@ -208,7 +208,7 @@ umo_vnc_create_scripts() {
             cp -f "$_src" "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
             chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/$_cscript" 2>/dev/null || true
         else
-            umo_log_warn "Container Script Missing: $_src"
+            umo_log_warn "Container Script Missing: $(umo_fs_display_path "$_src")"
         fi
     done
 
@@ -230,7 +230,7 @@ exec "$_umo_login" -c "umo-stopvnc"
 EOF
     chmod +x "$_vnc_home/umo-vnc-stop.sh"
 
-    umo_log_ok "VNC Scripts Created ($_vnc_home)"
+    umo_log_ok "VNC Scripts Created ($(umo_fs_display_path "$_vnc_home"))"
 }
 
 umo_vnc_setup() {

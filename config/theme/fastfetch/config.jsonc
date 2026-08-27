@@ -1,5 +1,6 @@
-// UMO - Fastfetch Configuration (UMO design language) (GPL-3.0-or-later)
-// https://github.com/shadow-x78/ubuntu-modded-optimized
+// ─────────────────────────────────────────────
+// UMO - Fastfetch Configuration
+// ─────────────────────────────────────────────
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {

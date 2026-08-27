@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Session Stopper (host-side) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
@@ -31,6 +29,11 @@ else
     _G_RUN='|'
 fi
 
+if [ ! -x "$UMO_LOGIN" ]; then
+    printf "\n  %b%s%b  UMO not installed, nothing to stop\n\n" "$_UMO_PRI" "$_G_RUN" "$_UMO_NC"
+    exit 0
+fi
+
 printf "\n${_UMO_PRI}"
 printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
 printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
@@ -55,4 +58,3 @@ printf "  %b──────────────────────�
 printf "  %b%b▸ UMO Session Stopped%b\n" "$_UMO_BOLD" "$_UMO_GRN" "$_UMO_NC"
 printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
 printf "\n"
-

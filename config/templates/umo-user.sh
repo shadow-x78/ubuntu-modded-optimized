@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Default User Login Template (rendered per install) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 INSTALL_DIR="{{INSTALL_DIR}}"
 PREFIX="{{TERMUX_PREFIX}}"
 UMO_USER="{{UMO_USER}}"

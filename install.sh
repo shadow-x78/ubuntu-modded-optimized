@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Repo Installer Entry Point (runs bin/umo-install) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 set -e
 [ -t 1 ] && printf '\033[2J\033[3J\033[H\033c'

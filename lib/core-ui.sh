@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Core Library: Interactive Menus and Prompts (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_UI_LOADED:-}" ] || return 0
 _UMO_UI_LOADED=1
@@ -23,9 +21,9 @@ umo_ui_header() {
     umo_banner
 
     printf "\n"
-    printf "  %b%b%b\n" "$UMO_BOLD" "$_text" "$UMO_NC"
+    printf "  %b%s%b  %b%b%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$_text" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
-    _rule_len="$_txtlen"
+    _rule_len=$((_txtlen + 3))
     [ "$_rule_len" -lt 1 ] && _rule_len=1
     umo_repeat "$UMO_LINE_H" "$_rule_len"
     printf "%b\n" "$UMO_NC"
@@ -37,10 +35,11 @@ umo_ui_menu() {
     umo_screen_clear
     umo_banner
     printf "\n"
-    printf "  %b%b%b\n" "$UMO_BOLD" "$_title" "$UMO_NC"
+    printf "  %b%s%b  %b%b%b\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP_BLOCK" "$UMO_NC" "$UMO_BOLD" "$_title" "$UMO_NC"
     printf "  %b" "$UMO_COLOR_PRIMARY"
     _title_plain=$(printf '%s' "$_title" | sed "s/$(printf '\033')\[[0-9;]*m//g")
     _title_len=$(printf '%s' "$_title_plain" | wc -m)
+    _title_len=$((_title_len + 3))
     [ "$_title_len" -lt 1 ] && _title_len=1
     umo_repeat "$UMO_LINE_H" "$_title_len"
     printf "%b\n\n" "$UMO_NC"

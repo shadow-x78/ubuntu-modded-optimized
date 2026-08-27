@@ -1,9 +1,4 @@
 #!/bin/sh
-# UMO - In-Container XFCE Desktop First-Boot Init (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
-#
-# Every step logs to /tmp/umo-desktop-init.log inside the container, so a
-# missing wallpaper or theme can be diagnosed from one file.
 
 _LOG=/tmp/umo-desktop-init.log
 _log() {
@@ -20,12 +15,6 @@ if [ ! -f "$WP" ]; then
 fi
 _log "Start (Wallpaper: $WP)"
 
-# The session dbus address is only exported into startxfce4's child chain
-# (dbus-launch), so this script discovers the bus in order of preference:
-# 1. an inherited DBUS_SESSION_BUS_ADDRESS,
-# 2. the session file dbus-launch writes to ~/.dbus/session-bus/,
-# 3. the environ of a running session process (/proc scan, root only).
-# Must happen before ANY xfconf-query call, otherwise they all fail.
 if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
     _log "Bus Inherited From Environment"
 else
@@ -73,9 +62,6 @@ else
 fi
 sleep 2
 
-# Apply the wallpaper to every monitor key we can find (existing xfconf
-# entries, xrandr outputs and the common fallback names), retrying a few
-# rounds while xfdesktop finishes registering its channels.
 _wp_round=0
 _wp_found=0
 while [ "$_wp_round" -lt 3 ]; do
@@ -121,9 +107,6 @@ default"
 done
 [ "$_wp_found" = 1 ] || _log "Wallpaper Never Appeared In The Channel"
 
-# Force the running xfdesktop to re-read every setting and repaint. A
-# session that started before the channel writes can miss the property
-# change notification, and -R reloads the backdrop unconditionally.
 if command -v xfdesktop >/dev/null 2>&1; then
     _xfce_up=1
     if command -v pgrep >/dev/null 2>&1; then
@@ -148,8 +131,6 @@ fi
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0 >/dev/null 2>&1 || true
 xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons -n -t int -s 0 >/dev/null 2>&1 || true
 
-# Enforce the UMO theme at session boot (xfconf caches can ignore freshly
-# written channel files, so set the live values directly).
 _um_mode=$(cat /etc/umo/umo-theme-mode 2>/dev/null || true)
 case "$_um_mode" in
     light) _um_gtk="Orchis-Light-Compact"; _um_fbk="Materia-light"; _um_icons="Tela"; _um_fbi="gnome" ;;

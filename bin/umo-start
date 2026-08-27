@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Session Launcher (audio + VNC, host-side) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 TERMUX_HOME="${HOME:-/data/data/com.termux/files/home}"
 UMO_SCRIPT_HOME="$TERMUX_HOME/.umo"
@@ -36,10 +34,16 @@ else
     _G_ERR='ERR'; _G_WARN='!'; _G_RUN='|'
 fi
 
-# Shorten Termux host paths for display (/data/data/com.termux/files/... -> /home/...)
 _umo_dp() {
-    _dp_base="${PREFIX:-/data/data/com.termux/files}"
+    _dp_base="/data/data/com.termux/files"
+    if [ -n "${PREFIX:-}" ]; then
+        _dp_files=$(cd "${PREFIX%/}/.." 2>/dev/null && pwd) || _dp_files=""
+        case "$_dp_files" in
+            */files) _dp_base="$_dp_files" ;;
+        esac
+    fi
     case "$1" in
+        "$_dp_base")   printf '%s' "/" ;;
         "$_dp_base"/*) printf '%s' "${1#"$_dp_base"}" ;;
         *)             printf '%s' "$1" ;;
     esac
@@ -87,6 +91,12 @@ _umo_refresh_cli() {
     return 0
 }
 _umo_refresh_cli
+
+if [ ! -x "$UMO_LOGIN" ]; then
+    printf "  %b%s%b  UMO not installed (%s missing)\n" "$_UMO_RED" "$_G_ERR" "$_UMO_NC" "$(_umo_dp "$UMO_LOGIN")"
+    printf "      Run the installer first, then: umo start\n"
+    exit 1
+fi
 
 termux-wake-lock 2>/dev/null || true
 
@@ -148,9 +158,6 @@ else
     nohup "$UMO_LOGIN" -c "umo-startvnc" > "$_vnc_log" 2>&1 &
     _vnc_starter=$!
 
-    # Wait up to 90s for the X server to appear: a first boot after a fresh
-    # install (cold proot + pulseaudio + Xtigervnc startup) takes longer than
-    # any fixed sleep. Stop waiting early if the starter process exits.
     _vnc_wait=0
     while [ "$_vnc_wait" -lt 90 ]; do
         if pgrep -f Xvnc >/dev/null 2>&1 || pgrep -f Xtigervnc >/dev/null 2>&1; then
@@ -206,4 +213,3 @@ else
     printf "  %b────────────────────────────────────────%b\n" "$_UMO_PRI" "$_UMO_NC"
     printf "\n"
 fi
-

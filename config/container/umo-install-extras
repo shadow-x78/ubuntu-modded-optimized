@@ -1,6 +1,23 @@
 #!/bin/sh
-# UMO - In-Container Designer Extras (Orchis/Tela/FiraCode Nerd) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
+
+_GRN='\033[38;5;34m'
+_RED='\033[38;5;196m'
+_ORG='\033[38;5;208m'
+_YLW='\033[38;5;226m'
+_NC='\033[0m'
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    _GRN=''; _RED=''; _ORG=''; _YLW=''; _NC=''
+fi
+
+_UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) _UMOG=1 ;;
+    *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
+esac
+if [ "${_UMOG:-0}" = "1" ]; then
+    _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'
+fi
+
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
 
 _MODE="${1:-dark}"
@@ -16,26 +33,6 @@ if [ -f /etc/umo/umo-theme-mode ]; then
     esac
 fi
 
-_GRN='\033[38;5;34m'
-_RED='\033[38;5;196m'
-_ORG='\033[38;5;208m'
-_YLW='\033[38;5;226m'
-_NC='\033[0m'
-if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
-    _GRN=''; _RED=''; _ORG=''; _YLW=''; _NC=''
-fi
-
-# Glyph support - same detection as the installer, so sub-steps use the
-# side arrow exactly like the install flow does.
-_UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'
-case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
-    *UTF-8*|*utf8*) _UMOG=1 ;;
-    *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
-esac
-if [ "${_UMOG:-0}" = "1" ]; then
-    _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'
-fi
-
 _step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
 _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
 _fail() { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
@@ -44,12 +41,14 @@ _warn() { printf "  %b%s%b  %s\n" "$_YLW" "$_UMO_GWARN" "$_NC" "$1"; }
 _LOG=/tmp/umo-install-extras.log
 printf '' > "$_LOG" 2>/dev/null || _LOG=/dev/null
 
-# Show the last lines of the current command's log, indented under the failure.
 _log_tail() { tail -n 6 "$_LOG" 2>/dev/null | sed 's/^/      /'; }
 
-# Fetch $2 from https://github.com/$1 - git clone first, then the master
-# tarball over plain HTTPS (some mobile carriers block the git transport or
-# codeload while github.com itself works). Keeps a cached clone between runs.
+_ensure_apt_lists() {
+    if ! apt-get install -y --no-install-recommends --dry-run "$1" >/dev/null 2>&1; then
+        timeout 300 apt-get update -qq >>"$_LOG" 2>&1 || true
+    fi
+}
+
 _fetch_repo() {
     _repo="$1" ; _dst="$2" ; _name="${_repo##*/}"
     if [ -f "$_dst/install.sh" ]; then
@@ -78,13 +77,12 @@ _fetch_repo() {
     return 1
 }
 
-# Orchis (vinceliuice) needs the SCSS compiler and the murrine GTK2 engine,
-# which the base container does not ship.
 if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Orchis-Light-Compact ]; then
     if _fetch_repo "vinceliuice/Orchis-theme" "/root/.orchis-theme"; then
         if ! command -v sassc >/dev/null 2>&1; then
             _step "Installing Theme Build Dependencies (sassc + murrine)..."
             printf '' > "$_LOG" 2>/dev/null || true
+            _ensure_apt_lists sassc
             timeout 600 apt-get install -y --no-install-recommends sassc gtk2-engines-murrine >>"$_LOG" 2>&1 || true
             if ! command -v sassc >/dev/null 2>&1; then
                 _warn "sassc Is Missing - Orchis Install Will Likely Fail"
@@ -114,13 +112,6 @@ if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Or
     fi
 fi
 
-# Tela icons: the installer's color argument selects the variant family
-# ("standard" or "black"), and it always installs three brightness levels per
-# family - slow under proot. The design only needs ONE variant of ONE family
-# per mode (dark: Tela-black-dark, light: Tela), so install just the active
-# family and patch the variant list down to what the mode actually uses
-# (dark keeps the black base variant required by the dark variant's symlinks).
-# NOTE: Tela names are lowercase (Tela-black-dark), not Tela-Black-Dark.
 if [ ! -d "/usr/share/icons/$_WANT_ICONS" ]; then
     if _fetch_repo "vinceliuice/Tela-icon-theme" "/root/.tela-icons"; then
         case "$_MODE" in
@@ -135,9 +126,6 @@ if [ ! -d "/usr/share/icons/$_WANT_ICONS" ]; then
         esac
         _step "Installing Tela Icons ($_WANT_ICONS)..."
         printf '' > "$_LOG" 2>/dev/null || true
-        # Both expressions: the first matches a pristine checkout, the second
-        # re-patches an already-patched cached source (kept after an incomplete
-        # run), so a stale cache can never pin the wrong variant list.
         sed -i "s|^readonly BRIGHT_VARIANTS=.*|$_tela_brights|; s|^BRIGHT_VARIANTS=.*|$_tela_brights|" /root/.tela-icons/install.sh 2>/dev/null || true
         ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons $_tela_color ) >>"$_LOG" 2>&1 || true
         if [ -d "/usr/share/icons/$_WANT_ICONS" ]; then
@@ -153,11 +141,8 @@ if [ ! -d "/usr/share/icons/$_WANT_ICONS" ]; then
     fi
 fi
 
-# FiraCode Nerd Font - the archive is fetched from the nerd-fonts release
-# (zip first, tar.xz fallback) and verified by the extracted files, so the
-# check does not depend on fc-list/fontconfig being present.
 _firacode_have() {
-    ls /usr/local/share/fonts/firacode-nerd/*.otf /usr/local/share/fonts/firacode-nerd/*.ttf >/dev/null 2>&1
+    { ls /usr/local/share/fonts/firacode-nerd/*.otf >/dev/null 2>&1 || ls /usr/local/share/fonts/firacode-nerd/*.ttf >/dev/null 2>&1; }
 }
 if ! _firacode_have; then
     if command -v curl >/dev/null 2>&1; then

@@ -1,13 +1,26 @@
 #!/bin/sh
-# UMO - In-Container VNC Stopper (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
-for _pid in $(pgrep -f Xtigervnc 2>/dev/null) $(pgrep -f Xvnc 2>/dev/null); do
+VNC_DISPLAY="${VNC_DISPLAY:-:1}"
+_vnc_num="${VNC_DISPLAY#:}"
+
+for _pid in $(pgrep -x Xtigervnc 2>/dev/null) $(pgrep -x Xvnc 2>/dev/null); do
     kill "$_pid" 2>/dev/null || true
 done
+_wait=0
+while [ "$_wait" -lt 5 ] && { pgrep -x Xtigervnc >/dev/null 2>&1 || pgrep -x Xvnc >/dev/null 2>&1; }; do
+    sleep 1
+    _wait=$((_wait + 1))
+done
+pkill -KILL -x Xtigervnc 2>/dev/null || true
+pkill -KILL -x Xvnc 2>/dev/null || true
+rm -f "/tmp/.X${_vnc_num}-lock" "/tmp/.X11-unix/X${_vnc_num}" 2>/dev/null || true
 rm -f /tmp/.X1-lock /tmp/.X11-unix/X1 /tmp/.X2-lock /tmp/.X11-unix/X2 2>/dev/null || true
-_UMO_GOK='OK'
+_UMO_GOK='OK'; _UMO_GWARN='!'
 case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
-    *UTF-8*|*utf8*) _UMO_GOK='✔' ;;
-    *) command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMO_GOK='✔' ;; esac ;;
+    *UTF-8*|*utf8*) _UMO_GOK='✔'; _UMO_GWARN='⚠' ;;
+    *) command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMO_GOK='✔'; _UMO_GWARN='⚠' ;; esac ;;
 esac
-printf "  \033[38;5;34m%s\033[0m  VNC Stopped\n" "$_UMO_GOK"
+if pgrep -x Xtigervnc >/dev/null 2>&1 || pgrep -x Xvnc >/dev/null 2>&1; then
+    printf "  \033[38;5;220m%s\033[0m  VNC Stop Incomplete (A Server Process Survived)\n" "${_UMO_GWARN}"
+else
+    printf "  \033[38;5;34m%s\033[0m  VNC Stopped\n" "$_UMO_GOK"
+fi

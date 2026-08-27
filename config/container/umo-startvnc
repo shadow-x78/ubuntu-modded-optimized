@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - In-Container VNC Launcher (self-healing startup) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
@@ -18,8 +16,6 @@ if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
     _GRN=''; _RED=''; _CYN=''; _ORG=''; _YEL=''; _DIM=''; _NC=''
 fi
 
-# Glyph support - same detection as the installer. Main steps keep the block
-# mark, sub-lines use the side arrow like the install flow.
 _UMO_GBLOCK='|'; _UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'; _UMO_GPLAY='*'
 case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
     *UTF-8*|*utf8*) _UMOG=1 ;;
@@ -34,9 +30,10 @@ _ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
 _err()  { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
 _note() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
 _hint() { printf "  %b%s%b  %s\n" "$_YEL" "$_UMO_GWARN" "$_NC" "$1"; }
-_apt_progress() { grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" | sed 's/^/    /' || true; }
+_APT_LOG=/tmp/umo-apt.log
+_apt_run() { "$@" >"$_APT_LOG" 2>&1; _apt_rc=$?; grep -E "^(Get:[0-9]|Unpacking |Setting up |Processing |Selecting |E: )" "$_APT_LOG" 2>/dev/null | sed 's/^/    /' || true; return $_apt_rc; }
 
-for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
+for _spid in $(pgrep -x "umo-startvnc" 2>/dev/null); do
     [ "$_spid" = "$$" ] && continue
     _skip=0
     _p=$$
@@ -48,22 +45,22 @@ for _spid in $(pgrep -f "umo-startvnc" 2>/dev/null); do
         _p=$(awk '/^PPid:/{print $2}' "/proc/$_p/status" 2>/dev/null)
     done
     [ "$_skip" = "1" ] && continue
-    kill -9 "$_spid" 2>/dev/null || true
+    kill "$_spid" 2>/dev/null || true
 done
 
 _step "Starting UMO VNC Server..."
 
 _stop_old_servers() {
     _rounds=0
-    while pgrep -f Xtigervnc >/dev/null 2>&1 && [ "$_rounds" -lt 6 ]; do
-        pkill -TERM -f Xtigervnc 2>/dev/null || true
+    while pgrep -x Xtigervnc >/dev/null 2>&1 && [ "$_rounds" -lt 6 ]; do
+        pkill -TERM -x Xtigervnc 2>/dev/null || true
         sleep 1
         _rounds=$((_rounds + 1))
         if [ "$_rounds" -ge 3 ]; then
-            pkill -KILL -f Xtigervnc 2>/dev/null || true
+            pkill -KILL -x Xtigervnc 2>/dev/null || true
         fi
     done
-    pkill -KILL -f "Xvnc" 2>/dev/null || true
+    pkill -KILL -x Xvnc 2>/dev/null || true
     sleep 1
 }
 
@@ -87,9 +84,15 @@ if [ ! -f "$HOME/.vnc/passwd" ]; then
     _err "Missing $HOME/.vnc/passwd - re-run the UMO installer or set it with vncpasswd."
     exit 1
 fi
-if [ ! -x /root/.vnc/xstartup ]; then
-    printf '#!/bin/sh\nexec xterm\n' > /root/.vnc/xstartup
-    chmod +x /root/.vnc/xstartup
+_VNC_XSTARTUP="$HOME/.vnc/xstartup"
+if [ ! -x "$_VNC_XSTARTUP" ] && [ -x /root/.vnc/xstartup ]; then
+    _VNC_XSTARTUP=/root/.vnc/xstartup
+fi
+if [ ! -x "$_VNC_XSTARTUP" ]; then
+    mkdir -p "$HOME/.vnc" 2>/dev/null || true
+    printf '#!/bin/sh\nexec xterm\n' > "$HOME/.vnc/xstartup"
+    chmod +x "$HOME/.vnc/xstartup"
+    _VNC_XSTARTUP="$HOME/.vnc/xstartup"
 fi
 
 export MESA_NO_SHM=1
@@ -115,25 +118,39 @@ _start_session() {
     (
         unset XAUTHORITY
         export DISPLAY="$VNC_DISPLAY"
-        exec /root/.vnc/xstartup
+        exec "$_VNC_XSTARTUP"
     ) >> "$HOME/.vnc/session.log" 2>&1 &
     _session_pid="$!"
 }
 
-if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-    _note "Desktop Components Missing - Installing Automatically (Up To 30 Minutes)"
+_de_probe="startxfce4"
+if [ -f "$_VNC_XSTARTUP" ]; then
+    _de_line=$(sed -n 's/^DE="\(.*\)"/\1/p' "$_VNC_XSTARTUP" 2>/dev/null | head -1)
+    case "$_de_line" in
+        lxde)    _de_probe="startlxde" ;;
+        openbox) _de_probe="openbox-session" ;;
+        minimal) _de_probe="xterm" ;;
+        xfce4)   _de_probe="startxfce4" ;;
+    esac
+fi
+
+if ! command -v "$_de_probe" >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+    _note "Desktop Components Missing ($_de_probe) - Installing Automatically (Up To 30 Minutes)"
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update 2>&1 | _apt_progress || true
-    timeout 1800 apt-get install -y --no-install-recommends \
-        xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
-        xfce4-terminal thunar dbus-x11 x11-xserver-utils \
-        gnome-icon-theme xfce4-whiskermenu-plugin mousepad plank 2>&1 | _apt_progress || true
-    dpkg --configure -a >/dev/null 2>&1 || true
-    if command -v startxfce4 >/dev/null 2>&1; then
-        _ok "Desktop components installed automatically"
+    _de_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils gnome-icon-theme xfce4-whiskermenu-plugin mousepad plank"
+    case "$_de_probe" in
+        startlxde)      _de_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf dbus-x11" ;;
+        openbox-session) _de_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils dbus-x11" ;;
+        xterm)          _de_pkgs="xterm xfonts-base" ;;
+    esac
+    _apt_run timeout 300 apt-get update || true
+    _apt_run timeout 1800 apt-get install -y --no-install-recommends $_de_pkgs || true
+    timeout 300 dpkg --configure -a >/dev/null 2>&1 || true
+    if command -v "$_de_probe" >/dev/null 2>&1; then
+        _ok "Desktop components installed automatically ($_de_probe)"
     else
         _err "Automatic desktop installation failed - real apt errors:"
-        tail -n 25 /var/log/apt/term.log 2>/dev/null
+        grep -E "^(E:|Err:|W:)" "$_APT_LOG" 2>/dev/null | tail -n 25 | sed 's/^/    /' || true
     fi
 fi
 
@@ -150,14 +167,14 @@ if ! command -v plank >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; the
     timeout 300 apt-get install -y --no-install-recommends plank >/dev/null 2>&1 || true
 fi
 
-_start_server || { _err "Failed to start Xtigervnc"; exit 1; }
+_start_server
 sleep 2
 if ! kill -0 "$_xpid" 2>/dev/null; then
     if tail -n 5 "$HOME/.vnc/xvnc.log" 2>/dev/null | grep -q "already running"; then
         _note "Another X Server Was Still Holding The Display - Stopping It And Retrying"
         _stop_old_servers
         _cleanup_locks
-        _start_server || { _err "Failed to start Xtigervnc after cleanup"; exit 1; }
+        _start_server
         sleep 2
     fi
 fi
@@ -180,6 +197,7 @@ printf "\n"
 
 _server_fails=0
 _session_fails=0
+_session_logged=0
 while [ "$_server_fails" -lt 5 ]; do
     sleep 5
     if ! kill -0 "$_xpid" 2>/dev/null; then
@@ -192,14 +210,19 @@ while [ "$_server_fails" -lt 5 ]; do
         sleep 2
         kill -0 "$_xpid" 2>/dev/null || continue
         _start_session
+        _session_logged=0
         continue
     fi
     if [ -n "$_session_pid" ] && ! kill -0 "$_session_pid" 2>/dev/null; then
         _session_fails=$((_session_fails + 1))
-        _hint "Desktop session exited ($_session_fails) - last session.log lines:"
-        tail -n 10 "$HOME/.vnc/session.log" 2>/dev/null
         if [ "$_session_fails" -le 3 ]; then
+            _hint "Desktop session exited ($_session_fails) - last session.log lines:"
+            tail -n 10 "$HOME/.vnc/session.log" 2>/dev/null
             _start_session
+            _session_logged=0
+        elif [ "$_session_logged" = "0" ]; then
+            _hint "Desktop session keeps exiting - no more automatic restarts (see $HOME/.vnc/session.log)"
+            _session_logged=1
         fi
     fi
 done

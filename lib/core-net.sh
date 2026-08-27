@@ -1,6 +1,4 @@
 #!/bin/sh
-# UMO - Core Library: RootFS Download Mirrors (sourced) (GPL-3.0-or-later)
-# https://github.com/shadow-x78/ubuntu-modded-optimized
 
 [ -z "${_UMO_NET_LOADED:-}" ] || return 0
 _UMO_NET_LOADED=1
@@ -8,6 +6,14 @@ _UMO_NET_LOADED=1
 . "${UMO_LIB_DIR:-.}/core-ansi.sh"
 
 _UMO_NET_MIN_SIZE=1048576
+
+_umo_net_dp() {
+    if command -v umo_fs_display_path >/dev/null 2>&1; then
+        umo_fs_display_path "$1"
+    else
+        printf '%s' "$1"
+    fi
+}
 
 umo_net_mirror_list() {
     _ver="${1:-22.04}"
@@ -161,7 +167,7 @@ umo_net_extract() {
     _archive="$1"
     _dest="${2:-.}"
 
-    [ -f "$_archive" ] || umo_die "Archive Not Found: $_archive"
+    [ -f "$_archive" ] || umo_die "Archive Not Found: $(_umo_net_dp "$_archive")"
     mkdir -p "$_dest"
 
     umo_log_step "Extract Archive"
