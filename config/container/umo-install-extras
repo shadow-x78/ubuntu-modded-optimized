@@ -6,13 +6,13 @@ export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C
 _MODE="${1:-dark}"
 case "$_MODE" in
     light) _WANT_GTK="Orchis-Light-Compact" ; _WANT_ICONS="Tela" ;;
-    *)     _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-Black-Dark" ;;
+    *)     _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-black-dark" ;;
 esac
 if [ -f /etc/umo/umo-theme-mode ]; then
     _marker=$(tr -d '[:space:]' < /etc/umo/umo-theme-mode 2>/dev/null)
     case "$_marker" in
         light) _MODE="light" ; _WANT_GTK="Orchis-Light-Compact" ; _WANT_ICONS="Tela" ;;
-        dark)  _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-Black-Dark" ;;
+        dark)  _MODE="dark" ; _WANT_GTK="Orchis-Dark-Compact" ; _WANT_ICONS="Tela-black-dark" ;;
     esac
 fi
 
@@ -114,24 +114,34 @@ if [ ! -d /usr/share/themes/Orchis-Dark-Compact ] || [ ! -d /usr/share/themes/Or
     fi
 fi
 
-# Tela icons are a plain copy install - only the fetch can realistically fail.
-# Two calls: the color argument selects the family, so 'standard' alone gives
-# Tela/Tela-light/Tela-dark and 'black' adds Tela-black/Tela-black-light/
-# Tela-black-dark - the design needs both families.
-if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; then
+# Tela icons: the installer's color argument selects the variant family
+# ("standard" or "black"), and it always installs three brightness levels per
+# family - slow under proot. The design only needs ONE variant of ONE family
+# per mode (dark: Tela-black-dark, light: Tela), so install just the active
+# family and patch the variant list down to what the mode actually uses
+# (dark keeps the black base variant required by the dark variant's symlinks).
+# NOTE: Tela names are lowercase (Tela-black-dark), not Tela-Black-Dark.
+if [ ! -d "/usr/share/icons/$_WANT_ICONS" ]; then
     if _fetch_repo "vinceliuice/Tela-icon-theme" "/root/.tela-icons"; then
-        if [ ! -d /usr/share/icons/Tela ]; then
-            _step "Installing Tela Icons (Standard Variants)..."
-            printf '' > "$_LOG" 2>/dev/null || true
-            ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons ) >>"$_LOG" 2>&1 || true
-        fi
-        if [ ! -d /usr/share/icons/Tela-Black-Dark ]; then
-            _step "Installing Tela Icons (Black Variants)..."
-            printf '' > "$_LOG" 2>/dev/null || true
-            ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons black ) >>"$_LOG" 2>&1 || true
-        fi
-        if [ -d /usr/share/icons/Tela-Black-Dark ] && [ -d /usr/share/icons/Tela ]; then
-            _ok "Tela Icons Installed"
+        case "$_MODE" in
+            dark)
+                _tela_color="black"
+                _tela_brights='BRIGHT_VARIANTS=("" "dark")'
+                ;;
+            *)
+                _tela_color=""
+                _tela_brights='BRIGHT_VARIANTS=("")'
+                ;;
+        esac
+        _step "Installing Tela Icons ($_WANT_ICONS)..."
+        printf '' > "$_LOG" 2>/dev/null || true
+        # Both expressions: the first matches a pristine checkout, the second
+        # re-patches an already-patched cached source (kept after an incomplete
+        # run), so a stale cache can never pin the wrong variant list.
+        sed -i "s|^readonly BRIGHT_VARIANTS=.*|$_tela_brights|; s|^BRIGHT_VARIANTS=.*|$_tela_brights|" /root/.tela-icons/install.sh 2>/dev/null || true
+        ( cd /root/.tela-icons && timeout 900 ./install.sh -d /usr/share/icons $_tela_color ) >>"$_LOG" 2>&1 || true
+        if [ -d "/usr/share/icons/$_WANT_ICONS" ]; then
+            _ok "Tela Icons Installed ($_WANT_ICONS)"
             rm -rf /root/.tela-icons 2>/dev/null || true
         else
             _fail "Tela Install Incomplete - Keeping The Source For The Next Run"
@@ -143,23 +153,37 @@ if [ ! -d /usr/share/icons/Tela-Black-Dark ] || [ ! -d /usr/share/icons/Tela ]; 
     fi
 fi
 
-if ! fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
-    if command -v curl >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
+# FiraCode Nerd Font - the archive is fetched from the nerd-fonts release
+# (zip first, tar.xz fallback) and verified by the extracted files, so the
+# check does not depend on fc-list/fontconfig being present.
+_firacode_have() {
+    ls /usr/local/share/fonts/firacode-nerd/*.otf /usr/local/share/fonts/firacode-nerd/*.ttf >/dev/null 2>&1
+}
+if ! _firacode_have; then
+    if command -v curl >/dev/null 2>&1; then
         _step "Downloading FiraCode Nerd Font..."
         mkdir -p /usr/local/share/fonts/firacode-nerd
         printf '' > "$_LOG" 2>/dev/null || true
         timeout 300 curl -fL --progress-bar https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.zip -o /tmp/firamono.zip >>"$_LOG" 2>&1 || true
-        if [ -s /tmp/firamono.zip ]; then
+        if [ -s /tmp/firamono.zip ] && command -v unzip >/dev/null 2>&1; then
             _step "Installing FiraCode Nerd Font..."
             unzip -o -q /tmp/firamono.zip -d /usr/local/share/fonts/firacode-nerd >>"$_LOG" 2>&1 || true
-            rm -f /tmp/firamono.zip
-            fc-cache -f >/dev/null 2>&1 || true
         fi
+        rm -f /tmp/firamono.zip
+        if ! _firacode_have; then
+            timeout 300 curl -fL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraMono.tar.xz -o /tmp/firamono.tar.xz >>"$_LOG" 2>&1 || true
+            if [ -s /tmp/firamono.tar.xz ]; then
+                _step "Installing FiraCode Nerd Font (tar.xz)..."
+                tar -xJf /tmp/firamono.tar.xz -C /usr/local/share/fonts/firacode-nerd >>"$_LOG" 2>&1 || true
+            fi
+            rm -f /tmp/firamono.tar.xz
+        fi
+        command -v fc-cache >/dev/null 2>&1 && fc-cache -f >/dev/null 2>&1 || true
     fi
-    if fc-list 2>/dev/null | grep -qi "FiraCode Nerd"; then
+    if _firacode_have; then
         _ok "FiraCode Nerd Font Installed"
     else
-        _fail "FiraCode Nerd Font Could Not Be Installed (curl/unzip missing or download failed)"
+        _fail "FiraCode Nerd Font Could Not Be Installed (download or extraction failed)"
         _log_tail
     fi
 fi
@@ -179,7 +203,7 @@ if [ -z "$_missing" ]; then
               /root/.gtkrc-2.0 \
               /home/umo/.gtkrc-2.0; do
         if [ -f "$_f" ]; then
-            sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Materia-light/Orchis-Light-Compact/g; s/Papirus-Dark/Tela-Black-Dark/g; s/Papirus-Light/Tela/g' "$_f" 2>/dev/null || true
+            sed -i 's/Materia-dark/Orchis-Dark-Compact/g; s/Materia-light/Orchis-Light-Compact/g; s/Papirus-Dark/Tela-black-dark/g; s/Papirus-Light/Tela/g; s/Tela-Black-Dark/Tela-black-dark/g' "$_f" 2>/dev/null || true
             case "$_f" in
                 *.xml)
                     sed -i "s|<property name=\"IconThemeName\" type=\"string\" value=\"[^\"]*\"/>|<property name=\"IconThemeName\" type=\"string\" value=\"$_WANT_ICONS\"/>|" "$_f" 2>/dev/null || true

@@ -80,7 +80,7 @@ xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons -n -t int -s 0 >/dev/
 _um_mode=$(cat /etc/umo/umo-theme-mode 2>/dev/null || true)
 case "$_um_mode" in
     light) _um_gtk="Orchis-Light-Compact"; _um_fbk="Materia-light"; _um_icons="Tela"; _um_fbi="gnome" ;;
-    *)     _um_gtk="Orchis-Dark-Compact";  _um_fbk="Materia-dark";  _um_icons="Tela-Black-Dark"; _um_fbi="gnome" ;;
+    *)     _um_gtk="Orchis-Dark-Compact";  _um_fbk="Materia-dark";  _um_icons="Tela-black-dark"; _um_fbi="gnome" ;;
 esac
 [ -d "/usr/share/themes/$_um_gtk" ] || _um_gtk="$_um_fbk"
 [ -d "/usr/share/icons/$_um_icons" ] || _um_icons="$_um_fbi"

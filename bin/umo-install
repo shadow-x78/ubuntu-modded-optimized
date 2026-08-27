@@ -8,7 +8,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.15.8"
+export UMO_VERSION="4.15.9"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -150,7 +150,7 @@ umo_phase_config() {
         "Developer (Basic + Python/Node/GCC/Tools)" \
         "Media (Basic + VLC/FFmpeg/GIMP/Audacity)" \
         "Office (Basic + LibreOffice Suite)" \
-        "Browser (Basic + Firefox ESR)" \
+        "Browser (Basic + GNOME Web)" \
         "Full Suite (Everything)"
 
     case "$UMO_MENU_IDX" in

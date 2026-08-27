@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.15.8-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.15.9-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -82,7 +82,7 @@ Full Ubuntu on your Android device - one command, zero hassle
 | **Openbox** | Window Manager | Advanced users, minimal footprint | Clearlooks windows, tint2 panel, root menu |
 | **Minimal** | CLI only | Servers and headless usage | Terminal only - no theme applied |
 
-All graphical desktops get the full design system: Orchis GTK theme (compact), Tela icons, DMZ cursors, Ubuntu SemiBold + FiraCode Nerd Mono fonts, a matching Fastfetch config, and the UMO wallpaper - applied to **both** root and the `umo` user. Pick **Night Mode** (Orchis-Dark-Compact + Tela-Black-Dark) or **Day Mode** (Orchis-Light-Compact + Tela) in the installer, or with `--theme=umo-dark|umo-light`.
+All graphical desktops get the full design system: Orchis GTK theme (compact), Tela icons, DMZ cursors, Ubuntu SemiBold + FiraCode Nerd Mono fonts, a matching Fastfetch config, and the UMO wallpaper - applied to **both** root and the `umo` user. Pick **Night Mode** (Orchis-Dark-Compact + Tela-black-dark) or **Day Mode** (Orchis-Light-Compact + Tela) in the installer, or with `--theme=umo-dark|umo-light`.
 
 **Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Generic systemctl emulator · Session Control
 

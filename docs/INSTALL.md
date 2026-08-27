@@ -2,7 +2,7 @@
 
 # Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.15.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.15.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -102,7 +102,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | Flag | Group | Includes |
 |------|-------|----------|
-| `--apps=basic` | Basic | Core utilities + Firefox ESR browser |
+| `--apps=basic` | Basic | Core utilities + GNOME Web (Epiphany) browser |
 | `--apps=dev` | Developer | git, vim, python3, nodejs, build-essential |
 | `--apps=media` | Media | ffmpeg, vlc, gimp |
 | `--apps=full` | Full | All of the above |
@@ -115,7 +115,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | Flag | Description |
 |------|-------------|
 | `--perf=<mode>` | Set performance level (`balanced`, `aggressive`, `off`) |
-| `--theme=<theme>` | Set desktop theme (`umo-dark`, `umo-light`, `none`) - default is `umo-dark` (Materia-dark GTK + Papirus-Dark icons + DMZ cursor) |
+| `--theme=<theme>` | Set desktop theme (`umo-dark`, `umo-light`, `none`) - default is `umo-dark` (Orchis-Dark-Compact GTK + Tela-black-dark icons + DMZ cursor, falling back to Materia-dark + gnome icons when the designer extras are missing) |
 | `--lean` | Remove docs/man/locales to save space |
 
 ---

@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.15.8-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.15.9-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -82,7 +82,7 @@
 | **Openbox** | Window Manager | المستخدمون المتقدمون، بصمة خفيفة | نوافذ Clearlooks، بانر tint2، قائمة root |
 | **Minimal** | CLI only | السيرفرات والاستخدام بدون واجهة | طرفية فقط - بدون سمة |
 
-جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة Orchis (المضغوطة)، أيقونات Tela، مؤشر DMZ، خطا Ubuntu SemiBold + FiraCode Nerd Mono، إعدادات Fastfetch جاهزة، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً. اختر **الوضع الليلي** (Orchis-Dark-Compact + Tela-Black-Dark) أو **الوضع النهاري** (Orchis-Light-Compact + Tela) من قائمة المثبّت، أو عبر `--theme=umo-dark|umo-light`.
+جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة Orchis (المضغوطة)، أيقونات Tela، مؤشر DMZ، خطا Ubuntu SemiBold + FiraCode Nerd Mono، إعدادات Fastfetch جاهزة، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً. اختر **الوضع الليلي** (Orchis-Dark-Compact + Tela-black-dark) أو **الوضع النهاري** (Orchis-Light-Compact + Tela) من قائمة المثبّت، أو عبر `--theme=umo-dark|umo-light`.
 
 **يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl عام · التحكم بالجلسات
 

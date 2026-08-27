@@ -23,7 +23,7 @@ _umo_theme_mode_setup() {
             ;;
         *)
             _GTK_THEME="Orchis-Dark-Compact"
-            _ICON_THEME="Tela-Black-Dark"
+            _ICON_THEME="Tela-black-dark"
             _CURSOR_THEME="DMZ-White"
             _DESKTOP_BG="#1e1e1e"
             _DESKTOP_FG="#ffffff"
@@ -103,7 +103,7 @@ umo_theme_extras() {
     fi
 
     _want_gtk="Orchis-Dark-Compact"
-    _want_icons="Tela-Black-Dark"
+    _want_icons="Tela-black-dark"
     [ "$_mode" = "light" ] && _want_gtk="Orchis-Light-Compact" && _want_icons="Tela"
 
     _has_theme=0
@@ -236,7 +236,7 @@ umo_theme_apply_fastfetch() {
 # Base names of the .desktop files pinned to the Plank dock, based on the
 # selected application set (only entries actually installed get pinned).
 _umo_plank_launchers() {
-    printf '%s\n' thunar xfce4-terminal firefox-esr mousepad
+    printf '%s\n' thunar xfce4-terminal org.gnome.Epiphany mousepad
     case "${UMO_APP_SET:-basic}" in
         media)   printf '%s\n' vlc gimp ;;
         office)  printf '%s\n' libreoffice-startcenter atril ;;

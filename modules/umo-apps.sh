@@ -23,7 +23,7 @@ dpkg --configure -a || true
 locale-gen en_US.UTF-8 || true
 apt-get install -y --no-install-recommends mousepad ristretto file-roller || true
 dpkg --configure -a || true
-apt-get install -y --no-install-recommends firefox-esr || true
+apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
 "
 }
@@ -31,8 +31,6 @@ dpkg --configure -a || true
 umo_apps_browsers() {
     umo_log_step "Install Browsers"
     _run_installer "Browsers" "
-apt-get install -y --no-install-recommends firefox-esr || true
-dpkg --configure -a || true
 apt-get install -y --no-install-recommends epiphany-browser || true
 dpkg --configure -a || true
 "

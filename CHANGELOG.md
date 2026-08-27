@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.9] - 2026-08-27
+
+### 🐛 Fixed
+- **Tela icons always reported "Install Incomplete / icon theme Tela-Black-Dark missing" even though the installer finished successfully — case mismatch:** the Tela installer creates lowercase directories (`Tela-black-dark`, verified again against the upstream `install.sh` and a full local run), but the whole design checked and configured `Tela-Black-Dark`. GTK icon-theme names are case-sensitive, so the theme could never be found. All references (mode defaults, extras installer, satisfaction probe, session-boot enforcement, config-alignment sed) now use the real lowercase name, and the alignment pass also migrates any config still carrying the old capitalized form.
+- **`firefox-esr` has no installation candidate on Ubuntu and broke every app-set install:** Ubuntu dropped the Firefox ESR deb (Firefox is snap-only, which cannot run inside proot), so every set that referenced it printed `E: Package 'firefox-esr' has no installation candidate` and the app-set probe could never be satisfied. All sets and probes now use `epiphany-browser` (GNOME Web — a real deb that works inside proot), the duplicate install line in the browsers set is gone, and the Plank dock pins `org.gnome.Epiphany` instead of `firefox-esr`.
+- **FiraCode Nerd Font reported "Could Not Be Installed" despite a 100% download:** the verification required `fc-list` (fontconfig), so on containers without it the freshly extracted fonts were declared missing. Success is now verified by the extracted `.otf`/`.ttf` files themselves (with `fc-cache` still run when available), and a `FiraMono.tar.xz` download is retried when the zip or `unzip` fails.
+
+### ⚡ Performance
+- **Tela install is now ~3x faster:** the extras installer previously installed both Tela families (standard + black, six variants of sed-heavy SVG recoloring and icon-cache runs under proot) regardless of the theme mode. It now installs only the variant family the active mode needs (dark: `Tela-black` + `Tela-black-dark`; light: `Tela` only) and patches the installer's `BRIGHT_VARIANTS` line to skip the unused brightness levels — verified end-to-end locally against the upstream `install.sh` (dark mode installs exactly the two needed variants and nothing else). The patch is idempotent: it matches both the pristine `readonly BRIGHT_VARIANTS=...` line and an already-patched one, so a cached source kept from an interrupted run can never pin the wrong variant list on the next run (including after a mode change).
+
+### 🎨 Changed
+- **Docs and menus no longer advertise what does not install:** the install guide (EN/AR) now describes the basic set as shipping GNOME Web (Epiphany) and the default `umo-dark` theme with its real names (Orchis-Dark-Compact + Tela-black-dark icons + DMZ cursor, Materia/gnome fallback when the designer extras are missing) instead of the old Materia-dark + Papirus-Dark description, the READMEs (EN/AR) carry the lowercase icon-theme name, the installer's app-set menu says "Browser (Basic + GNOME Web)", and the Openbox root-menu browser chain falls back to `epiphany` instead of `firefox-esr`.
+
 ## [v4.15.8] - 2026-08-27
 
 ### 🐛 Fixed

@@ -11,7 +11,7 @@
       <action name="Execute"><command>pcmanfm</command></action>
     </item>
     <item label="Web Browser">
-      <action name="Execute"><command>sh -c "exo-open --launch WebBrowser || firefox-esr || midori || true"</command></action>
+      <action name="Execute"><command>sh -c "exo-open --launch WebBrowser || epiphany || midori || true"</command></action>
     </item>
     <separator/>
     <item label="Reconfigure Openbox">

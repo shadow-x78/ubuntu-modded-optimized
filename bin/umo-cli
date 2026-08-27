@@ -372,7 +372,7 @@ _umo_refresh_container() {
 _umo_theme_satisfied() {
     case "$UMO_THEME" in
         umo-light) _wg="Orchis-Light-Compact"; _wi="Tela" ;;
-        *)         _wg="Orchis-Dark-Compact";  _wi="Tela-Black-Dark" ;;
+        *)         _wg="Orchis-Dark-Compact";  _wi="Tela-black-dark" ;;
     esac
     [ -d "$UMO_INSTALL_DIR/usr/share/themes/$_wg" ] || return 1
     [ -d "$UMO_INSTALL_DIR/usr/share/icons/$_wi" ] || return 1
@@ -383,12 +383,12 @@ _umo_theme_satisfied() {
 _umo_apps_satisfied() {
     _probes=""
     case "$UMO_APP_SET" in
-        basic)   _probes="nano git firefox-esr" ;;
-        dev)     _probes="nano git firefox-esr python3 node gcc make cmake vim" ;;
-        media)   _probes="nano git firefox-esr vlc ffmpeg mpv audacity gimp" ;;
-        office)  _probes="nano git firefox-esr libreoffice atril" ;;
-        browser) _probes="nano git firefox-esr epiphany" ;;
-        full)    _probes="nano git firefox-esr python3 node gcc make cmake vim \
+        basic)   _probes="nano git epiphany" ;;
+        dev)     _probes="nano git epiphany python3 node gcc make cmake vim" ;;
+        media)   _probes="nano git epiphany vlc ffmpeg mpv audacity gimp" ;;
+        office)  _probes="nano git epiphany libreoffice atril" ;;
+        browser) _probes="nano git epiphany" ;;
+        full)    _probes="nano git epiphany python3 node gcc make cmake vim \
                           vlc ffmpeg mpv audacity gimp libreoffice atril" ;;
         *) return 1 ;;
     esac
