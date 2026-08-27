@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.10] - 2026-08-27
+
+### 🐛 Fixed
+- **Two `update-alternatives` warnings on every `epiphany-browser` install ("skip creation of /usr/share/man/man1/x-www-browser.1.gz ... associated file ... doesn't exist", same for `gnome-www-browser`):** the epiphany postinst registers both browser alternatives with a slave man page (`epiphany-browser.1.gz`), but the UMO dpkg excludes file keeps all of `/usr/share/man/*` from ever being unpacked, so the slave target never existed — harmless, but noisy on every fresh install and on any future epiphany upgrade. The excludes now carry a `path-include` for exactly that one ~1 KB man page (dpkg's last-matching-rule-wins semantics, the same mechanism the English-locale include already uses), so the file is unpacked, the alternative slave links are created cleanly, and both warnings are gone at the source.
+
 ## [v4.15.9] - 2026-08-27
 
 ### 🐛 Fixed

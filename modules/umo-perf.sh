@@ -39,6 +39,12 @@ EOC
     cat > "${UMO_INSTALL_DIR:?}$_dpkg_exclude" << 'EOD'
 path-exclude=/usr/share/doc/*
 path-exclude=/usr/share/man/*
+# epiphany-browser registers the x-www-browser / gnome-www-browser
+# alternatives with a slave man page; without this one file dpkg never
+# unpacks it and update-alternatives prints two warnings on every
+# epiphany install. The last matching rule wins, so this re-includes
+# exactly this ~1 KB file.
+path-include=/usr/share/man/man1/epiphany-browser.1.gz
 path-exclude=/usr/share/info/*
 path-exclude=/usr/share/locale/*
 path-include=/usr/share/locale/en/*
