@@ -50,4 +50,27 @@ done
 xfconf-query -c xfce4-desktop -p /desktop-icons/style -n -t int -s 0 >/dev/null 2>&1 || true
 xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons -n -t int -s 0 >/dev/null 2>&1 || true
 
+# Enforce the UMO theme at session boot (xfconf caches can ignore freshly
+# written channel files, so set the live values directly).
+_um_mode=$(cat /etc/umo/umo-theme-mode 2>/dev/null || true)
+case "$_um_mode" in
+    light) _um_gtk="Orchis-Light-Compact"; _um_fbk="Materia-light"; _um_icons="Tela"; _um_fbi="gnome" ;;
+    *)     _um_gtk="Orchis-Dark-Compact";  _um_fbk="Materia-dark";  _um_icons="Tela-Black-Dark"; _um_fbi="gnome" ;;
+esac
+[ -d "/usr/share/themes/$_um_gtk" ] || _um_gtk="$_um_fbk"
+[ -d "/usr/share/icons/$_um_icons" ] || _um_icons="$_um_fbi"
+
+_i=0
+until xfconf-query -c xsettings -l >/dev/null 2>&1; do
+    _i=$((_i + 1))
+    [ "$_i" -ge 20 ] && break
+    sleep 1
+done
+if xfconf-query -c xsettings -l >/dev/null 2>&1; then
+    xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s "$_um_gtk" >/dev/null 2>&1 || true
+    xfconf-query -c xsettings -p /Net/ThemeName -s "$_um_gtk" >/dev/null 2>&1 || true
+    xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s "$_um_icons" >/dev/null 2>&1 || true
+    xfconf-query -c xsettings -p /Net/IconThemeName -s "$_um_icons" >/dev/null 2>&1 || true
+fi
+
 exit 0

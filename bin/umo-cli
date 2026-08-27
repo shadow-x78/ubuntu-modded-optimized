@@ -153,11 +153,34 @@ _umo_detect_ubuntu_version() {
     printf '%s' "$_v"
 }
 
+# Detect the installed application set by probing the container binaries,
+# from the richest set downwards, so legacy installs keep their apps.
+_umo_detect_app_set() {
+    _ct="$(_umo_install_dir)"
+    _has() { [ -x "$_ct/usr/bin/$1" ] || [ -x "$_ct/usr/local/bin/$1" ]; }
+    if _has libreoffice && _has vlc && _has gimp && _has python3 && _has gcc; then
+        printf 'full'; return
+    fi
+    if _has libreoffice || _has atril; then
+        printf 'office'; return
+    fi
+    if _has vlc || _has mpv || _has gimp || _has audacity; then
+        printf 'media'; return
+    fi
+    if _has python3 || _has gcc || _has cmake || _has node; then
+        printf 'dev'; return
+    fi
+    if _has epiphany; then
+        printf 'browser'; return
+    fi
+    printf 'basic'
+}
+
 _umo_detect_saved_settings() {
     UMO_DE="$(printf '%s' "${UMO_DE:-$(_umo_detect_de)}" | tr -d '"')"
     UMO_THEME="${UMO_THEME:-$(_umo_detect_theme)}"
     UMO_UBUNTU_VERSION="${UMO_UBUNTU_VERSION:-$(_umo_detect_ubuntu_version)}"
-    UMO_APP_SET="${UMO_APP_SET:-basic}"
+    UMO_APP_SET="${UMO_APP_SET:-$(_umo_detect_app_set)}"
     export UMO_DE UMO_THEME UMO_UBUNTU_VERSION UMO_APP_SET
 }
 
@@ -403,9 +426,8 @@ _umo_reapply_settings() {
 
     if [ "$UMO_DE" != "minimal" ] && [ "$UMO_THEME" != "none" ]; then
         if _umo_theme_satisfied; then
-            _umo_ok "Theme Already Applied ($UMO_THEME) - Verifying Designer Extras Only"
-            umo_theme_extras </dev/null || _umo_warn "Designer Extras Check Finished With Warnings"
-            umo_theme_write_mode_marker || true
+            _umo_ok "Theme Packages Present - Re-Applying Design Configuration"
+            umo_theme_reapply_config </dev/null || _umo_warn "Design Re-Apply Finished With Warnings"
         else
             umo_theme_setup </dev/null || _umo_warn "Theme Re-Apply Finished With Warnings"
         fi
@@ -422,7 +444,7 @@ _umo_reapply_settings() {
     _umo_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
         xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
         mousepad dbus-x11 x11-xserver-utils \
-        gnome-icon-theme xfce4-whiskermenu-plugin"
+        gnome-icon-theme xfce4-whiskermenu-plugin plank"
     case "$UMO_DE" in
         lxde)
             _umo_probe="startlxde"

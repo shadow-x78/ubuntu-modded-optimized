@@ -113,7 +113,7 @@ if ! command -v startxfce4 >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1
     timeout 1800 apt-get install -y --no-install-recommends \
         xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
         xfce4-terminal thunar dbus-x11 x11-xserver-utils \
-        gnome-icon-theme xfce4-whiskermenu-plugin mousepad 2>&1 | _apt_progress || true
+        gnome-icon-theme xfce4-whiskermenu-plugin mousepad plank 2>&1 | _apt_progress || true
     dpkg --configure -a >/dev/null 2>&1 || true
     if command -v startxfce4 >/dev/null 2>&1; then
         _ok "Desktop components installed automatically"

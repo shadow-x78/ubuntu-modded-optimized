@@ -267,7 +267,38 @@ umo_theme_apply_xfce() {
                 "TERMINAL_FONT" "$(_umo_theme_terminal_font)"
         fi
         rm -f "$_home/.config/xfce4/panel/panels.xml" 2>/dev/null || true
+
+        # Plank bottom dock - autostarted by xfce4-session (the VNC xstartup
+        # execs startxfce4, so plank must come from the session autostart).
+        _autostart_dir="$_home/.config/autostart"
+        if mkdir -p "$_autostart_dir" 2>/dev/null; then
+            cat > "$_autostart_dir/plank.desktop" << 'PLANKDESK'
+[Desktop Entry]
+Type=Application
+Name=Plank
+Comment=Dock
+Exec=plank
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+PLANKDESK
+        fi
     done
+
+    # System-wide autostart fallback (covers accounts without the user entry).
+    _xdg_autostart="${UMO_INSTALL_DIR}/etc/xdg/autostart"
+    if mkdir -p "$_xdg_autostart" 2>/dev/null; then
+        cat > "$_xdg_autostart/plank.desktop" << 'PLANKDESK'
+[Desktop Entry]
+Type=Application
+Name=Plank
+Comment=Dock
+Exec=plank
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+PLANKDESK
+    fi
 
     if [ -d "${UMO_INSTALL_DIR}/usr/local/bin" ] || mkdir -p "${UMO_INSTALL_DIR}/usr/local/bin" 2>/dev/null; then
         if [ -f "$_theme_dir/umo-desktop-init" ]; then
@@ -365,15 +396,11 @@ umo_theme_fix_ownership() {
     fi
 }
 
-umo_theme_setup() {
-    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme Disabled."; return 0; }
-    umo_log_step "Apply UMO Desktop Theme ($UMO_THEME)"
-
-    _umo_theme_mode_setup
-    umo_theme_write_mode_marker
-
-    umo_theme_packages || true
-    umo_theme_extras || true
+# Cheap local design application (fonts, wallpaper, GTK, DE layout, fastfetch,
+# ownership). Safe to re-run on every update - no apt, no downloads.
+# Callers must run _umo_theme_mode_setup and umo_theme_extras first so
+# _GTK_THEME/_ICON_THEME reflect availability fallbacks.
+_umo_theme_apply_local() {
     umo_theme_apply_fonts || true
     umo_theme_apply_wallpaper || true
 
@@ -389,6 +416,32 @@ umo_theme_setup() {
 
     umo_theme_apply_fastfetch || true
     umo_theme_fix_ownership || true
+    return 0
+}
+
+umo_theme_reapply_config() {
+    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme Disabled."; return 0; }
+    umo_log_step "Re-Apply UMO Desktop Design ($UMO_THEME)"
+
+    _umo_theme_mode_setup
+    umo_theme_write_mode_marker
+    umo_theme_extras || true
+    _umo_theme_apply_local
+
+    umo_log_ok "Desktop Design Re-Applied"
+    return 0
+}
+
+umo_theme_setup() {
+    [ "$UMO_THEME" = "none" ] && { umo_log_info "Theme Disabled."; return 0; }
+    umo_log_step "Apply UMO Desktop Theme ($UMO_THEME)"
+
+    _umo_theme_mode_setup
+    umo_theme_write_mode_marker
+
+    umo_theme_packages || true
+    umo_theme_extras || true
+    _umo_theme_apply_local
 
     umo_log_ok "Desktop Theme Applied"
     return 0

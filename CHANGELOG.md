@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.15.7] - 2026-08-27
+
+### 🐛 Fixed
+- **The XFCE session never showed the UMO design after the first boot (no wallpaper, default panel, no dock):** `umo update` treated the theme as "already applied" whenever the Orchis/Tela/font directories existed and only re-checked the designer extras — skipping the whole cheap design pass (wallpaper, XFCE panel/xsettings/terminal, GTK config, fastfetch, ownership). The theme module is now split: the expensive part (apt packages + downloads) still runs only when missing, but a new `umo_theme_reapply_config` re-applies all local design configuration on **every** update, so the wallpaper and panel layout always converge on the UMO design.
+- **The bottom Plank dock was missing in XFCE:** plank was neither in the XFCE desktop package set nor autostarted by the session — the VNC `xstartup` only started it on the non-XFCE fallback path (`startxfce4` is exec'd first, so the later `plank &` line never ran). Plank is now installed with the XFCE set (installer, re-apply and the startvnc lazy installer) and autostarted by xfce4-session via `plank.desktop` entries (per-user `~/.config/autostart` + system-wide `/etc/xdg/autostart`).
+- **Session-boot theme enforcement:** `umo-desktop-init` now also sets the live GTK/icon theme with `xfconf-query` (Orchis/Tela when present, Materia/gnome fallback otherwise) — xfconf caches can ignore freshly written channel files, so the design is forced at every session start, alongside the existing wallpaper fix.
+- **Application-set amnesia on legacy installs:** the saved app set was hard-defaulted to `basic` when not recorded, silently dropping richer sets. `umo update` now detects the installed set by probing the container binaries (full → office → media → dev → browser → basic), so re-apply repairs the apps the user actually has.
+
 ## [v4.15.6] - 2026-08-27
 
 ### ⚡ Performance

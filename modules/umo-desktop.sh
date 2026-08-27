@@ -85,10 +85,10 @@ umo_de_xfce4() {
     xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
-    xfce4-whiskermenu-plugin || true'
+    xfce4-whiskermenu-plugin plank || true'
     _umo_de_build "$_pkgs" startxfce4
     _run_de_installer "XFCE4" startxfce4 \
-        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils"
+        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils plank"
 }
 
 umo_de_openbox() {
