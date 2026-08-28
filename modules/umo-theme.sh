@@ -303,8 +303,9 @@ _umo_plank_launchers() {
         media)   printf '%s\n' vlc gimp ;;
         office)  printf '%s\n' libreoffice-startcenter atril ;;
         browser) : ;;
-        full)    printf '%s\n' vlc gimp libreoffice-startcenter atril ;;
-        dev|basic|*) : ;;
+        dev)     printf '%s\n' code ;;
+        full)    printf '%s\n' vlc gimp libreoffice-startcenter atril code ;;
+        basic|*) : ;;
     esac
     return 0
 }

@@ -63,11 +63,15 @@ _apt "GIMP Image Editor" gimp
 umo_apps_dev() {
     umo_log_step "Install Development Tools"
     _run_installer "Development tools" '
-_apt "Python 3 (pip, venv)" python3 python3-pip python3-venv
+_apt "Python 3 (pip, venv, dev headers)" python3 python3-pip python3-venv python3-dev
 _apt "Node.js And npm" nodejs npm
-_apt "Build Toolchain (GCC, Make, CMake, GDB)" build-essential gcc g++ make cmake gdb
+_apt "Build Toolchain (GCC, Make, CMake, GDB)" build-essential gcc g++ make cmake gdb pkg-config
 _apt "Developer Utilities (vim, tmux, ssh, sqlite)" vim tmux openssh-client manpages-dev sqlite3
-' "python3 node npm gcc make cmake vim"
+_apt "Geany Lightweight IDE" geany
+_umo_setup_code_repo
+_apt "Visual Studio Code (Microsoft Repo)" code
+_umo_harden_code
+' "python3 node npm gcc make cmake vim geany pkg-config code"
 }
 
 umo_apps_termux() {
@@ -127,6 +131,38 @@ _run_installer() {
         printf '%s\n' '    _svc=/usr/share/dbus-1/services/org.gnome.Epiphany.service'
         printf '%s\n' '    [ -f "$_svc" ] && mv -f "$_svc" "$_svc.umo-disabled" 2>/dev/null || true'
         printf '%s\n' '}'
+        printf '%s\n' '_umo_setup_code_repo() {'
+        printf '%s\n' '    _list=/etc/apt/sources.list.d/vscode.list'
+        printf '%s\n' '    [ -f "$_list" ] && return 0'
+        printf '%s\n' '    _key=/usr/share/keyrings/packages.microsoft.gpg'
+        printf '%s\n' '    _asc=/tmp/packages.microsoft.asc'
+        printf '%s\n' '    mkdir -p /usr/share/keyrings 2>/dev/null || true'
+        printf '%s\n' '    if [ ! -s "$_key" ]; then'
+        printf '%s\n' '        if command -v wget >/dev/null 2>&1; then'
+        printf '%s\n' '            timeout 120 wget -qO "$_asc" https://packages.microsoft.com/keys/microsoft.asc >> "$_LOG" 2>&1 || true'
+        printf '%s\n' '        elif command -v curl >/dev/null 2>&1; then'
+        printf '%s\n' '            timeout 120 curl -fsSL -o "$_asc" https://packages.microsoft.com/keys/microsoft.asc >> "$_LOG" 2>&1 || true'
+        printf '%s\n' '        fi'
+        printf '%s\n' '        if [ -s "$_asc" ]; then'
+        printf '%s\n' '            if command -v gpg >/dev/null 2>&1; then'
+        printf '%s\n' '                gpg --dearmor < "$_asc" > "$_key" 2>> "$_LOG" || true'
+        printf '%s\n' '            fi'
+        printf '%s\n' '            [ -s "$_key" ] || grep -E "^[A-Za-z0-9+/]+={0,2}\$" "$_asc" 2>/dev/null | base64 -d > "$_key" 2>> "$_LOG" || true'
+        printf '%s\n' '        fi'
+        printf '%s\n' '        rm -f "$_asc" 2>/dev/null || true'
+        printf '%s\n' '    fi'
+        printf '%s\n' '    if [ -s "$_key" ]; then'
+        printf '%s\n' '        printf "deb [arch=amd64,arm64,armhf signed-by=%s] https://packages.microsoft.com/repos/code stable main\n" "$_key" > "$_list" 2>>"$_LOG" || true'
+        printf '%s\n' '        timeout 600 apt-get update >> "$_LOG" 2>&1 || true'
+        printf '%s\n' '    fi'
+        printf '%s\n' '    [ -f "$_list" ] || printf "[%s] VS Code repo unavailable - code will not install\n" "$(_um_ts)" >> "$_LOG" 2>/dev/null || true'
+        printf '%s\n' '}'
+        printf '%s\n' '_umo_harden_code() {'
+        printf '%s\n' '    _cd=/usr/share/applications/code.desktop'
+        printf '%s\n' '    if [ -f "$_cd" ]; then'
+        printf '%s\n' '        sed -i "s|^Exec=.*|Exec=/usr/local/bin/umo-code %U|" "$_cd" 2>/dev/null || true'
+        printf '%s\n' '    fi'
+        printf '%s\n' '}'
         printf '%s\n' 'timeout 600 apt-get update >> "$_LOG" 2>&1 || true'
         printf '%s\n' 'dpkg --configure -a >> "$_LOG" 2>&1 || true'
         printf '%s\n' "$_script_body"
@@ -183,13 +219,15 @@ _run_installer() {
 }
 
 _umo_deploy_browser_wrapper() {
-    _bw_src="$SCRIPT_DIR/config/container/umo-browser"
-    _bw_dst="${UMO_INSTALL_DIR:?}/usr/local/bin/umo-browser"
-    if [ -f "$_bw_src" ]; then
-        mkdir -p "$(dirname "$_bw_dst")" 2>/dev/null || true
-        cp -f "$_bw_src" "$_bw_dst" 2>/dev/null || true
-        chmod +x "$_bw_dst" 2>/dev/null || true
-    fi
+    for _bw_name in umo-browser umo-code; do
+        _bw_src="$SCRIPT_DIR/config/container/$_bw_name"
+        _bw_dst="${UMO_INSTALL_DIR:?}/usr/local/bin/$_bw_name"
+        if [ -f "$_bw_src" ]; then
+            mkdir -p "$(dirname "$_bw_dst")" 2>/dev/null || true
+            cp -f "$_bw_src" "$_bw_dst" 2>/dev/null || true
+            chmod +x "$_bw_dst" 2>/dev/null || true
+        fi
+    done
 }
 
 _umo_apps_disk_check() {
@@ -197,10 +235,10 @@ _umo_apps_disk_check() {
     [ -n "$_ad_free_kb" ] || return 0
     _ad_need_kb=1200000
     case "$UMO_APP_SET" in
-        dev)    _ad_need_kb=2600000 ;;
+        dev)    _ad_need_kb=3400000 ;;
         media)  _ad_need_kb=3600000 ;;
         office) _ad_need_kb=2800000 ;;
-        full)   _ad_need_kb=6200000 ;;
+        full)   _ad_need_kb=7000000 ;;
     esac
     _ad_free_mb=$((_ad_free_kb / 1024))
     _ad_need_mb=$((_ad_need_kb / 1024))

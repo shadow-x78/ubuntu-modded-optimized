@@ -1,0 +1,32 @@
+#!/bin/sh
+_LOG=/tmp/umo-code.log
+_ts() { date '+%H:%M:%S' 2>/dev/null || echo '?'; }
+
+printf '[%s] launch args: %s\n' "$(_ts)" "$*" >> "$_LOG" 2>/dev/null || true
+
+export LIBGL_ALWAYS_SOFTWARE=1
+export GALLIUM_DRIVER="${GALLIUM_DRIVER:-llvmpipe}"
+export ELECTRON_DISABLE_SANDBOX=1
+[ -n "${DISPLAY:-}" ] || export DISPLAY=:1
+
+_CODE_BIN=""
+if command -v code >/dev/null 2>&1; then
+    _CODE_BIN=code
+elif [ -x /usr/share/code/code ]; then
+    _CODE_BIN=/usr/share/code/code
+fi
+
+if [ -z "$_CODE_BIN" ]; then
+    printf '[%s] ERROR: VS Code binary not found - install the dev set (umo install, set=dev)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+    printf 'UMO Code: VS Code is not installed in the container.\n' >&2
+    printf 'Install it with the dev application set: umo install --apps=dev\n' >&2
+    printf 'Full log: %s\n' "$_LOG" >&2
+    exit 127
+fi
+
+printf '[%s] exec: %s (DISPLAY=%s)\n' "$(_ts)" "$_CODE_BIN" "$DISPLAY" >> "$_LOG" 2>/dev/null || true
+if [ "$(id -u 2>/dev/null || printf '0')" = "0" ]; then
+    exec "$_CODE_BIN" --no-sandbox --disable-gpu --disable-dev-shm-usage \
+        --user-data-dir="${HOME:-/root}/.config/umo-vscode-data" "$@" >> "$_LOG" 2>&1
+fi
+exec "$_CODE_BIN" --no-sandbox --disable-gpu --disable-dev-shm-usage "$@" >> "$_LOG" 2>&1

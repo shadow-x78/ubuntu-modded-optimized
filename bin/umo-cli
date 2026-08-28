@@ -315,7 +315,7 @@ _umo_refresh_container() {
 
     _bin_dir="$_ct_inst_dir/usr/local/bin"
     if mkdir -p "$_bin_dir" 2>/dev/null; then
-        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras umo-browser; do
+        for _cscript in umo-startvnc umo-stopvnc umo-desktop-init umo-install-extras umo-browser umo-code; do
             _csrc="$_UMO_REPO_DIR/config/container/$_cscript"
             [ -f "$_csrc" ] || _csrc="$_UMO_REPO_DIR/config/theme/xfce4/$_cscript"
             if [ -f "$_csrc" ]; then
@@ -345,6 +345,12 @@ _umo_refresh_container() {
         if sed -i '0,/^Exec=/s|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|' "$_falkon_desktop" 2>/dev/null; then
             sed -i 's|^DBusActivatable=.*|DBusActivatable=false|' "$_falkon_desktop" 2>/dev/null || true
             _umo_ok "Falkon Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
+        fi
+    fi
+    _code_desktop="$_ct_inst_dir/usr/share/applications/code.desktop"
+    if [ -f "$_code_desktop" ] && ! grep -q "^Exec=/usr/local/bin/umo-code" "$_code_desktop" 2>/dev/null; then
+        if sed -i 's|^Exec=.*|Exec=/usr/local/bin/umo-code %U|' "$_code_desktop" 2>/dev/null; then
+            _umo_ok "VS Code Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
         fi
     fi
 
@@ -459,11 +465,11 @@ _umo_apps_satisfied() {
     _probes=""
     case "$UMO_APP_SET" in
         basic)   _probes="nano git falkon" ;;
-        dev)     _probes="nano git falkon python3 node gcc make cmake vim" ;;
+        dev)     _probes="nano git falkon python3 node gcc make cmake vim geany pkg-config code" ;;
         media)   _probes="nano git falkon vlc ffmpeg mpv audacity gimp" ;;
         office)  _probes="nano git falkon libreoffice atril" ;;
         browser) _probes="nano git falkon" ;;
-        full)    _probes="nano git falkon python3 node gcc make cmake vim \
+        full)    _probes="nano git falkon python3 node gcc make cmake vim geany pkg-config code \
                           vlc ffmpeg mpv audacity gimp libreoffice atril" ;;
         *) return 1 ;;
     esac
