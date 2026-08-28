@@ -30,12 +30,14 @@ REPAIR
 umo_vnc_install() {
     umo_log_step "Install VNC Server"
     {
+        printf '%s\n' '#!/bin/sh'
+        _umo_log_container_prelude
         cat << 'HDR'
-#!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
+_LOG=/root/install-vnc.log
 
 HDR
         _tz_area="${UMO_TZ%%/*}"
@@ -48,10 +50,13 @@ HDR
         _umo_apt_repair_body
         cat << 'BODY'
 
-_um_apt_repair
+_step "Preparing TigerVNC Package Database..."
+_um_apt_repair >> "$_LOG" 2>&1
 
-timeout 600 apt-get update -qq || true
+_step "Updating Package Lists..."
+timeout 600 apt-get update -qq >> "$_LOG" 2>&1 || true
 
+_step "Installing TigerVNC Packages (This May Take A While)..."
 timeout 600 apt-get install -y --no-install-recommends \
     fontconfig fontconfig-config libfontconfig1 libfreetype6 libexpat1 \
     libpng16-16 libbrotli1 fonts-dejavu-core ucf \
@@ -65,21 +70,22 @@ timeout 600 apt-get install -y --no-install-recommends \
     xfonts-base xfonts-encodings xfonts-utils \
     dbus-x11 \
     tigervnc-standalone-server tigervnc-viewer tigervnc-common tigervnc-tools \
-    || true
+    >> "$_LOG" 2>&1 || true
 
-_um_apt_repair
+_step "Finalizing TigerVNC Package Database..."
+_um_apt_repair >> "$_LOG" 2>&1
 
 if command -v tigervncserver >/dev/null 2>&1 || command -v vncserver >/dev/null 2>&1; then
     exit 0
 fi
 
-echo "=== ERROR: TigerVNC installation failed ==="
-echo "--- dpkg audit ---"
-dpkg --audit 2>&1 | head -20
-echo "--- dpkg status ---"
-dpkg -l 'tigervnc*' 2>&1 | tail -10
-echo "--- status file perms ---"
-ls -la /var/lib/dpkg/status* 2>&1
+_fail "TigerVNC Install Failed"
+_warn "dpkg Audit:"
+dpkg --audit 2>&1 | head -20 | sed 's/^/      /' || true
+_warn "dpkg Status:"
+dpkg -l 'tigervnc*' 2>&1 | tail -10 | sed 's/^/      /' || true
+_warn "Status File Permissions:"
+ls -la /var/lib/dpkg/status* 2>&1 | sed 's/^/      /' || true
 exit 1
 BODY
     } > "${UMO_INSTALL_DIR:?}/root/install-vnc.sh"
@@ -97,12 +103,12 @@ BODY
     fi
     _rc=0
     if [ "${UMO_DEV_MODE:-0}" != "1" ]; then
-        timeout 3600 "$UMO_LOGIN_SH" -c "bash /root/install-vnc.sh" || _rc=$?
+        timeout 3600 "$UMO_LOGIN_SH" -c "bash /root/install-vnc.sh" </dev/null || _rc=$?
     fi
     if [ "$_rc" -eq 0 ]; then
-        printf "  %b%s%b  TigerVNC installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC"
+        umo_log_ok "TigerVNC Installed"
     else
-        printf "  %b%s%b  TigerVNC installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_rc"
+        umo_log_warn "TigerVNC Installation Encountered Errors (Code $_rc)"
     fi
     rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true
     return 0

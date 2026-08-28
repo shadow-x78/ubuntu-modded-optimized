@@ -51,18 +51,24 @@ umo_theme_packages() {
                  gnome-icon-theme unzip \
                  fonts-ubuntu fonts-inter fonts-jetbrains-mono fonts-dejavu-core"
 
-    cat > "${UMO_INSTALL_DIR:?}/root/install-theme.sh" << INNER
-#!/bin/sh
+    {
+        printf '%s\n' '#!/bin/sh'
+        _umo_log_container_prelude
+    } > "${UMO_INSTALL_DIR:?}/root/install-theme.sh"
+    cat >> "${UMO_INSTALL_DIR}/root/install-theme.sh" << INNER
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
+_LOG=/root/install-theme.log
+_step "Installing Theme Packages..."
 if dpkg -l papirus-icon-theme 2>/dev/null | grep -q '^ii'; then
-    timeout 600 apt-get remove -y papirus-icon-theme 2>/dev/null || true
+    timeout 600 apt-get remove -y papirus-icon-theme >> "\$_LOG" 2>&1 || true
 fi
-timeout 600 apt-get install -y --no-install-recommends $_theme_pkgs || true
-timeout 120 apt-get install -y exo-utils 2>/dev/null || true
-dpkg --configure -a || true
+timeout 600 apt-get install -y --no-install-recommends $_theme_pkgs >> "\$_LOG" 2>&1 || \
+    _fail "Theme Packages Returned Errors (See /root/install-theme.log)"
+timeout 120 apt-get install -y exo-utils >> "\$_LOG" 2>&1 || true
+dpkg --configure -a >> "\$_LOG" 2>&1 || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/install-theme.sh"
     _rc=0

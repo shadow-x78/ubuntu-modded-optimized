@@ -8,12 +8,14 @@ _UMO_MOD_DE_LOADED=1
 UMO_DE="${UMO_DE:-xfce4}"
 
 _umo_de_header() {
+    printf '%s\n' '#!/bin/sh'
+    _umo_log_container_prelude
     cat << 'HDR'
-#!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export LANG=C
 [ -t 0 ] && exec </dev/null
+_LOG=/root/install-de.log
 
 HDR
     _tz_area="${UMO_TZ%%/*}"
@@ -48,27 +50,32 @@ REPAIR
 _umo_de_build() {
     _pkgs_block="$1"
     _probe="$2"
+    _de_label="$3"
     {
         _umo_de_header
         cat << EOF
 
-_um_apt_repair
+_step "Preparing $_de_label Package Database..."
+_um_apt_repair >> "\$_LOG" 2>&1
 
-apt-get update || true
+_step "Updating Package Lists..."
+apt-get update >> "\$_LOG" 2>&1 || true
 
 _attempt=0
 until command -v $_probe >/dev/null 2>&1 || [ "\$_attempt" -ge 3 ]; do
     _attempt=\$((_attempt + 1))
+    _step "Installing $_de_label Packages (Attempt \$_attempt Of 3)..."
 $_pkgs_block
-    dpkg --configure -a || true
+    dpkg --configure -a >> "\$_LOG" 2>&1 || true
 done
 
 if ! command -v $_probe >/dev/null 2>&1; then
-    echo "=== DESKTOP INSTALL FAILED - real apt errors: ==="
-    tail -n 30 /var/log/apt/term.log 2>/dev/null || true
+    _fail "$_de_label Install Failed - Real Apt Errors:"
+    tail -n 30 /var/log/apt/term.log 2>/dev/null | sed 's/^/      /' || true
 fi
 
-_um_apt_repair
+_step "Finalizing $_de_label Package Database..."
+_um_apt_repair >> "\$_LOG" 2>&1
 EOF
     } > "${UMO_INSTALL_DIR:?}/root/install-de.sh"
 }
@@ -76,7 +83,7 @@ EOF
 umo_de_lxde() {
     umo_log_step "Install LXDE (Ultra-Lightweight)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf || true' startlxde
+    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf >> "$_LOG" 2>&1 || true' startlxde LXDE
     _run_de_installer "LXDE" startlxde \
         "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf"
 }
@@ -87,8 +94,8 @@ umo_de_xfce4() {
     xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
-    xfce4-whiskermenu-plugin plank || true'
-    _umo_de_build "$_pkgs" startxfce4
+    xfce4-whiskermenu-plugin plank >> "$_LOG" 2>&1 || true'
+    _umo_de_build "$_pkgs" startxfce4 XFCE4
     _run_de_installer "XFCE4" startxfce4 \
         "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils plank"
 }
@@ -96,7 +103,7 @@ umo_de_xfce4() {
 umo_de_openbox() {
     umo_log_step "Install Openbox (Minimal)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    openbox obconf lxterminal pcmanfm tint2 feh exo-utils || true' openbox-session
+    openbox obconf lxterminal pcmanfm tint2 feh exo-utils >> "$_LOG" 2>&1 || true' openbox-session Openbox
     _run_de_installer "Openbox" openbox-session \
         "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils"
 }
@@ -104,7 +111,7 @@ umo_de_openbox() {
 umo_de_minimal() {
     umo_log_step "Install Minimal X11"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    xterm xfonts-base || true' xterm
+    xterm xfonts-base >> "$_LOG" 2>&1 || true' xterm "Minimal X11"
     _run_de_installer "Minimal X11" xterm \
         "apt-get update && apt-get install -y --no-install-recommends xterm xfonts-base"
 }
@@ -116,24 +123,18 @@ _run_de_installer() {
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
     umo_log_run "Installing $_label..."
     _rc=0
-    "$UMO_LOGIN_SH" -c "bash /root/install-de.sh 2>&1 | tee /root/install-de.log; exit \${PIPESTATUS[0]}" || _rc=$?
+    "$UMO_LOGIN_SH" -c "bash /root/install-de.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then
-        printf "  %b%s%b  %s installed successfully\n" "$UMO_COLOR_SUCCESS" "$UMO_G_OK" "$UMO_NC" "$_label"
+        umo_log_ok "$_label Installed"
     else
-        printf "  %b%s%b  %s installation encountered errors (code %d)\n" "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_rc"
+        umo_log_warn "$_label Installation Encountered Errors (Code $_rc)"
     fi
     if [ -n "$_probe" ] && ! "$UMO_LOGIN_SH" -c "command -v $_probe >/dev/null 2>&1"; then
         printf "\n"
-        printf "  %b%s%b  CRITICAL: %s core component '%s' is MISSING - desktop would be EMPTY.\n" \
-            "$UMO_COLOR_DANGER" "$UMO_G_ERR" "$UMO_NC" "$_label" "$_probe"
-        printf "         Evidence kept in-container:\n"
-        printf "           /root/install-de.log  /root/install-de.last.sh\n"
-        printf "         Real apt errors:\n"
-        printf "           umo login -c \"tail -n 30 /var/log/apt/term.log\"\n"
-        printf "         Repair inside the container:\n"
-        printf "           umo login\n"
-        printf "           %s\n" "$_repair"
-        printf "         Then: umo stop && umo start\n\n"
+        umo_log_err "CRITICAL: $_label Core Component '$_probe' Missing - Desktop Would Be Empty"
+        umo_log_info "Evidence Kept In-Container: /root/install-de.log, /root/install-de.last.sh"
+        umo_log_info "Real Apt Errors: umo login -c \"tail -n 30 /var/log/apt/term.log\""
+        umo_log_info "Repair Inside The Container: umo login, then: $_repair, then: umo stop && umo start"
     fi
     mv -f "${UMO_INSTALL_DIR}/root/install-de.sh" "${UMO_INSTALL_DIR}/root/install-de.last.sh" 2>/dev/null || true
 }

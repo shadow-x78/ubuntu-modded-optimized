@@ -6,7 +6,7 @@ unset LD_PRELOAD
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export UMO_LIB_DIR="$SCRIPT_DIR/lib"
 export UMO_MOD_DIR="$SCRIPT_DIR/modules"
-export UMO_VERSION="4.16.8"
+export UMO_VERSION="4.16.9"
 
 UMO_INSTALL_DIR="${UMO_INSTALL_DIR:-$HOME/umo-ubuntu}"
 UMO_RUNTIME_DIR="${UMO_RUNTIME_DIR:-$HOME/.umo}"
@@ -288,9 +288,9 @@ umo_phase_finalize() {
             fi
         }
         umo_run_stream "Installing Dependencies..." _umo_login_timeout 600 -c \
-            "export DEBIAN_FRONTEND=noninteractive; apt-get install -y --no-install-recommends sudo || true" || true
+            "export DEBIAN_FRONTEND=noninteractive; apt-get install -y --no-install-recommends sudo >/tmp/umo-bootstrap.log 2>&1 || true" || true
         umo_run_stream "Configuring Packages..." _umo_login_timeout 900 -c \
-            "export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a || true" || true
+            "export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a >/tmp/umo-bootstrap.log 2>&1 || true" || true
         umo_run_quiet "Setting Up Users..." _umo_login_timeout 120 -c "usermod -aG sudo umo" || true
         umo_run_quiet "Restoring Service Binaries..." _umo_login_timeout 120 -c '
             for _f in invoke-rc.d service systemctl; do

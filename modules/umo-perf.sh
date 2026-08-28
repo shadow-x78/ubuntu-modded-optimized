@@ -64,12 +64,13 @@ umo_perf_debloat() {
     cat > "$UMO_INSTALL_DIR/root/debloat.sh" << INNER
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get purge -y --auto-remove $_bloat 2>/dev/null || true
+_LOG=/tmp/umo-debloat.log
+apt-get purge -y --auto-remove $_bloat >> "\$_LOG" 2>&1 || true
 sed -i '/messagebus/d' /var/lib/dpkg/statoverride 2>/dev/null || true
-apt-get clean
+apt-get clean >> "\$_LOG" 2>&1 || true
 rm -rf /var/lib/apt/lists/*
-apt-get install -y ubuntu-keyring 2>/dev/null || true
-dpkg --configure -a || true
+apt-get install -y ubuntu-keyring >> "\$_LOG" 2>&1 || true
+dpkg --configure -a >> "\$_LOG" 2>&1 || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/debloat.sh"
     umo_run_stream "Purging Bloat Packages..." "$UMO_LOGIN_SH" -c "bash /root/debloat.sh" || \
@@ -100,9 +101,10 @@ umo_perf_cleanup() {
     cat > "$UMO_INSTALL_DIR/root/cleanup.sh" << INNER
 #!/bin/sh
 export DEBIAN_FRONTEND=noninteractive
-apt-get clean
+_LOG=/tmp/umo-cleanup.log
+apt-get clean >> "\$_LOG" 2>&1 || true
 rm -rf /var/lib/apt/lists/* || true
-apt-get update -qq || true
+apt-get update -qq >> "\$_LOG" 2>&1 || true
 INNER
     chmod +x "$UMO_INSTALL_DIR/root/cleanup.sh"
     umo_run_stream "Running APT Cleanup..." "$UMO_LOGIN_SH" -c "bash /root/cleanup.sh" || \

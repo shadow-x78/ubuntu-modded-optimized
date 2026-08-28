@@ -11,7 +11,12 @@ umo_apps_basic() {
     umo_log_step "Install Base Utilities"
     _run_installer "Base utilities" '
 _apt "Core Utilities" nano wget curl git htop man-db ca-certificates ncurses-term
-_apt "Fastfetch" fastfetch || _apt "Neofetch (Fastfetch Unavailable On This Release)" neofetch
+_fetch_pkg="fastfetch"
+apt-cache show fastfetch >> "$_LOG" 2>&1 || _fetch_pkg="neofetch"
+if [ "$_fetch_pkg" = "neofetch" ]; then
+    _warn "Fastfetch Unavailable On This Release - Installing Neofetch Instead"
+fi
+_apt "Fetch Tool" "$_fetch_pkg"
 _apt "Archivers" zip unzip tar xz-utils bzip2 p7zip-full
 _apt "Locales And Timezone Data" locales tzdata
 locale-gen en_US.UTF-8 >> "$_LOG" 2>&1 || true
@@ -20,9 +25,9 @@ _apt "Falkon Web Browser" falkon
 _umo_harden_browser
 if command -v falkon >/dev/null 2>&1; then
     _bv=$(dpkg-query -W falkon 2>/dev/null | head -1 | cut -f2)
-    printf "UMO-BROWSER-OK falkon %s\n" "${_bv:-installed}"
+    _ok "Browser Available: Falkon ${_bv:-installed}"
 else
-    printf "UMO-BROWSER-MISSING: falkon failed to install\n"
+    _fail "Browser Missing: Falkon Failed To Install"
 fi
 ' "nano git zip mousepad falkon htop fastfetch,neofetch"
 }
@@ -34,9 +39,9 @@ _apt "Falkon Web Browser" falkon
 _umo_harden_browser
 if command -v falkon >/dev/null 2>&1; then
     _bv=$(dpkg-query -W falkon 2>/dev/null | head -1 | cut -f2)
-    printf "UMO-BROWSER-OK falkon %s\n" "${_bv:-installed}"
+    _ok "Browser Available: Falkon ${_bv:-installed}"
 else
-    printf "UMO-BROWSER-MISSING: falkon failed to install\n"
+    _fail "Browser Missing: Falkon Failed To Install"
 fi
 ' "falkon"
 }
@@ -89,6 +94,7 @@ _run_installer() {
     _script="${UMO_INSTALL_DIR:?}/root/install-apps.sh"
     {
         printf '%s\n' '#!/bin/sh'
+        _umo_log_container_prelude
         printf '%s\n' 'export DEBIAN_FRONTEND=noninteractive LC_ALL=C LANG=C'
         printf '%s\n' '[ -t 0 ] && exec </dev/null'
         printf '%s\n' '_LOG=/root/install-apps.log'
@@ -98,7 +104,7 @@ _run_installer() {
         printf '%s\n' "printf '\n===== [%s] %s =====\n' \"\$( _um_ts )\" \"$_label\" >> \"\$_LOG\" 2>/dev/null || true"
         printf '%s\n' '_apt() {'
         printf '%s\n' '    _lbl="$1"; shift'
-        printf '%s\n' '    printf "Installing %s...\n" "$_lbl"'
+        printf '%s\n' '    _step "Installing $_lbl..."'
         printf '%s\n' '    printf "[%s] group %s: %s\n" "$(_um_ts)" "$_lbl" "$*" >> "$_LOG" 2>/dev/null || true'
         printf '%s\n' '    _rcg=0'
         printf '%s\n' '    timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_LOG" 2>&1 || _rcg=$?'
@@ -110,10 +116,10 @@ _run_installer() {
         printf '%s\n' '        timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_LOG" 2>&1 || _rcg=$?'
         printf '%s\n' '    fi'
         printf '%s\n' '    if [ "$_rcg" -eq 0 ]; then'
-        printf '%s\n' '        printf "Group OK: %s\n" "$_lbl"'
+        printf '%s\n' '        _ok "$_lbl Installed"'
         printf '%s\n' '    else'
-        printf '%s\n' '        printf "Group FAILED: %s - real apt errors:\n" "$_lbl"'
-        printf '%s\n' '        grep -E "^(E:|Err:|W:)" "$_LOG" 2>/dev/null | tail -n 8 || true'
+        printf '%s\n' '        _fail "$_lbl Failed - Real Apt Errors:"'
+        printf '%s\n' "        grep -E \"^(E:|Err:|W:)\" \"\$_LOG\" 2>/dev/null | awk '!_u[\$0]++' | tail -n 6 | sed 's/^/      /' || true"
         printf '%s\n' '    fi'
         printf '%s\n' '    return "$_rcg"'
         printf '%s\n' '}'
@@ -180,22 +186,16 @@ _run_installer() {
         printf '%s\n' 'done'
         printf '%s\n' 'if [ -n "$_missing" ]; then'
         printf '%s\n' '    printf "MISSING=%s\n" "$_missing" > "$_STATUS" 2>/dev/null || true'
-        printf '%s\n' '    printf "SET-RESULT MISSING=%s\n" "$_missing"'
+        printf '%s\n' '    _fail "Set Result: Missing $_missing"'
         printf '%s\n' 'else'
         printf '%s\n' '    printf "OK\n" > "$_STATUS" 2>/dev/null || true'
-        printf '%s\n' '    printf "SET-RESULT OK\n"'
+        printf '%s\n' '    _ok "Set Result: All Probes Passed"'
         printf '%s\n' 'fi'
     } > "$_script"
     chmod +x "$_script"
     umo_log_run "Installing $_label..."
     _rc=0
-    _stamp="${TMPDIR:-/tmp}/umo-apps-rc.$$"
-    {
-        "$UMO_LOGIN_SH" -c "bash /root/install-apps.sh" </dev/null 2>&1
-        printf '%s' "$?" > "$_stamp" 2>/dev/null || true
-    } | _umo_stream_filter
-    _rc=$(cat "$_stamp" 2>/dev/null || printf '0')
-    rm -f "$_stamp" 2>/dev/null || true
+    "$UMO_LOGIN_SH" -c "bash /root/install-apps.sh" </dev/null || _rc=$?
     _status=$("$UMO_LOGIN_SH" -c "cat /root/.umo-apps-status 2>/dev/null" </dev/null 2>/dev/null || true)
     case "$_status" in
         OK)

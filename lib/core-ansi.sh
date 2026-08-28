@@ -213,6 +213,31 @@ _umo_stream_filter() {
     grep -vE "^(Get:[0-9]|Ign:|Hit:[0-9]|Reading package|Building dependency|debconf:)" || true
 }
 
+_umo_log_container_prelude() {
+    cat << 'PRELUDE'
+_GRN='\033[38;5;34m'
+_RED='\033[38;5;196m'
+_ORG='\033[38;5;208m'
+_YLW='\033[38;5;220m'
+_NC='\033[0m'
+if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    _GRN=''; _RED=''; _ORG=''; _YLW=''; _NC=''
+fi
+_UMO_GSTEP='>'; _UMO_GOK='OK'; _UMO_GERR='ERR'; _UMO_GWARN='!'
+case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in
+    *UTF-8*|*utf8*) _UMOG=1 ;;
+    *) _UMOG=0; command -v locale >/dev/null 2>&1 && case "$(locale charmap 2>/dev/null)" in UTF-8*|utf-8*) _UMOG=1 ;; esac ;;
+esac
+if [ "${_UMOG:-0}" = "1" ]; then
+    _UMO_GSTEP='❯'; _UMO_GOK='✔'; _UMO_GERR='✖'; _UMO_GWARN='⚠'
+fi
+_step() { printf "  %b%s%b  %s\n" "$_ORG" "$_UMO_GSTEP" "$_NC" "$1"; }
+_ok()   { printf "  %b%s%b  %s\n" "$_GRN" "$_UMO_GOK" "$_NC" "$1"; }
+_fail() { printf "  %b%s%b  %s\n" "$_RED" "$_UMO_GERR" "$_NC" "$1"; }
+_warn() { printf "  %b%s%b  %s\n" "$_YLW" "$_UMO_GWARN" "$_NC" "$1"; }
+PRELUDE
+}
+
 umo_run_stream() {
     _label="$1"
     shift
@@ -285,7 +310,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.16.8}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.16.9}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"
