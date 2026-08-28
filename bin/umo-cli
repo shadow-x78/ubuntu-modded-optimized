@@ -430,6 +430,25 @@ _umo_refresh_container() {
         chown -R 1000:1000 "$_ct_inst_dir/home/umo/.vnc" 2>/dev/null || true
     fi
 
+    for _ct_bashrc in "$_ct_inst_dir/root/.bashrc" "$_ct_inst_dir/home/umo/.bashrc"; do
+        [ -f "$_ct_bashrc" ] || continue
+        if ! grep -q "# ===== UMO TERM =====" "$_ct_bashrc" 2>/dev/null; then
+            {
+                printf '%s\n' '# ===== UMO TERM ====='
+                printf '%s\n' '_umo_term="${TERM:-}"'
+                printf '%s\n' 'if [ -z "$_umo_term" ] || [ "$_umo_term" = "dumb" ]; then'
+                printf '%s\n' '    export TERM=xterm-256color'
+                printf '%s\n' 'elif command -v infocmp >/dev/null 2>&1 && ! infocmp "$_umo_term" >/dev/null 2>&1; then'
+                printf '%s\n' '    export TERM=xterm-256color'
+                printf '%s\n' 'fi'
+                printf '%s\n' 'unset _umo_term 2>/dev/null || true'
+                cat "$_ct_bashrc"
+            } > "$_ct_bashrc.umo-tmp" 2>/dev/null && mv -f "$_ct_bashrc.umo-tmp" "$_ct_bashrc" 2>/dev/null || \
+                rm -f "$_ct_bashrc.umo-tmp" 2>/dev/null || true
+            _umo_ok "TERM Fallback Installed: $_ct_bashrc"
+        fi
+    done
+
     "$_UMO_LOGIN" -c "
         rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
         for _g in \$(id -G 2>/dev/null); do
@@ -464,13 +483,13 @@ _umo_theme_satisfied() {
 _umo_apps_satisfied() {
     _probes=""
     case "$UMO_APP_SET" in
-        basic)   _probes="nano git falkon" ;;
+        basic)   _probes="nano git falkon htop" ;;
         dev)     _probes="nano git falkon python3 node gcc make cmake vim geany pkg-config code" ;;
         media)   _probes="nano git falkon vlc ffmpeg mpv audacity gimp" ;;
         office)  _probes="nano git falkon libreoffice atril" ;;
-        browser) _probes="nano git falkon" ;;
+        browser) _probes="nano git falkon htop" ;;
         full)    _probes="nano git falkon python3 node gcc make cmake vim geany pkg-config code \
-                          vlc ffmpeg mpv audacity gimp libreoffice atril" ;;
+                          vlc ffmpeg mpv audacity gimp libreoffice atril htop" ;;
         *) return 1 ;;
     esac
     for _b in $_probes; do

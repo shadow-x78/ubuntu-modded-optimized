@@ -10,7 +10,7 @@ UMO_APP_SET="${UMO_APP_SET:-basic}"
 umo_apps_basic() {
     umo_log_step "Install Base Utilities"
     _run_installer "Base utilities" '
-_apt "Core Utilities" nano wget curl git htop man-db ca-certificates
+_apt "Core Utilities" nano wget curl git htop man-db ca-certificates ncurses-term
 _apt "Fastfetch" fastfetch || _apt "Neofetch (Fastfetch Unavailable On This Release)" neofetch
 _apt "Archivers" zip unzip tar xz-utils bzip2 p7zip-full
 _apt "Locales And Timezone Data" locales tzdata
@@ -24,7 +24,7 @@ if command -v falkon >/dev/null 2>&1; then
 else
     printf "UMO-BROWSER-MISSING: falkon failed to install\n"
 fi
-' "nano git zip mousepad falkon fastfetch|neofetch"
+' "nano git zip mousepad falkon htop fastfetch,neofetch"
 }
 
 umo_apps_browsers() {
@@ -169,8 +169,8 @@ _run_installer() {
         printf '%s\n' '_missing=""'
         printf '%s\n' "for _b in $_probes; do"
         printf '%s\n' '    case "$_b" in'
-        printf '%s\n' '        *"|"*)'
-        printf '%s\n' '            _alt1="${_b%%|*}"; _alt2="${_b##*|}"'
+        printf '%s\n' '        *,*)'
+        printf '%s\n' '            _alt1="${_b%%,*}"; _alt2="${_b##*,}"'
         printf '%s\n' '            command -v "$_alt1" >/dev/null 2>&1 || command -v "$_alt2" >/dev/null 2>&1 || _missing="${_missing:+$_missing,}$_b"'
         printf '%s\n' '            ;;'
         printf '%s\n' '        *)'

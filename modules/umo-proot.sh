@@ -155,7 +155,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \\
     \$AUDIO_SOCK \\
     -w / \\
     /usr/bin/env -i PWD=/ HOME=/root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \\
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
+    TERM="\${TERM:-xterm-256color}" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
     /bin/bash --login "\$@"
 EOF
     chmod +x "$UMO_SCRIPT_HOME/umo-login.sh"
@@ -176,7 +176,7 @@ exec proot --link2symlink --sysvipc -0 -r "\$INSTALL_DIR" \\
     -b "\$PREFIX/tmp:/tmp" -b "\$PREFIX/tmp:/dev/shm" \\
     -w / \\
     /usr/bin/env -i PWD=/ HOME=/home/umo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \\
-    TERM="\$TERM" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
+    TERM="\${TERM:-xterm-256color}" LANG=C.UTF-8 PULSE_SERVER=127.0.0.1 PULSE_LATENCY_MSEC=60 \\
     /bin/su - umo "\$@"
 EOF
     chmod +x "$UMO_SCRIPT_HOME/umo-user.sh"
@@ -212,6 +212,21 @@ EOF
 umo_proot_patch_bashrc() {
     _bashrc="$UMO_PROOT_DIR/root/.bashrc"
     [ ! -f "$_bashrc" ] && touch "$_bashrc"
+
+    if ! grep -q "# ===== UMO TERM =====" "$_bashrc" 2>/dev/null; then
+        {
+            printf '%s\n' '# ===== UMO TERM ====='
+            printf '%s\n' '_umo_term="${TERM:-}"'
+            printf '%s\n' 'if [ -z "$_umo_term" ] || [ "$_umo_term" = "dumb" ]; then'
+            printf '%s\n' '    export TERM=xterm-256color'
+            printf '%s\n' 'elif command -v infocmp >/dev/null 2>&1 && ! infocmp "$_umo_term" >/dev/null 2>&1; then'
+            printf '%s\n' '    export TERM=xterm-256color'
+            printf '%s\n' 'fi'
+            printf '%s\n' 'unset _umo_term 2>/dev/null || true'
+            cat "$_bashrc"
+        } > "$_bashrc.umo-tmp" 2>/dev/null && mv -f "$_bashrc.umo-tmp" "$_bashrc" 2>/dev/null || \
+            rm -f "$_bashrc.umo-tmp" 2>/dev/null || true
+    fi
 
     umo_fs_patch "$_bashrc" "# ===== UMO Environment =====" '
 export PULSE_SERVER=127.0.0.1
