@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.10] - 2026-08-28
+
+### 🐛 Fixed
+- **The "to verify the environment." hint after `umo update` printed in blue instead of the dimmed white of every other hint line:** the cyan color span around `umo status` was never reset before the dim attribute - `${_UMO_CYN}umo status${_UMO_DIM} to verify...` - and ANSI `2m` only adds faintness without clearing the color, so on terminals that ignore the faint attribute (Termux among them) the whole tail of the line stayed bright blue. The `umo user` hint carried the identical missing-reset bug. Both lines now reset before the dim span (`...umo status` + reset + dimmed `to verify the environment.`), matching the correct pattern the sibling `umo update --scripts-only` hint already used, so the hint tails render in the same soft white/grey as the rest of the CLI.
+
 ## [v4.16.9] - 2026-08-28
 
 ### 🎨 Changed

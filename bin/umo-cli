@@ -827,7 +827,7 @@ _umo_run_update() {
     _umo_kv "Desktop" "${_UMO_CYN}${UMO_DE:-xfce4}${_UMO_NC}"
     printf "\n"
     _umo_ok "UMO Fully Updated (Scripts, Settings, Apps, Theme And System Packages)"
-    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo status${_UMO_DIM} to verify the environment.${_UMO_NC}\n\n"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo status${_UMO_NC} ${_UMO_DIM}to verify the environment.${_UMO_NC}\n\n"
 }
 
 _umo_run_cmd() {
@@ -865,7 +865,7 @@ _umo_set_user() {
     _umo_detect_saved_settings
     _umo_conf_write
     _umo_ok "Default user is now: $_new_user"
-    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo user${_UMO_DIM} to login as ${_new_user}.${_UMO_NC}\n\n"
+    printf "  ${_UMO_DIM}Run ${_UMO_CYN}umo user${_UMO_NC} ${_UMO_DIM}to login as ${_new_user}.${_UMO_NC}\n\n"
 }
 
 _umo_uninstall() {
