@@ -207,7 +207,6 @@ export LIBGL_ALWAYS_SOFTWARE=1
 
 export QTWEBENGINE_DISABLE_SANDBOX=1
 export QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage"
-export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 
 _xpid=""
 _session_pid=""

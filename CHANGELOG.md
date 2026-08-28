@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.12] - 2026-08-28
+
+### 🎨 Changed
+- **GNOME Web (Epiphany) is gone from the project entirely - Falkon is the one and only browser:** v4.16.6 made Falkon the default but kept Epiphany around as a legacy fallback in six places, and every trace has now been removed. The launcher wrapper (`/usr/local/bin/umo-browser`) no longer resolves `epiphany`/`epiphany-browser` and no longer exports the WebKit sandbox switch or the cairo GSK renderer - it execs Falkon with the QtWebEngine switches or exits 127 with the install hint; the in-container app installer no longer rewrites Epiphany's desktop entry or moves aside its D-Bus service; the Plank dock builder no longer pins Epiphany when Falkon's desktop file is missing; the app-set detector recognizes a browser set by Falkon alone; and the `WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS` export is dropped from the fresh-container shell profile, the VNC session environment and the wrapper alike. Existing containers that still carry the old browser get it actively removed during `umo update`/`umo refresh`: the container refresh purges `epiphany-browser`/`epiphany` with autoremove (evidence in `/tmp/umo-epiphany-purge.log`), deletes any surviving desktop entry, scrubs the stale WebKit sandbox export out of `/root/.bashrc` and `/home/umo/.bashrc` line by line, and reports `Legacy GNOME Web (Epiphany) Removed - Falkon Is The Default Browser` when it actually had something to remove. Verified end-to-end in live containers: an Epiphany install is fully purged by the refresh block (binary, desktop entry and dpkg state all gone, the bashrc scrub keeps every other line intact), and Falkon launches through the slimmed wrapper under X with its desktop entry pointing at it.
+
 ## [v4.16.11] - 2026-08-28
 
 ### 🎨 Changed

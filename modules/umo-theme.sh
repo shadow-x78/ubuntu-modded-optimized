@@ -302,8 +302,6 @@ _umo_plank_launchers() {
     printf '%s\n' thunar xfce4-terminal mousepad
     if [ -f "$UMO_INSTALL_DIR/usr/share/applications/org.kde.falkon.desktop" ]; then
         printf '%s\n' org.kde.falkon
-    elif [ -f "$UMO_INSTALL_DIR/usr/share/applications/org.gnome.Epiphany.desktop" ]; then
-        printf '%s\n' org.gnome.Epiphany
     fi
     case "${UMO_APP_SET:-basic}" in
         media)   printf '%s\n' vlc gimp ;;

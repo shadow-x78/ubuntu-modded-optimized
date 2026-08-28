@@ -16,23 +16,8 @@ if command -v falkon >/dev/null 2>&1; then
     exec falkon "$@" >> "$_LOG" 2>&1
 fi
 
-_EPH_BIN=""
-if command -v epiphany >/dev/null 2>&1; then
-    _EPH_BIN=epiphany
-elif command -v epiphany-browser >/dev/null 2>&1; then
-    _EPH_BIN=epiphany-browser
-fi
-
-if [ -z "$_EPH_BIN" ]; then
-    printf '[%s] ERROR: no browser binary found - install with: apt-get install -y --no-install-recommends falkon\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
-    printf 'UMO Browser: no browser is installed in the container.\n' >&2
-    printf 'Install one with: apt-get install -y --no-install-recommends falkon\n' >&2
-    printf 'Full log: %s\n' "$_LOG" >&2
-    exit 127
-fi
-
-export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
-export GSK_RENDERER="${GSK_RENDERER:-cairo}"
-
-printf '[%s] exec: %s (legacy fallback, DISPLAY=%s GSK_RENDERER=%s)\n' "$(_ts)" "$_EPH_BIN" "$DISPLAY" "$GSK_RENDERER" >> "$_LOG" 2>/dev/null || true
-exec "$_EPH_BIN" "$@" >> "$_LOG" 2>&1
+printf '[%s] ERROR: no browser binary found - install with: apt-get install -y --no-install-recommends falkon\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+printf 'UMO Browser: no browser is installed in the container.\n' >&2
+printf 'Install one with: apt-get install -y --no-install-recommends falkon\n' >&2
+printf 'Full log: %s\n' "$_LOG" >&2
+exit 127

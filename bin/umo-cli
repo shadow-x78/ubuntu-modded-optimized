@@ -172,7 +172,7 @@ _umo_detect_app_set() {
     if _has python3 || _has gcc || _has cmake || _has node; then
         printf 'dev'; return
     fi
-    if _has falkon || _has epiphany; then
+    if _has falkon; then
         printf 'browser'; return
     fi
     printf 'basic'
@@ -329,17 +329,26 @@ _umo_refresh_container() {
         done
     fi
 
-    _eph_desktop="$_ct_inst_dir/usr/share/applications/org.gnome.Epiphany.desktop"
-    if [ -f "$_eph_desktop" ] && ! grep -q "^Exec=/usr/local/bin/umo-browser" "$_eph_desktop" 2>/dev/null; then
-        if sed -i 's|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|' "$_eph_desktop" 2>/dev/null; then
-            sed -i 's|^DBusActivatable=.*|DBusActivatable=false|' "$_eph_desktop" 2>/dev/null || true
-            _eph_svc="$_ct_inst_dir/usr/share/dbus-1/services/org.gnome.Epiphany.service"
-            if [ -f "$_eph_svc" ]; then
-                mv -f "$_eph_svc" "$_eph_svc.umo-disabled" 2>/dev/null || true
-            fi
-            _umo_ok "Legacy Browser Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
+    _eph_out=$("$_UMO_LOGIN" -c '
+        _eph_found=0
+        command -v epiphany >/dev/null 2>&1 && _eph_found=1
+        command -v epiphany-browser >/dev/null 2>&1 && _eph_found=1
+        dpkg -l epiphany-browser 2>/dev/null | grep -q "^ii" && _eph_found=1
+        if [ "$_eph_found" = "1" ]; then
+            rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend 2>/dev/null || true
+            timeout 600 apt-get purge -y epiphany-browser epiphany >/tmp/umo-epiphany-purge.log 2>&1 || true
+            timeout 600 apt-get autoremove -y >>/tmp/umo-epiphany-purge.log 2>&1 || true
+            rm -f /usr/share/applications/org.gnome.Epiphany.desktop 2>/dev/null || true
+            printf "EPH-PURGED"
         fi
-    fi
+        for _rc in /root/.bashrc /home/umo/.bashrc; do
+            [ -f "$_rc" ] && sed -i "/WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS/d" "$_rc" 2>/dev/null || true
+        done
+        true
+    ' </dev/null 2>/dev/null || true)
+    case "$_eph_out" in
+        *EPH-PURGED*) _umo_ok "Legacy GNOME Web (Epiphany) Removed - Falkon Is The Default Browser" ;;
+    esac
     _falkon_desktop="$_ct_inst_dir/usr/share/applications/org.kde.falkon.desktop"
     if [ -f "$_falkon_desktop" ] && ! grep -q "^Exec=/usr/local/bin/umo-browser" "$_falkon_desktop" 2>/dev/null; then
         if sed -i '0,/^Exec=/s|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|' "$_falkon_desktop" 2>/dev/null; then
