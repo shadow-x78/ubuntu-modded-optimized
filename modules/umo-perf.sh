@@ -37,7 +37,7 @@ EOC
     cat > "${UMO_INSTALL_DIR:?}$_dpkg_exclude" << 'EOD'
 path-exclude=/usr/share/doc/*
 path-exclude=/usr/share/man/*
-path-include=/usr/share/man/man1/epiphany-browser.1.gz
+path-include=/usr/share/man/man1/falkon.1.gz
 path-exclude=/usr/share/info/*
 path-exclude=/usr/share/locale/*
 path-include=/usr/share/locale/en/*

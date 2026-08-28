@@ -172,7 +172,7 @@ _umo_detect_app_set() {
     if _has python3 || _has gcc || _has cmake || _has node; then
         printf 'dev'; return
     fi
-    if _has epiphany; then
+    if _has falkon || _has epiphany; then
         printf 'browser'; return
     fi
     printf 'basic'
@@ -337,7 +337,14 @@ _umo_refresh_container() {
             if [ -f "$_eph_svc" ]; then
                 mv -f "$_eph_svc" "$_eph_svc.umo-disabled" 2>/dev/null || true
             fi
-            _umo_ok "Browser Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
+            _umo_ok "Legacy Browser Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
+        fi
+    fi
+    _falkon_desktop="$_ct_inst_dir/usr/share/applications/org.kde.falkon.desktop"
+    if [ -f "$_falkon_desktop" ] && ! grep -q "^Exec=/usr/local/bin/umo-browser" "$_falkon_desktop" 2>/dev/null; then
+        if sed -i '0,/^Exec=/s|^Exec=.*|Exec=/usr/local/bin/umo-browser %U|' "$_falkon_desktop" 2>/dev/null; then
+            sed -i 's|^DBusActivatable=.*|DBusActivatable=false|' "$_falkon_desktop" 2>/dev/null || true
+            _umo_ok "Falkon Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
         fi
     fi
 
@@ -372,6 +379,17 @@ _umo_refresh_container() {
             cp -f "$_ico_src/ubuntu-256.png" "$_ct_inst_dir/usr/share/umo/brand/ubuntu.png" 2>/dev/null || true
         fi
         _umo_ok "Ubuntu Brand Icon Deployed"
+    fi
+
+    _wm_defaults_dir="$_ct_inst_dir/etc/xdg/xfce4/whiskermenu"
+    if mkdir -p "$_wm_defaults_dir" 2>/dev/null; then
+        printf 'button-icon=/usr/share/umo/brand/ubuntu.png\n' \
+            > "$_wm_defaults_dir/defaults.rc" 2>/dev/null || true
+    fi
+    _panel_tpl_src="$_UMO_REPO_DIR/config/theme/xfce4/xfce4-panel.xml"
+    if [ -f "$_panel_tpl_src" ]; then
+        mkdir -p "$_ct_inst_dir/usr/share/umo" 2>/dev/null || true
+        cp -f "$_panel_tpl_src" "$_ct_inst_dir/usr/share/umo/xfce4-panel.xml" 2>/dev/null || true
     fi
 
     _xs_tpl="$_UMO_REPO_DIR/config/xstartup"
@@ -440,12 +458,12 @@ _umo_theme_satisfied() {
 _umo_apps_satisfied() {
     _probes=""
     case "$UMO_APP_SET" in
-        basic)   _probes="nano git epiphany" ;;
-        dev)     _probes="nano git epiphany python3 node gcc make cmake vim" ;;
-        media)   _probes="nano git epiphany vlc ffmpeg mpv audacity gimp" ;;
-        office)  _probes="nano git epiphany libreoffice atril" ;;
-        browser) _probes="nano git epiphany" ;;
-        full)    _probes="nano git epiphany python3 node gcc make cmake vim \
+        basic)   _probes="nano git falkon" ;;
+        dev)     _probes="nano git falkon python3 node gcc make cmake vim" ;;
+        media)   _probes="nano git falkon vlc ffmpeg mpv audacity gimp" ;;
+        office)  _probes="nano git falkon libreoffice atril" ;;
+        browser) _probes="nano git falkon" ;;
+        full)    _probes="nano git falkon python3 node gcc make cmake vim \
                           vlc ffmpeg mpv audacity gimp libreoffice atril" ;;
         *) return 1 ;;
     esac

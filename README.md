@@ -13,7 +13,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.16.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.16.6-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -158,7 +158,7 @@ bash install.sh [OPTIONS]
 
   --no-gui, --non-interactive    Skip menus, use defaults/env vars
   --de=xfce4|lxde|openbox        Choose desktop environment
-  --apps=basic|dev|media|full    Application group to install
+  --apps=basic|dev|media|office|browser|full   Application group to install
   --dir=PATH                     Custom installation directory
   --ubuntu=22.04|24.04           Ubuntu version to install
   --perf=balanced|aggressive|off Choose performance tuning level

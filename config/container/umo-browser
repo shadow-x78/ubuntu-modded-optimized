@@ -5,6 +5,17 @@ _ts() { date '+%H:%M:%S' 2>/dev/null || echo '?'; }
 
 printf '[%s] launch args: %s\n' "$(_ts)" "$*" >> "$_LOG" 2>/dev/null || true
 
+export LIBGL_ALWAYS_SOFTWARE=1
+export GALLIUM_DRIVER="${GALLIUM_DRIVER:-llvmpipe}"
+[ -n "${DISPLAY:-}" ] || export DISPLAY=:1
+
+if command -v falkon >/dev/null 2>&1; then
+    export QTWEBENGINE_DISABLE_SANDBOX=1
+    export QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage ${QTWEBENGINE_CHROMIUM_FLAGS:-}"
+    printf '[%s] exec: falkon (DISPLAY=%s)\n' "$(_ts)" "$DISPLAY" >> "$_LOG" 2>/dev/null || true
+    exec falkon "$@" >> "$_LOG" 2>&1
+fi
+
 _EPH_BIN=""
 if command -v epiphany >/dev/null 2>&1; then
     _EPH_BIN=epiphany
@@ -13,17 +24,15 @@ elif command -v epiphany-browser >/dev/null 2>&1; then
 fi
 
 if [ -z "$_EPH_BIN" ]; then
-    printf '[%s] ERROR: epiphany binary missing - install with: apt-get install -y --no-install-recommends epiphany-browser\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
-    printf 'UMO Browser: epiphany is not installed in the container.\n' >&2
-    printf 'Install it with: apt-get install -y --no-install-recommends epiphany-browser\n' >&2
+    printf '[%s] ERROR: no browser binary found - install with: apt-get install -y --no-install-recommends falkon\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+    printf 'UMO Browser: no browser is installed in the container.\n' >&2
+    printf 'Install one with: apt-get install -y --no-install-recommends falkon\n' >&2
     printf 'Full log: %s\n' "$_LOG" >&2
     exit 127
 fi
 
 export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 export GSK_RENDERER="${GSK_RENDERER:-cairo}"
-export LIBGL_ALWAYS_SOFTWARE=1
-[ -n "${DISPLAY:-}" ] || export DISPLAY=:1
 
-printf '[%s] exec: %s (DISPLAY=%s GSK_RENDERER=%s)\n' "$(_ts)" "$_EPH_BIN" "$DISPLAY" "$GSK_RENDERER" >> "$_LOG" 2>/dev/null || true
+printf '[%s] exec: %s (legacy fallback, DISPLAY=%s GSK_RENDERER=%s)\n' "$(_ts)" "$_EPH_BIN" "$DISPLAY" "$GSK_RENDERER" >> "$_LOG" 2>/dev/null || true
 exec "$_EPH_BIN" "$@" >> "$_LOG" 2>&1

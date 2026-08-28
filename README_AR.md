@@ -13,7 +13,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.6-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -158,7 +158,7 @@ bash install.sh [OPTIONS]
 
   --no-gui, --non-interactive    تجاوز القوائم، استخدام الافتراضيات أو متغيرات البيئة
   --de=xfce4|lxde|openbox        اختيار بيئة سطح المكتب
-  --apps=basic|dev|media|full    مجموعة التطبيقات المراد تثبيتها
+  --apps=basic|dev|media|office|browser|full   مجموعة التطبيقات المراد تثبيتها
   --dir=PATH                     مسار تثبيت مخصص
   --ubuntu=22.04|24.04           إصدار Ubuntu المطلوب
   --perf=balanced|aggressive|off اختيار مستوى الأداء

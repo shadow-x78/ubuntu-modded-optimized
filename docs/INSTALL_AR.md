@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.2-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.6-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -102,7 +102,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | الـ Flag | المجموعة | تشمل |
 |----------|---------|------|
-| `--apps=basic` | أساسية | الأدوات الأساسية + متصفح GNOME Web (Epiphany) |
+| `--apps=basic` | أساسية | الأدوات الأساسية + متصفح Falkon (خفيف ومناسب لبيئة proot) |
 | `--apps=dev` | تطوير | git, vim, python3, nodejs, build-essential |
 | `--apps=media` | وسائط | ffmpeg, vlc, gimp |
 | `--apps=full` | كاملة | جميع ما سبق |

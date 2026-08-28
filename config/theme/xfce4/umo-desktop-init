@@ -167,15 +167,61 @@ if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons/hicolor ]; the
 fi
 
 _bi_icon="/usr/share/umo/brand/ubuntu.png"
+if [ -f "$_bi_icon" ]; then
+    _bi_dr_dir=/etc/xdg/xfce4/whiskermenu
+    if mkdir -p "$_bi_dr_dir" 2>/dev/null; then
+        _bi_dr="$_bi_dr_dir/defaults.rc"
+        if [ -f "$_bi_dr" ]; then
+            if ! grep -q "^button-icon=$_bi_icon\$" "$_bi_dr" 2>/dev/null; then
+                sed -i "s|^button-icon=.*|button-icon=$_bi_icon|" "$_bi_dr" 2>/dev/null || true
+                grep -q '^button-icon=' "$_bi_dr" 2>/dev/null || \
+                    printf 'button-icon=%s\n' "$_bi_icon" >> "$_bi_dr" 2>/dev/null || true
+                _log "Whiskermenu defaults.rc Updated"
+            fi
+        else
+            printf 'button-icon=%s\n' "$_bi_icon" > "$_bi_dr" 2>/dev/null && \
+                _log "Whiskermenu defaults.rc Created"
+        fi
+    fi
+    for _bi_rc in /root/.config/xfce4/panel/whiskermenu-*.rc /home/*/.config/xfce4/panel/whiskermenu-*.rc; do
+        [ -f "$_bi_rc" ] || continue
+        grep -q "^button-icon=$_bi_icon\$" "$_bi_rc" 2>/dev/null && continue
+        if grep -q '^button-icon=' "$_bi_rc" 2>/dev/null; then
+            sed -i "s|^button-icon=.*|button-icon=$_bi_icon|" "$_bi_rc" 2>/dev/null || true
+        else
+            printf 'button-icon=%s\n' "$_bi_icon" >> "$_bi_rc" 2>/dev/null || true
+        fi
+        _log "Whiskermenu Profile Patched ($_bi_rc)"
+    done
+fi
 if [ -f "$_bi_icon" ] && xfconf-query -c xfce4-panel -l >/dev/null 2>&1; then
-    for _plg in $(xfconf-query -c xfce4-panel -l 2>/dev/null | sed -n 's|^/plugins/\([^/]*\)$|\1|p'); do
-        _plg_type=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg" 2>/dev/null)
-        [ "$_plg_type" = "whiskermenu" ] || continue
-        _cur_icon=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" 2>/dev/null)
-        [ "$_cur_icon" = "$_bi_icon" ] && continue
-        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -n -t string -s "$_bi_icon" >/dev/null 2>&1 || true
-        xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -s "$_bi_icon" >/dev/null 2>&1 || true
-        _log "Panel Menu Button Icon Set To $_bi_icon ($_plg, was: ${_cur_icon:-unset})"
+    _bi_round=0
+    _bi_done=0
+    while [ "$_bi_done" = "0" ] && [ "$_bi_round" -lt 3 ]; do
+        _bi_round=$((_bi_round + 1))
+        _bi_missing=""
+        for _plg in $(xfconf-query -c xfce4-panel -l 2>/dev/null | sed -n 's|^/plugins/\([^/]*\)$|\1|p'); do
+            _plg_type=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg" 2>/dev/null)
+            [ "$_plg_type" = "whiskermenu" ] || continue
+            _cur_icon=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" 2>/dev/null)
+            [ "$_cur_icon" = "$_bi_icon" ] && continue
+            xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -n -t string -s "$_bi_icon" >/dev/null 2>&1 || true
+            xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" -s "$_bi_icon" >/dev/null 2>&1 || true
+            _log "Panel Menu Button Icon Set To $_bi_icon ($_plg, was: ${_cur_icon:-unset})"
+        done
+        for _plg in $(xfconf-query -c xfce4-panel -l 2>/dev/null | sed -n 's|^/plugins/\([^/]*\)$|\1|p'); do
+            _plg_type=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg" 2>/dev/null)
+            [ "$_plg_type" = "whiskermenu" ] || continue
+            _ver_icon=$(xfconf-query -c xfce4-panel -p "/plugins/$_plg/button-icon" 2>/dev/null)
+            [ "$_ver_icon" = "$_bi_icon" ] || _bi_missing="$_bi_missing $_plg"
+        done
+        if [ -z "$_bi_missing" ]; then
+            _bi_done=1
+            _log "Panel Menu Button Icon Verified (Round $_bi_round)"
+        else
+            _log "Panel Menu Button Icon Not Yet Applied ($_bi_missing, Round $_bi_round)"
+            sleep 3
+        fi
     done
 fi
 

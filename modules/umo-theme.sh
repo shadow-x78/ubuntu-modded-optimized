@@ -293,12 +293,17 @@ umo_theme_apply_fastfetch() {
 }
 
 _umo_plank_launchers() {
-    printf '%s\n' thunar xfce4-terminal org.gnome.Epiphany mousepad
+    printf '%s\n' thunar xfce4-terminal mousepad
+    if [ -f "$UMO_INSTALL_DIR/usr/share/applications/org.kde.falkon.desktop" ]; then
+        printf '%s\n' org.kde.falkon
+    elif [ -f "$UMO_INSTALL_DIR/usr/share/applications/org.gnome.Epiphany.desktop" ]; then
+        printf '%s\n' org.gnome.Epiphany
+    fi
     case "${UMO_APP_SET:-basic}" in
         media)   printf '%s\n' vlc gimp ;;
         office)  printf '%s\n' libreoffice-startcenter atril ;;
-        browser) printf '%s\n' org.gnome.Epiphany ;;
-        full)    printf '%s\n' vlc gimp libreoffice-startcenter atril org.gnome.Epiphany ;;
+        browser) : ;;
+        full)    printf '%s\n' vlc gimp libreoffice-startcenter atril ;;
         dev|basic|*) : ;;
     esac
     return 0
@@ -426,6 +431,19 @@ PLANKDESK
         if [ -f "$_theme_dir/umo-desktop-init" ]; then
             cp -f "$_theme_dir/umo-desktop-init" "${UMO_INSTALL_DIR}/usr/local/bin/umo-desktop-init" 2>/dev/null || true
             chmod +x "${UMO_INSTALL_DIR}/usr/local/bin/umo-desktop-init" 2>/dev/null || true
+        fi
+    fi
+
+    _wm_defaults_dir="${UMO_INSTALL_DIR}/etc/xdg/xfce4/whiskermenu"
+    if mkdir -p "$_wm_defaults_dir" 2>/dev/null; then
+        printf 'button-icon=/usr/share/umo/brand/ubuntu.png\n' \
+            > "$_wm_defaults_dir/defaults.rc" 2>/dev/null || true
+    fi
+
+    _umo_share_dir="${UMO_INSTALL_DIR}/usr/share/umo"
+    if mkdir -p "$_umo_share_dir" 2>/dev/null; then
+        if [ -f "$_theme_dir/xfce4-panel.xml" ]; then
+            cp -f "$_theme_dir/xfce4-panel.xml" "$_umo_share_dir/xfce4-panel.xml" 2>/dev/null || true
         fi
     fi
 

@@ -74,6 +74,112 @@ _cleanup_locks
 mkdir -p /tmp/.X11-unix 2>/dev/null || true
 chmod 1777 /tmp/.X11-unix 2>/dev/null || true
 
+_UM_ICON="/usr/share/umo/brand/ubuntu.png"
+_UM_ICON_OK=1
+[ -f "$_UM_ICON" ] || _UM_ICON_OK=0
+if [ "$_UM_ICON_OK" = "0" ]; then
+    _hint "Brand Icon Missing ($_UM_ICON) - Run: umo update"
+fi
+
+_um_ensure_defaults_rc() {
+    _dr_dir=/etc/xdg/xfce4/whiskermenu
+    _dr_file="$_dr_dir/defaults.rc"
+    mkdir -p "$_dr_dir" 2>/dev/null || return 0
+    if [ -f "$_dr_file" ] && grep -q "^button-icon=$_UM_ICON\$" "$_dr_file" 2>/dev/null; then
+        return 0
+    fi
+    if [ -f "$_dr_file" ]; then
+        sed -i "s|^button-icon=.*|button-icon=$_UM_ICON|" "$_dr_file" 2>/dev/null || true
+        grep -q "^button-icon=" "$_dr_file" 2>/dev/null || \
+            printf 'button-icon=%s\n' "$_UM_ICON" >> "$_dr_file" 2>/dev/null || true
+    else
+        printf 'button-icon=%s\n' "$_UM_ICON" > "$_dr_file" 2>/dev/null || true
+    fi
+}
+
+_um_patch_wm_rc() {
+    for _rcf in "$1"/.config/xfce4/panel/whiskermenu-*.rc; do
+        [ -f "$_rcf" ] || continue
+        if grep -q "^button-icon=$_UM_ICON\$" "$_rcf" 2>/dev/null; then
+            continue
+        fi
+        if grep -q '^button-icon=' "$_rcf" 2>/dev/null; then
+            sed -i "s|^button-icon=.*|button-icon=$_UM_ICON|" "$_rcf" 2>/dev/null || true
+        else
+            printf 'button-icon=%s\n' "$_UM_ICON" >> "$_rcf" 2>/dev/null || true
+        fi
+        _note "Whiskermenu Profile Updated: $_rcf"
+    done
+}
+
+_um_patch_panel_xml() {
+    _pxf="$1"
+    [ -f "$_pxf" ] || return 0
+    _wm_n=$(grep -c 'value="whiskermenu"' "$_pxf" 2>/dev/null || true)
+    [ "${_wm_n:-0}" -gt 0 ] 2>/dev/null || return 0
+    _ok_n=$(grep -c "name=\"button-icon\" type=\"string\" value=\"$_UM_ICON\"" "$_pxf" 2>/dev/null || true)
+    [ "${_ok_n:-0}" -ge "${_wm_n:-0}" ] 2>/dev/null && return 0
+    _pxf_tmp="${_pxf}.umo-tmp.$$"
+    awk -v ICON="$_UM_ICON" '
+        BEGIN { inwm = 0; depth = 0 }
+        {
+            line = $0
+            if (inwm) {
+                if (line ~ /name="button-icon"/) { next }
+                print line
+                if (line ~ /<property[ \t]/ && line !~ /\/>[ \t]*$/) { depth++ }
+                if (line ~ /<\/property>/) { depth--; if (depth <= 0) inwm = 0 }
+                next
+            }
+            if (line ~ /<property[ \t]+name="plugin-[^"]*"[ \t]+type="string"[ \t]+value="whiskermenu"/) {
+                match(line, /^[ \t]*/); lead = substr(line, 1, RLENGTH)
+                if (line ~ /\/>[ \t]*$/) {
+                    open = line
+                    sub(/[ \t]*\/>[ \t]*$/, ">", open)
+                    print open
+                    printf "%s  <property name=\"button-icon\" type=\"string\" value=\"%s\"/>\n", lead, ICON
+                    printf "%s</property>\n", lead
+                } else {
+                    print line
+                    printf "%s  <property name=\"button-icon\" type=\"string\" value=\"%s\"/>\n", lead, ICON
+                    inwm = 1; depth = 1
+                }
+                next
+            }
+            print line
+        }
+    ' "$_pxf" > "$_pxf_tmp" 2>/dev/null || { rm -f "$_pxf_tmp" 2>/dev/null; return 0; }
+    if [ -s "$_pxf_tmp" ] && ! cmp -s "$_pxf_tmp" "$_pxf" 2>/dev/null; then
+        mv -f "$_pxf_tmp" "$_pxf" 2>/dev/null || rm -f "$_pxf_tmp" 2>/dev/null
+        _note "Panel Config Updated: $_pxf"
+    else
+        rm -f "$_pxf_tmp" 2>/dev/null || true
+    fi
+}
+
+_um_seed_panel_xml() {
+    _home="$1"
+    [ -d "$_home" ] || return 0
+    _tpl=/usr/share/umo/xfce4-panel.xml
+    [ -f "$_tpl" ] || return 0
+    _dst_dir="$_home/.config/xfce4/xfconf/xfce-perchannel-xml"
+    _dst="$_dst_dir/xfce4-panel.xml"
+    [ -f "$_dst" ] && return 0
+    mkdir -p "$_dst_dir" 2>/dev/null || return 0
+    cp -f "$_tpl" "$_dst" 2>/dev/null || true
+    _note "Panel Config Seeded: $_dst"
+}
+
+if [ "$_UM_ICON_OK" = "1" ]; then
+    _um_ensure_defaults_rc
+    for _um_home in /root /home/*; do
+        [ -d "$_um_home" ] || continue
+        _um_seed_panel_xml "$_um_home"
+        _um_patch_wm_rc "$_um_home"
+        _um_patch_panel_xml "$_um_home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+    done
+fi
+
 pulseaudio --start 2>/dev/null || true
 
 if ! command -v Xtigervnc >/dev/null 2>&1; then
@@ -98,6 +204,10 @@ fi
 export MESA_NO_SHM=1
 export GALLIUM_DRIVER=llvmpipe
 export LIBGL_ALWAYS_SOFTWARE=1
+
+export QTWEBENGINE_DISABLE_SANDBOX=1
+export QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage"
+export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1
 
 _xpid=""
 _session_pid=""
