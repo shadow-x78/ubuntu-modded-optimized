@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.16.11] - 2026-08-28
+
+### 🎨 Changed
+- **The fetch-tool fallback no longer presents itself as a warning:** fastfetch does not exist in either the 22.04 or the 24.04 repositories, so the single `⚠ Fastfetch Unavailable On This Release - Installing Neofetch Instead` line introduced in v4.16.9 fired on every install of every supported release - a warning that is always true is noise, not a warning. The basic set now checks availability quietly (`apt-cache show` straight into the log) and installs whichever exists as one normal labeled group - `Installing Fetch Tool (Neofetch)...` on 22.04/24.04, `Installing Fetch Tool (Fastfetch)...` on any future release that ships it - leaving exactly one chevron step line and one checkmark verdict, no warning glyph. The either/or satisfaction probe (`fastfetch,neofetch`) is unchanged.
+
 ## [v4.16.10] - 2026-08-28
 
 ### 🐛 Fixed

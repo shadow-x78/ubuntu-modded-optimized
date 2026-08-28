@@ -11,12 +11,9 @@ umo_apps_basic() {
     umo_log_step "Install Base Utilities"
     _run_installer "Base utilities" '
 _apt "Core Utilities" nano wget curl git htop man-db ca-certificates ncurses-term
-_fetch_pkg="fastfetch"
-apt-cache show fastfetch >> "$_LOG" 2>&1 || _fetch_pkg="neofetch"
-if [ "$_fetch_pkg" = "neofetch" ]; then
-    _warn "Fastfetch Unavailable On This Release - Installing Neofetch Instead"
-fi
-_apt "Fetch Tool" "$_fetch_pkg"
+_fetch_pkg="fastfetch"; _fetch_name="Fastfetch"
+apt-cache show fastfetch >> "$_LOG" 2>&1 || { _fetch_pkg="neofetch"; _fetch_name="Neofetch"; }
+_apt "Fetch Tool ($_fetch_name)" "$_fetch_pkg"
 _apt "Archivers" zip unzip tar xz-utils bzip2 p7zip-full
 _apt "Locales And Timezone Data" locales tzdata
 locale-gen en_US.UTF-8 >> "$_LOG" 2>&1 || true
