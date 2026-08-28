@@ -83,9 +83,9 @@ EOF
 umo_de_lxde() {
     umo_log_step "Install LXDE (Ultra-Lightweight)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf >> "$_LOG" 2>&1 || true' startlxde LXDE
+    lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf xdg-utils >> "$_LOG" 2>&1 || true' startlxde LXDE
     _run_de_installer "LXDE" startlxde \
-        "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf"
+        "apt-get update && apt-get install -y --no-install-recommends lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf xdg-utils"
 }
 
 umo_de_xfce4() {
@@ -94,18 +94,18 @@ umo_de_xfce4() {
     xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
     xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
     mousepad dbus-x11 x11-xserver-utils gnome-icon-theme \
-    xfce4-whiskermenu-plugin plank >> "$_LOG" 2>&1 || true'
+    xfce4-whiskermenu-plugin plank xdg-utils >> "$_LOG" 2>&1 || true'
     _umo_de_build "$_pkgs" startxfce4 XFCE4
     _run_de_installer "XFCE4" startxfce4 \
-        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils plank"
+        "apt-get update && apt-get install -y --no-install-recommends xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils plank xdg-utils"
 }
 
 umo_de_openbox() {
     umo_log_step "Install Openbox (Minimal)"
     _umo_de_build 'timeout 1800 apt-get install -y --no-install-recommends \
-    openbox obconf lxterminal pcmanfm tint2 feh exo-utils >> "$_LOG" 2>&1 || true' openbox-session Openbox
+    openbox obconf lxterminal pcmanfm tint2 feh exo-utils xdg-utils >> "$_LOG" 2>&1 || true' openbox-session Openbox
     _run_de_installer "Openbox" openbox-session \
-        "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils"
+        "apt-get update && apt-get install -y --no-install-recommends openbox obconf lxterminal pcmanfm tint2 feh exo-utils xdg-utils"
 }
 
 umo_de_minimal() {

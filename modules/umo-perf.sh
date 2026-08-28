@@ -146,16 +146,28 @@ export LIBGL_ALWAYS_SOFTWARE=0
 umo_perf_vnc() {
     umo_log_step "Tune VNC Performance"
 
+    _vnc_depth=24
+    _vnc_rate=30
     if [ "$UMO_PERF_MODE" = "aggressive" ]; then
         export UMO_VNC_DEPTH=16
+        _vnc_depth=16
+        _vnc_rate=20
     fi
+
+    _vnc_conf_dir="${UMO_INSTALL_DIR:?}/etc/umo"
+    mkdir -p "$_vnc_conf_dir" 2>/dev/null || true
+    {
+        printf 'VNC_DEPTH="%s"\n' "$_vnc_depth"
+        printf 'VNC_FRAMERATE="%s"\n' "$_vnc_rate"
+        printf 'VNC_HEXTILE="0"\n'
+    } > "$_vnc_conf_dir/vnc.conf" 2>/dev/null || true
 
     _xfce_settings="$UMO_INSTALL_DIR/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
     if [ -f "$_xfce_settings" ]; then
         sed -i 's|use_compositing" type="bool" value="true"|use_compositing" type="bool" value="false"|g' "$_xfce_settings" 2>/dev/null || true
     fi
 
-    umo_log_ok "VNC Tuned"
+    umo_log_ok "VNC Tuned (Depth $_vnc_depth, FrameRate $_vnc_rate, Fast Hextile)"
 }
 
 umo_perf_desktop() {

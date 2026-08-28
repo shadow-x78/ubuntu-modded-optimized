@@ -363,6 +363,86 @@ _umo_refresh_container() {
         fi
     fi
 
+    _fb_bin="$_ct_inst_dir/usr/bin/falkon"
+    _bw_bin="$_ct_inst_dir/usr/local/bin/umo-browser"
+    if [ -x "$_fb_bin" ] && [ -x "$_bw_bin" ]; then
+        mkdir -p "$_ct_inst_dir/usr/share/xfce4/helpers" 2>/dev/null || true
+        cat > "$_ct_inst_dir/usr/share/xfce4/helpers/umo-falkon.desktop" << 'UMOFALKON'
+[Desktop Entry]
+Version=1.0
+Icon=falkon
+Type=X-XFCE-Helper
+Name=Falkon Web Browser (UMO)
+StartupNotify=false
+NoDisplay=true
+X-XFCE-Binaries=/usr/local/bin/umo-browser;
+X-XFCE-Category=WebBrowser
+X-XFCE-Commands=%B;
+X-XFCE-CommandsWithParameter=%B "%s";
+UMOFALKON
+        for _ct_u in "$_ct_inst_dir/root" "$_ct_inst_dir/home/umo"; do
+            [ -d "$_ct_u" ] || continue
+            mkdir -p "$_ct_u/.config/xfce4" 2>/dev/null || true
+            _ct_hr="$_ct_u/.config/xfce4/helpers.rc"
+            [ -f "$_ct_hr" ] || : > "$_ct_hr" 2>/dev/null || true
+            if grep -q "^WebBrowser=" "$_ct_hr" 2>/dev/null; then
+                sed -i "s|^WebBrowser=.*|WebBrowser=umo-falkon|" "$_ct_hr" 2>/dev/null || true
+            else
+                printf "WebBrowser=umo-falkon\n" >> "$_ct_hr" 2>/dev/null || true
+            fi
+            _ct_ml="$_ct_u/.config/mimeapps.list"
+            [ -f "$_ct_ml" ] || printf "[Default Applications]\n" > "$_ct_ml" 2>/dev/null || true
+            for _ct_mt in x-scheme-handler/http x-scheme-handler/https text/html; do
+                awk -v k="$_ct_mt" -v v="org.kde.falkon.desktop" '
+                    BEGIN { insec = 0; have = 0; written = 0 }
+                    /^\[Default Applications\][ \t]*$/ { have = 1; insec = 1; print; next }
+                    /^\[/ {
+                        if (insec && !written) { print k "=" v; written = 1 }
+                        insec = 0; print; next
+                    }
+                    insec && index($0, k "=") == 1 { print k "=" v; written = 1; next }
+                    { print }
+                    END {
+                        if (insec && !written) print k "=" v
+                        else if (!have) { print ""; print "[Default Applications]"; print k "=" v }
+                    }
+                ' "$_ct_ml" > "${_ct_ml}.umo" 2>/dev/null && mv -f "${_ct_ml}.umo" "$_ct_ml" 2>/dev/null || rm -f "${_ct_ml}.umo" 2>/dev/null || true
+            done
+        done
+        chown 1000:1000 "$_ct_inst_dir/home/umo/.config/xfce4/helpers.rc" \
+            "$_ct_inst_dir/home/umo/.config/mimeapps.list" 2>/dev/null || true
+        "$_UMO_LOGIN" -c '
+            if command -v falkon >/dev/null 2>&1 && [ -x /usr/local/bin/umo-browser ]; then
+                update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/umo-browser 200 >/dev/null 2>&1 || true
+            fi
+            true
+        ' </dev/null >/dev/null 2>&1 || true
+        _umo_ok "Default Browser Wired To Falkon Wrapper (XFCE Helper + MIME Defaults)"
+    fi
+
+    for _ct_xf in "$_ct_inst_dir/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" \
+                  "$_ct_inst_dir/home/umo/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"; do
+        if [ -f "$_ct_xf" ] && grep -q 'use_compositing" type="bool" value="true"' "$_ct_xf" 2>/dev/null; then
+            sed -i 's|use_compositing" type="bool" value="true"|use_compositing" type="bool" value="false"|g' "$_ct_xf" 2>/dev/null || true
+            _umo_ok "Compositor Disabled For VNC Performance ($(_umo_dp "$_ct_xf"))"
+        fi
+    done
+
+    _perf_mode="${UMO_PERF_MODE:-balanced}"
+    _vnc_depth=24
+    _vnc_rate=30
+    if [ "$_perf_mode" = "aggressive" ]; then
+        _vnc_depth=16
+        _vnc_rate=20
+    fi
+    mkdir -p "$_ct_inst_dir/etc/umo" 2>/dev/null || true
+    {
+        printf 'VNC_DEPTH="%s"\n' "$_vnc_depth"
+        printf 'VNC_FRAMERATE="%s"\n' "$_vnc_rate"
+        printf 'VNC_HEXTILE="0"\n'
+    } > "$_ct_inst_dir/etc/umo/vnc.conf" 2>/dev/null || true
+    _umo_ok "VNC Performance Tuning Deployed (Mode: $_perf_mode, Depth $_vnc_depth, FrameRate $_vnc_rate)"
+
     UMO_LIB_DIR="${UMO_LIB_DIR:-$_UMO_REPO_DIR/lib}"
     [ -f "$UMO_LIB_DIR/core-system.sh" ] && . "$UMO_LIB_DIR/core-system.sh" 2>/dev/null
     _ct_tz=""
@@ -553,14 +633,14 @@ _umo_reapply_settings() {
     _umo_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 \
         xfce4-terminal thunar xfce4-screenshooter xfce4-taskmanager \
         mousepad dbus-x11 x11-xserver-utils \
-        gnome-icon-theme xfce4-whiskermenu-plugin plank"
+        gnome-icon-theme xfce4-whiskermenu-plugin plank xdg-utils"
     case "$UMO_DE" in
         lxde)
             _umo_probe="startlxde"
-            _umo_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf" ;;
+            _umo_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf xdg-utils" ;;
         openbox)
             _umo_probe="openbox-session"
-            _umo_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils" ;;
+            _umo_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils xdg-utils" ;;
         minimal)
             _umo_probe="xterm"
             _umo_pkgs="xterm xfonts-base" ;;

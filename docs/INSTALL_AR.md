@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.12-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -114,7 +114,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 
 | الـ Flag | الوصف |
 |----------|-------|
-| `--perf=<mode>` | تعيين مستوى الأداء (`balanced`, `aggressive`, `off`) |
+| `--perf=<mode>` | تعيين مستوى الأداء (`balanced`: عمق 24 و30 إطارا/ثانية وترميز hextile سريع - `aggressive`: عمق 16 و20 إطارا/ثانية للأجهزة الأبطأ - `off`). تُحفظ الإعدادات في `/etc/umo/vnc.conf` داخل الحاوية، ويُعطَّل compositor الخاص بـ xfwm4 دائما لأجل VNC، ويطبّق `umo update` الأمرين على الحاويات القائمة |
 | `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `umo-light`, `none`) - الافتراضي `umo-dark` (Orchis-Dark-Compact + أيقونات Tela-black-dark + مؤشر DMZ، مع الرجوع إلى Materia-dark + أيقونات gnome عند غياب إضافات المصمم) |
 | `--lean` | حذف التوثيق واللغات لتوفير المساحة |
 

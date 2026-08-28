@@ -1,8 +1,13 @@
 #!/bin/sh
+if [ -f /etc/umo/vnc.conf ]; then
+    . /etc/umo/vnc.conf
+fi
 VNC_DISPLAY="${VNC_DISPLAY:-:1}"
 VNC_GEOMETRY="${VNC_GEOMETRY:-1280x720}"
 VNC_DEPTH="${VNC_DEPTH:-24}"
 VNC_PORT="${VNC_PORT:-5901}"
+VNC_FRAMERATE="${VNC_FRAMERATE:-30}"
+VNC_HEXTILE="${VNC_HEXTILE:-0}"
 _vnc_num="${VNC_DISPLAY#:}"
 
 _GRN='\033[38;5;34m'
@@ -210,6 +215,14 @@ export QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-
 
 _xpid=""
 _session_pid=""
+_vnc_tune_args=""
+if Xtigervnc -help 2>&1 | grep -q "FrameRate"; then
+    _vnc_tune_args="-FrameRate $VNC_FRAMERATE"
+fi
+if Xtigervnc -help 2>&1 | grep -q "ImprovedHextile"; then
+    _vnc_tune_args="$_vnc_tune_args -ImprovedHextile $VNC_HEXTILE"
+fi
+
 _start_server() {
     Xtigervnc "$VNC_DISPLAY" \
         -geometry "$VNC_GEOMETRY" \
@@ -219,6 +232,7 @@ _start_server() {
         -SecurityTypes VncAuth \
         -PasswordFile "$HOME/.vnc/passwd" \
         -alwaysshared \
+        $_vnc_tune_args \
         -Log "*:stderr:100" </dev/null >> "$HOME/.vnc/xvnc.log" 2>&1 &
     _xpid="$!"
 }
@@ -246,10 +260,10 @@ fi
 if ! command -v "$_de_probe" >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
     _note "Desktop Components Missing ($_de_probe) - Installing Automatically (Up To 30 Minutes)"
     export DEBIAN_FRONTEND=noninteractive
-    _de_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils gnome-icon-theme xfce4-whiskermenu-plugin mousepad plank"
+    _de_pkgs="xfce4-panel xfce4-session xfce4-settings xfwm4 xfdesktop4 xfce4-terminal thunar dbus-x11 x11-xserver-utils gnome-icon-theme xfce4-whiskermenu-plugin mousepad plank xdg-utils"
     case "$_de_probe" in
-        startlxde)      _de_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf dbus-x11" ;;
-        openbox-session) _de_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils dbus-x11" ;;
+        startlxde)      _de_pkgs="lxde-core lxde-common lxsession lxterminal pcmanfm openbox obconf dbus-x11 xdg-utils" ;;
+        openbox-session) _de_pkgs="openbox obconf lxterminal pcmanfm tint2 feh exo-utils dbus-x11 xdg-utils" ;;
         xterm)          _de_pkgs="xterm xfonts-base" ;;
     esac
     _apt_run timeout 300 apt-get update || true
@@ -302,6 +316,7 @@ printf "\n"
 printf "  %bDisplay:%b    %b%s%b\n" "" "$_NC" "$_CYN" "$VNC_DISPLAY" "$_NC"
 printf "  %bAddress:%b    %b%s:%s%b\n" "" "$_NC" "$_CYN" "127.0.0.1" "$VNC_PORT" "$_NC"
 printf "  %bResolution:%b %b%s%b\n" "" "$_NC" "$_DIM" "$VNC_GEOMETRY" "$_NC"
+printf "  %bTuning:%b     %b%s%b\n" "" "$_NC" "$_DIM" "depth $VNC_DEPTH - $VNC_FRAMERATE fps - hextile $([ "$VNC_HEXTILE" = "1" ] && printf 'improved' || printf 'fast')" "$_NC"
 printf "\n"
 
 _server_fails=0
