@@ -292,25 +292,59 @@ umo_banner_full() {
     _cols="${1:-$(umo_term_cols)}"
     _cols="${_cols:-80}"
 
-    _l1='██╗   ██╗███╗   ███╗ ██████╗  '
-    _l2='██║   ██║████╗ ████║██╔═══██╗ '
-    _l3='██║   ██║██╔████╔██║██║   ██║ '
-    _l4='██║   ██║██║╚██╔╝██║██║   ██║ '
-    _l5='╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ '
-    _l6=' ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  '
+    # UMO logo mark - the real logo geometry (circle-of-friends ring with the
+    # installer chevron), rendered as half-block terminal art. Falls back to
+    # solid blocks when half-blocks are unavailable, and to ASCII # on request.
+    _l1='             ▄██▄            '
+    _l2='         ▄▄████████▄▄        '
+    _l3='       ▄███▀▀████▀▀███▄      '
+    _l4='     ▄███▀▄█▄▄      ▀███▄    '
+    _l5='    ▄██▀  ▀████▄▄     ▀██▄  '
+    _l6='    ███     ▀▀████▄    ███  '
+    _l7='    ███        █████   ███  '
+    _l8='    ███▄    ▄▄████▀   ▄███  '
+    _l9='    █████ ▄████▀▀    █████  '
+    _l10='    █████▄▀██▀      ▄█████  '
+    _l11='     ▀▀▀███▄▄▄▄▄▄▄▄███▀▀▀   '
+    _l12='         ▀▀████████▀▀      '
 
-    _logo_w=30
+    # ASCII fallback: same geometry, # blocks (UMO_ASCII=1 or non-UTF-8)
+    _a1='             ####          '
+    _a2='         ############      '
+    _a3='       ################    '
+    _a4='     #########      #####  '
+    _a5='    ####  #######     #### '
+    _a6='    ###     #######    ### '
+    _a7='    ###        #####   ### '
+    _a8='    ####    #######   #### '
+    _a9='    ##### #######    ##### '
+    _a10='    ##########      ###### '
+    _a11='     ####################  '
+    _a12='         ############     '
+
+    if [ "$UMO_GLYPH_SUPPORT" -ne 1 ] 2>/dev/null || [ -n "${UMO_ASCII:-}" ]; then
+        _l1="$_a1"; _l2="$_a2"; _l3="$_a3"; _l4="$_a4"; _l5="$_a5"; _l6="$_a6"
+        _l7="$_a7"; _l8="$_a8"; _l9="$_a9"; _l10="$_a10"; _l11="$_a11"; _l12="$_a12"
+    fi
+
+    _logo_w=$(printf '%s' "$_l7" | wc -m)
     _pad=$(( (_cols - _logo_w) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
 
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l1" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l2" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l3" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l4" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l5" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l6" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "${_l1#"${_l1%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "${_l2#"${_l2%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "${_l3#"${_l3%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "${_l4#"${_l4%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "${_l5#"${_l5%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "${_l6#"${_l6%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "${_l7#"${_l7%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "${_l8#"${_l8%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "${_l9#"${_l9%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "${_l10#"${_l10%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "${_l11#"${_l11%%[! ]*}"}" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "${_l12#"${_l12%%[! ]*}"}" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.16.13}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.16.14}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

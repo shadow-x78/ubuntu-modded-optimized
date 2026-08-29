@@ -426,7 +426,7 @@ PLANKDESK
             fi
         done
         if [ "$_pp_done" = 1 ]; then
-            umo_log_ok "Plank Dock Theme Installed (Rounded)"
+            umo_log_ok "Plank Dock Theme Installed"
         else
             umo_log_info "Plank Dock Theme Skipped (No GTK Theme Directory Found Yet)"
         fi

@@ -248,13 +248,36 @@ alias startvnc="bash /usr/local/bin/umo-startvnc"
 alias stopvnc="bash /usr/local/bin/umo-stopvnc"
 
 if [ -n "$PS1" ]; then
+    _umo_g=0
+    case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_g=1 ;; esac
     printf "\n\033[38;5;208m"
-    printf "  ██╗   ██╗███╗   ███╗ ██████╗  \n"
-    printf "  ██║   ██║████╗ ████║██╔═══██╗ \n"
-    printf "  ██║   ██║██╔████╔██║██║   ██║ \n"
-    printf "  ██║   ██║██║╚██╔╝██║██║   ██║ \n"
-    printf "  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ \n"
-    printf "   ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  \n"
+    if [ "$_umo_g" -eq 1 ]; then
+        printf "  %s\n" "             ▄██▄"
+        printf "  %s\n" "         ▄▄████████▄▄"
+        printf "  %s\n" "       ▄███▀▀████▀▀███▄"
+        printf "  %s\n" "     ▄███▀▄█▄▄      ▀███▄"
+        printf "  %s\n" "    ▄██▀  ▀████▄▄     ▀██▄"
+        printf "  %s\n" "    ███     ▀▀████▄    ███"
+        printf "  %s\n" "    ███        █████   ███"
+        printf "  %s\n" "    ███▄    ▄▄████▀   ▄███"
+        printf "  %s\n" "    █████ ▄████▀▀    █████"
+        printf "  %s\n" "    █████▄▀██▀      ▄█████"
+        printf "  %s\n" "     ▀▀▀███▄▄▄▄▄▄▄▄███▀▀▀"
+        printf "  %s\n" "         ▀▀████████▀▀"
+    else
+        printf "  %s\n" "             ####"
+        printf "  %s\n" "         ############"
+        printf "  %s\n" "       ################"
+        printf "  %s\n" "     #########      #####"
+        printf "  %s\n" "    ####  #######     ####"
+        printf "  %s\n" "    ###     #######    ###"
+        printf "  %s\n" "    ###        #####   ###"
+        printf "  %s\n" "    ####    #######   ####"
+        printf "  %s\n" "    ##### #######    #####"
+        printf "  %s\n" "    ##########      ######"
+        printf "  %s\n" "     ####################"
+        printf "  %s\n" "         ############"
+    fi
     printf "\033[0m\n"
     printf "\033[38;5;208m  ────────────────────────────────────────────────────────\033[0m\n\n"
     if command -v fastfetch >/dev/null 2>&1; then

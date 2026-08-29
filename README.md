@@ -1,19 +1,12 @@
 <div align="center">
 
-<pre align="center">
- ██╗   ██╗███╗   ███╗ ██████╗
-  ██║   ██║████╗ ████║██╔═══██╗
-  ██║   ██║██╔████╔██║██║   ██║
-  ██║   ██║██║╚██╔╝██║██║   ██║
-  ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝
-  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝
-</pre>
+<img src="assets/logo/umo-logo.svg" width="180" alt="UMO logo - the Ubuntu circle-of-friends ring, whole, with the UMO installer chevron at its center">
 
 # Ubuntu Modded Optimized
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.16.13-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.16.14-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)

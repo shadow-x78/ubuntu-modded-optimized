@@ -24,6 +24,7 @@
 - [VNC Feels Slow or Freezes](#vnc-slow)
 - [Default Web Browser Fails With "Input/Output Error"](#default-browser)
 - [htop Opens and Closes Instantly](#htop-instant-close)
+- [Plank Dock Has Square Edges](#plank-square-edges)
 - [No Audio in Proot](#no-audio)
 - [systemctl Fails](#systemctl)
 - [Black Screen / VNC Not Connecting](#black-screen)
@@ -125,6 +126,15 @@ htop
 ```
 
 **Check:** inside the container, `echo $TERM` must print `xterm-256color`. If it prints anything else, `infocmp $TERM` must succeed - otherwise the guard falls back automatically. Inside the desktop, launch htop from `xfce4-terminal` (the menu entry does this for you), never from a terminal emulator that exports no `TERM`.
+
+---
+
+<a id="plank-square-edges"></a>
+## 📐 Plank Dock Has Square Edges
+
+**Cause:** Not a broken install - it is plank itself. Its renderer hard-codes every corner radius to 0 when no compositor is running (`draw_rounded_rect` in plank's `Theme.vala`: `if (!is_composited()) top_radius = bottom_radius = 0.0;`), and UMO runs the desktop compositor-less on purpose because compositing every frame is the heaviest per-frame cost on a phone CPU under VNC (see [VNC Feels Slow or Freezes](#vnc-slow)). The dock theme still applies - colors, paddings, indicator - only the rounding cannot render.
+
+**Fix:** none needed; this is the designed behavior. If you prefer rounded corners over the VNC speed-up, enable the compositor yourself inside the desktop (Settings → Window Manager Tweaks → Compositor) - the theme carries `TopRoundness=18`, so the dock rounds the moment a compositor runs.
 
 ---
 

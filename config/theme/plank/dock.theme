@@ -1,11 +1,21 @@
 # ─────────────────────────────────────────────
 # UMO - Plank Dock Theme
 # ─────────────────────────────────────────────
-# Rounded top corners, translucent black - the
-# plank theme from the Orchis GTK source, which
-# the Orchis installer never ships. Plank runs
-# with Theme=Gtk+ and resolves it from a plank/
-# folder inside the active GTK theme.
+# Translucent black - the plank theme from the
+# Orchis GTK source, which the Orchis installer
+# never ships. Plank runs with Theme=Gtk+ and
+# resolves it from a plank/ folder inside the
+# active GTK theme.
+#
+# Note on TopRoundness: plank hard-codes corner
+# radii to 0 when no compositor is running
+# (draw_rounded_rect in its Theme.vala), and UMO
+# runs the desktop compositor-less for VNC
+# performance - so the dock renders square-edged
+# here by design. The value is kept at the Orchis
+# 18 so a compositor-enabled session gets the
+# rounding for free; the colors, paddings and
+# indicator style apply either way.
 
 # ── Theme Base ──
 [PlankTheme]
