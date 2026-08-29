@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.5] - 2026-08-30
+
+### 🐛 Fixed
+
+- **`umo start` reported VNC failure while the server was still starting - the wait loop was racing a capability probe:** the container-side start script probes `Xtigervnc -help` twice before launching the server (FrameRate/ImprovedHextile tuning), and the host-side wait loop in `umo start` checked for the server with a bare `pgrep -f Xtigervnc` - which matches the transient `-help` process. The loop broke out after ~2 seconds on that false positive, found no real server yet, and printed the failure screen (the "(no X server appeared in 2s)" signature) while the starter was alive and the real server still booting. Both the wait loop and the final verdict in `umo start`, and the `umo status` VNC probe, now match the server specifically (`Xtigervnc :<display>` / `Xvnc :<display>` patterns) - the `-help` probe can never satisfy them. This is the actual root cause of the recurring "VNC Failed To Start" screen on phones where startup takes longer than the broken loop's effective 2-second window.
+
+- **The mark is the beloved original again:** v4.18.4's solid-block redrawing of the mark read as a smudged ring - the analytic resample lost the circle's outline vocabulary. The banner's mark is restored to the original v4.17.3 half-block art verbatim (the 22-column ring of friends that shipped through four releases), paired with the classic `UMO` wordmark dead-center (3 blank rows above, 3 below) and the spaced vertical rule - 55 columns, 12 rows, every line exactly 55 chars, verified programmatically in all six banner sites in both modes. The v4.18.4 container-banner refresh machinery (idempotent strip-and-redeploy on `umo update`) keeps deploying this art; existing installs pick it up on the next `umo update`.
+
 ## [v4.18.4] - 2026-08-29
 
 ### 🎨 Changed
