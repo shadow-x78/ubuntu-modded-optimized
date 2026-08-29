@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.4] - 2026-08-29
+
+### 🎨 Changed
+
+- **The mark is drawn in the wordmark's own vocabulary - solid blocks, not scattered half-blocks:** the v4.18.3 mark was rendered with `▀`/`▄` half-blocks, giving it a fuzzier, lower-contrast look next to the crisp solid `██╗ ██║` letters. The mark is now drawn from the same SVG geometry (ring + three heads + chevron) but rendered as **solid `█` cells on the same 24x12 cell grid as the letters** - one cell, one block, the exact binary crispness of the classic wordmark - so the mark and the letters finally read as one family. The ASCII fallback uses the same geometry with `#` cells. All six banner sites rebuilt together in both modes (57 columns, 12 rows, every line exactly 57 chars - verified programmatically).
+
+### 🗑️ Removed
+
+- **Legacy container-banner blocker:** the in-container bashrc banner used to be written only once - at container creation - and never refreshed, leaving every existing install showing the old art forever (the "old logo in my terminal" report). `umo update` now strips the legacy banner block from both `/root/.bashrc` and `/home/umo/.bashrc` (an awk state machine that removes the `if [ -n "$PS1" ]` banner block through its fastfetch/neofetch tail) and deploys the current banner under a `# ===== UMO TERM BANNER =====` marker that makes the refresh idempotent; the deploy-and-strip cycle was verified against a real old-style bashrc: the old art disappears, the new banner renders in both UTF-8 and ASCII modes, and a second run changes nothing.
+
 ## [v4.18.3] - 2026-08-29
 
 ### 🐛 Fixed

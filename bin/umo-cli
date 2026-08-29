@@ -62,19 +62,19 @@ _umo_dp() {
 _umo_header() {
     printf "\n"
     if [ "$_UMO_GLYPH" -eq 1 ]; then
-    _l1='         ▄▄██▄▄          │                               ';  _l2='     ▄▄██████████▄▄      │                               '
-    _l3='   ▄███▀▄       ▀███▄    │                               ';  _l4='  ▄██▀  ██▄       ▀██▄   │ ██╗   ██╗███╗   ███╗ ██████╗  '
-    _l5=' ▄██    ▀▀██▄▄▄     ██▄  │ ██║   ██║████╗ ████║██╔═══██╗ ';  _l6=' ██▀       ▀███▄    ▀██  │ ██║   ██║██╔████╔██║██║   ██║ '
-    _l7=' ██▄       ▄███▀    ▄██  │ ██║   ██║██║╚██╔╝██║██║   ██║ ';  _l8=' ████   ▄▄██▀▀▀    ████  │ ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ '
-    _l9=' █████▄ ██▀      ▄█████  │  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  ';  _l10=' ▀▀▀███▄▀       ▄███▀▀▀  │                               '
-    _l11='     ▀▀████▄▄████▀▀      │                               ';  _l12='         ▀▀▀▀▀▀          │                               '
+    _l1='                         │                               ';  _l2='          ████           │                               '
+    _l3='      ████████████       │                               ';  _l4='    ██████      ████     │ ██╗   ██╗███╗   ███╗ ██████╗  '
+    _l5='    ██  █████     ██     │ ██║   ██║████╗ ████║██╔═══██╗ ';  _l6='   ██      █████   ██    │ ██║   ██║██╔████╔██║██║   ██║ '
+    _l7='   ██      █████   ██    │ ██║   ██║██║╚██╔╝██║██║   ██║ ';  _l8='   ████ █████    ████    │ ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ '
+    _l9='   ███████      █████    │  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  ';  _l10='      ████████████       │                               '
+    _l11='          ████           │                               ';  _l12='                         │                               '
     else
-    _l1='         ######          |                               ';  _l2='     ##############      |                               '
-    _l3='   ######       #####    |                               ';  _l4='  ####  ###       ####   |      #   #  #   #   ###       '
-    _l5=' ###    #######     ###  |      #   #  ## ##  #   #      ';  _l6=' ###       #####    ###  |      #   #  # # #  #   #      '
-    _l7=' ###       #####    ###  |      #   #  #   #  #   #      ';  _l8=' ####   #######    ####  |      #   #  #   #  #   #      '
-    _l9=' ###### ###      ######  |       ###   #   #   ###       ';  _l10=' ########       #######  |                               '
-    _l11='     ##############      |                               ';  _l12='         ######          |                               '
+    _l1='                         |                               ';  _l2='          ####           |                               '
+    _l3='      ############       |                               ';  _l4='    ######      ####     |      #   #  #   #   ###       '
+    _l5='    ##  #####     ##     |      #   #  ## ##  #   #      ';  _l6='   ##      #####   ##    |      #   #  # # #  #   #      '
+    _l7='   ##      #####   ##    |      #   #  #   #  #   #      ';  _l8='   #### #####    ####    |      #   #  #   #  #   #      '
+    _l9='   #######      #####    |       ###   #   #   ###       ';  _l10='      ############       |                               '
+    _l11='          ####           |                               ';  _l12='                         |                               '
     fi
     for _ln in "$_l1" "$_l2" "$_l3" "$_l4" "$_l5" "$_l6" "$_l7" "$_l8" "$_l9" "$_l10" "$_l11" "$_l12"; do
         printf "  %b%s%b\n" "$_UMO_PRI" "$_ln" "$_UMO_NC"
@@ -423,6 +423,87 @@ UMOFALKON
         done
         chown 1000:1000 "$_ct_inst_dir/home/umo/.config/xfce4/helpers.rc" \
             "$_ct_inst_dir/home/umo/.config/mimeapps.list" 2>/dev/null || true
+
+    _bn_changed=0
+    _bn_strip() {
+        _bs_rc="$1"
+        [ -f "$_bs_rc" ] || return 0
+        awk '
+            /^if \[ -n "\$PS1" \]; then$/ && seen_ff == 0 { skip = 1 }
+            skip {
+                if ($0 ~ /^fi$/ && nf) { skip = 0; nf = 0; next }
+                if ($0 ~ /fastfetch|neofetch/) nf = 1
+                next
+            }
+            { print }
+        ' "$_bs_rc" > "${_bs_rc}.umo" 2>/dev/null || return 0
+        if ! cmp -s "${_bs_rc}.umo" "$_bs_rc" 2>/dev/null; then
+            mv -f "${_bs_rc}.umo" "$_bs_rc" 2>/dev/null && _bn_changed=1
+        else
+            rm -f "${_bs_rc}.umo" 2>/dev/null || true
+        fi
+    }
+    _bn_strip "$_ct_inst_dir/root/.bashrc"
+    _bn_strip "$_ct_inst_dir/home/umo/.bashrc"
+
+    _umo_deploy_bashrc_banner() {
+        _d_home="$1"
+        _d_rc="$_ct_inst_dir$_d_home/.bashrc"
+        _d_dir=$(dirname "$_d_rc")
+        mkdir -p "$_d_dir" 2>/dev/null || true
+        if [ ! -f "$_d_rc" ]; then
+            : > "$_d_rc" 2>/dev/null || return 0
+        fi
+        if grep -q "UMO TERM BANNER" "$_d_rc" 2>/dev/null; then
+            return 0
+        fi
+        {
+            printf '%s\n' '# ===== UMO TERM BANNER ====='
+            printf '%s\n' 'if [ -n "$PS1" ]; then'
+            printf '%s\n' '    _umo_g=0'
+            printf '%s\n' '    case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_g=1 ;; esac'
+            printf '%s\n' '    printf "\n\033[38;5;208m"'
+            printf '%s\n' '    if [ "$_umo_g" -eq 1 ]; then'
+            printf '%s\n' '        printf "  %s\n" "                          │                                "'
+            printf '%s\n' '        printf "  %s\n" "          ████           │                               "'
+            printf '%s\n' '        printf "  %s\n" "      ████████████       │                               "'
+            printf '%s\n' '        printf "  %s\n" "    ██████      ████     │ ██╗   ██╗███╗   ███╗ ██████╗  "'
+            printf '%s\n' '        printf "  %s\n" "    ██  █████     ██     │ ██║   ██║████╗ ████║██╔═══██╗ "'
+            printf '%s\n' '        printf "  %s\n" "   ██      █████   ██    │ ██║   ██║██╔████╔██║██║   ██║ "'
+            printf '%s\n' '        printf "  %s\n" "   ██      █████   ██    │ ██║   ██║██║╚██╔╝██║██║   ██║ "'
+            printf '%s\n' '        printf "  %s\n" "   ████ █████    ████    │ ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ "'
+            printf '%s\n' '        printf "  %s\n" "   ███████      █████    │  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  "'
+            printf '%s\n' '        printf "  %s\n" "      ████████████       │                               "'
+            printf '%s\n' '        printf "  %s\n" "          ████           │                               "'
+            printf '%s\n' '        printf "  %s\n" "                          │                                "'
+            printf '%s\n' '    else'
+            printf '%s\n' '        printf "  %s\n" "                          |                                "'
+            printf '%s\n' '        printf "  %s\n" "          ####           |                               "'
+            printf '%s\n' '        printf "  %s\n" "      ############       |                               "'
+            printf '%s\n' '        printf "  %s\n" "    ######      ####     |      #   #  #   #   ###       "'
+            printf '%s\n' '        printf "  %s\n" "    ##  #####     ##     |      #   #  ## ##  #   #      "'
+            printf '%s\n' '        printf "  %s\n" "   ##      #####   ##    |      #   #  # # #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" "   ##      #####   ##    |      #   #  #   #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" "   #### #####    ####    |      #   #  #   #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" "   #######      #####    |       ###   #   #   ###       "'
+            printf '%s\n' '        printf "  %s\n" "      ############       |                               "'
+            printf '%s\n' '        printf "  %s\n" "          ####           |                               "'
+            printf '%s\n' '        printf "  %s\n" "                          |                                "'
+            printf '%s\n' '    fi'
+            printf '%s\n' '    printf "\033[0m\n"'
+            printf '%s\n' '    printf "\033[38;5;208m  ────────────────────────────────────────────────────────\033[0m\n\n"'
+            printf '%s\n' '    if command -v fastfetch >/dev/null 2>&1; then'
+            printf '%s\n' '        fastfetch --logo none'
+            printf '%s\n' '    elif command -v neofetch >/dev/null 2>&1; then'
+            printf '%s\n' '        neofetch'
+            printf '%s\n' '    fi'
+            printf '%s\n' 'fi'
+        } >> "$_d_rc" 2>/dev/null || true
+    }
+    _umo_deploy_bashrc_banner "/root"
+    [ -d "$_ct_inst_dir/home/umo" ] && _umo_deploy_bashrc_banner "/home/umo"
+    _umo_ok "Container Login Banner Updated (Current Style, Both Users)"
+
         "$_UMO_LOGIN" -c '
             if command -v falkon >/dev/null 2>&1 && [ -x /usr/local/bin/umo-browser ]; then
                 update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/umo-browser 200 >/dev/null 2>&1 || true
