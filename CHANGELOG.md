@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v4.16.14] - 2026-08-29
+## [v4.17.0] - 2026-08-29
 
 ### ✨ Added
 - **The project has its own logo:** `assets/logo/umo-logo.svg` - a flat, single-color mark in the exact visual language of the shipped `ubuntu.svg` brand icon (#e9500e, the same Ubuntu orange). The design: the Ubuntu circle-of-friends ring, but **whole** - the stock mark is three broken arcs, and this one is a complete circle with the three heads (270/30/150 degrees, the Ubuntu arrangement), because "every broken arc repaired" is the project's own story; and at the center, in the void, the installer chevron `❯` - the glyph every UMO install step prints - as the hero. The logo ships as a full set (SVG + PNG at 512/256/128/96/64/48 plus a white-background preview) in `assets/logo/`, and both READMEs (EN/AR) now open with the mark at 180px **replacing the old ASCII banner entirely** - the logo is the banner now. The SVG uses two role classes (`.umo-f` fill, `.umo-s` stroke) sharing one color to retheme, and the geometry is verified (46px clear margin, the chevron fits the center void at 126px reach vs 149px void radius, 0.00px chord spread on the head triangle, the chevron bbox optically centered on 256).
