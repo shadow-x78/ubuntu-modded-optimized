@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.2] - 2026-08-29
+
+### 🎨 Changed
+
+- **The banner wordmark is the classic block-font `UMO` letters:** the v4.18.1 wordmark was drawn as solid half-block shapes spanning all 11 rows - a different, stenciled look that was never what the project wore; the wordmark beside the mark is now the exact classic `██╗ ██║` art from the pre-logo era (restored verbatim from v4.16.13), vertically centered on its six rows within the 11-row banner, split from the 22-column circle-of-friends mark by the spaced vertical rule (`mark │ UMO`) - 55 columns, 11 lines, every line exactly 55 chars. The ASCII fallback renders the same layout with a `#`-outline `UMO` on the same centered rows. All six banner sites (the lib banner, both `umo start` paths, `umo stop`, the CLI header, the in-container bashrc) rebuilt together in both modes.
+
 ## [v4.18.1] - 2026-08-29
 
 ### 🎨 Changed
