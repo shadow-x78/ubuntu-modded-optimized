@@ -2,7 +2,7 @@
 
 # Troubleshooting - UMO
 
-[![Version](https://img.shields.io/badge/version-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -25,6 +25,8 @@
 - [Default Web Browser Fails With "Input/Output Error"](#default-browser)
 - [htop Opens and Closes Instantly](#htop-instant-close)
 - [Plank Dock Has Square Edges](#plank-square-edges)
+- [Terminal Banner Shows # Art (or Gibberish)](#terminal-art)
+- [Menu Button Shows the Wrong Icon](#menu-icon)
 - [No Audio in Proot](#no-audio)
 - [systemctl Fails](#systemctl)
 - [Black Screen / VNC Not Connecting](#black-screen)
@@ -134,7 +136,41 @@ htop
 
 **Cause:** Not a broken install - it is plank itself. Its renderer hard-codes every corner radius to 0 when no compositor is running (`draw_rounded_rect` in plank's `Theme.vala`: `if (!is_composited()) top_radius = bottom_radius = 0.0;`), and UMO runs the desktop compositor-less on purpose because compositing every frame is the heaviest per-frame cost on a phone CPU under VNC (see [VNC Feels Slow or Freezes](#vnc-slow)). The dock theme still applies - colors, paddings, indicator - only the rounding cannot render.
 
-**Fix:** none needed; this is the designed behavior. If you prefer rounded corners over the VNC speed-up, enable the compositor yourself inside the desktop (Settings → Window Manager Tweaks → Compositor) - the theme carries `TopRoundness=18`, so the dock rounds the moment a compositor runs.
+**Fix:** none needed; this is the designed behavior (documented in the install log since v4.17.0 - the success line no longer claims rounding it cannot deliver). If you prefer rounded corners over the VNC speed-up, enable the compositor yourself inside the desktop (Settings → Window Manager Tweaks → Compositor) - the theme carries `TopRoundness=18`, so the dock rounds the moment a compositor runs.
+
+---
+
+<a id="terminal-art"></a>
+## 🖥️ Terminal Banner Shows # Art (or Gibberish)
+
+**Cause:** the UMO banner (the half-block logo mark) needs a UTF-8 terminal. On non-UTF-8 terminals every site automatically falls back to the pure-ASCII `#` rendering - that is the designed fallback, not a bug. Gibberish (`�`, `â–`) means the terminal is decoding UTF-8 bytes as something else (a `C` locale, or a viewer app that assumes a legacy codepage).
+
+**Fix:**
+
+```bash
+# Check your locale inside Termux
+locale
+
+# Force UTF-8
+echo 'export LANG=en_US.UTF-8' >> ~/.bashrc && source ~/.bashrc
+```
+
+To force the ASCII rendering even on a UTF-8 terminal (e.g. inside logs or CI): `UMO_ASCII=1 umo start`.
+
+---
+
+<a id="menu-icon"></a>
+## 🔘 Menu Button Shows the Wrong Icon
+
+**Cause:** the XFCE whiskermenu button icon points at `/usr/share/umo/brand/umo.png` (the UMO mark, since v4.17.1). An older container still carries the pre-UMO Ubuntu mark, or the brand file is missing after a partial update.
+
+**Fix:** re-deploy the icon and re-point the button (both happen on `umo update`; the VNC session start enforces it on every boot too):
+
+```bash
+umo update
+```
+
+**Check:** inside the container, `ls /usr/share/umo/brand/umo.png` must exist, and the button shows the UMO ring-of-friends mark (whole circle + three heads + center chevron).
 
 ---
 

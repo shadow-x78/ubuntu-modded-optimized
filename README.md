@@ -6,7 +6,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.17.2-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -27,6 +27,7 @@ Full Ubuntu on your Android device - one command, zero hassle
 - [What is UMO?](#what-is-umo)
 - [Screenshots](#screenshots)
 - [Desktop Environments](#desktop-environments)
+- [The UMO Mark](#umo-brand)
 - [Quick Start](#quick-start)
 - [Commands](#commands)
 - [CLI Options](#cli-options)
@@ -78,6 +79,21 @@ Full Ubuntu on your Android device - one command, zero hassle
 All graphical desktops get the full design system: Orchis GTK theme (compact), Tela icons, DMZ cursors, Ubuntu SemiBold + FiraCode Nerd Mono fonts, a matching Fastfetch config, and the UMO wallpaper - applied to **both** root and the `umo` user. Pick **Night Mode** (Orchis-Dark-Compact + Tela-black-dark) or **Day Mode** (Orchis-Light-Compact + Tela) in the installer, or with `--theme=umo-dark|umo-light`.
 
 **Includes:** TigerVNC · PulseAudio Bridge · Termux:X11 · Generic systemctl emulator · Session Control
+
+---
+
+<a id="umo-brand"></a>
+## 🧭 The UMO Mark
+
+The project's logo is a flat, single-color mark (#e9500e - the Ubuntu orange): the Ubuntu circle-of-friends ring, but **whole** - the stock mark is three broken arcs, and this one is a complete circle with all three heads (270/30/150°), because *"every broken arc repaired"* is UMO's own story - with the installer chevron `❯` (the glyph every UMO install step prints) at the center.
+
+The mark is everywhere:
+
+| Surface | Where you see it |
+|---------|------------------|
+| Repository header | Both READMEs open with the logo instead of an ASCII banner (`assets/logo/`) |
+| Terminal banners | Every banner site (installer, `umo start/stop`, CLI header, in-container login) renders the same geometry as half-block art - with a pure-ASCII `#` fallback on non-UTF-8 terminals (`UMO_ASCII=1` forces it) |
+| Desktop menu button | The whiskermenu button on the XFCE panel wears the UMO mark (`/usr/share/umo/brand/umo.png`), not the Ubuntu logo - deployed at install, on `umo update` and at every session start |
 
 ---
 
@@ -196,9 +212,13 @@ UMO/
 │   ├── umo-desktop.sh       # DE installer (XFCE4 / LXDE / Openbox)
 │   ├── umo-theme.sh         # Desktop design engine (all DEs)
 │   └── umo-apps.sh          # App group installer
+├── assets/
+│   ├── logo/                # The UMO mark (SVG + PNG set)
+│   └── screenshots/         # Installer screenshots
 ├── config/
 │   ├── xstartup             # VNC session template
 │   └── theme/               # Design templates: GTK, XFCE4, LXDE, Openbox, fonts, wallpaper
+│       └── icons/           # UMO brand icon set (hicolor + menu button)
 ├── docs/
 │   ├── INSTALL.md           # Detailed installation guide
 │   └── TROUBLESHOOTING.md   # Common issues and fixes

@@ -2,7 +2,7 @@
 
 # Security Policy - UMO
 
-[![Version](https://img.shields.io/badge/version-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -27,10 +27,10 @@
 
 | Version | Supported |
 |---------|-----------|
-| 2.1.x | ✅ Active |
-| < 2.1 | ❌ End of Life |
+| 4.17.x (latest) | ✅ Active |
+| < 4.17 | ❌ End of Life |
 
-Only the latest minor release receives security updates. Ensure you are on the most recent version before reporting.
+Only the latest minor release receives security updates. Ensure you are on the most recent version (`umo version`) before reporting.
 
 ---
 

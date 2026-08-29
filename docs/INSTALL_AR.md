@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -104,8 +104,10 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 |----------|---------|------|
 | `--apps=basic` | أساسية | الأدوات الأساسية + متصفح Falkon (خفيف ومناسب لبيئة proot) |
 | `--apps=dev` | تطوير | git, vim, python3, nodejs, build-essential, VS Code, Geany |
-| `--apps=media` | وسائط | ffmpeg, vlc, gimp |
-| `--apps=full` | كاملة | جميع ما سبق |
+| `--apps=media` | وسائط | ffmpeg, vlc, mpv, audacity, gimp |
+| `--apps=office` | مكتبية | LibreOffice (Writer, Calc, Impress) + قارئ PDF atril + الخطوط |
+| `--apps=browser` | متصفح | إعادة فحص Falkon + ربطه كمتصفح افتراضي |
+| `--apps=full` | كاملة | كل ما سبق + تكامل Termux |
 
 ---
 
@@ -115,7 +117,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | الـ Flag | الوصف |
 |----------|-------|
 | `--perf=<mode>` | تعيين مستوى الأداء (`balanced`: عمق 24 و30 إطارا/ثانية وترميز hextile سريع - `aggressive`: عمق 16 و20 إطارا/ثانية للأجهزة الأبطأ - `off`). تُحفظ الإعدادات في `/etc/umo/vnc.conf` داخل الحاوية، ويُعطَّل compositor الخاص بـ xfwm4 دائما لأجل VNC، ويطبّق `umo update` الأمرين على الحاويات القائمة |
-| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `umo-light`, `none`) - الافتراضي `umo-dark` (Orchis-Dark-Compact + أيقونات Tela-black-dark + مؤشر DMZ، مع الرجوع إلى Materia-dark + أيقونات gnome عند غياب إضافات المصمم) |
+| `--theme=<theme>` | تعيين مظهر سطح المكتب (`umo-dark`, `umo-light`, `none`) - الافتراضي `umo-dark` (Orchis-Dark-Compact + أيقونات Tela-black-dark + مؤشر DMZ، مع الرجوع إلى Materia-dark + أيقونات gnome عند غياب إضافات المصمم). كل واجهة رسومية تحصل أيضاً على شعار UMO كزر قائمة البانر، وخلفية UMO، وإعدادات Fastfetch مطابقة |
 | `--lean` | حذف التوثيق واللغات لتوفير المساحة |
 
 ---
@@ -149,13 +151,16 @@ umo login
 
 | الأمر | الوصف |
 |-------|-------|
-| `umo start` | بدء الجلسة مع VNC والصوت |
+| `umo start` | بدء الجلسة مع VNC والصوت (أضف `--x11` لجلسة Termux:X11 بدلاً من VNC) |
 | `umo stop` | إيقاف جميع الخدمات |
 | `umo status` | عرض حالة الخدمات |
 | `umo login` | الدخول كـ root |
 | `umo user` | الدخول كمستخدم افتراضي |
+| `umo run "<أمر>"` | تنفيذ أمر واحد داخل الحاوية |
+| `umo backup [مجلد]` | أرشفة نظام ملفات Ubuntu |
 | `umo update` | تحديث كامل: جلب آخر نسخة من UMO، إعادة تطبيق إعداداتك المحفوظة (الثيم، التطبيقات، سطح المكتب)، وترقية حزم أوبونتو. `--scripts-only` للتحديث السريع، `--no-upgrade` لتخطي ترقية نظام أوبونتو |
 | `umo refresh` | إعادة توليد واجهة `umo` وسكربتات الهوست والحاوية من النسخة المحلية للأداة (بدون سحب git) |
+| `umo uninstall` | إزالة UMO بالكامل (نظام الملفات، سكربتات الهوست، أمر `umo`، الاسم المستعارة) |
 | `umo version` | عرض إصدار UMO الحالي |
 
 ### داخل Ubuntu
@@ -180,6 +185,9 @@ umo login
 ```bash
 # حذف Ubuntu وجميع ملفات UMO
 rm -rf ~/umo-ubuntu ~/.umo ~/umo-*.sh
+
+# أو الطريقة النظيفة
+umo uninstall
 ```
 
 ---

@@ -2,7 +2,7 @@
 
 # Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -104,8 +104,10 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 |------|-------|----------|
 | `--apps=basic` | Basic | Core utilities + Falkon web browser (lightweight, proot-friendly) |
 | `--apps=dev` | Developer | git, vim, python3, nodejs, build-essential, VS Code, Geany |
-| `--apps=media` | Media | ffmpeg, vlc, gimp |
-| `--apps=full` | Full | All of the above |
+| `--apps=media` | Media | ffmpeg, vlc, mpv, audacity, gimp |
+| `--apps=office` | Office | LibreOffice (Writer, Calc, Impress), atril PDF viewer, fonts |
+| `--apps=browser` | Browser | Falkon re-check + default-browser wiring |
+| `--apps=full` | Full | All of the above + Termux integration |
 
 ---
 
@@ -115,7 +117,7 @@ UMO_DE=lxde UMO_APP_SET=dev UMO_NON_INTERACTIVE=1 bash install.sh
 | Flag | Description |
 |------|-------------|
 | `--perf=<mode>` | Set performance level (`balanced`: depth 24, 30 fps, fast hextile - `aggressive`: depth 16, 20 fps, fast hextile for slower devices - `off`). The tuning lives in `/etc/umo/vnc.conf` inside the container, the xfwm4 compositor is always disabled for VNC, and `umo update` applies both to existing containers |
-| `--theme=<theme>` | Set desktop theme (`umo-dark`, `umo-light`, `none`) - default is `umo-dark` (Orchis-Dark-Compact GTK + Tela-black-dark icons + DMZ cursor, falling back to Materia-dark + gnome icons when the designer extras are missing) |
+| `--theme=<theme>` | Set desktop theme (`umo-dark`, `umo-light`, `none`) - default is `umo-dark` (Orchis-Dark-Compact GTK + Tela-black-dark icons + DMZ cursor, falling back to Materia-dark + gnome icons when the designer extras are missing). Every graphical desktop also gets the UMO mark as the panel menu button, the UMO wallpaper and a matching Fastfetch config |
 | `--lean` | Remove docs/man/locales to save space |
 
 ---
@@ -149,13 +151,16 @@ umo login
 
 | Command | Description |
 |---------|-------------|
-| `umo start` | Start session with VNC & Audio |
+| `umo start` | Start session with VNC & Audio (add `--x11` for a Termux:X11 session instead of VNC) |
 | `umo stop` | Stop all services |
 | `umo status` | Show running status of services |
 | `umo login` | Login as root |
 | `umo user` | Login as default user |
+| `umo run "<cmd>"` | Run one command inside the container |
+| `umo backup [dir]` | Archive the Ubuntu rootfs |
 | `umo update` | Full update: pull latest UMO, re-apply saved settings (theme, apps, desktop), upgrade Ubuntu packages. `--scripts-only` for a fast refresh, `--no-upgrade` to skip the Ubuntu system upgrade |
 | `umo refresh` | Re-render the `umo` CLI, host and container scripts from the local tool copy (no git pull) |
+| `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
 | `umo version` | Display current UMO version |
 
 ### Inside Ubuntu
@@ -180,6 +185,9 @@ umo login
 ```bash
 # Remove Ubuntu rootfs and all UMO files
 rm -rf ~/umo-ubuntu ~/.umo ~/umo-*.sh
+
+# Or the clean way
+umo uninstall
 ```
 
 ---

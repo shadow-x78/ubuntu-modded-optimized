@@ -2,7 +2,7 @@
 
 # استكشاف الأخطاء وإصلاحها - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.16.13-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -25,6 +25,8 @@
 - [المتصفح الافتراضي يفشل بخطأ "Input/Output Error"](#default-browser)
 - [htop يفتح ويغلق مباشرة](#htop-instant-close)
 - [شريط Plank بحواف حادة](#plank-square-edges)
+- [بانر الطرفية يظهر بفن # (أو رموز مشوهة)](#terminal-art)
+- [زر القائمة يعرض الأيقونة الخطأ](#menu-icon)
 - [لا يوجد صوت داخل proot](#no-audio)
 - [systemctl يفشل](#systemctl)
 - [شاشة سوداء أو VNC لا يتصل](#black-screen)
@@ -134,7 +136,41 @@ htop
 
 **السبب:** ليست مشكلة تثبيت - بل هذا سلوك plank نفسه. رسّام plank يفرض تصفير كل انحناءات الزوايا عندما لا يعمل أي compositor (في `Theme.vala` الخاص به: `if (!is_composited()) top_radius = bottom_radius = 0.0;`)، و UMO يشغّل سطح المكتب بدون compositor عمدا لأن تركيب كل إطار هو أثقل تكلفة لكل إطار على معالج الهاتف تحت VNC (راجع [VNC بطيء أو يتجمد](#vnc-slow)). سمة الشريط مطبقة فعلا - الألوان والحواشي ومؤشر التطبيقات - لكن التقوّس لا يمكن رسمه.
 
-**الحل:** لا شيء مطلوب؛ هذا هو السلوك المقصود. وإن كنت تفضّل الحواف المدورة على سرعة VNC، فعّل الـ compositor بنفسك داخل سطح المكتب (الإعدادات ← تحسينات مدير النوافذ ← Compositor) - فالسمة تحمل `TopRoundness=18` وسيستدير الشريط لحظة عمل الـ compositor.
+**الحل:** لا شيء مطلوب؛ هذا هو السلوك المقصود (موثّق في سجل التثبيت منذ v4.17.0 - سطر النجاح لم يعد يعد بتقوّس لا يستطيع تسليمه). وإن كنت تفضّل الحواف المدورة على سرعة VNC، فعّل الـ compositor بنفسك داخل سطح المكتب (الإعدادات ← تحسينات مدير النوافذ ← Compositor) - فالسمة تحمل `TopRoundness=18` وسيستدير الشريط لحظة عمل الـ compositor.
+
+---
+
+<a id="terminal-art"></a>
+## 🖥️ بانر الطرفية يظهر بفن # (أو رموز مشوهة)
+
+**السبب:** بانر UMO (شعار half-block) يحتاج طرفية UTF-8. على الطرفيات غير UTF-8 كل المواقع ترجع تلقائياً إلى نسخة ASCII بحرف `#` - هذا هو الـ fallback المقصود وليس علة. أما الرموز المشوهة (`�`، `â–`) فتعني أن الطرفية تفك بايتات UTF-8 كترميز آخر (locale بحرف `C`، أو تطبيق عارض يفترض ترميزاً قديماً).
+
+**الحل:**
+
+```bash
+# افحص الـ locale داخل Termux
+locale
+
+# فرض UTF-8
+echo 'export LANG=en_US.UTF-8' >> ~/.bashrc && source ~/.bashrc
+```
+
+لفرض نسخة ASCII حتى على طرفية UTF-8 (مثلاً داخل السجلات أو CI): `UMO_ASCII=1 umo start`.
+
+---
+
+<a id="menu-icon"></a>
+## 🔘 زر القائمة يعرض الأيقونة الخطأ
+
+**السبب:** زر قائمة whiskermenu في XFCE يشير إلى `/usr/share/umo/brand/umo.png` (شعار UMO، منذ v4.17.1). حاوية قديمة لا تزال تحمل شعار Ubuntu السابق، أو ملف الشعار مفقود بعد تحديث جزئي.
+
+**الحل:** أعد نشر الأيقونة وأعد توجيه الزر (كلاهما يحدث مع `umo update`؛ وبداية جلسة VNC تفرض ذلك عند كل إقلاع أيضاً):
+
+```bash
+umo update
+```
+
+**التحقق:** داخل الحاوية، `ls /usr/share/umo/brand/umo.png` يجب أن يوجد، والزر يعرض شعار UMO (حلقة كاملة + ثلاثة رؤوس + شيفرون مركزي).
 
 ---
 
