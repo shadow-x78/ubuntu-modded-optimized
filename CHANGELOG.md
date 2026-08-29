@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.1] - 2026-08-29
+
+### 🎨 Changed
+
+- **The banner is `mark │ UMO` with all three elements the same height and on the same rows:** the v4.18.0 layout paired the mark with a scattered block-glyph wordmark; the banner is now the 22-column circle-of-friends mark, a space, the vertical rule, a space, and a 30-column `UMO` wordmark - 55 columns, 11 lines, every line exactly 55 chars, and the mark, rule and wordmark all span the full 11 rows together. The wordmark is drawn analytically (a 30x22 pixel grid packed into 11 half-block rows - no more 6-row letters floating mid-height); the ASCII fallback is the same layout with `#` outlines and a plain `|` rule. All six banner sites (the lib banner, both `umo start` paths, `umo stop`, the CLI header, the in-container bashrc) rebuilt together in both modes.
+
+### 🗑️ Removed
+
+- **The marketing-style logo sections from the documentation:** the "The UMO Mark" section and its surface table (repository header / terminal banners / desktop menu button) are gone from both READMEs along with their ToC entries, the "Brand Assets" section is gone from CONTRIBUTING.md (the PR template's functional banner-check checklist line stays), and `umo credit` drops its trailing design-story line - the docs now say what the tool does, not where its logo lives.
+
+- **One unused function:** `umo_log_run` in `lib/core-ansi.sh` - defined, never called anywhere; dropped in the dead-code reference pass. Zero other unused functions, variables or files found.
+
+### 🐛 Fixed
+
+- **The last mid-code comment:** `bin/umo-cli`'s login guard carried a stray comment - the only comment left inside any code file after the v4.16.13 strip; removed. Config files (`.conf`, `.ini`, XML, JSONC, `.tmpl`) keep their box-style comments untouched.
+
 ## [v4.18.0] - 2026-08-29
 
 ### ✨ Added

@@ -139,14 +139,6 @@ umo_log_step()  {
     fi
 }
 
-umo_log_run() {
-    if [ "$UMO_GLYPH_SUPPORT" -eq 1 ] 2>/dev/null; then
-        printf "  %b%s%b  %s%s\n" "$UMO_COLOR_PRIMARY" "$UMO_G_STEP" "$UMO_NC" "$(umo_log__time)" "$*"
-    else
-        printf "  %b%s%b  %s%s\n" "$UMO_B_CYAN" "$UMO_G_STEP" "$UMO_NC" "$(umo_log__time)" "$*"
-    fi
-}
-
 umo_log_file() {
     _msg="$1"
     _logdir="${UMO_LOG_DIR:-$HOME/.umo/logs}"
@@ -292,41 +284,36 @@ umo_banner_full() {
     _cols="${1:-$(umo_term_cols)}"
     _cols="${_cols:-80}"
 
-    # UMO banner: the logo mark (circle-of-friends ring + chevron) beside the
-    # UMO wordmark, split by a vertical rule. Every line is exactly 40 chars
-    # (uniform, leading spaces preserved) so the whole banner centers as one
-    # block. Falls back to ASCII on non-UTF-8 or UMO_ASCII=1.
-    _l1='        ▄▄██▄▄         │                '
-    _l2='    ▄▄██████████▄▄     │                '
-    _l3='   ███▀▄▄      ▀███    │                '
-    _l4='  ██▀  ███▄      ▀██   │ █   █ █ █ █   █'
-    _l5=' ███     ▀███▄    ███  │ █   █ █ █ █ █ █'
-    _l6=' ██        ████    ██  │ █   █ █ █ █ █ █'
-    _l7=' ███▄    ▄███▀   ▄███  │ █ █ █ █ █ █ █ █'
-    _l8=' ████▄ ███▀     ▄████  │  █ █   █ █  █ █'
-    _l9=' ▀▀███▄▀▀      ▄███▀▀  │                '
-    _l10='    ▀▀████▄▄████▀▀     │                '
-    _l11='        ▀▀▀▀▀▀         │                '
+    _l1='        ▄▄██▄▄         │ ██     ██ ███    ███ █████████'
+    _l2='    ▄▄██████████▄▄     │ ██     ██ ███    ███ █████████'
+    _l3='   ███▀▄▄      ▀███    │ ██     ██ ███    ███ ██    ██ '
+    _l4='  ██▀  ███▄      ▀██   │ ██     ██ ███    ███ ██    ██ '
+    _l5=' ███     ▀███▄    ███  │ ██     ██ ██████████ ██    ██ '
+    _l6=' ██        ████    ██  │ ██     ██ ██████████ ██    ██ '
+    _l7=' ███▄    ▄███▀   ▄███  │ ██     ██ ███ ██ ███ ██    ██ '
+    _l8=' ████▄ ███▀     ▄████  │ ██     ██ ███ ██ ███ ██    ██ '
+    _l9=' ▀▀███▄▀▀      ▄███▀▀  │ ██     ██ ███ ██ ███ ██    ██ '
+    _l10='    ▀▀████▄▄████▀▀     │ █████████ ███    ███ █████████'
+    _l11='        ▀▀▀▀▀▀         │ █████████ ███    ███ █████████'
 
-    # ASCII fallback: same layout, # blocks (UMO_ASCII=1 or non-UTF-8)
-    _a1='         ####          |                '
-    _a2='     ############      |                '
-    _a3='   ####         ###    |                '
-    _a4='  ###  ####      ###   | #   # # # #   #'
-    _a5=' ###     ####     ###  | #   # # # # # #'
-    _a6=' ##        ####    ##  | #   # # # # # #'
-    _a7=' ###     ####     ###  | # # # # # # # #'
-    _a8=' ##### ####     #####  |  # #   # #  # #'
-    _a9='  #####         ####   |                '
-    _a10='     ############      |                '
-    _a11='                       |                '
+    _a1='         ####          | ##     ## ###    ### #########'
+    _a2='     ############      | ##     ## ###    ### #########'
+    _a3='   ####         ###    | ##     ## ###    ### ##    ## '
+    _a4='  ###  ####      ###   | ##     ## ###    ### ##    ## '
+    _a5=' ###     ####     ###  | ##     ## ########## ##    ## '
+    _a6=' ##        ####    ##  | ##     ## ########## ##    ## '
+    _a7=' ###     ####     ###  | ##     ## ### ## ### ##    ## '
+    _a8=' ##### ####     #####  | ##     ## ### ## ### ##    ## '
+    _a9='  #####         ####   | ##     ## ### ## ### ##    ## '
+    _a10='     ############      | ######### ###    ### #########'
+    _a11='                       | ######### ###    ### #########'
 
     if [ "$UMO_GLYPH_SUPPORT" -ne 1 ] 2>/dev/null || [ -n "${UMO_ASCII:-}" ]; then
         _l1="$_a1"; _l2="$_a2"; _l3="$_a3"; _l4="$_a4"; _l5="$_a5"; _l6="$_a6"
         _l7="$_a7"; _l8="$_a8"; _l9="$_a9"; _l10="$_a10"; _l11="$_a11"
     fi
 
-    _logo_w=40
+    _logo_w=55
     _pad=$(( (_cols - _logo_w) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
 
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l1" "$UMO_NC"
@@ -342,7 +329,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l11" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.18.0}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.18.1}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

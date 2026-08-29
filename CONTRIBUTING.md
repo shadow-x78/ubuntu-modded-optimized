@@ -48,20 +48,6 @@ The tag push triggers the [release workflow](.github/workflows/release.yml), whi
 verifies the version against the tag, runs syntax checks, and attaches a tarball +
 SHA256 checksum to the GitHub release.
 
-## 🎨 Brand Assets (when touching visuals)
-
-The UMO mark has one geometry with three renderings - keep them in sync:
-
-- `assets/logo/umo-logo.svg` + the PNG set (repository header, READMEs)
-- `config/theme/icons/umo.svg` + `umo-*.png` (the desktop menu button / hicolor)
-- the terminal banner art in `lib/core-ansi.sh` and the five inline banner sites
-  (`bin/umo-start`, `bin/umo-stop`, `bin/umo-cli`, `modules/umo-proot.sh`)
-
-Every art line must be **exactly the same width** (22 chars in the current set,
-leading spaces preserved) - the lib banner centers the whole block, and any
-ragged line shears the circle. Verify both modes after editing: UTF-8
-(half-blocks) and `UMO_ASCII=1` (pure `#`).
-
 ---
 
 <div align="center">

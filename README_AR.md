@@ -6,7 +6,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.1-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -27,7 +27,6 @@
 - [ما هو UMO؟](#what-is-umo)
 - [لقطات الشاشة](#screenshots)
 - [بيئات سطح المكتب](#desktop-environments)
-- [شعار UMO](#umo-brand)
 - [البدء السريع](#quick-start)
 - [الأوامر](#commands)
 - [خيارات سطر الأوامر](#cli-options)
@@ -79,21 +78,6 @@
 جميع الواجهات الرسومية تحصل على نظام التصميم الكامل: سمة Orchis (المضغوطة)، أيقونات Tela، مؤشر DMZ، خطا Ubuntu SemiBold + FiraCode Nerd Mono، إعدادات Fastfetch جاهزة، وخلفية UMO - مطبقة على المستخدمَين **root و umo** معاً. اختر **الوضع الليلي** (Orchis-Dark-Compact + Tela-black-dark) أو **الوضع النهاري** (Orchis-Light-Compact + Tela) من قائمة المثبّت، أو عبر `--theme=umo-dark|umo-light`.
 
 **يشمل:** TigerVNC · جسر PulseAudio · Termux:X11 · محاكي systemctl عام · التحكم بالجلسات
-
----
-
-<a id="umo-brand"></a>
-## 🧭 شعار UMO
-
-شعار المشروع علامة مسطحة بلون واحد (#e9500e - برتقالي Ubuntu): حلقة أصدقاء Ubuntu لكنها **كاملة** - فالعلامة الأصلية ثلاثة أقواس مكسورة، وهذه دائرة مكتملة بالرؤوس الثلاثة (270/30/150°)، لأن *"كل قوس مكسور تم إصلاحه"* هي قصة UMO نفسها - مع شيفرون المثبِّت `❯` (الرمز الذي تطبعه كل خطوة تثبيت) في المركز.
-
-العلامة موجودة في كل مكان:
-
-| الموضع | أين تراها |
-|--------|-----------|
-| ترويسة المستودع | كلا README يفتحان بالشعار بدل بانر ASCII (`assets/logo/`) |
-| بانرات الطرفية | كل موقع بانر (المثبِّت، `umo start/stop`، ترويسة CLI، تسجيل الدخول داخل الحاوية) يرسم نفس الهندسة بفن half-block - مع نسخة ASCII بحرف `#` للطرفيات غير UTF-8 (`UMO_ASCII=1` لفرضها) |
-| زر قائمة سطح المكتب | زر whiskermenu في بانر XFCE يحمل شعار UMO (`/usr/share/umo/brand/umo.png`) وليس شعار Ubuntu - يُنشر عند التثبيت وعند `umo update` وكل بدء جلسة |
 
 ---
 
