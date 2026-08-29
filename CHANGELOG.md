@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.17.2] - 2026-08-29
+
+### 🐛 Fixed
+- **The terminal logo art is properly sized at last - full width, exact aspect, real edges:** three concrete defects made the v4.17.1 art look off. First, the mark only spanned 23 of 30 columns (77% width) because the ring geometry left a 46-unit margin on each side of the viewBox - the new geometry fills the grid completely (head outer edge at the canvas edge, ring band 176..232 of 0..512), so the mark now occupies 27.2 of 30 columns and 27.2 display-widths of height: a measured, aspect-exact circle on any 1:2-character terminal. Second, the ASCII fallback was squashed +25% wide - its cells were 17 units across but 42 units tall (2.5:1), so the circle rendered as a wide oval; the ASCII grid is now 30x15 with 2:1 cells, the same measured-round proportions as the UTF-8 half-block grid. Third, the installer's lib banner destroyed the circle's taper: every art line was lstrip-ed and then given one identical pad, which shifted each line's content to the same starting column and turned the left rim into a straight edge; the lines now carry uniform 30-char widths with their leading spaces intact, and the banner pads the whole block once - verified visually under a PTY, the left-edge sequence reads 12-8-5-4-3-2-1-1-1-2-2-2-5-8-13, a true circle taper. The chevron also grows to fill the void properly (reach 158 vs a 176-unit void at stroke 56, still optically centered on 256) and the head/ring/void relationships keep their SVG values (heads merge into the ring by 24 units vs the SVG's 23). Both renderings regenerated from the same tuned geometry and swapped into all six banner sites (lib, both `umo start` paths, `umo stop`, the CLI header, the in-container bashrc) - the inline sites grew from 12 to 15 lines for the fuller mark - and every path was re-verified live in both UTF-8 and ASCII modes: 15 lines, measured round, block-centered, zero leftovers of the old art.
+
 ## [v4.17.1] - 2026-08-29
 
 ### 🐛 Fixed
