@@ -132,7 +132,7 @@ _run_de_installer() {
         printf "\n"
         umo_log_err "CRITICAL: $_label Core Component '$_probe' Missing - Desktop Would Be Empty"
         umo_log_info "Evidence Kept In-Container: /root/install-de.log, /root/install-de.last.sh"
-        umo_log_info "Real Apt Errors: umo login -c \"tail -n 30 /var/log/apt/term.log\""
+        umo_log_info "Real Apt Errors: umo run \"tail -n 30 /var/log/apt/term.log\""
         umo_log_info "Repair Inside The Container: umo login, then: $_repair, then: umo stop && umo start"
     fi
     mv -f "${UMO_INSTALL_DIR}/root/install-de.sh" "${UMO_INSTALL_DIR}/root/install-de.last.sh" 2>/dev/null || true

@@ -207,5 +207,5 @@ if [ -z "$_missing" ]; then
 fi
 
 _fail "Designer Extras Missing: $_missing"
-_warn "Retry Later With: umo login -c 'umo-install-extras $_MODE'"
+_warn "Retry Later With: umo run 'umo-install-extras $_MODE'"
 exit 1

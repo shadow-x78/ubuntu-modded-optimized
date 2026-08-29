@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.3] - 2026-08-29
+
+### 🐛 Fixed
+
+- **The banner is truly centered now - and the wordmark, rule and mark all share the exact same height:** with 6 rows of letters inside an 11-row banner the letters sat 2-above/3-below optical center and the vertical rule ran taller than the wordmark block, visibly off-center next to the mark. The banner is now 12 rows (57 columns, every line exactly 57 chars): the mark is regenerated as a uniform 24x24-pixel circle (the v4.17.2-style analytic scale - 3x3 subsamples per output pixel from the 22x22 bitmap, so the ring stays round), packed into 12 half-block rows, and the classic `UMO` letters now have exactly 3 blank rows above and 3 below - dead-center vertically - with the spaced rule `mark │ UMO` spanning the same 12 rows as the mark. All six banner sites rebuilt together in both modes (half-block UTF-8 and `#` ASCII).
+
+- **`umo start`'s VNC failure hint pointed at a command that no longer exists:** since v4.18.0 `umo login` is interactive-only and commands go through `umo run`, but the VNC failure screen still said `umo login -c "apt install -y tigervnc-standalone-server"` - a hint that now exits with a usage error instead of installing anything. It says `umo run "apt install -y tigervnc-standalone-server"`. Six more stale `umo login -c` hints across the CLI, the apps/desktop modules and the in-container extras installer all move to `umo run` the same way (a repo-wide grep finds zero `umo login -c` left outside the historical changelog). The failure diagnostics also got sharper: the one-line-log case (starter printed only the step line, then died - the phantom-killer signature) is detected explicitly and named, and the log tail shown grows from 8 to 15 lines.
+
 ## [v4.18.2] - 2026-08-29
 
 ### 🎨 Changed

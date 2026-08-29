@@ -247,14 +247,14 @@ _run_installer() {
             ;;
         MISSING=*)
             umo_log_warn "$_label Finished, Missing Packages: ${_status#MISSING=}"
-            umo_log_info "Diagnose: umo login -c \"tail -40 /root/install-apps.log\""
+            umo_log_info "Diagnose: umo run \"tail -40 /root/install-apps.log\""
             ;;
         *)
             if [ "$_rc" -eq 0 ]; then
                 umo_log_warn "$_label Finished With Warnings"
             else
                 umo_log_warn "$_label Installation Failed (Code $_rc)"
-                umo_log_info "Diagnose: umo login -c \"tail -40 /root/install-apps.log\""
+                umo_log_info "Diagnose: umo run \"tail -40 /root/install-apps.log\""
             fi
             ;;
     esac
