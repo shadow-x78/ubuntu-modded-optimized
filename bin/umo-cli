@@ -62,19 +62,19 @@ _umo_dp() {
 _umo_header() {
     printf "\n"
     if [ "$_UMO_GLYPH" -eq 1 ]; then
-        _l1='             ▄██▄';        _l2='         ▄▄████████▄▄'
-        _l3='       ▄███▀▀████▀▀███▄';  _l4='     ▄███▀▄█▄▄      ▀███▄'
-        _l5='    ▄██▀  ▀████▄▄     ▀██▄'; _l6='    ███     ▀▀████▄    ███'
-        _l7='    ███        █████   ███'; _l8='    ███▄    ▄▄████▀   ▄███'
-        _l9='    █████ ▄████▀▀    █████'; _l10='    █████▄▀██▀      ▄█████'
-        _l11='     ▀▀▀███▄▄▄▄▄▄▄▄███▀▀▀'; _l12='         ▀▀████████▀▀'
+        _l1='            ▄████▄';        _l2='        ▄▄██████████▄▄'
+        _l3='      ▄████▀▀████▀▀████▄';  _l4='     ████▀ ▄█▄      ▀████'
+        _l5='    ███▀   ▀███▄      ▀███'; _l6='    ███       ▀███▄    ███'
+        _l7='    ███         ████   ███'; _l8='    ███▄      ▄███▀   ▄███'
+        _l9='   ▄█████  ▄███▀     █████▄'; _l10='   ▀█████▄ ▀█▀      ▄█████▀'
+        _l11='     ▀▀████▄▄▄▄▄▄▄▄████▀▀'; _l12='        ▀▀██████████▀▀'
     else
-        _l1='             ####';          _l2='         ############'
-        _l3='       ################';    _l4='     #########      #####'
-        _l5='    ####  #######     ####'; _l6='    ###     #######    ###'
-        _l7='    ###        #####   ###'; _l8='    ####    #######   ####'
-        _l9='    ##### #######    #####'; _l10='    ##########      ######'
-        _l11='     ####################';  _l12='         ############'
+        _l1='            ######';          _l2='        ##############'
+        _l3='      ##################';    _l4='     ##### ###      #####'
+        _l5='    ####   #####      ####'; _l6='    ###       #####    ###'
+        _l7='    ###         ####   ###'; _l8='    ####      #####   ####'
+        _l9='   ######  #####     ######'; _l10='   ####### ###      #######'
+        _l11='     ####################';  _l12='        ##############'
     fi
     for _ln in "$_l1" "$_l2" "$_l3" "$_l4" "$_l5" "$_l6" "$_l7" "$_l8" "$_l9" "$_l10" "$_l11" "$_l12"; do
         printf "  %b%s%b\n" "$_UMO_PRI" "$_ln" "$_UMO_NC"
@@ -472,25 +472,25 @@ UMOFALKON
     _ico_src="$_UMO_REPO_DIR/config/theme/icons"
     if [ -d "$_ico_src" ]; then
         _ico_hicolor="$_ct_inst_dir/usr/share/icons/hicolor"
-        if [ -f "$_ico_src/ubuntu.svg" ]; then
+        if [ -f "$_ico_src/umo.svg" ]; then
             mkdir -p "$_ico_hicolor/scalable/apps" 2>/dev/null || true
-            cp -f "$_ico_src/ubuntu.svg" "$_ico_hicolor/scalable/apps/ubuntu.svg" 2>/dev/null || true
+            cp -f "$_ico_src/umo.svg" "$_ico_hicolor/scalable/apps/umo.svg" 2>/dev/null || true
         fi
         for _ico_size in 48 64 96 128 256; do
-            [ -f "$_ico_src/ubuntu-$_ico_size.png" ] || continue
+            [ -f "$_ico_src/umo-$_ico_size.png" ] || continue
             mkdir -p "$_ico_hicolor/${_ico_size}x${_ico_size}/apps" 2>/dev/null || true
-            cp -f "$_ico_src/ubuntu-$_ico_size.png" "$_ico_hicolor/${_ico_size}x${_ico_size}/apps/ubuntu.png" 2>/dev/null || true
+            cp -f "$_ico_src/umo-$_ico_size.png" "$_ico_hicolor/${_ico_size}x${_ico_size}/apps/umo.png" 2>/dev/null || true
         done
-        if [ -f "$_ico_src/ubuntu-256.png" ]; then
+        if [ -f "$_ico_src/umo-256.png" ]; then
             mkdir -p "$_ct_inst_dir/usr/share/umo/brand" 2>/dev/null || true
-            cp -f "$_ico_src/ubuntu-256.png" "$_ct_inst_dir/usr/share/umo/brand/ubuntu.png" 2>/dev/null || true
+            cp -f "$_ico_src/umo-256.png" "$_ct_inst_dir/usr/share/umo/brand/umo.png" 2>/dev/null || true
         fi
-        _umo_ok "Ubuntu Brand Icon Deployed"
+        _umo_ok "UMO Brand Icon Deployed"
     fi
 
     _wm_defaults_dir="$_ct_inst_dir/etc/xdg/xfce4/whiskermenu"
     if mkdir -p "$_wm_defaults_dir" 2>/dev/null; then
-        printf 'button-icon=/usr/share/umo/brand/ubuntu.png\n' \
+        printf 'button-icon=/usr/share/umo/brand/umo.png\n' \
             > "$_wm_defaults_dir/defaults.rc" 2>/dev/null || true
     fi
     _panel_tpl_src="$_UMO_REPO_DIR/config/theme/xfce4/xfce4-panel.xml"

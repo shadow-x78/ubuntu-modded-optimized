@@ -441,7 +441,7 @@ PLANKDESK
 
     _wm_defaults_dir="${UMO_INSTALL_DIR}/etc/xdg/xfce4/whiskermenu"
     if mkdir -p "$_wm_defaults_dir" 2>/dev/null; then
-        printf 'button-icon=/usr/share/umo/brand/ubuntu.png\n' \
+        printf 'button-icon=/usr/share/umo/brand/umo.png\n' \
             > "$_wm_defaults_dir/defaults.rc" 2>/dev/null || true
     fi
 
@@ -546,14 +546,14 @@ umo_theme_apply_brand_icon() {
     [ -d "$_bi_src_dir" ] || return 0
 
     _bi_hicolor="$UMO_INSTALL_DIR/usr/share/icons/hicolor"
-    if [ -f "$_bi_src_dir/ubuntu.svg" ]; then
+    if [ -f "$_bi_src_dir/umo.svg" ]; then
         mkdir -p "$_bi_hicolor/scalable/apps" 2>/dev/null || true
-        cp -f "$_bi_src_dir/ubuntu.svg" "$_bi_hicolor/scalable/apps/ubuntu.svg" 2>/dev/null || true
+        cp -f "$_bi_src_dir/umo.svg" "$_bi_hicolor/scalable/apps/umo.svg" 2>/dev/null || true
     fi
     for _bi_size in 48 64 96 128 256; do
-        [ -f "$_bi_src_dir/ubuntu-$_bi_size.png" ] || continue
+        [ -f "$_bi_src_dir/umo-$_bi_size.png" ] || continue
         mkdir -p "$_bi_hicolor/${_bi_size}x${_bi_size}/apps" 2>/dev/null || true
-        cp -f "$_bi_src_dir/ubuntu-$_bi_size.png" "$_bi_hicolor/${_bi_size}x${_bi_size}/apps/ubuntu.png" 2>/dev/null || true
+        cp -f "$_bi_src_dir/umo-$_bi_size.png" "$_bi_hicolor/${_bi_size}x${_bi_size}/apps/umo.png" 2>/dev/null || true
     done
     if [ ! -f "$_bi_hicolor/index.theme" ]; then
         {
@@ -578,13 +578,13 @@ umo_theme_apply_brand_icon() {
         } > "$_bi_hicolor/index.theme" 2>/dev/null || true
     fi
 
-    if [ -f "$_bi_src_dir/ubuntu-256.png" ]; then
+    if [ -f "$_bi_src_dir/umo-256.png" ]; then
         mkdir -p "$UMO_INSTALL_DIR/usr/share/umo/brand" 2>/dev/null || true
-        cp -f "$_bi_src_dir/ubuntu-256.png" "$UMO_INSTALL_DIR/usr/share/umo/brand/ubuntu.png" 2>/dev/null || true
+        cp -f "$_bi_src_dir/umo-256.png" "$UMO_INSTALL_DIR/usr/share/umo/brand/umo.png" 2>/dev/null || true
     fi
 
-    if [ -f "$_bi_hicolor/scalable/apps/ubuntu.svg" ] || [ -f "$UMO_INSTALL_DIR/usr/share/umo/brand/ubuntu.png" ]; then
-        umo_log_ok "Ubuntu Brand Icon Installed (hicolor + /usr/share/umo/brand/ubuntu.png)"
+    if [ -f "$_bi_hicolor/scalable/apps/umo.svg" ] || [ -f "$UMO_INSTALL_DIR/usr/share/umo/brand/umo.png" ]; then
+        umo_log_ok "UMO Brand Icon Installed (hicolor + /usr/share/umo/brand/umo.png)"
     fi
     return 0
 }

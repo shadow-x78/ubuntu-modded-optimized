@@ -95,7 +95,6 @@ BODY
     else
         umo_log_warn "install-vnc.sh Has Syntax Issues"
     fi
-    umo_log_run "Installing TigerVNC..."
     if [ ! -x "$UMO_LOGIN_SH" ]; then
         umo_log_warn "umo-login.sh Not Found/Executable - VNC Install Skipped"
         rm -f "${UMO_INSTALL_DIR}/root/install-vnc.sh" 2>/dev/null || true

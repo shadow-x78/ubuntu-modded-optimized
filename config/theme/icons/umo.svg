@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- ─────────────────────────────────────────────
+       UMO - Ubuntu Modded Optimized
+       Project Logo
+       ─────────────────────────────────────────────
+       The circle of friends, but whole - the Ubuntu
+       ring with every broken arc repaired (the UMO
+       story), with the installer chevron (every UMO
+       step prints it) as the hero in the center.
+       Same flat single-color language as the
+       original Ubuntu brand mark it replaces.
+       One color, two role classes (.umo-f fill,
+       .umo-s stroke). This is the desktop menu
+       icon (whiskermenu button) - installed to
+       hicolor as umo.svg + /usr/share/umo/brand.
+       ───────────────────────────────────────────── -->
+  <defs>
+    <style>.umo-f{fill:#e9500e;}.umo-s{fill:none;stroke:#e9500e;}</style>
+  </defs>
+  <circle class="umo-s" cx="256" cy="256" r="168" stroke-width="38"/>
+  <circle class="umo-f" cx="256.00" cy="88.00" r="42"/>
+  <circle class="umo-f" cx="401.49" cy="340.00" r="42"/>
+  <circle class="umo-f" cx="110.51" cy="340.00" r="42"/>
+  <path class="umo-s" d="M 199 170 L 313 256 L 199 342" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

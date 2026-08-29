@@ -121,7 +121,6 @@ _run_de_installer() {
     _probe="$2"
     _repair="$3"
     chmod +x "${UMO_INSTALL_DIR}/root/install-de.sh"
-    umo_log_run "Installing $_label..."
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-de.sh" </dev/null || _rc=$?
     if [ "$_rc" -eq 0 ]; then

@@ -166,7 +166,7 @@ if [ -x /usr/bin/gtk-update-icon-cache ] && [ -d /usr/share/icons/hicolor ]; the
     _log "Hicolor Icon Cache Refreshed"
 fi
 
-_bi_icon="/usr/share/umo/brand/ubuntu.png"
+_bi_icon="/usr/share/umo/brand/umo.png"
 if [ -f "$_bi_icon" ]; then
     _bi_dr_dir=/etc/xdg/xfce4/whiskermenu
     if mkdir -p "$_bi_dr_dir" 2>/dev/null; then

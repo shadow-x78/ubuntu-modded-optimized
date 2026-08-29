@@ -238,7 +238,6 @@ _run_installer() {
         printf '%s\n' 'fi'
     } > "$_script"
     chmod +x "$_script"
-    umo_log_run "Installing $_label..."
     _rc=0
     "$UMO_LOGIN_SH" -c "bash /root/install-apps.sh" </dev/null || _rc=$?
     _status=$("$UMO_LOGIN_SH" -c "cat /root/.umo-apps-status 2>/dev/null" </dev/null 2>/dev/null || true)

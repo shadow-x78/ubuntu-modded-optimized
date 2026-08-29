@@ -294,33 +294,33 @@ umo_banner_full() {
 
     # UMO logo mark - the real logo geometry (circle-of-friends ring with the
     # installer chevron), rendered as half-block terminal art. Falls back to
-    # solid blocks when half-blocks are unavailable, and to ASCII # on request.
-    _l1='             ▄██▄            '
-    _l2='         ▄▄████████▄▄        '
-    _l3='       ▄███▀▀████▀▀███▄      '
-    _l4='     ▄███▀▄█▄▄      ▀███▄    '
-    _l5='    ▄██▀  ▀████▄▄     ▀██▄  '
-    _l6='    ███     ▀▀████▄    ███  '
-    _l7='    ███        █████   ███  '
-    _l8='    ███▄    ▄▄████▀   ▄███  '
-    _l9='    █████ ▄████▀▀    █████  '
-    _l10='    █████▄▀██▀      ▄█████  '
-    _l11='     ▀▀▀███▄▄▄▄▄▄▄▄███▀▀▀   '
-    _l12='         ▀▀████████▀▀      '
+    # ASCII blocks when glyphs are unavailable, or on request (UMO_ASCII=1).
+    _l1='            ▄████▄'
+    _l2='        ▄▄██████████▄▄'
+    _l3='      ▄████▀▀████▀▀████▄'
+    _l4='     ████▀ ▄█▄      ▀████'
+    _l5='    ███▀   ▀███▄      ▀███'
+    _l6='    ███       ▀███▄    ███'
+    _l7='    ███         ████   ███'
+    _l8='    ███▄      ▄███▀   ▄███'
+    _l9='   ▄█████  ▄███▀     █████▄'
+    _l10='   ▀█████▄ ▀█▀      ▄█████▀'
+    _l11='     ▀▀████▄▄▄▄▄▄▄▄████▀▀'
+    _l12='        ▀▀██████████▀▀'
 
     # ASCII fallback: same geometry, # blocks (UMO_ASCII=1 or non-UTF-8)
-    _a1='             ####          '
-    _a2='         ############      '
-    _a3='       ################    '
-    _a4='     #########      #####  '
-    _a5='    ####  #######     #### '
-    _a6='    ###     #######    ### '
-    _a7='    ###        #####   ### '
-    _a8='    ####    #######   #### '
-    _a9='    ##### #######    ##### '
-    _a10='    ##########      ###### '
-    _a11='     ####################  '
-    _a12='         ############     '
+    _a1='            ######'
+    _a2='        ##############'
+    _a3='      ##################'
+    _a4='     ##### ###      #####'
+    _a5='    ####   #####      ####'
+    _a6='    ###       #####    ###'
+    _a7='    ###         ####   ###'
+    _a8='    ####      #####   ####'
+    _a9='   ######  #####     ######'
+    _a10='   ####### ###      #######'
+    _a11='     ####################'
+    _a12='        ##############'
 
     if [ "$UMO_GLYPH_SUPPORT" -ne 1 ] 2>/dev/null || [ -n "${UMO_ASCII:-}" ]; then
         _l1="$_a1"; _l2="$_a2"; _l3="$_a3"; _l4="$_a4"; _l5="$_a5"; _l6="$_a6"
@@ -344,7 +344,7 @@ umo_banner_full() {
     printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "${_l12#"${_l12%%[! ]*}"}" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.17.0}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.17.1}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

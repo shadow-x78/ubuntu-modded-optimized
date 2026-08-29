@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.17.1] - 2026-08-29
+
+### 🐛 Fixed
+- **The redundant "Installing Base utilities..." line under every install step heading is gone:** the apps, desktop and VNC installers all printed a chevron run-line (`❯ Installing Base utilities...`) that said the same thing as the step heading right above it (`▌ Install Base Utilities`) and then streamed the container's own sub-steps below (`❯ Installing Core Utilities...`, `❯ Preparing XFCE4 Package Database...`) - one duplicated line of noise per installer with zero information. The line is removed from all three flow owners: the apps set installer (`modules/umo-apps.sh`), the DE installer (`modules/umo-desktop.sh`) and TigerVNC (`modules/umo-vnc.sh`); the heading is now immediately followed by the container's real sub-steps, exactly like the fastfetch/browser steps that never had a filler line.
+
+### 🎨 Changed
+- **The terminal logo art is redrawn at real resolution - the same mark, properly rasterized:** the v4.17.0 half-block art was sampled from a small render and read muddy at 30 columns - the ring wobbled, the three heads blurred into the rim and the chevron was a two-cell smear. The art is now generated analytically (exact per-cell coverage of the ring, the three head circles and the chevron segments, 4x4 subsamples per cell) with stroke weights tuned for the 30-column block grid: ring 56 units, heads 52, chevron 44 - proportions that keep the SVG's exact relationships (heads merge into the ring by 24 units vs the SVG's 23; chevron reach 127 vs a 142-unit void) while making every element read clearly. The result is a bolder, rounder mark (26x24 cells vs the old 22x22, 12 lines): crisp rim, three visible heads, a chevron with an actual point. Both renderings (half-block UTF-8 and the pure-ASCII `#` fallback) were regenerated from the same tuned geometry and swapped into all six banner sites (the lib banner, both `umo start` paths, `umo stop`, the CLI header and the in-container bashrc), and every path was re-verified live in both modes.
+- **The desktop menu button now wears the UMO logo - the Ubuntu mark is fully retired:** the whiskermenu button icon (the panel's leftmost button) pointed at the Ubuntu circle-of-friends raster (`/usr/share/umo/brand/ubuntu.png`) since v4.16.4. The brand asset set in `config/theme/icons/` is replaced wholesale - `umo.svg` + `umo-{48,64,96,128,256}.png`, the UMO mark rendered from the project logo geometry - and every consumer now installs and points at the UMO names: the theme module's hicolor/brand deployment and its `defaults.rc` write, the `umo update`/`refresh` deployment in the CLI, the VNC session-start icon enforcement (`config/container/umo-startvnc`), the session-boot desktop init and the shipped `xfce4-panel.xml` template all use `umo.svg`/`umo.png`/`/usr/share/umo/brand/umo.png`, with the log lines renamed to match (`UMO Brand Icon Installed/Deployed`). No Ubuntu-branded asset remains anywhere in the tree.
+
 ## [v4.17.0] - 2026-08-29
 
 ### ✨ Added

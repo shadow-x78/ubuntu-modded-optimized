@@ -79,7 +79,7 @@ _cleanup_locks
 mkdir -p /tmp/.X11-unix 2>/dev/null || true
 chmod 1777 /tmp/.X11-unix 2>/dev/null || true
 
-_UM_ICON="/usr/share/umo/brand/ubuntu.png"
+_UM_ICON="/usr/share/umo/brand/umo.png"
 _UM_ICON_OK=1
 [ -f "$_UM_ICON" ] || _UM_ICON_OK=0
 if [ "$_UM_ICON_OK" = "0" ]; then
