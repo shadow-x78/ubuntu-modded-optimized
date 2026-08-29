@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.0] - 2026-08-29
+
+### ✨ Added
+- **`umo credit` - the project and developer introduction:** a new command (`credit`, aliases `credits`/`about`) that prints the version banner followed by the project line (what UMO is, in one sentence), the developer block (shadow-x78 - design, engineering, everything - with GitHub and repo links), the built-with stack, the license, and the mark's design story (the circle of friends, whole - every broken arc repaired - with the installer chevron at its center). Listed in `umo help` under General and in both README command tables.
+- **The banner is now the logo mark beside the UMO wordmark - `mark │ UMO`:** every banner site previously showed the logo alone; the layout is now the 22-column circle-of-friends mark on the left, a vertical rule, and a 15-column five-row `UMO` wordmark vertically centered beside it (40 columns total, 11 lines, every line exactly 40 chars so the whole banner centers as one block at any terminal width - the pipe column verified aligned under a PTY). The ASCII fallback renders the same layout with `#` blocks and a plain `|` rule. The lib banner carries it; the standalone sites keep their compact mark.
+
+### 🔒 Changed
+- **`umo login` is an interactive root shell only - commands move to `umo run`:** login used to pass any arguments through to bash (`umo login -c "apt upgrade"` worked), blurring the line between "open a shell" and "run a command". Login now takes no arguments: calling it with any argument exits with a usage error that points at the intended path (`umo run "<command>"`). `umo run` remains the one-command path (it already runs via the wrapper's `-c`). Both READMEs and both INSTALL guides document the split.
+
+### 🗑️ Removed (documentation)
+- **The docs lost their dead weight - everything that duplicated, padded or said nothing is gone:** SECURITY.md drops the empty Hall of Fame ("None yet - be the first!"), the academic Security Audit section (a restatement of the scope paragraph as bullet lists) and the separate Disclosure Policy section (5-step list + timeline tables duplicating the reporting section) - reporting, timeline and disclosure merge into one tight section, and the recommendations collapse from five numbered items to a single paragraph. The supported-versions table now reads 4.18.x. CONTRIBUTING.md merges the three generic sections (Branch Naming, Commit Convention, Code Style, Pull Requests - four headings of universally-known conventions) into one "Day-to-Day Work" block, keeping the release process and Brand Assets sections that are actually UMO-specific. Both INSTALL guides drop their full command tables (which had become a stale copy of the README's) in favor of a five-line essentials block plus a link to the README's authoritative table. Every remaining section earns its place; all anchors re-verified programmatically after the trim (zero broken ToC links across all seven documents).
+
 ## [v4.17.3] - 2026-08-29
 
 ### 🎨 Changed

@@ -2,40 +2,11 @@
 
 Contributions to UMO are welcome. This document describes the development workflow.
 
-## 🌿 Branch Naming
+## 🌿 Day-to-Day Work
 
-Use the following prefixes for branches:
-
-- `feature/` - new features
-- `fix/` - bug fixes
-- `docs/` - documentation changes
-- `chore/` - maintenance tasks
-
-Example: `feature/lxqt-support`
-
-## 💬 Commit Convention
-
-Commit messages follow this format:
-
-```text
-umo | <type>: <description>
-umo | vX.Y.Z | <type>: <description>
-```
-
-- `<type>` is one of `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
-- `vX.Y.Z` is the current version. Release commits use it.
-- A release ships as ONE commit: the pending feature work plus the version bump,
-  tagged `vX.Y.Z` (there is no separate `release:` bump commit).
-
-Example: `umo | v4.0.9 | fix: correct dpkg lock cleanup on exit trap`
-
-## 💅 Code Style
-
-UMO is written in **POSIX sh** - no bashisms.
-
-- Every shell script must pass `sh -n` (syntax check).
-- Run `shellcheck -s sh` before committing; no new warnings allowed.
-- File headers follow the UMO style:
+- **Branches:** `feature/`, `fix/`, `docs/`, `chore/` prefixes (e.g. `feature/lxqt-support`), branched from `main`.
+- **Commits:** `umo | <type>: <description>` for work, `umo | vX.Y.Z | <type>: <description>` for release commits. Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
+- **Style:** POSIX `sh` - no bashisms. Every script must pass `sh -n`; run `shellcheck -s sh` before committing (no new warnings). Headers follow the UMO style:
 
 ```sh
 #!/bin/sh
@@ -43,13 +14,7 @@ UMO is written in **POSIX sh** - no bashisms.
 # https://github.com/shadow-x78/ubuntu-modded-optimized
 ```
 
-## ✅ Pull Requests
-
-1. Fork the repo and create a branch from `main`.
-2. Make sure `sh -n` and `shellcheck` pass on all changed scripts.
-3. Describe your change in `CHANGELOG.md` (rotated into a versioned block at release time).
-4. Fill in the PR template checklist.
-5. Target the `main` branch.
+- **Pull requests:** from a fork, targeting `main`, with `sh -n` + `shellcheck` clean, a `CHANGELOG.md` entry, and the PR template checklist filled in.
 
 ## 🚀 Release Process (maintainers)
 

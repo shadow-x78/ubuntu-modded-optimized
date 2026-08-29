@@ -1117,6 +1117,23 @@ _umo_status() {
     printf "\n"
 }
 
+_umo_credit() {
+    _umo_header
+    printf "  ${_UMO_PRI}Project${_UMO_NC}\n"
+    printf "    Ubuntu Modded Optimized (UMO) - full Ubuntu on Android via Termux.\n"
+    printf "    ${_UMO_DIM}One command, zero hassle. POSIX sh, no external UI deps.${_UMO_NC}\n\n"
+    printf "  ${_UMO_PRI}Developer${_UMO_NC}\n"
+    printf "    ${_UMO_BOLD}shadow-x78${_UMO_NC} ${_UMO_DIM}- design, engineering, everything${_UMO_NC}\n"
+    printf "      GitHub:    ${_UMO_CYN}https://github.com/shadow-x78${_UMO_NC}\n"
+    printf "      Repo:      ${_UMO_CYN}https://github.com/shadow-x78/ubuntu-modded-optimized${_UMO_NC}\n\n"
+    printf "  ${_UMO_PRI}Built With${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}POSIX sh · proot · TigerVNC · PulseAudio · XFCE4/LXDE/Openbox${_UMO_NC}\n\n"
+    printf "  ${_UMO_PRI}License${_UMO_NC}\n"
+    printf "    ${_UMO_DIM}GPL-3.0-or-later - see the LICENSE file in the repo.${_UMO_NC}\n\n"
+    printf "  ${_UMO_DIM}The UMO mark: the circle of friends, whole - every broken arc\n"
+    printf "  repaired - with the installer chevron at its center.${_UMO_NC}\n\n"
+}
+
 _umo_help() {
     _umo_plate "Command Reference"
 
@@ -1149,6 +1166,7 @@ _umo_help() {
 
     printf "  ${_UMO_PRI}General${_UMO_NC}\n"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "version"            "Print version banner"
+    printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "credit"             "About UMO and the developer"
     printf "    ${_UMO_CYN}%-22s${_UMO_NC} %s\n" "help"               "This reference"
     printf "\n"
 
@@ -1169,7 +1187,17 @@ case "$1" in
         _s="$_UMO_SCRIPT_DIR/umo-stop.sh"
         [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-stop.sh"
         exec "$_s" ;;
-    login)                  exec "$_UMO_LOGIN" ;;
+    login)
+        # login is an interactive root shell only - commands run via umo run
+        if [ -n "${2:-}" ]; then
+            _umo_err "umo login opens an interactive shell - it takes no arguments."
+            printf "  To run a command inside Ubuntu, use:\n"
+            printf "    ${_UMO_CYN}umo run \"<command>\"${_UMO_NC}\n\n"
+            exit 1
+        fi
+        exec "$_UMO_LOGIN" ;;
+    credit|credits|about)
+        _umo_credit ;;
     user)
         _s="$_UMO_SCRIPT_DIR/umo-user.sh"
         [ -x "$_s" ] || _s="$_UMO_TERMUX_HOME/umo-user.sh"

@@ -6,7 +6,7 @@
 
 Full Ubuntu on your Android device - one command, zero hassle
 
-[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.18.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -137,13 +137,14 @@ umo login
 | `umo start` | Start session with VNC & Audio |
 | `umo stop` | Stop all services |
 | `umo status` | Show running status of services |
-| `umo login` | Login as root |
+| `umo login` | Root shell inside Ubuntu (interactive only - commands go through `umo run`) |
 | `umo user` | Login as default user |
 | `umo run "<cmd>"` | Run one command inside the container |
 | `umo backup [dir]` | Archive the Ubuntu rootfs |
 | `umo update` | Full update: pulls the latest UMO, re-applies your saved settings (theme mode, app set, desktop), and upgrades every Ubuntu package. Use `--scripts-only` for a fast scripts-only refresh or `--no-upgrade` to skip the Ubuntu system upgrade |
 | `umo refresh` | Re-render the `umo` CLI, host scripts and container scripts from the local tool copy (no git pull) |
 | `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
+| `umo credit` | About UMO and the developer |
 | `umo version` | Display current UMO version |
 
 > Host-side scripts (`umo-login.sh`, `umo-start.sh`, `umo-stop.sh`, `umo-vnc-*.sh`, `aliases.sh`) live in `~/.umo/` - the Termux home stays clean. The installer sources `~/.umo/aliases.sh` from your shell rc, so `umo-start`, `umo-stop`, `umo-startvnc`, `umo-stopvnc`, `umo-login` and `umo-user` are usable as plain commands.

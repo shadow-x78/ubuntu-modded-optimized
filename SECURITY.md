@@ -2,7 +2,7 @@
 
 # Security Policy - UMO
 
-[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.18.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -15,10 +15,7 @@
 
 - [Supported Versions](#supported-versions)
 - [Reporting a Vulnerability](#reporting)
-- [Disclosure Policy](#disclosure)
 - [Security Considerations](#considerations)
-- [Security Audit](#audit)
-- [Hall of Fame](#hall-of-fame)
 
 ---
 
@@ -37,113 +34,30 @@ Only the latest minor release receives security updates. Ensure you are on the m
 <a id="reporting"></a>
 ## 🚨 Reporting a Vulnerability
 
-If you discover a security vulnerability in UMO, please report it **responsibly** and **privately**.
+If you discover a security vulnerability in UMO, please report it **responsibly** and **privately** - never in a public issue or pull request.
 
-**Preferred method:**
-- Open a private security advisory on GitHub:
-  [Security Advisories](https://github.com/shadow-x78/ubuntu-modded-optimized/security/advisories/new)
+| Channel | Where |
+|---------|-------|
+| Preferred | [Private security advisory](https://github.com/shadow-x78/ubuntu-modded-optimized/security/advisories/new) |
+| Alternative | GitHub direct message to [@shadow-x78](https://github.com/shadow-x78) |
 
-**Alternative method:**
-- GitHub direct message to [@shadow-x78](https://github.com/shadow-x78)
-
-**What to include:**
-
-| Field | Details |
-|-------|---------|
-| Description | Clear explanation of the vulnerability |
-| Reproduction | Steps to reproduce - minimal PoC if possible |
-| Component | Affected file / module and version |
-| Impact | Privilege escalation, data exposure, etc. |
-| Fix | Suggested mitigation (optional) |
-
-**Response timeline:**
-
-| Phase | Timeframe |
-|-------|-----------|
-| Initial acknowledgment | Within 72 hours |
-| Impact assessment | Within 7 days |
-| Patch development | Within 30 days (critical) |
-| Public disclosure | Coordinated after fix is released |
-
----
-
-<a id="disclosure"></a>
-## 📢 Disclosure Policy
-
-We follow a **coordinated disclosure** model:
-
-1. Report received and acknowledged
-2. Vulnerability validated and severity assessed
-3. Fix developed and tested
-4. Patch released to all supported versions
-5. Public disclosure with credit to reporter (if desired)
-
-> **No premature disclosure.** Do not open public issues or pull requests for security bugs until the fix is released.
+Include: a clear description, reproduction steps (minimal PoC if possible), the affected component and version, and the impact. Expect acknowledgment within 72 hours, an impact assessment within 7 days, and a critical patch within 30 days. Public disclosure is coordinated after the fix is released, with credit to the reporter if desired.
 
 ---
 
 <a id="considerations"></a>
 ## 🔍 Security Considerations
 
-### Scope
-
-UMO is a POSIX `sh` installer that runs inside **Termux** on Android. It:
-- Downloads and extracts Ubuntu rootfs images
-- Configures proot containers
-- Installs VNC, PulseAudio, and desktop environments
-- Creates wrapper scripts in `$HOME` and `/usr/local/bin`
-
-### Known Risk Areas
+UMO is a POSIX `sh` installer that runs inside Termux on Android: it downloads Ubuntu rootfs images, configures proot containers, installs VNC/PulseAudio/desktop environments, and writes wrapper scripts - all in plain, auditable shell (no compiled binaries, no setuid, no kernel modules).
 
 | Area | Risk | Mitigation |
 |------|------|------------|
-| Rootfs download | Supply-chain / MITM | HTTPS mirrors only; release tarballs and Ubuntu rootfs archives verified via SHA-256 checksums |
+| Rootfs download | Supply-chain / MITM | HTTPS mirrors only; release tarballs and rootfs archives verified via SHA-256 |
 | Proot execution | Container escape to Termux host | User-space proot - no root required; mounts limited to `dev`, `proc`, `sys`, `sdcard`, `termux` |
-| VNC exposure | Remote access to the desktop session | Server always binds `127.0.0.1` (hardcoded, no LAN opt-out); random per-install password stored at `~/.umo/vnc-pass` (0600) |
-| Sudo inside Ubuntu | `ubuntu` user has passwordless sudo | By design - local single-user Termux environment |
-| `$HOME` scripts | Overwritten on re-install | Scripts use `#!/bin/sh` minimal logic; no prompt before overwrite |
+| VNC exposure | Remote access to the desktop | Server always binds `127.0.0.1` (hardcoded); random per-install password at `~/.umo/vnc-pass` (0600) |
+| Sudo inside Ubuntu | `umo` user has passwordless sudo | By design - local single-user Termux environment |
 
-### Recommendations
-
-1. **Change the VNC password immediately** after first login:
-   ```bash
-   vncpasswd
-   ```
-
-2. **Install via the official one-liner (release verified):**
-   ```bash
-   bash <(curl -fsSL https://raw.githubusercontent.com/shadow-x78/ubuntu-modded-optimized/main/umo.sh)
-   ```
-
-3. **Keep Termux updated** via F-Droid or GitHub - not Play Store.
-
-4. **Never expose VNC port `5901`** to untrusted networks without a tunnel or VPN.
-
-5. **Review `.vnc/xstartup`** before running if cloned from a fork.
-
----
-
-<a id="audit"></a>
-## 🔬 Security Audit
-
-UMO is written entirely in POSIX `sh` - no compiled binaries, no setuid/setgid, no kernel modules. A full install performs:
-
-- `mkdir -p` under `$HOME`
-- `proot` bind mounts
-- `pkg install` inside Termux
-- `apt-get install` inside the Ubuntu chroot
-- `chmod +x` on generated wrapper scripts
-
-All logic is readable in plain shell. If you perform an audit, please share findings via the private reporting channels above.
-
----
-
-<a id="hall-of-fame"></a>
-## 🏆 Hall of Fame
-
-We thank the following security researchers for responsible disclosure:
-
-*(None yet - be the first!)*
+**Do these three things:** change the VNC password (`vncpasswd`) right after first login, install via the official one-liner (release-verified), and never expose port `5901` to untrusted networks without a tunnel. Keep Termux itself updated from F-Droid or GitHub - not Play Store.
 
 ---
 

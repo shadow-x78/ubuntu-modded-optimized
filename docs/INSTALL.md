@@ -2,7 +2,7 @@
 
 # Installation Guide - UMO
 
-[![Version](https://img.shields.io/badge/version-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.18.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -147,35 +147,15 @@ umo login
 <a id="commands"></a>
 ## ⌨️ Commands Reference
 
-### In Termux
+The full command reference (Termux + inside-Ubuntu, including `umo run`, `umo backup`, `umo credit` and the systemctl emulator) lives in the [README command table](../README.md#commands). The essentials:
 
-| Command | Description |
-|---------|-------------|
-| `umo start` | Start session with VNC & Audio (add `--x11` for a Termux:X11 session instead of VNC) |
-| `umo stop` | Stop all services |
-| `umo status` | Show running status of services |
-| `umo login` | Login as root |
-| `umo user` | Login as default user |
-| `umo run "<cmd>"` | Run one command inside the container |
-| `umo backup [dir]` | Archive the Ubuntu rootfs |
-| `umo update` | Full update: pull latest UMO, re-apply saved settings (theme, apps, desktop), upgrade Ubuntu packages. `--scripts-only` for a fast refresh, `--no-upgrade` to skip the Ubuntu system upgrade |
-| `umo refresh` | Re-render the `umo` CLI, host and container scripts from the local tool copy (no git pull) |
-| `umo uninstall` | Remove UMO completely (rootfs, host scripts, `umo` command, aliases) |
-| `umo version` | Display current UMO version |
-
-### Inside Ubuntu
-
-| Command | Description |
-|---------|-------------|
-| `umo-startvnc` | Start VNC server |
-| `umo-stopvnc` | Stop VNC server |
-| `systemctl start <service>` | Start a service (emulated) |
-| `systemctl status <service>` | Check service status |
-| `systemctl restart <service>` | Restart a service |
-| `systemctl stop <service>` | Stop a service (emulated) |
-| `systemctl enable <service>` | Enable a service |
-| `systemctl disable <service>` | Disable a service |
-| _(example: `systemctl start ssh`)_ | _Start SSH server_ |
+```bash
+umo start          # boot Ubuntu with VNC + audio
+umo login          # interactive root shell (commands: umo run "<cmd>")
+umo run "htop"     # one command inside Ubuntu
+umo status         # service status
+umo stop           # shut everything down
+```
 
 ---
 

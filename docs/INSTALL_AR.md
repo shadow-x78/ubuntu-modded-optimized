@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.17.3-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.0-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -147,14 +147,21 @@ umo login
 <a id="commands"></a>
 ## ⌨️ مرجع الأوامر
 
-### في Termux
+مرجع الأوامر الكامل (Termux + داخل Ubuntu، بما يشمل `umo run` و `umo backup` و `umo credit` ومحاكي systemctl) موجود في [جدول أوامر README](../README_AR.md#commands). الأساسيات:
 
-| الأمر | الوصف |
-|-------|-------|
+```bash
+umo start          # إقلاع Ubuntu مع VNC والصوت
+umo login          # قوقعة root تفاعلية (الأوامر: umo run "<أمر>")
+umo run "htop"     # أمر واحد داخل Ubuntu
+umo status         # حالة الخدمات
+umo stop           # إيقاف كل شيء
+```
+
+-------|-------|
 | `umo start` | بدء الجلسة مع VNC والصوت (أضف `--x11` لجلسة Termux:X11 بدلاً من VNC) |
 | `umo stop` | إيقاف جميع الخدمات |
 | `umo status` | عرض حالة الخدمات |
-| `umo login` | الدخول كـ root |
+| `umo login` | قوقعة root داخل Ubuntu (تفاعلية فقط - الأوامر تُنفّذ عبر `umo run`) |
 | `umo user` | الدخول كمستخدم افتراضي |
 | `umo run "<أمر>"` | تنفيذ أمر واحد داخل الحاوية |
 | `umo backup [مجلد]` | أرشفة نظام ملفات Ubuntu |

@@ -6,7 +6,7 @@
 
 أوبنتو كامل على هاتفك الأندرويد - أمر واحد، بدون تعقيد
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.17.3-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.0-2563eb?style=flat-square&logo=semver)](CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -137,13 +137,14 @@ umo login
 | `umo start` | بدء الجلسة مع VNC والصوت |
 | `umo stop` | إيقاف جميع الخدمات |
 | `umo status` | عرض حالة الخدمات |
-| `umo login` | الدخول كـ root |
+| `umo login` | قوقعة root داخل Ubuntu (تفاعلية فقط - الأوامر تُنفّذ عبر `umo run`) |
 | `umo user` | الدخول كمستخدم افتراضي |
 | `umo run "<cmd>"` | تنفيذ أمر واحد داخل الحاوية |
 | `umo backup [dir]` | أرشفة جذر نظام Ubuntu |
 | `umo update` | تحديث كامل: جلب آخر نسخة من UMO، إعادة تطبيق إعداداتك المحفوظة (وضع الثيم، فئة التطبيقات، سطح المكتب)، وترقية كل حزم أوبونتو. استخدم `--scripts-only` للتحديث السريع للسكربتات فقط أو `--no-upgrade` لتخطي ترقية نظام أوبونتو |
 | `umo refresh` | إعادة توليد واجهة `umo` وسكربتات الهوست والحاوية من النسخة المحلية للأداة (بدون سحب git) |
 | `umo uninstall` | إزالة UMO بالكامل (الجذر، سكربتات الهوست، أمر `umo`، والـ aliases) |
+| `umo credit` | التعريف بـ UMO والمطوّر |
 | `umo version` | عرض إصدار UMO الحالي |
 
 > سكربتات الهوست (`umo-login.sh`، `umo-start.sh`، `umo-stop.sh`، `umo-vnc-*.sh`، `aliases.sh`) تُثبَّت في `~/.umo/` - فيبقى مجلد Termux الرئيسي نظيفًا. يضيف المثبّت سطرًا في ملف الـ shell rc يستدعي `~/.umo/aliases.sh`، فتصبح `umo-start` و`umo-stop` و`umo-startvnc` و`umo-stopvnc` و`umo-login` و`umo-user` أوامر مباشرة.
