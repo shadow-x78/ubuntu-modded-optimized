@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.8] - 2026-08-30
+
+### 🐛 Fixed
+
+- **VS Code settings-sync EFAULT errors - root-caused to a Node/Electron async-write defect that proot cannot carry, and defused by disabling exactly the two broken resource types:** the failing writes (`sync/globalState/preview/globalState.json`, `sync/profiles/preview/profiles.json`) are small frequent writes from VS Code's embedded Electron/Node utility process, and the EFAULT signature is a documented product-level defect: an async `write()` snapshots a (ptr,len) from a resizable ArrayBuffer, and when the buffer shrinks mid-write the kernel sees decommitted pages and returns EFAULT (nodejs/undici#3601, oven-sh/bun#34758 has the full mechanics) - reported against VS Code in proot (proot-me/proot#413, open) and the same paths on arm64 Crostini (microsoft/vscode#194212, closed Not Planned). Every other sync resource (settings, keybindings, snippets, tasks, extensions) syncs fine; only UI State and Profiles use the broken preview-write path. Since the bug is inside the product and unfixable from outside, UMO now turns off exactly those two resource types via the official storage keys (`sync.enable.globalState`, `sync.enable.profiles` - verified against the VS Code source's `getEnablementKey`) seeded into `state.vscdb` with `INSERT OR REPLACE` (idempotent). The `umo-code` launcher applies the guard on first launch for existing installs (a `.umo-proot-sync-seeded` flag makes it a one-time operation, verified end-to-end: first launch seeds the DB and the second launch is a complete no-op), and the dev-set harden step seeds the same keys for fresh installs.
+
 ## [v4.18.7] - 2026-08-30
 
 ### 🐛 Fixed

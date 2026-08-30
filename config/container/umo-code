@@ -27,6 +27,20 @@ fi
 printf '[%s] exec: %s (DISPLAY=%s)\n' "$(_ts)" "$_CODE_BIN" "$DISPLAY" >> "$_LOG" 2>/dev/null || true
 _UMO_VSC_DATA="${HOME:-/root}/.config/umo-vscode-data"
 _UMO_VSC_ARGS="--no-sandbox --disable-gpu --password-store=basic"
+_UMO_VSC_FLAG="$_UMO_VSC_DATA/.umo-proot-sync-seeded"
+if [ ! -f "$_UMO_VSC_FLAG" ]; then
+    mkdir -p "$_UMO_VSC_DATA/User/globalStorage" 2>/dev/null || true
+    _UMO_VSC_DB="$_UMO_VSC_DATA/User/globalStorage/state.vscdb"
+    if [ ! -f "$_UMO_VSC_DB" ] && command -v sqlite3 >/dev/null 2>&1; then
+        sqlite3 "$_UMO_VSC_DB" "CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);" 2>/dev/null || true
+        sqlite3 "$_UMO_VSC_DB" "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);" 2>/dev/null || true
+        printf '[%s] proot sync guard seeded (globalState+profiles off)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+    elif [ -f "$_UMO_VSC_DB" ] && command -v sqlite3 >/dev/null 2>&1; then
+        sqlite3 "$_UMO_VSC_DB" "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);" 2>/dev/null || true
+        printf '[%s] proot sync guard applied (globalState+profiles off)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+    fi
+    : > "$_UMO_VSC_FLAG" 2>/dev/null || true
+fi
 if [ "$(id -u 2>/dev/null || printf '0')" = "0" ]; then
     exec "$_CODE_BIN" $_UMO_VSC_ARGS \
         --user-data-dir="$_UMO_VSC_DATA" "$@" >> "$_LOG" 2>&1
