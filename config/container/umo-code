@@ -27,19 +27,18 @@ fi
 printf '[%s] exec: %s (DISPLAY=%s)\n' "$(_ts)" "$_CODE_BIN" "$DISPLAY" >> "$_LOG" 2>/dev/null || true
 _UMO_VSC_DATA="${HOME:-/root}/.config/umo-vscode-data"
 _UMO_VSC_ARGS="--no-sandbox --disable-gpu --password-store=basic"
-_UMO_VSC_FLAG="$_UMO_VSC_DATA/.umo-proot-sync-seeded"
-if [ ! -f "$_UMO_VSC_FLAG" ]; then
-    mkdir -p "$_UMO_VSC_DATA/User/globalStorage" 2>/dev/null || true
-    _UMO_VSC_DB="$_UMO_VSC_DATA/User/globalStorage/state.vscdb"
-    if [ ! -f "$_UMO_VSC_DB" ] && command -v sqlite3 >/dev/null 2>&1; then
+_UMO_VSC_DB="$_UMO_VSC_DATA/User/globalStorage/state.vscdb"
+_UMO_VSC_SEED_SQL="INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);"
+if command -v sqlite3 >/dev/null 2>&1; then
+    mkdir -p "$(dirname "$_UMO_VSC_DB")" 2>/dev/null || true
+    if [ ! -f "$_UMO_VSC_DB" ]; then
         sqlite3 "$_UMO_VSC_DB" "CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);" 2>/dev/null || true
-        sqlite3 "$_UMO_VSC_DB" "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);" 2>/dev/null || true
-        printf '[%s] proot sync guard seeded (globalState+profiles off)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
-    elif [ -f "$_UMO_VSC_DB" ] && command -v sqlite3 >/dev/null 2>&1; then
-        sqlite3 "$_UMO_VSC_DB" "INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);" 2>/dev/null || true
-        printf '[%s] proot sync guard applied (globalState+profiles off)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
     fi
-    : > "$_UMO_VSC_FLAG" 2>/dev/null || true
+    if sqlite3 "$_UMO_VSC_DB" "$_UMO_VSC_SEED_SQL" 2>/dev/null; then
+        if [ "$(sqlite3 "$_UMO_VSC_DB" "SELECT COUNT(*) FROM ItemTable WHERE key IN ('sync.enable.globalState','sync.enable.profiles') AND value IN (0,'0');" 2>/dev/null)" = "2" ]; then
+            printf '[%s] proot sync guard verified (globalState+profiles off)\n' "$(_ts)" >> "$_LOG" 2>/dev/null || true
+        fi
+    fi
 fi
 if [ "$(id -u 2>/dev/null || printf '0')" = "0" ]; then
     exec "$_CODE_BIN" $_UMO_VSC_ARGS \

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.9] - 2026-08-30
+
+### 🐛 Fixed
+
+- **The VS Code sync guard now actually lands on existing installs:** v4.18.8's guard lived only in the `umo-code` launcher behind a flag file - but the flag was written even when the sqlite seeding failed, so a missing sqlite3 binary or a failed INSERT permanently disabled the guard with no retry, and launching `code` directly from the desktop (bypassing the wrapper) skipped it entirely. The launcher now seeds on every start with no flag: it creates the DB if absent, runs the idempotent INSERT, and verifies the two keys actually landed (a `SELECT COUNT(*)` must return 2); and `umo update` itself seeds both users' `state.vscdb` through the container login - so the next update applies the guard no matter how VS Code gets launched.
+
+- **The troubleshooting guide told users to restart services with `umo login`:** three sections (VNC screen-lock, no-audio, black-screen) ended their fix blocks with `umo stop; umo login` - but `login` only opens a shell and starts nothing, so following the guide verbatim left VNC and audio down. All three now say `umo stop; umo start` (and the black-screen fallback uses `umo run "umo-stopvnc; umo-startvnc"` instead of raw `vncserver -kill`), and two more check blocks that told readers to open a shell for one-shot commands (`echo >> /etc/umo/vnc.conf`, the browser verification) now use `umo run` directly. Both the English and Arabic guides are fixed; the only remaining `umo login` uses are the genuinely interactive ones (htop, shells).
+
+- **A truncated table remnant in the Arabic install guide:** a `-------|-------|` separator line and a full 11-row command table sat duplicated after the essentials block in INSTALL_AR.md - leftovers from the v4.18.0 documentation diet that rendered as a broken table. Removed; the essentials block (pointing at the authoritative README table) stands alone, and all four guides re-verified with zero broken anchors.
+
 ## [v4.18.8] - 2026-08-30
 
 ### 🐛 Fixed

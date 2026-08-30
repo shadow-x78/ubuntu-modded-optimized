@@ -374,6 +374,11 @@ _umo_refresh_container() {
             _umo_ok "VS Code Launcher Hardened For Proot (Wrapper + Sandbox Disabled)"
         fi
     fi
+    _vsc_seed="INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.globalState', 0); INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('sync.enable.profiles', 0);"
+    for _vsc_rc in "$_ct_inst_dir/root/.config/umo-vscode-data/User/globalStorage/state.vscdb" "$_ct_inst_dir/home/umo/.config/umo-vscode-data/User/globalStorage/state.vscdb"; do
+        [ -f "$_vsc_rc" ] || continue
+        "$_UMO_LOGIN" -c "sqlite3 '$_vsc_rc' '$_vsc_seed'" >/dev/null 2>&1 || true
+    done
 
     _fb_bin="$_ct_inst_dir/usr/bin/falkon"
     _bw_bin="$_ct_inst_dir/usr/local/bin/umo-browser"

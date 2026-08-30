@@ -2,7 +2,7 @@
 
 # Troubleshooting - UMO
 
-[![Version](https://img.shields.io/badge/version-4.18.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.18.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![Platform](https://img.shields.io/badge/platform-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -45,7 +45,7 @@
 
 ```bash
 termux-wake-lock
-umo login
+umo start
 ```
 
 > Keep Termux open in the foreground or use a persistent notification to prevent Android from killing it.
@@ -86,8 +86,7 @@ umo start
 **Check:** the start banner prints a `Tuning:` line (e.g. `depth 24 - 30 fps - hextile fast`). If the desktop still feels heavy, lower the resolution before connecting:
 
 ```bash
-# inside the container (umo login)
-echo 'VNC_GEOMETRY="1024x576"' >> /etc/umo/vnc.conf
+umo run "echo 'VNC_GEOMETRY=\"1024x576\"' >> /etc/umo/vnc.conf"
 ```
 
 ---
@@ -103,11 +102,11 @@ echo 'VNC_GEOMETRY="1024x576"' >> /etc/umo/vnc.conf
 umo update
 ```
 
-**Check:** inside the container (`umo login`), this must open Falkon with no dialog:
+**Check:** this must open Falkon with no dialog (run both from Termux):
 
 ```bash
-xfce4-mime-helper --launch WebBrowser https://example.com
-cat /tmp/umo-browser.log   # should end with "Sandboxing disabled by user"
+umo run "xfce4-mime-helper --launch WebBrowser https://example.com"
+umo run "tail -2 /tmp/umo-browser.log"   # should end with "Sandboxing disabled by user"
 ```
 
 If it still fails, re-run the installer with the browser set so the wiring runs inside the app installer: `bash umo.sh --no-gui --apps=browser`.
@@ -184,10 +183,10 @@ umo update
 ```bash
 # Restart everything (recommended)
 umo stop
-umo login
+umo start
 
-# Or start PulseAudio manually inside Ubuntu
-pulseaudio --start
+# Or check audio status without restarting
+umo status
 ```
 
 ---
@@ -223,15 +222,14 @@ systemctl disable <service>
 ```bash
 # Stop all services and restart
 umo stop
-umo login
+umo start
 ```
 
-If the issue persists, kill any lingering VNC processes:
+If the issue persists, reset the VNC server inside the container:
 
 ```bash
-# Inside Ubuntu
-vncserver -kill :1
-vncserver :1
+umo run "umo-stopvnc"
+umo run "umo-startvnc"
 ```
 
 ---

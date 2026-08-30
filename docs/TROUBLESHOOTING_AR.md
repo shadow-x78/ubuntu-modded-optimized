@@ -2,7 +2,7 @@
 
 # استكشاف الأخطاء وإصلاحها - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -45,7 +45,7 @@
 
 ```bash
 termux-wake-lock
-umo login
+umo start
 ```
 
 > أبقِ Termux مفتوحاً في المقدمة أو استخدم إشعاراً دائماً لمنع Android من إيقافه.
@@ -86,8 +86,7 @@ umo start
 **التحقق:** سطر البداية يعرض `Tuning:` (مثلا `depth 24 - 30 fps - hextile fast`). إذا بقي سطح المكتب ثقيلا، خفّض الدقة قبل الاتصال:
 
 ```bash
-# داخل الحاوية (umo login)
-echo 'VNC_GEOMETRY="1024x576"' >> /etc/umo/vnc.conf
+umo run "echo 'VNC_GEOMETRY=\"1024x576\"' >> /etc/umo/vnc.conf"
 ```
 
 ---
@@ -103,11 +102,11 @@ echo 'VNC_GEOMETRY="1024x576"' >> /etc/umo/vnc.conf
 umo update
 ```
 
-**التحقق:** داخل الحاوية (`umo login`) يجب أن يفتح هذا الأمر Falkon بدون أي رسالة:
+**التحقق:** يجب أن يفتح هذا الأمر Falkon بدون أي رسالة (نفّذ الاثنين من Termux):
 
 ```bash
-xfce4-mime-helper --launch WebBrowser https://example.com
-cat /tmp/umo-browser.log   # يجب أن ينتهي بـ "Sandboxing disabled by user"
+umo run "xfce4-mime-helper --launch WebBrowser https://example.com"
+umo run "tail -2 /tmp/umo-browser.log"   # يجب أن ينتهي بـ "Sandboxing disabled by user"
 ```
 
 إذا استمرت المشكلة، أعد تشغيل المثبت مع حزمة المتصفح ليعمل الربط داخل مثبت التطبيقات: `bash umo.sh --no-gui --apps=browser`.
@@ -184,10 +183,10 @@ umo update
 ```bash
 # إعادة تشغيل كل شيء (موصى به)
 umo stop
-umo login
+umo start
 
-# أو تشغيل PulseAudio يدوياً داخل Ubuntu
-pulseaudio --start
+# أو فحص حالة الصوت دون إعادة تشغيل
+umo status
 ```
 
 ---
@@ -223,15 +222,14 @@ systemctl disable <service>
 ```bash
 # إيقاف جميع الخدمات وإعادة التشغيل
 umo stop
-umo login
+umo start
 ```
 
-إذا استمرت المشكلة، اقتل أي عمليات VNC عالقة:
+إذا استمرت المشكلة، صفّر خادم VNC داخل الحاوية:
 
 ```bash
-# داخل Ubuntu
-vncserver -kill :1
-vncserver :1
+umo run "umo-stopvnc"
+umo run "umo-startvnc"
 ```
 
 ---

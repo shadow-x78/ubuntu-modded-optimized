@@ -2,7 +2,7 @@
 
 # دليل التثبيت - UMO
 
-[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.8-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
+[![الإصدار](https://img.shields.io/badge/الإصدار-4.18.9-2563eb?style=flat-square&logo=semver)](../CHANGELOG.md)
 [![الرخصة](https://img.shields.io/badge/الرخصة-GPL--3.0-dc2626?style=flat-square)](../LICENSE)
 ![Shell](https://img.shields.io/badge/shell-POSIX%20sh-16a34a?style=flat-square&logo=gnubash)
 ![المنصة](https://img.shields.io/badge/المنصة-Android%208%2B%20%7C%20ARM64-9333ea?style=flat-square&logo=android)
@@ -156,33 +156,6 @@ umo run "htop"     # أمر واحد داخل Ubuntu
 umo status         # حالة الخدمات
 umo stop           # إيقاف كل شيء
 ```
-
--------|-------|
-| `umo start` | بدء الجلسة مع VNC والصوت (أضف `--x11` لجلسة Termux:X11 بدلاً من VNC) |
-| `umo stop` | إيقاف جميع الخدمات |
-| `umo status` | عرض حالة الخدمات |
-| `umo login` | قوقعة root داخل Ubuntu (تفاعلية فقط - الأوامر تُنفّذ عبر `umo run`) |
-| `umo user` | الدخول كمستخدم افتراضي |
-| `umo run "<أمر>"` | تنفيذ أمر واحد داخل الحاوية |
-| `umo backup [مجلد]` | أرشفة نظام ملفات Ubuntu |
-| `umo update` | تحديث كامل: جلب آخر نسخة من UMO، إعادة تطبيق إعداداتك المحفوظة (الثيم، التطبيقات، سطح المكتب)، وترقية حزم أوبونتو. `--scripts-only` للتحديث السريع، `--no-upgrade` لتخطي ترقية نظام أوبونتو |
-| `umo refresh` | إعادة توليد واجهة `umo` وسكربتات الهوست والحاوية من النسخة المحلية للأداة (بدون سحب git) |
-| `umo uninstall` | إزالة UMO بالكامل (نظام الملفات، سكربتات الهوست، أمر `umo`، الاسم المستعارة) |
-| `umo version` | عرض إصدار UMO الحالي |
-
-### داخل Ubuntu
-
-| الأمر | الوصف |
-|-------|-------|
-| `umo-startvnc` | تشغيل خادم VNC |
-| `umo-stopvnc` | إيقاف خادم VNC |
-| `systemctl start <service>` | تشغيل خدمة (محاكى) |
-| `systemctl status <service>` | فحص حالة الخدمة |
-| `systemctl restart <service>` | إعادة تشغيل خدمة |
-| `systemctl stop <service>` | إيقاف خدمة (محاكى) |
-| `systemctl enable <service>` | تفعيل خدمة |
-| `systemctl disable <service>` | تعطيل خدمة |
-| _(مثال: `systemctl start ssh`)_ | _تشغيل خادم SSH_ |
 
 ---
 
