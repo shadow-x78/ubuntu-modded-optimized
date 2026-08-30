@@ -30,20 +30,14 @@ if [ "$UMO_COLOR_SUPPORT" -eq 256 ] 2>/dev/null; then
     UMO_COLOR_DANGER='\033[38;5;160m'
     UMO_COLOR_SUCCESS='\033[38;5;34m'
     UMO_COLOR_WARN='\033[38;5;220m'
-    UMO_GRAD_1='\033[38;5;208m'
-    UMO_GRAD_2='\033[38;5;214m'
-    UMO_GRAD_3='\033[38;5;220m'
 elif [ "$UMO_COLOR_SUPPORT" -eq 16 ] 2>/dev/null; then
-    UMO_COLOR_PRIMARY='\033[1;33m'
+    UMO_COLOR_PRIMARY='\033[0;33m'
     UMO_COLOR_ACCENT='\033[1;35m'
     UMO_COLOR_INFO='\033[1;36m'
     UMO_COLOR_MUTED='\033[0;37m'
     UMO_COLOR_DANGER='\033[1;31m'
     UMO_COLOR_SUCCESS='\033[1;32m'
     UMO_COLOR_WARN='\033[1;33m'
-    UMO_GRAD_1='\033[0;33m'
-    UMO_GRAD_2='\033[1;33m'
-    UMO_GRAD_3='\033[1;37m'
 else
     UMO_COLOR_PRIMARY=''
     UMO_COLOR_ACCENT=''
@@ -52,9 +46,6 @@ else
     UMO_COLOR_DANGER=''
     UMO_COLOR_SUCCESS=''
     UMO_COLOR_WARN=''
-    UMO_GRAD_1=''
-    UMO_GRAD_2=''
-    UMO_GRAD_3=''
 fi
 
 if [ "$UMO_COLOR_SUPPORT" -eq 0 ] 2>/dev/null; then
@@ -315,24 +306,24 @@ umo_banner_full() {
         _l7="$_a7"; _l8="$_a8"; _l9="$_a9"; _l10="$_a10"; _l11="$_a11"; _l12="$_a12"
     fi
 
-    _logo_w=57
+    _logo_w=55
     _pad=$(( (_cols - _logo_w) / 2 )); [ "$_pad" -lt 0 ] && _pad=0
 
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l1" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l2" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l3" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l4" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l5" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l6" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l7" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l8" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_3" "$_pad" '' "$_l9" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_2" "$_pad" '' "$_l10" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l11" "$UMO_NC"
-    printf "%b%*s%s%b\n" "$UMO_GRAD_1" "$_pad" '' "$_l12" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l1" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l2" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l3" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l4" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l5" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l6" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l7" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l8" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l9" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l10" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l11" "$UMO_NC"
+    printf "%b%*s%s%b\n" "$UMO_COLOR_PRIMARY" "$_pad" '' "$_l12" "$UMO_NC"
     printf '\n'
 
-    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.18.9}"
+    _tag="Ubuntu Modded Optimized · v${UMO_VERSION:-4.19.0}"
     _taglen=$(printf '%s' "$_tag" | wc -m)
     _tagpad=$(( (_cols - _taglen) / 2 )); [ "$_tagpad" -lt 0 ] && _tagpad=0
     printf "%b%*s%s%b\n" "$UMO_COLOR_ACCENT" "$_tagpad" '' "$_tag" "$UMO_NC"

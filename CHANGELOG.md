@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.19.0] - 2026-08-30
+
+### 🎨 Changed
+
+- **The installer banner is the same orange as every other UMO surface:** the installer's banner (through `lib/core-ansi.sh`) was the only site printed with a three-tone gradient (`UMO_GRAD_1/2/3`), so the rows carrying the mark, rule and wordmark rendered yellow-gold (color 220) and amber (214) instead of the UMO orange - visibly clashing with the flat `38;5;208` orange that `umo start/stop/cli` print. The banner loop now uses one color for all twelve rows (`UMO_COLOR_PRIMARY` = `38;5;208` in 256-color mode, `0;33` dim orange in 16-color mode - which also fixes the second yellow source: the 16-color fallback had `1;33` bright yellow), verified under a real PTY: every row carries exactly `38;5;208`. The dead `UMO_GRAD_*` definitions (zero remaining consumers) are removed, and the banner width constant is corrected from a stale 57 to the actual 55 columns.
+
 ## [v4.18.9] - 2026-08-30
 
 ### 🐛 Fixed
