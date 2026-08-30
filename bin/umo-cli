@@ -429,6 +429,11 @@ UMOFALKON
         _bs_rc="$1"
         [ -f "$_bs_rc" ] || return 0
         awk '
+            /^# ===== UMO TERM BANNER =====$/ { dmarked = 1 }
+            dmarked {
+                if ($0 == "fi") { dmarked = 0 }
+                next
+            }
             /^if \[ -n "\$PS1" \]; then$/ && seen_ff == 0 { skip = 1 }
             skip {
                 if ($0 ~ /^fi$/ && nf) { skip = 0; nf = 0; next }
@@ -454,9 +459,6 @@ UMOFALKON
         if [ ! -f "$_d_rc" ]; then
             : > "$_d_rc" 2>/dev/null || return 0
         fi
-        if grep -q "UMO TERM BANNER" "$_d_rc" 2>/dev/null; then
-            return 0
-        fi
         {
             printf '%s\n' '# ===== UMO TERM BANNER ====='
             printf '%s\n' 'if [ -n "$PS1" ]; then'
@@ -464,31 +466,31 @@ UMOFALKON
             printf '%s\n' '    case "${LANG:-}${LC_ALL:-}${LC_CTYPE:-}" in *UTF-8*|*utf8*) _umo_g=1 ;; esac'
             printf '%s\n' '    printf "\n\033[38;5;208m"'
             printf '%s\n' '    if [ "$_umo_g" -eq 1 ]; then'
-            printf '%s\n' '        printf "  %s\n" "                          │                                "'
-            printf '%s\n' '        printf "  %s\n" "          ████           │                               "'
-            printf '%s\n' '        printf "  %s\n" "      ████████████       │                               "'
-            printf '%s\n' '        printf "  %s\n" "    ██████      ████     │ ██╗   ██╗███╗   ███╗ ██████╗  "'
-            printf '%s\n' '        printf "  %s\n" "    ██  █████     ██     │ ██║   ██║████╗ ████║██╔═══██╗ "'
-            printf '%s\n' '        printf "  %s\n" "   ██      █████   ██    │ ██║   ██║██╔████╔██║██║   ██║ "'
-            printf '%s\n' '        printf "  %s\n" "   ██      █████   ██    │ ██║   ██║██║╚██╔╝██║██║   ██║ "'
-            printf '%s\n' '        printf "  %s\n" "   ████ █████    ████    │ ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ "'
-            printf '%s\n' '        printf "  %s\n" "   ███████      █████    │  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  "'
-            printf '%s\n' '        printf "  %s\n" "      ████████████       │                               "'
-            printf '%s\n' '        printf "  %s\n" "          ████           │                               "'
-            printf '%s\n' '        printf "  %s\n" "                          │                                "'
+            printf '%s\n' '        printf "  %s\n" "        ▄▄██▄▄         │                               "'
+            printf '%s\n' '        printf "  %s\n" "    ▄▄██████████▄▄     │                               "'
+            printf '%s\n' '        printf "  %s\n" "   ███▀▄▄      ▀███    │                               "'
+            printf '%s\n' '        printf "  %s\n" "  ██▀  ███▄      ▀██   │ ██╗   ██╗███╗   ███╗ ██████╗  "'
+            printf '%s\n' '        printf "  %s\n" " ███     ▀███▄    ███  │ ██║   ██║████╗ ████║██╔═══██╗ "'
+            printf '%s\n' '        printf "  %s\n" " ██        ████    ██  │ ██║   ██║██╔████╔██║██║   ██║ "'
+            printf '%s\n' '        printf "  %s\n" " ███▄    ▄███▀   ▄███  │ ██║   ██║██║╚██╔╝██║██║   ██║ "'
+            printf '%s\n' '        printf "  %s\n" " ████▄ ███▀     ▄████  │ ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝ "'
+            printf '%s\n' '        printf "  %s\n" " ▀▀███▄▀▀      ▄███▀▀  │  ╚═════╝ ╚═╝     ╚═╝ ╚═════╝  "'
+            printf '%s\n' '        printf "  %s\n" "    ▀▀████▄▄████▀▀     │                               "'
+            printf '%s\n' '        printf "  %s\n" "        ▀▀▀▀▀▀         │                               "'
+            printf '%s\n' '        printf "  %s\n" "                       │                               "'
             printf '%s\n' '    else'
-            printf '%s\n' '        printf "  %s\n" "                          |                                "'
-            printf '%s\n' '        printf "  %s\n" "          ####           |                               "'
-            printf '%s\n' '        printf "  %s\n" "      ############       |                               "'
-            printf '%s\n' '        printf "  %s\n" "    ######      ####     |      #   #  #   #   ###       "'
-            printf '%s\n' '        printf "  %s\n" "    ##  #####     ##     |      #   #  ## ##  #   #      "'
-            printf '%s\n' '        printf "  %s\n" "   ##      #####   ##    |      #   #  # # #  #   #      "'
-            printf '%s\n' '        printf "  %s\n" "   ##      #####   ##    |      #   #  #   #  #   #      "'
-            printf '%s\n' '        printf "  %s\n" "   #### #####    ####    |      #   #  #   #  #   #      "'
-            printf '%s\n' '        printf "  %s\n" "   #######      #####    |       ###   #   #   ###       "'
-            printf '%s\n' '        printf "  %s\n" "      ############       |                               "'
-            printf '%s\n' '        printf "  %s\n" "          ####           |                               "'
-            printf '%s\n' '        printf "  %s\n" "                          |                                "'
+            printf '%s\n' '        printf "  %s\n" "         ####          |                               "'
+            printf '%s\n' '        printf "  %s\n" "     ############      |                               "'
+            printf '%s\n' '        printf "  %s\n" "   ####         ###    |                               "'
+            printf '%s\n' '        printf "  %s\n" "  ###  ####      ###   |      #   #  #   #   ###       "'
+            printf '%s\n' '        printf "  %s\n" " ###     ####     ###  |      #   #  ## ##  #   #      "'
+            printf '%s\n' '        printf "  %s\n" " ##        ####    ##  |      #   #  # # #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" " ###     ####     ###  |      #   #  #   #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" " ##### ####     #####  |      #   #  #   #  #   #      "'
+            printf '%s\n' '        printf "  %s\n" "  #####         ####   |       ###   #   #   ###       "'
+            printf '%s\n' '        printf "  %s\n" "     ############      |                               "'
+            printf '%s\n' '        printf "  %s\n" "                       |                               "'
+            printf '%s\n' '        printf "  %s\n" "                       |                               "'
             printf '%s\n' '    fi'
             printf '%s\n' '    printf "\033[0m\n"'
             printf '%s\n' '    printf "\033[38;5;208m  ────────────────────────────────────────────────────────\033[0m\n\n"'

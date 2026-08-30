@@ -70,10 +70,11 @@ _apt "Node.js And npm" nodejs npm
 _apt "Build Toolchain (GCC, Make, CMake, GDB)" build-essential gcc g++ make cmake gdb pkg-config
 _apt "Developer Utilities (vim, tmux, ssh, sqlite)" vim tmux openssh-client manpages-dev sqlite3
 _apt "Geany Lightweight IDE" geany
+_apt "GNOME Keyring (VS Code Credential Storage)" gnome-keyring libsecret-1-0 libsecret-1-tools
 _umo_setup_code_repo
 _apt "Visual Studio Code (Microsoft Repo)" code
 _umo_harden_code
-' "python3 node npm gcc make cmake vim geany pkg-config code"
+' "python3 node npm gcc make cmake vim geany pkg-config code gnome-keyring"
 }
 
 umo_apps_termux() {
@@ -213,6 +214,17 @@ _run_installer() {
         printf '%s\n' '    if [ -f "$_cd" ]; then'
         printf '%s\n' '        sed -i "s|^Exec=.*|Exec=/usr/local/bin/umo-code %U|" "$_cd" 2>/dev/null || true'
         printf '%s\n' '    fi'
+        printf '%s\n' '    _cu="root"; [ -d /home/umo ] && _cu="umo"'
+        printf '%s\n' '    for _uh in /root /home/umo; do'
+        printf '%s\n' '        [ -d "$_uh" ] || continue'
+        printf '%s\n' '        mkdir -p "$_uh/.config/umo-vscode-data/User" 2>/dev/null || true'
+        printf '%s\n' '        _usf="$_uh/.config/umo-vscode-data/User/settings.json"'
+        printf '%s\n' '        if [ -f "$_usf" ]; then'
+        printf '%s\n' '            grep -q "extensions.verifySignatures" "$_usf" 2>/dev/null || sed -i "s|^{|{|\\n    \\"extensions.verifySignatures\\": false," "$_usf" 2>/dev/null || true'
+        printf '%s\n' '        else'
+        printf '%s\n' '            printf "{\\n    \\"extensions.verifySignatures\\": false\\n}\\n" > "$_usf" 2>/dev/null || true'
+        printf '%s\n' '        fi'
+        printf '%s\n' '    done'
         printf '%s\n' '}'
         printf '%s\n' 'timeout 600 apt-get update >> "$_LOG" 2>&1 || true'
         printf '%s\n' 'dpkg --configure -a >> "$_LOG" 2>&1 || true'

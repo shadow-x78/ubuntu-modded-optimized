@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.6] - 2026-08-30
+
+### 🐛 Fixed
+
+- **Existing installs kept the smudged v4.18.4 banner art - the updater shipped the wrong art and never replaced it:** the `umo update` bashrc-banner machinery added in v4.18.4 had two defects: the deploy function still embedded the v4.18.4 solid-block art (the smudged ring users reported), and it skipped redeployment whenever a `UMO TERM BANNER` marker already existed - so the v4.18.5 art never reached containers that had already run the v4.18.4 update. The strip now also removes any previously deployed marker block (old and legacy banner styles both), and the deploy always writes the current art (the restored original ring beside the classic letters). Verified end-to-end against a real v4.18.4-style bashrc: the smudged art disappears, the correct banner renders, the marker count stays exactly 1 after a second run.
+
+- **VS Code in the container: GNOME keyring warning, signature-verification errors on every synced extension, and EFAULT on sync writes:** three separate defects. (1) The keyring warning: the dev application set never installed a libsecret backend, so VS Code had no credential storage in a GNOME-ducked environment - the set now installs `gnome-keyring` + `libsecret-1-0` + `libsecret-1-tools`, and the `umo-code` launcher passes `--password-store=basic` so credentials fall back to plain files when the keyring is still unavailable. (2) The `SignatureVerificationInternal: UnknownError` flood: marketplace signature verification cannot work inside proot (its signing stack is absent) - the harden step now seeds `"extensions.verifySignatures": false` into both users' `settings.json` so extensions sync instead of skipping every one. (3) The `EFAULT: bad address` write errors: the launcher passed `--disable-dev-shm-usage` which forces VS Code onto an mmap/shm path that proot handles badly - the flag is dropped (Electron in proot works better with its default tmpfs strategy, matching the wrapper's own `--no-sandbox --disable-gpu` posture).
+
 ## [v4.18.5] - 2026-08-30
 
 ### 🐛 Fixed
