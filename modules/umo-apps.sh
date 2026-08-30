@@ -70,11 +70,11 @@ _apt "Node.js And npm" nodejs npm
 _apt "Build Toolchain (GCC, Make, CMake, GDB)" build-essential gcc g++ make cmake gdb pkg-config
 _apt "Developer Utilities (vim, tmux, ssh, sqlite)" vim tmux openssh-client manpages-dev sqlite3
 _apt "Geany Lightweight IDE" geany
-_apt "GNOME Keyring (VS Code Credential Storage)" gnome-keyring libsecret-1-0 libsecret-1-tools
+_apt "GNOME Keyring (VS Code Credential Storage)" gnome-keyring libsecret-1-0 libsecret-tools
 _umo_setup_code_repo
 _apt "Visual Studio Code (Microsoft Repo)" code
 _umo_harden_code
-' "python3 node npm gcc make cmake vim geany pkg-config code gnome-keyring"
+' "python3 node npm gcc make cmake vim geany pkg-config code secret-tool"
 }
 
 umo_apps_termux() {
@@ -104,20 +104,25 @@ _run_installer() {
         printf '%s\n' '    _lbl="$1"; shift'
         printf '%s\n' '    _step "Installing $_lbl..."'
         printf '%s\n' '    printf "[%s] group %s: %s\n" "$(_um_ts)" "$_lbl" "$*" >> "$_LOG" 2>/dev/null || true'
+        printf '%s\n' '    _glog="${_LOG}.$$_lbl"'
+        printf '%s\n' '    _glog=$(printf "%s" "$_glog" | tr -c "a-zA-Z0-9._-" "_")'
+        printf '%s\n' '    : > "$_glog" 2>/dev/null || _glog="$_LOG"'
         printf '%s\n' '    _rcg=0'
-        printf '%s\n' '    timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_LOG" 2>&1 || _rcg=$?'
+        printf '%s\n' '    timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_glog" 2>&1 || _rcg=$?'
         printf '%s\n' '    if [ "$_rcg" -ne 0 ]; then'
         printf '%s\n' '        printf "[%s] group %s failed (rc=%s), repairing and retrying once\n" "$(_um_ts)" "$_lbl" "$_rcg" >> "$_LOG" 2>/dev/null || true'
         printf '%s\n' '        dpkg --configure -a >> "$_LOG" 2>&1 || true'
         printf '%s\n' '        timeout 600 apt-get update >> "$_LOG" 2>&1 || true'
         printf '%s\n' '        _rcg=0'
-        printf '%s\n' '        timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_LOG" 2>&1 || _rcg=$?'
+        printf '%s\n' '        timeout 1800 apt-get install -y --no-install-recommends "$@" >> "$_glog" 2>&1 || _rcg=$?'
         printf '%s\n' '    fi'
+        printf '%s\n' '    cat "$_glog" >> "$_LOG" 2>/dev/null || true'
+        printf '%s\n' '    rm -f "$_glog" 2>/dev/null || true'
         printf '%s\n' '    if [ "$_rcg" -eq 0 ]; then'
         printf '%s\n' '        _ok "$_lbl Installed"'
         printf '%s\n' '    else'
         printf '%s\n' '        _fail "$_lbl Failed - Real Apt Errors:"'
-        printf '%s\n' "        grep -E \"^(E:|Err:|W:)\" \"\$_LOG\" 2>/dev/null | awk '!_u[\$0]++' | tail -n 6 | sed 's/^/      /' || true"
+        printf '%s\n' "        grep -E \"^(E:|Err:|W:)\" \"\$_glog\" 2>/dev/null | awk '!_u[\$0]++' | tail -n 6 | sed 's/^/      /' || true"
         printf '%s\n' '    fi'
         printf '%s\n' '    return "$_rcg"'
         printf '%s\n' '}'

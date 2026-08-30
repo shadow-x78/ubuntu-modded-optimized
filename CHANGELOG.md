@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v4.18.7] - 2026-08-30
+
+### 🐛 Fixed
+
+- **The dev-set keyring install failed on every Ubuntu: `libsecret-1-tools` does not exist:** v4.18.6's dev-set line installed `libsecret-1-tools`, a name that does not exist in the Ubuntu archive (it is `libsecret-tools`), so apt aborted the whole group - the log's "Unable to locate package libsecret-1-tools" - and the set finished reporting `Missing gnome-keyring` even though gnome-keyring itself was fine. The group now installs the correct trio: `gnome-keyring libsecret-1-0 libsecret-tools`. The missing-probe also checked `command -v gnome-keyring`, which is a daemon and not guaranteed on PATH; it now checks `secret-tool`, the CLI the libsecret-tools package actually ships.
+
+- **Failed install groups printed stale errors from unrelated earlier groups:** the `_apt` helper appended everything to one shared log and, on failure, grepped the whole log for `E:`/`Err:`/`W:` lines - so the keyring failure surfaced `E: Unable to locate package fastfetch` from a much earlier group's attempt, sending users diagnosing the wrong package. Each `_apt` group now writes to its own per-group log (merged into the main log afterward), and the failure screen greps only that group's log - the group's own errors, nothing else. Verified with a simulation: a failing group prints only its own error while stale lines remain invisible, and a succeeding group prints clean.
+
 ## [v4.18.6] - 2026-08-30
 
 ### 🐛 Fixed
