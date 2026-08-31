@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [v4.19.0] - 2026-08-30
 
+### 📸 Screenshots
+
+- **The gallery is the current v4.19 design, named by content and ordered by the installer flow:** seven fresh captures (six portrait phone screens and one landscape XFCE session) replace the v4.14-era four-shot set. Every capture was identified by OCR of its on-screen title (Choose Ubuntu Version, Choose Desktop Environment, Choose Theme Mode, Choose Application Set, Configuration Summary, Installation Complete, plus the desktop session) and named accordingly - `01_version_selection` through `07_desktop_session`, matching the exact sequence a user walks during install. Both READMEs document the new set in two grouped rows (the five installer steps, then the completion report beside the wide desktop capture), and every referenced file exists on disk - verified programmatically with zero orphan references.
+
 ### 🎨 Changed
 
 - **The installer banner is the same orange as every other UMO surface:** the installer's banner (through `lib/core-ansi.sh`) was the only site printed with a three-tone gradient (`UMO_GRAD_1/2/3`), so the rows carrying the mark, rule and wordmark rendered yellow-gold (color 220) and amber (214) instead of the UMO orange - visibly clashing with the flat `38;5;208` orange that `umo start/stop/cli` print. The banner loop now uses one color for all twelve rows (`UMO_COLOR_PRIMARY` = `38;5;208` in 256-color mode, `0;33` dim orange in 16-color mode - which also fixes the second yellow source: the 16-color fallback had `1;33` bright yellow), verified under a real PTY: every row carries exactly `38;5;208`. The dead `UMO_GRAD_*` definitions (zero remaining consumers) are removed, and the banner width constant is corrected from a stale 57 to the actual 55 columns.

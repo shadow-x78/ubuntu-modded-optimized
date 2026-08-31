@@ -56,11 +56,21 @@ Full Ubuntu on your Android device - one command, zero hassle
 <a id="screenshots"></a>
 ## 🖼️ Screenshots
 
+**The installer** (every step is a guided menu):
+
 <p align="center">
-  <img src="assets/screenshots/01_version_selection.jpg" width="24%" alt="Version Selection">
-  <img src="assets/screenshots/02_desktop_selection.jpg" width="24%" alt="Desktop Selection">
-  <img src="assets/screenshots/03_apps_selection.jpg" width="24%" alt="Apps Selection">
-  <img src="assets/screenshots/04_configuration_summary.jpg" width="24%" alt="Configuration Summary">
+  <img src="assets/screenshots/01_version_selection.jpg" width="30%" alt="Version Selection">
+  <img src="assets/screenshots/02_desktop_selection.jpg" width="30%" alt="Desktop Selection">
+  <img src="assets/screenshots/03_theme_selection.jpg" width="30%" alt="Theme Selection">
+  <img src="assets/screenshots/04_apps_selection.jpg" width="30%" alt="Apps Selection">
+  <img src="assets/screenshots/05_configuration_summary.jpg" width="30%" alt="Configuration Summary">
+</p>
+
+**The result** (summary screen, completion report, and the XFCE session):
+
+<p align="center">
+  <img src="assets/screenshots/06_installation_complete.jpg" width="30%" alt="Installation Complete">
+  <img src="assets/screenshots/07_desktop_session.jpg" width="62%" alt="XFCE Desktop Session">
 </p>
 
 ---

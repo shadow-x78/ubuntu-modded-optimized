@@ -56,11 +56,21 @@
 <a id="screenshots"></a>
 ## 🖼️ لقطات الشاشة
 
+**المثبِّت** (كل خطوة قائمة إرشادية):
+
 <p align="center">
-  <img src="assets/screenshots/01_version_selection.jpg" width="24%" alt="اختيار الإصدار">
-  <img src="assets/screenshots/02_desktop_selection.jpg" width="24%" alt="اختيار الواجهة">
-  <img src="assets/screenshots/03_apps_selection.jpg" width="24%" alt="اختيار التطبيقات">
-  <img src="assets/screenshots/04_configuration_summary.jpg" width="24%" alt="ملخص الإعدادات">
+  <img src="assets/screenshots/01_version_selection.jpg" width="30%" alt="اختيار الإصدار">
+  <img src="assets/screenshots/02_desktop_selection.jpg" width="30%" alt="اختيار الواجهة">
+  <img src="assets/screenshots/03_theme_selection.jpg" width="30%" alt="اختيار الثيم">
+  <img src="assets/screenshots/04_apps_selection.jpg" width="30%" alt="اختيار التطبيقات">
+  <img src="assets/screenshots/05_configuration_summary.jpg" width="30%" alt="ملخص الإعدادات">
+</p>
+
+**النتيجة** (شاشة الإكمال وجلسة XFCE):
+
+<p align="center">
+  <img src="assets/screenshots/06_installation_complete.jpg" width="30%" alt="اكتمال التثبيت">
+  <img src="assets/screenshots/07_desktop_session.jpg" width="62%" alt="جلسة سطح مكتب XFCE">
 </p>
 
 ---
