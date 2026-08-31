@@ -56,22 +56,28 @@
 <a id="screenshots"></a>
 ## 🖼️ لقطات الشاشة
 
-**المثبِّت** (كل خطوة قائمة إرشادية):
+**المثبِّت الإرشادي** - كل خطوة قائمة مرقّمة بالترتيب الذي تراه:
 
-<p align="center">
-  <img src="assets/screenshots/01_version_selection.jpg" width="30%" alt="اختيار الإصدار">
-  <img src="assets/screenshots/02_desktop_selection.jpg" width="30%" alt="اختيار الواجهة">
-  <img src="assets/screenshots/03_theme_selection.jpg" width="30%" alt="اختيار الثيم">
-  <img src="assets/screenshots/04_apps_selection.jpg" width="30%" alt="اختيار التطبيقات">
-  <img src="assets/screenshots/05_configuration_summary.jpg" width="30%" alt="ملخص الإعدادات">
-</p>
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="assets/screenshots/01_version_selection.jpg" width="100%" alt="اختيار الإصدار"><br><sub><b>1 · الإصدار</b> - 22.04 LTS أو 24.04 LTS</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/02_desktop_selection.jpg" width="100%" alt="اختيار الواجهة"><br><sub><b>2 · الواجهة</b> - XFCE4 · LXDE · Openbox · CLI</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/03_theme_selection.jpg" width="100%" alt="اختيار الثيم"><br><sub><b>3 · الثيم</b> - ليلي أو نهاري</sub></td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="assets/screenshots/04_apps_selection.jpg" width="100%" alt="اختيار التطبيقات"><br><sub><b>4 · التطبيقات</b> - ست مجموعات تطبيقات</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/05_configuration_summary.jpg" width="100%" alt="ملخص الإعدادات"><br><sub><b>5 · الملخص</b> - مراجعة قبل التثبيت</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/06_installation_complete.jpg" width="100%" alt="اكتمال التثبيت"><br><sub><b>6 · الاكتمال</b> - تقرير نهاية التثبيت</sub></td>
+  </tr>
+</table>
 
-**النتيجة** (شاشة الإكمال وجلسة XFCE):
+**النتيجة** - جلسة XFCE كما تحصل عليها جاهزة:
 
-<p align="center">
-  <img src="assets/screenshots/06_installation_complete.jpg" width="30%" alt="اكتمال التثبيت">
-  <img src="assets/screenshots/07_desktop_session.jpg" width="62%" alt="جلسة سطح مكتب XFCE">
-</p>
+<table>
+  <tr>
+    <td align="center"><img src="assets/screenshots/07_desktop_session.jpg" width="94%" alt="جلسة سطح مكتب XFCE"><br><sub><b>7 · سطح المكتب</b> - ثيم UMO وخلفيته وFastfetch، جاهزة</sub></td>
+  </tr>
+</table>
 
 ---
 

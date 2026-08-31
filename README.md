@@ -56,22 +56,28 @@ Full Ubuntu on your Android device - one command, zero hassle
 <a id="screenshots"></a>
 ## 🖼️ Screenshots
 
-**The installer** (every step is a guided menu):
+**The guided installer** - every step is a menu, numbered in the order you see it:
 
-<p align="center">
-  <img src="assets/screenshots/01_version_selection.jpg" width="30%" alt="Version Selection">
-  <img src="assets/screenshots/02_desktop_selection.jpg" width="30%" alt="Desktop Selection">
-  <img src="assets/screenshots/03_theme_selection.jpg" width="30%" alt="Theme Selection">
-  <img src="assets/screenshots/04_apps_selection.jpg" width="30%" alt="Apps Selection">
-  <img src="assets/screenshots/05_configuration_summary.jpg" width="30%" alt="Configuration Summary">
-</p>
+<table>
+  <tr>
+    <td width="33%" align="center"><img src="assets/screenshots/01_version_selection.jpg" width="100%" alt="Version Selection"><br><sub><b>1 · Version</b> - 22.04 LTS or 24.04 LTS</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/02_desktop_selection.jpg" width="100%" alt="Desktop Selection"><br><sub><b>2 · Desktop</b> - XFCE4 · LXDE · Openbox · CLI</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/03_theme_selection.jpg" width="100%" alt="Theme Selection"><br><sub><b>3 · Theme</b> - Night or Day mode</sub></td>
+  </tr>
+  <tr>
+    <td width="33%" align="center"><img src="assets/screenshots/04_apps_selection.jpg" width="100%" alt="Apps Selection"><br><sub><b>4 · Apps</b> - six application sets</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/05_configuration_summary.jpg" width="100%" alt="Configuration Summary"><br><sub><b>5 · Summary</b> - review before install</sub></td>
+    <td width="33%" align="center"><img src="assets/screenshots/06_installation_complete.jpg" width="100%" alt="Installation Complete"><br><sub><b>6 · Done</b> - completion report</sub></td>
+  </tr>
+</table>
 
-**The result** (summary screen, completion report, and the XFCE session):
+**The result** - the XFCE session you get out of the box:
 
-<p align="center">
-  <img src="assets/screenshots/06_installation_complete.jpg" width="30%" alt="Installation Complete">
-  <img src="assets/screenshots/07_desktop_session.jpg" width="62%" alt="XFCE Desktop Session">
-</p>
+<table>
+  <tr>
+    <td align="center"><img src="assets/screenshots/07_desktop_session.jpg" width="94%" alt="XFCE Desktop Session"><br><sub><b>7 · The desktop</b> - UMO theme, wallpaper and Fastfetch, ready</sub></td>
+  </tr>
+</table>
 
 ---
 
